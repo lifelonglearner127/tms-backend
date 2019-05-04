@@ -1,0 +1,182 @@
+[
+    {
+        "model": "info.Product",
+        "pk": 1,
+        "fields": {
+            "name": "Product1",
+            "code": "product1",
+            "category": "gas",
+            "unit_price": 1,
+            "description": "Product1",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.Product",
+        "pk": 2,
+        "fields": {
+            "name": "Product2",
+            "code": "product2",
+            "category": "gas",
+            "unit_price": 1,
+            "description": "Product2",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.Product",
+        "pk": 3,
+        "fields": {
+            "name": "Product3",
+            "code": "product3",
+            "category": "gas",
+            "unit_price": 1,
+            "description": "Product3",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.Product",
+        "pk": 4,
+        "fields": {
+            "name": "Product4",
+            "code": "product4",
+            "category": "oil",
+            "unit_price": 1,
+            "description": "Product4",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.Product",
+        "pk": 5,
+        "fields": {
+            "name": "Product5",
+            "code": "product5",
+            "category": "oil",
+            "unit_price": 1,
+            "description": "Product5",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.Product",
+        "pk": 6,
+        "fields": {
+            "name": "Product6",
+            "code": "product6",
+            "category": "oil",
+            "unit_price": 1,
+            "description": "Product6",
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 1,
+        "fields": {
+            "name": "Loading A",
+            "contact": "Loading A",
+            "phone_number": "123456789",
+            "address": "Loading A",
+            "efence_centroid": "A-centroid",
+            "efence_radius": "A-radius",
+            "unit_price": 1,
+            "unit_time": 1,
+            "duration_unit": "H",
+            "product": 1,
+            "average_time": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 2,
+        "fields": {
+            "name": "Loading B",
+            "contact": "Loading B",
+            "phone_number": "123456789",
+            "address": "Loading B",
+            "efence_centroid": "B-centroid",
+            "efence_radius": "B-radius",
+            "unit_price": 1,
+            "unit_time": 1,
+            "duration_unit": "H",
+            "product": 2,
+            "average_time": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.UnLoadingStation",
+        "pk": 1,
+        "fields": {
+            "name": "UnLoading A",
+            "contact": "UnLoading A",
+            "phone_number": "123456789",
+            "address": "UnLoading A",
+            "efence_centroid": "A-centroid",
+            "efence_radius": "A-radius",
+            "unit_price": 1,
+            "unit_time": 1,
+            "duration_unit": "H",
+            "product": 1,
+            "average_time": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.UnLoadingStation",
+        "pk": 2,
+        "fields": {
+            "name": "UnLoading B",
+            "contact": "UnLoading B",
+            "phone_number": "123456789",
+            "address": "Loading B",
+            "efence_centroid": "B-centroid",
+            "efence_radius": "B-radius",
+            "unit_price": 1,
+            "unit_time": 1,
+            "duration_unit": "H",
+            "product": 2,
+            "average_time": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "vehicle.Vehicle",
+        "pk": 1,
+        "fields": {
+            "model": "T",
+            "no": "Model-1",
+            "code": "Model-1",
+            "brand": "T",
+            "load": 100,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "vehicle.Vehicle",
+        "pk": 2,
+        "fields": {
+            "model": "T",
+            "no": "Model-2",
+            "code": "Model-2",
+            "brand": "T",
+            "load": 100,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    }
+]
