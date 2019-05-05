@@ -54,11 +54,14 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, password, **extra_fields):
         extra_fields.setdefault('role', constants.USER_ROLE_ADMIN)
 
-        return self.create_user(
+        user = self.create_user(
             username,
             password=password,
             **extra_fields
         )
+
+        CompanyStaffProfile.objects.create(user=user)
+        return user
 
 
 class User(AbstractBaseUser):
@@ -132,3 +135,60 @@ class User(AbstractBaseUser):
     def is_staff(self):
         return self.role in \
             [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
+
+
+class CompanyStaffProfile(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    birthday = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    spouse_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    spouse_number = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return '{} - {}\'s profile'.format(self.user.role, self.user.username)
+
+
+class CustomerProfile(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    good = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    payment_unit = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    associated = models.ForeignKey(
+        CompanyStaffProfile,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    def __str__(self):
+        return '{} - {}\'s profile'.format(self.user.role, self.user.username)
