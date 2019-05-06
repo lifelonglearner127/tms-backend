@@ -49,6 +49,20 @@ class Station(BasicContactModel):
         blank=True
     )
 
+    working_time = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True
+    )
+
+    average_time = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True
+    )
+
     class Meta:
         abstract = True
 

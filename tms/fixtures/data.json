@@ -82,13 +82,15 @@
         "pk": 1,
         "fields": {
             "name": "Loading A",
-            "contact": "Loading A",
+            "contact": "Zhang Shi Jun",
             "mobile": "123456789",
-            "address": "Loading A",
+            "address": "Tongzhou District Beijing",
             "centroid": "A-centroid",
             "radius": "A-radius",
             "price": 1,
             "product": 1,
+            "working_time": 1,
+            "average_time": 2,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }
@@ -98,13 +100,87 @@
         "pk": 2,
         "fields": {
             "name": "Loading B",
-            "contact": "Loading B",
+            "contact": "Zhen He",
             "mobile": "123456789",
-            "address": "Loading B",
+            "address": "Tongzhou District Beijing",
             "centroid": "B-centroid",
             "radius": "B-radius",
             "price": 1,
             "product": 2,
+            "working_time": 1,
+            "average_time": 2,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 3,
+        "fields": {
+            "name": "Loading C",
+            "contact": "Zhen Ge",
+            "mobile": "123456789",
+            "address": "Jilin",
+            "centroid": "C-centroid",
+            "radius": "C-radius",
+            "price": 1,
+            "product": 3,
+            "working_time": 1,
+            "average_time": 2,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 4,
+        "fields": {
+            "name": "Loading D",
+            "contact": "D Manager",
+            "mobile": "123456789",
+            "address": "Chaoyang District Beijing",
+            "centroid": "D-centroid",
+            "radius": "D-radius",
+            "price": 1,
+            "product": 4,
+            "working_time": 1,
+            "average_time": 2,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 5,
+        "fields": {
+            "name": "Loading E",
+            "contact": "E Manager",
+            "mobile": "123456789",
+            "address": "Shen Zhen District Beijing",
+            "centroid": "E-centroid",
+            "radius": "E-radius",
+            "price": 5,
+            "product": 1,
+            "working_time": 1,
+            "average_time": 2,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.LoadingStation",
+        "pk": 6,
+        "fields": {
+            "name": "Loading F",
+            "contact": "F Manager",
+            "mobile": "123456789",
+            "address": "Shang hai",
+            "centroid": "F-centroid",
+            "radius": "F-radius",
+            "price": 1,
+            "product": 6,
+            "working_time": 1,
+            "average_time": 2,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }

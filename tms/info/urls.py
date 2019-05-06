@@ -21,5 +21,6 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^product-categories/$', views.ProductCategoriesView.as_view())
+    url(r'^product-categories/$', views.ProductCategoriesView.as_view()),
+    url(r'^short/products/$', views.ShortProductView.as_view())
 ]

@@ -42,7 +42,9 @@ class BasicContactModel(TimeStampedModel):
     )
 
     address = models.CharField(
-        max_length=100
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     class Meta:

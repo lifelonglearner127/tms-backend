@@ -1,5 +1,5 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
 from .models import (
     Product, LoadingStation, UnLoadingStation, QualityStation, OilStation
 )
@@ -7,10 +7,13 @@ from .models import (
 
 class ShortProductSerializer(serializers.ModelSerializer):
 
+    value = serializers.CharField(source='id')
+    text = serializers.CharField(source='name')
+
     class Meta:
         model = Product
         fields = (
-            'id', 'name'
+            'value', 'text'
         )
 
 
@@ -38,12 +41,28 @@ class ShortLoadingStationSerializer(serializers.ModelSerializer):
 
 class LoadingStationSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer()
+    product = ShortProductSerializer(read_only=True)
 
     class Meta:
         model = LoadingStation
         fields = '__all__'
 
+    def create(self, validated_data):
+        product_id = self.context.get('product_id')
+        product = get_object_or_404(Product, pk=product_id)
+        return LoadingStation.objects.create(
+            product=product, **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        product_id = self.context.get('product_id')
+        product = get_object_or_404(Product, pk=product_id)
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
 
 class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
 
@@ -56,7 +75,7 @@ class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
 
 class UnLoadingStationSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer()
+    product = ShortProductSerializer(read_only=True)
 
     class Meta:
         model = UnLoadingStation
