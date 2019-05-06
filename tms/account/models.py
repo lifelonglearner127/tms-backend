@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from ..core import constants
-from ..core.validations import validate_phone_number
+from ..core.validations import validate_mobile
 
 
 class AdminManager(models.Manager):
@@ -77,12 +77,12 @@ class User(AbstractBaseUser):
         blank=True
     )
 
-    phone_number = models.CharField(
+    mobile = models.CharField(
         max_length=20,
         unique=True,
         null=True,
         blank=True,
-        validators=[validate_phone_number]
+        validators=[validate_mobile]
     )
 
     name = models.CharField(

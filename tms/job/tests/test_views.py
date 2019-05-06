@@ -19,7 +19,7 @@ class JobViewSetTest(APITestCase):
 
         self.admin = UserModel.objects.create(
             username='admin',
-            phone_number='123',
+            mobile='123',
             password='gibupjo127',
             role=constants.USER_ROLE_ADMIN
         )
@@ -28,7 +28,7 @@ class JobViewSetTest(APITestCase):
 
         self.staff = UserModel.objects.create(
             username='staff',
-            phone_number='456',
+            mobile='456',
             password='gibupjo127',
             role=constants.USER_ROLE_STAFF
         )
@@ -37,7 +37,7 @@ class JobViewSetTest(APITestCase):
 
         self.driver = UserModel.objects.create(
             username='driver',
-            phone_number='789',
+            mobile='789',
             password='gibupjo127',
             role=constants.USER_ROLE_DRIVER
         )
@@ -46,7 +46,7 @@ class JobViewSetTest(APITestCase):
 
         self.escort = UserModel.objects.create(
             username='escrot',
-            phone_number='123456',
+            mobile='123456',
             password='gibupjo127',
             role=constants.USER_ROLE_ESCORT
         )
@@ -55,7 +55,7 @@ class JobViewSetTest(APITestCase):
 
         self.customer = UserModel.objects.create(
             username='customer',
-            phone_number='456789',
+            mobile='456789',
             password='gibupjo127',
             role=constants.USER_ROLE_CUSTOMER
         )

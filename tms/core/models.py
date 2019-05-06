@@ -37,7 +37,7 @@ class BasicContactModel(TimeStampedModel):
         max_length=100
     )
 
-    phone_number = models.CharField(
+    mobile = models.CharField(
         max_length=30
     )
 

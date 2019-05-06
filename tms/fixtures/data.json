@@ -83,7 +83,7 @@
         "fields": {
             "name": "Loading A",
             "contact": "Loading A",
-            "phone_number": "123456789",
+            "mobile": "123456789",
             "address": "Loading A",
             "efence_centroid": "A-centroid",
             "efence_radius": "A-radius",
@@ -102,7 +102,7 @@
         "fields": {
             "name": "Loading B",
             "contact": "Loading B",
-            "phone_number": "123456789",
+            "mobile": "123456789",
             "address": "Loading B",
             "efence_centroid": "B-centroid",
             "efence_radius": "B-radius",
@@ -121,7 +121,7 @@
         "fields": {
             "name": "UnLoading A",
             "contact": "UnLoading A",
-            "phone_number": "123456789",
+            "mobile": "123456789",
             "address": "UnLoading A",
             "efence_centroid": "A-centroid",
             "efence_radius": "A-radius",
@@ -140,7 +140,7 @@
         "fields": {
             "name": "UnLoading B",
             "contact": "UnLoading B",
-            "phone_number": "123456789",
+            "mobile": "123456789",
             "address": "Loading B",
             "efence_centroid": "B-centroid",
             "efence_radius": "B-radius",

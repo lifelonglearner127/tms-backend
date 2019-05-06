@@ -20,7 +20,7 @@ class Product(TimeStampedModel):
         default=constants.PRODUCT_TYPE_GASOLINE
     )
 
-    unit_price = models.DecimalField(
+    price = models.DecimalField(
         max_digits=5,
         decimal_places=1
     )
@@ -30,34 +30,23 @@ class Product(TimeStampedModel):
 
 class Station(BasicContactModel):
 
-    efence_centroid = models.CharField(
+    centroid = models.CharField(
         max_length=10,
         null=True,
         blank=True
     )
 
-    efence_radius = models.CharField(
+    radius = models.CharField(
         max_length=10,
         null=True,
         blank=True
     )
 
-    unit_price = models.DecimalField(
+    price = models.DecimalField(
         max_digits=5,
         decimal_places=1,
         null=True,
         blank=True
-    )
-
-    unit_time = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True
-    )
-
-    duration_unit = models.CharField(
-        max_length=10,
-        choices=constants.DURATION_UNIT,
-        default=constants.DURATION_UNIT_HOUR
     )
 
     class Meta:
@@ -70,13 +59,6 @@ class LoadStation(Station):
         Product,
         on_delete=models.SET_NULL,
         null=True
-    )
-
-    average_time = models.DecimalField(
-        max_digits=2,
-        decimal_places=1,
-        null=True,
-        blank=True
     )
 
     class Meta:

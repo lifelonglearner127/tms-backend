@@ -61,7 +61,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         context = self.context.get('user')
         user_data = {
             'username': context.get('username'),
-            'phone_number': context.get('phone_number'),
+            'mobile': context.get('mobile'),
             'name': context.get('name')
         }
         user = User.objects.create_user(**user_data)
@@ -76,7 +76,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         context = self.context.get('user')
 
         user.username = context.get('username', user.username)
-        user.phone_number = context.get('phone_number', user.phone_number)
+        user.mobile = context.get('mobile', user.mobile)
         user.name = context.get('name', user.name)
         user.save()
 

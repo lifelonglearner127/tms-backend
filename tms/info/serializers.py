@@ -32,7 +32,7 @@ class ShortLoadingStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoadingStation
         fields = (
-            'id', 'name', 'contact', 'phone_number', 'address'
+            'id', 'name', 'contact', 'mobile', 'address'
         )
 
 
@@ -48,7 +48,7 @@ class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnLoadingStation
         fields = (
-            'id', 'name', 'contact', 'phone_number', 'address'
+            'id', 'name', 'contact', 'mobile', 'address'
         )
 
 

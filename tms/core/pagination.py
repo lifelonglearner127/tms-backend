@@ -28,7 +28,7 @@ class StandardResultsSetPagination(PageNumberPagination):
             'total': total,
             'from': bottom + 1,
             'to': top,
-            'per_page': self.page.paginator.per_page,
+            'per_page': per_page,
             'last_page': self.page.paginator.num_pages,
             'data': data
         })

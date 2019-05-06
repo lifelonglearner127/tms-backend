@@ -7,7 +7,7 @@ UserModel = get_user_model()
 class TMSAuthenticationBackend:
     def authenticate(self, request, username=None, password=None):
         if username.isdigit():
-            kwargs = {'phone_number': username}
+            kwargs = {'mobile': username}
         else:
             kwargs = {'username': username}
         try:
