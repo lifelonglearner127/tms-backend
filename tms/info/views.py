@@ -99,6 +99,43 @@ class UnLoadingStationViewSet(StaffViewSet):
     queryset = models.UnLoadingStation.objects.all()
     serializer_class = serializers.UnLoadingStationSerializer
 
+    def create(self, request):
+        context = {
+            'product_id': request.data.pop('product')
+        }
+        serializer = self.serializer_class(
+            data=request.data,
+            context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+        context = {
+            'product_id': request.data.pop('product')
+        }
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class QualityStationViewSet(StaffViewSet):
 

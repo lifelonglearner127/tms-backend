@@ -60,7 +60,8 @@ class LoadingStationSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
-
+        
+        instance.product = product
         instance.save()
         return instance
 
@@ -80,6 +81,24 @@ class UnLoadingStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnLoadingStation
         fields = '__all__'
+
+    def create(self, validated_data):
+        product_id = self.context.get('product_id')
+        product = get_object_or_404(Product, pk=product_id)
+        return UnLoadingStation.objects.create(
+            product=product, **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        product_id = self.context.get('product_id')
+        product = get_object_or_404(Product, pk=product_id)
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.product = product
+        instance.save()
+        return instance
 
 
 class QualityStationSerializer(serializers.ModelSerializer):
