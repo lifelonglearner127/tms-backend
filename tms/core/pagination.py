@@ -29,6 +29,9 @@ class StandardResultsSetPagination(PageNumberPagination):
             'from': bottom + 1,
             'to': top,
             'per_page': per_page,
+            'current_page': page_number,
             'last_page': self.page.paginator.num_pages,
+            'next_page_url': self.get_next_link(),
+            'prev_page_url': self.get_previous_link(),
             'data': data
         })

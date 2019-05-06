@@ -6,7 +6,7 @@
             "name": "Product1",
             "code": "product1",
             "category": "gas",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product1",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -19,7 +19,7 @@
             "name": "Product2",
             "code": "product2",
             "category": "gas",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product2",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -32,7 +32,7 @@
             "name": "Product3",
             "code": "product3",
             "category": "gas",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product3",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -45,7 +45,7 @@
             "name": "Product4",
             "code": "product4",
             "category": "oil",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product4",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -58,7 +58,7 @@
             "name": "Product5",
             "code": "product5",
             "category": "oil",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product5",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -71,7 +71,7 @@
             "name": "Product6",
             "code": "product6",
             "category": "oil",
-            "unit_price": 1,
+            "price": 1,
             "description": "Product6",
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
@@ -85,13 +85,10 @@
             "contact": "Loading A",
             "mobile": "123456789",
             "address": "Loading A",
-            "efence_centroid": "A-centroid",
-            "efence_radius": "A-radius",
-            "unit_price": 1,
-            "unit_time": 1,
-            "duration_unit": "H",
+            "centroid": "A-centroid",
+            "radius": "A-radius",
+            "price": 1,
             "product": 1,
-            "average_time": 1,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }
@@ -104,13 +101,10 @@
             "contact": "Loading B",
             "mobile": "123456789",
             "address": "Loading B",
-            "efence_centroid": "B-centroid",
-            "efence_radius": "B-radius",
-            "unit_price": 1,
-            "unit_time": 1,
-            "duration_unit": "H",
+            "centroid": "B-centroid",
+            "radius": "B-radius",
+            "price": 1,
             "product": 2,
-            "average_time": 1,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }
@@ -123,13 +117,10 @@
             "contact": "UnLoading A",
             "mobile": "123456789",
             "address": "UnLoading A",
-            "efence_centroid": "A-centroid",
-            "efence_radius": "A-radius",
-            "unit_price": 1,
-            "unit_time": 1,
-            "duration_unit": "H",
+            "centroid": "A-centroid",
+            "radius": "A-radius",
+            "price": 1,
             "product": 1,
-            "average_time": 1,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }
@@ -142,13 +133,10 @@
             "contact": "UnLoading B",
             "mobile": "123456789",
             "address": "Loading B",
-            "efence_centroid": "B-centroid",
-            "efence_radius": "B-radius",
-            "unit_price": 1,
-            "unit_time": 1,
-            "duration_unit": "H",
+            "centroid": "B-centroid",
+            "radius": "B-radius",
+            "price": 1,
             "product": 2,
-            "average_time": 1,
             "created": "2013-03-16T17:41:28+00:00",
             "updated": "2013-03-16T17:41:28+00:00"
         }
