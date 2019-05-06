@@ -20,8 +20,8 @@ class ProductCategoriesView(StaffAPIView):
         for (slug, name) in PRODUCT_TYPE:
             product_categories.append(
                 {
-                    'slug': slug,
-                    'name': name
+                    'value': slug,
+                    'text': name
                 }
             )
 

@@ -23,8 +23,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductCategoriesSerializer(serializers.Serializer):
 
-    slug = serializers.CharField()
-    name = serializers.CharField()
+    value = serializers.CharField()
+    text = serializers.CharField()
 
 
 class ShortLoadingStationSerializer(serializers.ModelSerializer):
@@ -37,6 +37,8 @@ class ShortLoadingStationSerializer(serializers.ModelSerializer):
 
 
 class LoadingStationSerializer(serializers.ModelSerializer):
+
+    product = ShortProductSerializer()
 
     class Meta:
         model = LoadingStation
@@ -53,6 +55,8 @@ class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
 
 
 class UnLoadingStationSerializer(serializers.ModelSerializer):
+
+    product = ShortProductSerializer()
 
     class Meta:
         model = UnLoadingStation

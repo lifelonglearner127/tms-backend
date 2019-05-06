@@ -50,6 +50,7 @@ class CompanyStaffSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
+    associated = CompanyStaffSerializer(read_only=True)
 
     class Meta:
         model = CustomerProfile
