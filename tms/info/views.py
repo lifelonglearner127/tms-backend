@@ -1,41 +1,22 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..core.views import StaffAPIView, StaffViewSet, ChoicesView
+from ..core.views import StaffViewSet, ShortAPIView, ChoicesView
 from ..core.constants import PRODUCT_TYPE
-from . import models
-from . import serializers
+from . import models as m
+from . import serializers as s
 
 
 class ProductViewSet(StaffViewSet):
 
-    queryset = models.Product.objects.all()
-    serializer_class = serializers.ProductSerializer
-
-
-class ShortProductView(StaffAPIView):
-
-    def get(self, request):
-        serializer = serializers.ShortProductSerializer(
-            models.Product.objects.all(),
-            many=True
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-
-class ProductCategoriesView(ChoicesView):
-
-    static_choices = PRODUCT_TYPE
+    queryset = m.Product.objects.all()
+    serializer_class = s.ProductSerializer
 
 
 class LoadingStationViewSet(StaffViewSet):
 
-    queryset = models.LoadingStation.objects.all()
-    serializer_class = serializers.LoadingStationSerializer
+    queryset = m.LoadingStation.objects.all()
+    serializer_class = s.LoadingStationSerializer
 
     def create(self, request):
         context = {
@@ -77,8 +58,8 @@ class LoadingStationViewSet(StaffViewSet):
 
 class UnLoadingStationViewSet(StaffViewSet):
 
-    queryset = models.UnLoadingStation.objects.all()
-    serializer_class = serializers.UnLoadingStationSerializer
+    queryset = m.UnLoadingStation.objects.all()
+    serializer_class = s.UnLoadingStationSerializer
 
     def create(self, request):
         context = {
@@ -120,11 +101,56 @@ class UnLoadingStationViewSet(StaffViewSet):
 
 class QualityStationViewSet(StaffViewSet):
 
-    queryset = models.QualityStation.objects.all()
-    serializer_class = serializers.QualityStationSerializer
+    queryset = m.QualityStation.objects.all()
+    serializer_class = s.QualityStationSerializer
 
 
 class OilStationViewSet(StaffViewSet):
 
-    queryset = models.OilStation.objects.all()
-    serializer_class = serializers.OilStationSerializer
+    queryset = m.OilStation.objects.all()
+    serializer_class = s.OilStationSerializer
+
+
+class ShortProductAPIView(ShortAPIView):
+    """
+    View to list short data of product
+    """
+    model_class = m.Product
+    serializer_class = s.ShortProductSerializer
+
+
+class ShortLoadingStationAPIView(ShortAPIView):
+    """
+    View to list short data of loading stations
+    """
+    model_class = m.LoadingStation
+    serializer_class = s.ShortLoadingStationSerializer
+
+
+class ShortUnLoadingStationAPIView(ShortAPIView):
+    """
+    View to list short data of unloading stations
+    """
+    model_class = m.UnLoadingStation
+    serializer_class = s.ShortUnLoadingStationSerializer
+
+
+class ShortQualityStationAPIView(ShortAPIView):
+    """
+    View to list short data of quality stations
+    """
+    model_class = m.QualityStation
+    serializer_class = s.QualityStationSerializer
+
+
+class ShortOilStationAPIView(ShortAPIView):
+    """
+    View to list short data of oil stations
+    """
+    model_class = m.OilStation
+    serializer_class = s.OilStationSerializer
+
+
+class ProductCategoriesView(ChoicesView):
+
+    static_choices = PRODUCT_TYPE

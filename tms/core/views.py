@@ -42,3 +42,25 @@ class ChoicesView(StaffAPIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class ShortAPIView(StaffAPIView):
+    """
+    View to list short data of specified model
+    """
+    model_class = None
+    serializer_class = None
+
+    def get_queryset(self):
+        return self.model_class.objects.all()
+
+    def get(self, request):
+        serializer = self.serializer_class(
+            self.get_queryset(),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

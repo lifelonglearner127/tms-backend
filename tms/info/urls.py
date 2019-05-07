@@ -22,5 +22,9 @@ router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^product-categories/$', views.ProductCategoriesView.as_view()),
-    url(r'^short/products/$', views.ShortProductView.as_view())
+    url(r'^short/products/$', views.ShortProductAPIView.as_view()),
+    url(r'^short/loading/$', views.ShortLoadingStationAPIView.as_view()),
+    url(r'^short/unloading/$', views.ShortUnLoadingStationAPIView.as_view()),
+    url(r'^short/quality/$', views.ShortUnLoadingStationAPIView.as_view()),
+    url(r'^short/oil/$', views.ShortUnLoadingStationAPIView.as_view()),
 ]

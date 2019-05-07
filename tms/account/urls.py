@@ -1,17 +1,17 @@
 from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 
-from .import views
+from .import views as v
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
-    r'user', views.UserViewSet, base_name='user'
+    r'user', v.UserViewSet, base_name='user'
 )
 router.register(
-    r'customer', views.CustomerViewSet, base_name='customer'
+    r'customer', v.CustomerViewSet, base_name='customer'
 )
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^short/staff/$', views.ShortCompanyStaffView.as_view())
+    url(r'^short/staff/$', v.ShortCompanyStaffView.as_view())
 ]

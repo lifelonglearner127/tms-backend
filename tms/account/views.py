@@ -1,46 +1,27 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..core.views import StaffViewSet, StaffAPIView
-from .serializers import (
-    AuthSerializer, UserSerializer, CustomerSerializer,
-    ShortCompanyStaffSerializer
-)
-from .models import (
-    User, CustomerProfile, CompanyStaffProfile
-)
+from ..core.views import StaffViewSet, ShortAPIView
+from . import models as m
+from . import serializers as s
 
 
 def jwt_response_payload_handler(token, user=None, request=None):
     return {
         'token': token,
-        'user': AuthSerializer(user, context={'request': request}).data
+        'user': s.AuthSerializer(user, context={'request': request}).data
     }
 
 
 class UserViewSet(StaffViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class ShortCompanyStaffView(StaffAPIView):
-
-    def get(self, request):
-        serializer = ShortCompanyStaffSerializer(
-            CompanyStaffProfile.objects.all(),
-            many=True
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    queryset = m.User.objects.all()
+    serializer_class = s.UserSerializer
 
 
 class CustomerViewSet(StaffViewSet):
 
-    queryset = CustomerProfile.objects.all()
-    serializer_class = CustomerSerializer
+    queryset = m.CustomerProfile.objects.all()
+    serializer_class = s.CustomerSerializer
 
     def create(self, request):
         context = {
@@ -79,3 +60,11 @@ class CustomerViewSet(StaffViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class ShortCompanyStaffView(ShortAPIView):
+    """
+    View to list short data of customer profiles
+    """
+    model_class = m.CompanyStaffProfile
+    serializer_class = s.ShortCompanyStaffSerializer

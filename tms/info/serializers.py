@@ -7,13 +7,10 @@ from .models import (
 
 class ShortProductSerializer(serializers.ModelSerializer):
 
-    value = serializers.CharField(source='id')
-    text = serializers.CharField(source='name')
-
     class Meta:
         model = Product
         fields = (
-            'value', 'text'
+            'id', 'name', 'price'
         )
 
 
@@ -96,11 +93,29 @@ class UnLoadingStationSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ShortQualityStationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QualityStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
+
+
 class QualityStationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QualityStation
         fields = '__all__'
+
+
+class ShortOilStationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OilStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
 
 
 class OilStationSerializer(serializers.ModelSerializer):
