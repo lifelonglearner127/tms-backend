@@ -25,25 +25,11 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ShortStationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for short data of station
-    Used for base class for Loading, Unloading, Oil, Quality station
-    """
-    class Meta:
-        fields = (
-            'id', 'name', 'contact', 'mobile', 'address'
-        )
-
-
 class LoadStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Load Station
     Used for base class for Loading, Unloading Station
     """
-    class Meta:
-        fields = '__all__'
-
     def create(self, validated_data):
         product_data = self.context.get('product')
         product_id = product_data.get('id')
@@ -65,12 +51,15 @@ class LoadStationSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ShortLoadingStationSerializer(ShortStationSerializer):
+class ShortLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Loading Station
     """
     class Meta:
         model = LoadingStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
 
 
 class LoadingStationSerializer(LoadStationSerializer):
@@ -81,14 +70,18 @@ class LoadingStationSerializer(LoadStationSerializer):
 
     class Meta:
         model = LoadingStation
+        fields = '__all__'
 
 
-class ShortUnLoadingStationSerializer(ShortStationSerializer):
+class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of UnLoading Station
     """
     class Meta:
         model = UnLoadingStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
 
 
 class UnLoadingStationSerializer(LoadStationSerializer):
@@ -99,14 +92,18 @@ class UnLoadingStationSerializer(LoadStationSerializer):
 
     class Meta:
         model = UnLoadingStation
+        fields = '__all__'
 
 
-class ShortQualityStationSerializer(ShortStationSerializer):
+class ShortQualityStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Quality Station
     """
     class Meta:
         model = QualityStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
 
 
 class QualityStationSerializer(serializers.ModelSerializer):
@@ -118,12 +115,15 @@ class QualityStationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ShortOilStationSerializer(ShortStationSerializer):
+class ShortOilStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Oil Station
     """
     class Meta:
         model = OilStation
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
 
 
 class OilStationSerializer(serializers.ModelSerializer):
