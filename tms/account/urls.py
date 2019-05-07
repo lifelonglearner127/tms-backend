@@ -13,5 +13,6 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^short/staff/$', v.ShortCompanyStaffView.as_view())
+    url(r'^short/staff/$', v.ShortStaffAPIView.as_view()),
+    url(r'^short/customer/$', v.ShortCustomerAPIView.as_view())
 ]

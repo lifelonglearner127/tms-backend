@@ -9,8 +9,15 @@ class ShortUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'name'
+            'id', 'name', 'mobile'
         )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.username
+
+        return ret
 
 
 class AuthSerializer(serializers.ModelSerializer):
@@ -27,18 +34,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
-
-
-class ShortCompanyStaffSerializer(serializers.ModelSerializer):
-
-    value = serializers.CharField(source='id')
-    text = serializers.CharField(source='user.username')
-
-    class Meta:
-        model = CompanyStaffProfile
-        fields = (
-            'value', 'text'
-        )
 
 
 class CompanyStaffSerializer(serializers.ModelSerializer):
@@ -64,7 +59,7 @@ class CompanyStaffSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
-    associated = ShortCompanyStaffSerializer(read_only=True)
+    associated = CompanyStaffSerializer(read_only=True)
 
     class Meta:
         model = CustomerProfile

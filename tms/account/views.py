@@ -62,9 +62,21 @@ class CustomerViewSet(StaffViewSet):
         )
 
 
-class ShortCompanyStaffView(ShortAPIView):
+class ShortStaffAPIView(ShortAPIView):
     """
     View to list short data of customer profiles
     """
-    model_class = m.CompanyStaffProfile
-    serializer_class = s.ShortCompanyStaffSerializer
+    serializer_class = s.ShortUserSerializer
+
+    def get_queryset(self):
+        return m.User.staffs.all()
+
+
+class ShortCustomerAPIView(ShortAPIView):
+    """
+    View to list short data of customer profiles
+    """
+    serializer_class = s.ShortUserSerializer
+
+    def get_queryset(self):
+        return m.User.customers.all()
