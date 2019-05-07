@@ -8,105 +8,83 @@ from . import serializers as s
 
 
 class ProductViewSet(StaffViewSet):
-
+    """
+    Viewset for products
+    """
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
 
 
-class LoadingStationViewSet(StaffViewSet):
+class LoadStationViewSet(StaffViewSet):
+    """
+    Used for base class for loading, unloading station viewset
+    """
+    def create(self, request):
+        context = {
+            'product': request.data.pop('product')
+        }
+        serializer = self.serializer_class(
+            data=request.data,
+            context=context
+        )
 
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+        context = {
+            'product': request.data.pop('product')
+        }
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class LoadingStationViewSet(LoadStationViewSet):
+    """
+    Viewset for Loading Station
+    """
     queryset = m.LoadingStation.objects.all()
     serializer_class = s.LoadingStationSerializer
 
-    def create(self, request):
-        context = {
-            'product_id': request.data.pop('product')
-        }
-        serializer = self.serializer_class(
-            data=request.data,
-            context=context
-        )
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    def update(self, request, pk=None):
-        serializer_instance = self.get_object()
-        context = {
-            'product_id': request.data.pop('product')
-        }
-        serializer = self.serializer_class(
-            serializer_instance,
-            data=request.data,
-            context=context,
-            partial=True
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-
-class UnLoadingStationViewSet(StaffViewSet):
-
+class UnLoadingStationViewSet(LoadStationViewSet):
+    """
+    Viewset for UnLoading Station
+    """
     queryset = m.UnLoadingStation.objects.all()
     serializer_class = s.UnLoadingStationSerializer
 
-    def create(self, request):
-        context = {
-            'product_id': request.data.pop('product')
-        }
-        serializer = self.serializer_class(
-            data=request.data,
-            context=context
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    def update(self, request, pk=None):
-        serializer_instance = self.get_object()
-        context = {
-            'product_id': request.data.pop('product')
-        }
-        serializer = self.serializer_class(
-            serializer_instance,
-            data=request.data,
-            context=context,
-            partial=True
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
 
 class QualityStationViewSet(StaffViewSet):
-
+    """
+    Viewset for Quality Station
+    """
     queryset = m.QualityStation.objects.all()
     serializer_class = s.QualityStationSerializer
 
 
 class OilStationViewSet(StaffViewSet):
-
+    """
+    Viewset for Oil Station
+    """
     queryset = m.OilStation.objects.all()
     serializer_class = s.OilStationSerializer
 
