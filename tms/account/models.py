@@ -190,5 +190,11 @@ class CustomerProfile(models.Model):
         null=True
     )
 
+    address = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         return '{} - {}\'s profile'.format(self.user.role, self.user.username)

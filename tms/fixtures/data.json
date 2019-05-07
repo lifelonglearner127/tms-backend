@@ -218,6 +218,160 @@
         }
     },
     {
+        "model": "info.UnLoadingStation",
+        "pk": 3,
+        "fields": {
+            "name": "UnLoading C",
+            "contact": "C Manager",
+            "mobile": "123456789",
+            "address": "Beijing",
+            "centroid": "A-centroid",
+            "radius": "A-radius",
+            "price": 1,
+            "product": 3,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.UnLoadingStation",
+        "pk": 4,
+        "fields": {
+            "name": "UnLoading D",
+            "contact": "D Manager",
+            "mobile": "123456789",
+            "address": "Shang hai",
+            "centroid": "B-centroid",
+            "radius": "B-radius",
+            "price": 1,
+            "product": 4,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.UnLoadingStation",
+        "pk": 5,
+        "fields": {
+            "name": "UnLoading E",
+            "contact": "E Manager",
+            "mobile": "123456789",
+            "address": "UnLoading A",
+            "centroid": "E-centroid",
+            "radius": "E-radius",
+            "price": 1,
+            "product": 5,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.UnLoadingStation",
+        "pk": 6,
+        "fields": {
+            "name": "UnLoading F",
+            "contact": "F Manager",
+            "mobile": "123456789",
+            "address": "Loading B",
+            "centroid": "F-centroid",
+            "radius": "F-radius",
+            "price": 1,
+            "product": 6,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 1,
+        "fields": {
+            "name": "Oil A",
+            "contact": "Oil A",
+            "mobile": "123456789",
+            "address": "Oil A",
+            "centroid": "A-centroid",
+            "radius": "A-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 2,
+        "fields": {
+            "name": "Oil B",
+            "contact": "Oil B",
+            "mobile": "123456789",
+            "address": "Loading B",
+            "centroid": "B-centroid",
+            "radius": "B-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 3,
+        "fields": {
+            "name": "Oil C",
+            "contact": "C Manager",
+            "mobile": "123456789",
+            "address": "Beijing",
+            "centroid": "A-centroid",
+            "radius": "A-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 4,
+        "fields": {
+            "name": "Oil D",
+            "contact": "D Manager",
+            "mobile": "123456789",
+            "address": "Shang hai",
+            "centroid": "B-centroid",
+            "radius": "B-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 5,
+        "fields": {
+            "name": "Oil E",
+            "contact": "E Manager",
+            "mobile": "123456789",
+            "address": "Oil A",
+            "centroid": "E-centroid",
+            "radius": "E-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "info.OilStation",
+        "pk": 6,
+        "fields": {
+            "name": "Oil F",
+            "contact": "F Manager",
+            "mobile": "123456789",
+            "address": "Loading B",
+            "centroid": "F-centroid",
+            "radius": "F-radius",
+            "price": 1,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
         "model": "vehicle.Vehicle",
         "pk": 1,
         "fields": {

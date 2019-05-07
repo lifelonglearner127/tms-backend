@@ -60,10 +60,11 @@ class LoadingStationSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
-        
+
         instance.product = product
         instance.save()
         return instance
+
 
 class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
 

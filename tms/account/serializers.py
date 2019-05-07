@@ -1,4 +1,6 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from ..core import constants
 from .models import User, CompanyStaffProfile, CustomerProfile
 
 
@@ -27,6 +29,18 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortCompanyStaffSerializer(serializers.ModelSerializer):
+
+    value = serializers.CharField(source='id')
+    text = serializers.CharField(source='user.username')
+
+    class Meta:
+        model = CompanyStaffProfile
+        fields = (
+            'value', 'text'
+        )
+
+
 class CompanyStaffSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
@@ -50,43 +64,49 @@ class CompanyStaffSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
-    associated = CompanyStaffSerializer(read_only=True)
+    associated = ShortCompanyStaffSerializer(read_only=True)
 
     class Meta:
         model = CustomerProfile
-        fields = (
-            'id', 'user', 'good', 'payment_unit', 'associated'
-        )
+        fields = '__all__'
 
     def create(self, validated_data):
-        context = self.context.get('user')
+        user_context = self.context.get('user')
+        associated_id = self.context.get('associated')
         user_data = {
-            'username': context.get('username'),
-            'mobile': context.get('mobile'),
-            'name': context.get('name')
+            'username': user_context.get('username'),
+            'password': user_context.get('password'),
+            'mobile': user_context.get('mobile'),
+            'name': user_context.get('name'),
+            'role': constants.USER_ROLE_CUSTOMER
         }
         user = User.objects.create_user(**user_data)
+        associated = get_object_or_404(CompanyStaffProfile, pk=associated_id)
+
         customer = CustomerProfile.objects.create(
             user=user,
+            associated=associated,
             **validated_data
         )
         return customer
 
     def update(self, instance, validated_data):
         user = instance.user
-        context = self.context.get('user')
+        user_context = self.context.get('user')
 
-        user.username = context.get('username', user.username)
-        user.mobile = context.get('mobile', user.mobile)
-        user.name = context.get('name', user.name)
+        user.username = user_context.get('username', user.username)
+        user.mobile = user_context.get('mobile', user.mobile)
+        user.name = user_context.get('name', user.name)
+        user.set_password(user_context.get('password', user.password))
         user.save()
 
         instance.good = validated_data.get('good', instance.good)
         instance.payment_unit = validated_data.get(
             'payment_unit', instance.payment_unit
         )
-        instance.associated = validated_data.get(
-            'associated', instance.associated
-        )
+        instance.address = validated_data.get('address', instance.address)
+        associated_id = self.context.get('associated')
+        associated = get_object_or_404(CompanyStaffProfile, pk=associated_id)
+        instance.associated = associated
         instance.save()
         return instance

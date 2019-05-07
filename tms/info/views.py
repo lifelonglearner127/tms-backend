@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
 from ..core.views import StaffAPIView, StaffViewSet
 from ..core.constants import PRODUCT_TYPE
@@ -92,7 +91,7 @@ class LoadingStationViewSet(StaffViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
-        
+
 
 class UnLoadingStationViewSet(StaffViewSet):
 

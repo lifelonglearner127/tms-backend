@@ -1,9 +1,14 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..core.views import StaffViewSet
-from .serializers import AuthSerializer, UserSerializer, CustomerSerializer
-from .models import User, CustomerProfile
+from ..core.views import StaffViewSet, StaffAPIView
+from .serializers import (
+    AuthSerializer, UserSerializer, CustomerSerializer,
+    ShortCompanyStaffSerializer
+)
+from .models import (
+    User, CustomerProfile, CompanyStaffProfile
+)
 
 
 def jwt_response_payload_handler(token, user=None, request=None):
@@ -18,6 +23,20 @@ class UserViewSet(StaffViewSet):
     serializer_class = UserSerializer
 
 
+class ShortCompanyStaffView(StaffAPIView):
+
+    def get(self, request):
+        serializer = ShortCompanyStaffSerializer(
+            CompanyStaffProfile.objects.all(),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
 class CustomerViewSet(StaffViewSet):
 
     queryset = CustomerProfile.objects.all()
@@ -25,7 +44,8 @@ class CustomerViewSet(StaffViewSet):
 
     def create(self, request):
         context = {
-            'user': request.data.pop('user')
+            'user': request.data.pop('user'),
+            'associated': request.data.pop('associated')
         }
 
         serializer = self.serializer_class(
@@ -43,7 +63,8 @@ class CustomerViewSet(StaffViewSet):
     def update(self, request, pk=None):
         serializer_instance = self.get_object()
         context = {
-            'user': request.data.pop('user')
+            'user': request.data.pop('user'),
+            'associated': request.data.pop('associated')
         }
         serializer = self.serializer_class(
             serializer_instance,
