@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..core.views import StaffAPIView, StaffViewSet
+from ..core.views import StaffAPIView, StaffViewSet, ChoicesView
 from ..core.constants import PRODUCT_TYPE
 from . import models
 from . import serializers
@@ -27,27 +27,9 @@ class ShortProductView(StaffAPIView):
         )
 
 
-class ProductCategoriesView(StaffAPIView):
+class ProductCategoriesView(ChoicesView):
 
-    def get(self, request):
-        product_categories = []
-        for (slug, name) in PRODUCT_TYPE:
-            product_categories.append(
-                {
-                    'value': slug,
-                    'text': name
-                }
-            )
-
-        serializer = serializers.ProductCategoriesSerializer(
-            product_categories,
-            many=True
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    static_choices = PRODUCT_TYPE
 
 
 class LoadingStationViewSet(StaffViewSet):

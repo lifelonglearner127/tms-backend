@@ -24,12 +24,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductCategoriesSerializer(serializers.Serializer):
-
-    value = serializers.CharField()
-    text = serializers.CharField()
-
-
 class ShortLoadingStationSerializer(serializers.ModelSerializer):
 
     class Meta:

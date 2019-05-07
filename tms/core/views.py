@@ -1,6 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from .permissions import IsAccountStaffOrReadOnly
+from .serializers import ChoiceSerializer
 
 
 class StaffViewSet(viewsets.ModelViewSet):
@@ -15,3 +17,28 @@ class StaffAPIView(APIView):
     APIView only allowed for admin or staff permission
     """
     permission_classes = [IsAccountStaffOrReadOnly]
+
+
+class ChoicesView(StaffAPIView):
+
+    static_choices = ()
+
+    def get(self, request):
+        choices = []
+        for (slug, name) in self.static_choices:
+            choices.append(
+                {
+                    'value': slug,
+                    'text': name
+                }
+            )
+
+        serializer = ChoiceSerializer(
+            choices,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

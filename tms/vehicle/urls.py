@@ -10,4 +10,6 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^vehicle-brand/$', views.VehicleBrandAPIView.as_view()),
+    url(r'^vehicle-model/$', views.VehicleModelAPIView.as_view()),
 ]

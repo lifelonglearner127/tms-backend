@@ -8,7 +8,7 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = (
-            'id', 'no'
+            'value', 'text'
         )
 
 
