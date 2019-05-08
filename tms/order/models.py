@@ -7,7 +7,9 @@ from ..info.models import LoadingStation, UnLoadingStation, Product
 
 
 class Order(TimeStampedModel):
-
+    """
+    Order model
+    """
     alias = models.CharField(
         max_length=100
     )
@@ -46,7 +48,9 @@ class Order(TimeStampedModel):
 
 
 class OrderProduct(models.Model):
-
+    """
+    Intermediate model for order model and product model
+    """
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE
@@ -97,7 +101,9 @@ class OrderProduct(models.Model):
 
 
 class OrderProductDeliver(models.Model):
-
+    """
+    Intermediate model for ordered product and unloading station
+    """
     order_product = models.ForeignKey(
         OrderProduct,
         on_delete=models.CASCADE

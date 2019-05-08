@@ -8,6 +8,9 @@ router.register(
     r'user', v.UserViewSet, base_name='user'
 )
 router.register(
+    r'profile', v.StaffProfileViewSet, base_name='profile'
+)
+router.register(
     r'customer', v.CustomerViewSet, base_name='customer'
 )
 

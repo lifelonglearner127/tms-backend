@@ -5,7 +5,9 @@ from ..core.models import TimeStampedModel
 
 
 class Vehicle(TimeStampedModel):
-
+    """
+    Vehicle model
+    """
     model = models.CharField(
         max_length=1,
         choices=constants.VEHICLE_MODEL_TYPE,
@@ -33,7 +35,9 @@ class Vehicle(TimeStampedModel):
 
 
 class VehicleDocument(models.Model):
-
+    """
+    Vehicle Document model
+    """
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE

@@ -5,6 +5,9 @@ UserModel = get_user_model()
 
 
 class TMSAuthenticationBackend:
+    """
+    Authentication against either phone number or username
+    """
     def authenticate(self, request, username=None, password=None):
         if username.isdigit():
             kwargs = {'mobile': username}

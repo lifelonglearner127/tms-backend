@@ -6,13 +6,17 @@ from ..core.validations import validate_mobile
 
 
 class AdminManager(models.Manager):
-
+    """
+    Admin Model Manager
+    """
     def get_queryset(self):
         return super().get_queryset().filter(role=constants.USER_ROLE_ADMIN)
 
 
 class StaffManager(models.Manager):
-
+    """
+    Staff Model Manager
+    """
     def get_queryset(self):
         return super().get_queryset().filter(
             role__in=[constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
@@ -20,24 +24,33 @@ class StaffManager(models.Manager):
 
 
 class DriverManager(models.Manager):
-
+    """
+    Driver Model Manager
+    """
     def get_queryset(self):
         return super().get_queryset().filter(role=constants.USER_ROLE_DRIVER)
 
 
 class EscortManager(models.Manager):
-
+    """
+    Escort Model Manager
+    """
     def get_queryset(self):
         return super().get_queryset().filter(role=constants.USER_ROLE_ESCORT)
 
 
 class CustomerManager(models.Manager):
-
+    """
+    Customer Model Manager
+    """
     def get_queryset(self):
         return super().get_queryset().filter(role=constants.USER_ROLE_CUSTOMER)
 
 
 class UserManager(BaseUserManager):
+    """
+    Default User Model Manager
+    """
     def create_user(self, username, password=None, **extra_fields):
         if not username:
             raise ValueError('Users must have an username')
@@ -60,12 +73,14 @@ class UserManager(BaseUserManager):
             **extra_fields
         )
 
-        CompanyStaffProfile.objects.create(user=user)
+        StaffProfile.objects.create(user=user)
         return user
 
 
 class User(AbstractBaseUser):
-
+    """
+    User model
+    """
     username = models.CharField(
         max_length=100,
         unique=True
@@ -137,8 +152,10 @@ class User(AbstractBaseUser):
             [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
 
 
-class CompanyStaffProfile(models.Model):
-
+class StaffProfile(models.Model):
+    """
+    Company Staff Profile Model
+    """
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE
@@ -166,7 +183,9 @@ class CompanyStaffProfile(models.Model):
 
 
 class CustomerProfile(models.Model):
-
+    """
+    Customer Profile Model
+    """
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE
@@ -185,7 +204,8 @@ class CustomerProfile(models.Model):
     )
 
     associated = models.ForeignKey(
-        CompanyStaffProfile,
+        User,
+        related_name='associated',
         on_delete=models.SET_NULL,
         null=True
     )

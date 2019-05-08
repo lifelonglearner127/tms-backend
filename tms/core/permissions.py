@@ -3,6 +3,9 @@ from .constants import USER_ROLE_STAFF, USER_ROLE_ADMIN
 
 
 class IsAccountStaffOrReadOnly(permissions.BasePermission):
+    """
+    Permission to only allow admin and staff roles
+    """
     def has_permission(self, request, view):
         return request.user.is_authenticated
 

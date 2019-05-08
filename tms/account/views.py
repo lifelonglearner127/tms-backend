@@ -14,8 +14,15 @@ def jwt_response_payload_handler(token, user=None, request=None):
 
 
 class UserViewSet(StaffViewSet):
+
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
+
+
+class StaffProfileViewSet(StaffViewSet):
+
+    queryset = m.StaffProfile.objects.all()
+    serializer_class = s.StaffProfileSerializer
 
 
 class CustomerViewSet(StaffViewSet):

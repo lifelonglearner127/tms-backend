@@ -9,11 +9,17 @@ class LargeResultsSetPagination(PageNumberPagination):
 
 
 class StandardResultsSetPagination(PageNumberPagination):
+    """
+    Used as a standard pagination in this project
+    """
     page_size = 10
     page_size_query_param = 'per_page'
     max_page_size = 50
 
     def get_paginated_response(self, data):
+        """
+        Customize pagination response style in order to work with vuetable
+        """
         per_page = self.page.paginator.per_page
         total = self.page.paginator.count
         page_number = int(

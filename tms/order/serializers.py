@@ -13,7 +13,9 @@ from ..account.models import User
 
 
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for unloading stations selected for product delivery
+    """
     unloading_station = ShortUnLoadingStationSerializer(
         read_only=True
     )
@@ -26,7 +28,9 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
 
 
 class OrderProductSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for ordred products
+    """
     unloading_stations = OrderProductDeliverSerializer(
         source='orderproductdeliver_set', many=True, read_only=True
     )
@@ -41,7 +45,9 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-
+    """
+    Order serializer
+    """
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )

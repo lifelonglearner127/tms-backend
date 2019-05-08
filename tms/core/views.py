@@ -20,7 +20,9 @@ class StaffAPIView(APIView):
 
 
 class ChoicesView(StaffAPIView):
-
+    """
+    APIView for returning backend contant choices
+    """
     static_choices = ()
 
     def get(self, request):

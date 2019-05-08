@@ -1,19 +1,12 @@
 from rest_framework import serializers
 
-from .models import Vehicle
-
-
-class ShortVehicleSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Vehicle
-        fields = (
-            'value', 'text'
-        )
+from . import models as m
 
 
 class VehicleSerializer(serializers.ModelSerializer):
-
+    """
+    Vehicle serializer
+    """
     class Meta:
-        model = Vehicle
+        model = m.Vehicle
         fields = '__all__'

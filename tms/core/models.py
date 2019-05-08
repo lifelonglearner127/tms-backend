@@ -2,7 +2,9 @@ from django.db import models
 
 
 class CreatedTimeModel(models.Model):
-
+    """
+    Used as base class for models needing create time
+    """
     created = models.DateTimeField(
         auto_now_add=True
     )
@@ -13,7 +15,9 @@ class CreatedTimeModel(models.Model):
 
 
 class TimeStampedModel(models.Model):
-
+    """
+    Used as base class for models needing timestamp
+    """
     created = models.DateTimeField(
         auto_now_add=True
     )
@@ -28,7 +32,9 @@ class TimeStampedModel(models.Model):
 
 
 class BasicContactModel(TimeStampedModel):
-
+    """
+    Used as base class for models needing basic contact info
+    """
     name = models.CharField(
         max_length=100
     )

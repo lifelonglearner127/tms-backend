@@ -1,14 +1,12 @@
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
+from rest_framework import viewsets
 
-from ..core import constants
-from .models import Job
-from .serializers import JobSerializer
+from . import models as m
+from . import serializers as s
 
 
-class JobViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
-
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
+class JobViewSet(viewsets.ModelViewSet):
+    """
+    Job Viewset
+    """
+    queryset = m.Job.objects.all()
+    serializer_class = s.JobSerializer

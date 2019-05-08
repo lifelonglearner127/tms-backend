@@ -8,7 +8,9 @@ from .serializers import OrderSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-
+    """
+    Order Viewset
+    """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAccountStaffOrReadOnly]

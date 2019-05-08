@@ -1,13 +1,15 @@
 from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
+
+from . import models as m
 from ..core import constants
-from .models import User, CompanyStaffProfile, CustomerProfile
 
 
 class ShortUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = m.User
         fields = (
             'id', 'name', 'mobile'
         )
@@ -23,7 +25,7 @@ class ShortUserSerializer(serializers.ModelSerializer):
 class AuthSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = m.User
         fields = (
             'id', 'username', 'role'
         )
@@ -32,37 +34,35 @@ class AuthSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = m.User
         fields = '__all__'
 
 
-class CompanyStaffSerializer(serializers.ModelSerializer):
+class StaffProfileSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
 
     class Meta:
-        model = CompanyStaffProfile
-        fields = (
-            'user', 'birthday', 'spouse_name', 'spouse_number'
-        )
+        model = m.StaffProfile
+        fields = '__all__'
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_data)
-        company_staff = CustomerProfile.objects.create(
+        user = m.User.objects.create_user(**user_data)
+        profile = m.StaffProfile.objects.create(
             user=user,
             **validated_data
         )
-        return company_staff
+        return profile
 
 
 class CustomerSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
-    associated = CompanyStaffSerializer(read_only=True)
+    associated = UserSerializer(read_only=True)
 
     class Meta:
-        model = CustomerProfile
+        model = m.CustomerProfile
         fields = '__all__'
 
     def create(self, validated_data):
@@ -75,10 +75,10 @@ class CustomerSerializer(serializers.ModelSerializer):
             'name': user_context.get('name'),
             'role': constants.USER_ROLE_CUSTOMER
         }
-        user = User.objects.create_user(**user_data)
-        associated = get_object_or_404(CompanyStaffProfile, pk=associated_id)
+        user = m.User.objects.create_user(**user_data)
+        associated = get_object_or_404(m.User, pk=associated_id)
 
-        customer = CustomerProfile.objects.create(
+        customer = m.CustomerProfile.objects.create(
             user=user,
             associated=associated,
             **validated_data
@@ -101,7 +101,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         )
         instance.address = validated_data.get('address', instance.address)
         associated_id = self.context.get('associated')
-        associated = get_object_or_404(CompanyStaffProfile, pk=associated_id)
+        associated = get_object_or_404(m.CompanyStaffProfile, pk=associated_id)
         instance.associated = associated
         instance.save()
         return instance
