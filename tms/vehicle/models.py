@@ -33,6 +33,9 @@ class Vehicle(TimeStampedModel):
         decimal_places=1
     )
 
+    def __str__(self):
+        return self.no
+
 
 class VehicleDocument(models.Model):
     """

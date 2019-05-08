@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from .models import Vehicle, VehicleDocument
+from . import models as m
 
 
-@admin.register(Vehicle)
+@admin.register(m.Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(VehicleDocument)
+@admin.register(m.VehicleDocument)
 class VehicleDocumentAdmin(admin.ModelAdmin):
     pass
