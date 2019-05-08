@@ -1,17 +1,18 @@
 from django.contrib import admin
-from .models import Order, OrderProduct, OrderProductDeliver
+
+from . import models as m
 
 
-@admin.register(Order)
+@admin.register(m.Order)
 class OrderAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(OrderProduct)
+@admin.register(m.OrderProduct)
 class OrderProductAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(OrderProductDeliver)
+@admin.register(m.OrderProductDeliver)
 class OrderProductDeliverAdmin(admin.ModelAdmin):
     pass

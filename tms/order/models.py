@@ -6,6 +6,56 @@ from ..core.models import TimeStampedModel
 from ..info.models import LoadingStation, UnLoadingStation, Product
 
 
+class PendingOrderManager():
+    """
+    Pending Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.ORDER_STATUS_PENDING
+        )
+
+
+class InProgressOrderManager():
+    """
+    In Progress Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.ORDER_STATUS_INPROGRESS
+        )
+
+
+class CompleteOrderManager():
+    """
+    Complete Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.ORDER_STATUS_COMPLETE
+        )
+
+
+class InternalOrderManager():
+    """
+    Internal Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.ORDER_SOURCE_INTERNAL
+        )
+
+
+class CustomerOrderManager():
+    """
+    Customer Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.ORDER_SOURCE_CUSTOMER
+        )
+
+
 class Order(TimeStampedModel):
     """
     Order model
@@ -45,6 +95,28 @@ class Order(TimeStampedModel):
         Product,
         through='OrderProduct'
     )
+
+    source = models.CharField(
+        max_length=1,
+        choices=constants.ORDER_SOURCE,
+        default=constants.ORDER_SOURCE_INTERNAL
+    )
+
+    status = models.CharField(
+        max_length=1,
+        choices=constants.ORDER_STATUS,
+        default=constants.ORDER_STATUS_PENDING
+    )
+
+    objects = models.Manager()
+    pendings = PendingOrderManager()
+    inprogress = InProgressOrderManager()
+    completeds = CompleteOrderManager()
+    from_internal = InternalOrderManager()
+    from_customer = CustomerOrderManager()
+
+    def __str__(self):
+        return self.alias
 
 
 class OrderProduct(models.Model):
@@ -99,6 +171,12 @@ class OrderProduct(models.Model):
         through='OrderProductDeliver'
     )
 
+    def __str__(self):
+        return '{}-{}: {}{}'.format(
+            self.order.alias, self.product.name,
+            self.total_weight, self.weight_unit
+        )
+
 
 class OrderProductDeliver(models.Model):
     """
@@ -116,3 +194,9 @@ class OrderProductDeliver(models.Model):
     )
 
     weight = models.PositiveIntegerField()
+
+    def __str__(self):
+        return '{} in {}-{} to {}'.format(
+            self.weight, self.order_product.order.alias,
+            self.order_product.product.name, self.unloading_station.name
+        )

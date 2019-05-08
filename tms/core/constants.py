@@ -77,6 +77,16 @@ ORDER_STATUS = (
 )
 
 
+# Order app - Order source constants
+# ----------------------------------------------------------------------------
+ORDER_SOURCE_INTERNAL = 'I'
+ORDER_SOURCE_CUSTOMER = 'C'
+ORDER_SOURCE = (
+    (ORDER_SOURCE_INTERNAL, 'From Staff'),
+    (ORDER_SOURCE_CUSTOMER, 'From Customer')
+)
+
+
 # Metric Units constants
 # ----------------------------------------------------------------------------
 UNIT_WEIGHT_TON = 'T'
