@@ -2,12 +2,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-class LargeResultsSetPagination(PageNumberPagination):
-    page_size = 1000
-    page_size_query_param = 'per_page'
-    max_page_size = 10000
-
-
 class StandardResultsSetPagination(PageNumberPagination):
     """
     Used as a standard pagination in this project

@@ -65,6 +65,18 @@ JOB_STATUS = (
 )
 
 
+# Order app - Order status constants
+# ----------------------------------------------------------------------------
+ORDER_STATUS_PENDING = 'P'
+ORDER_STATUS_INPROGRESS = 'I'
+ORDER_STATUS_COMPLETE = 'C'
+ORDER_STATUS = (
+    (ORDER_STATUS_PENDING, 'Pending'),
+    (ORDER_STATUS_INPROGRESS, 'In Progress'),
+    (ORDER_STATUS_COMPLETE, 'Complete')
+)
+
+
 # Metric Units constants
 # ----------------------------------------------------------------------------
 UNIT_WEIGHT_TON = 'T'

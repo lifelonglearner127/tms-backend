@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .permissions import IsAccountStaffOrReadOnly
+from .permissions import IsStaffUser
 from .serializers import ChoiceSerializer
 
 
@@ -9,14 +9,14 @@ class StaffViewSet(viewsets.ModelViewSet):
     """
     Vieweset only allowed for admin or staff permission
     """
-    permission_classes = [IsAccountStaffOrReadOnly]
+    permission_classes = [IsStaffUser]
 
 
 class StaffAPIView(APIView):
     """
     APIView only allowed for admin or staff permission
     """
-    permission_classes = [IsAccountStaffOrReadOnly]
+    permission_classes = [IsStaffUser]
 
 
 class ChoicesView(StaffAPIView):

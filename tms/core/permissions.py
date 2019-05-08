@@ -2,7 +2,7 @@ from rest_framework import permissions
 from .constants import USER_ROLE_STAFF, USER_ROLE_ADMIN
 
 
-class IsAccountStaffOrReadOnly(permissions.BasePermission):
+class IsStaffUser(permissions.BasePermission):
     """
     Permission to only allow admin and staff roles
     """
