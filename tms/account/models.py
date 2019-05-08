@@ -124,6 +124,11 @@ class User(AbstractBaseUser):
         default=constants.USER_ROLE_STAFF
     )
 
+    @property
+    def is_staff(self):
+        return self.role in \
+            [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
+
     objects = UserManager()
     admins = AdminManager()
     staffs = StaffManager()
@@ -133,6 +138,9 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.username
 
     def has_perm(self, perm, obj=None):
         if self.is_active and self.role == constants.USER_ROLE_ADMIN:
@@ -145,11 +153,6 @@ class User(AbstractBaseUser):
             return True
 
         return False
-
-    @property
-    def is_staff(self):
-        return self.role in \
-            [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
 
 
 class StaffProfile(models.Model):

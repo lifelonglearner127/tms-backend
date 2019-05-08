@@ -1,13 +1,12 @@
-from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
 from . import models as m
-from ..core import constants
 
 
 class ShortUserSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for short data of User
+    """
     class Meta:
         model = m.User
         fields = (
@@ -23,7 +22,9 @@ class ShortUserSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for auth data of user
+    """
     class Meta:
         model = m.User
         fields = (
@@ -32,14 +33,18 @@ class AuthSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for User
+    """
     class Meta:
         model = m.User
         fields = '__all__'
 
 
 class StaffProfileSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for StaffProfile
+    """
     user = UserSerializer(read_only=True)
 
     class Meta:
@@ -47,7 +52,13 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        # get user data and create
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+
         user = m.User.objects.create_user(**user_data)
         profile = m.StaffProfile.objects.create(
             user=user,
@@ -55,9 +66,27 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         )
         return profile
 
+    def update(self, instance, validated_data):
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+        for (key, value) in user_data.items():
+            setattr(instance.user, key, value)
+        instance.user.save()
 
-class CustomerSerializer(serializers.ModelSerializer):
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
 
+        return instance
+
+
+class CustomerProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Customer
+    """
     user = UserSerializer(read_only=True)
     associated = UserSerializer(read_only=True)
 
@@ -66,42 +95,68 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        user_context = self.context.get('user')
-        associated_id = self.context.get('associated')
-        user_data = {
-            'username': user_context.get('username'),
-            'password': user_context.get('password'),
-            'mobile': user_context.get('mobile'),
-            'name': user_context.get('name'),
-            'role': constants.USER_ROLE_CUSTOMER
-        }
-        user = m.User.objects.create_user(**user_data)
-        associated = get_object_or_404(m.User, pk=associated_id)
+        # get user data and create one
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
 
-        customer = m.CustomerProfile.objects.create(
+        user = m.User.objects.create_user(**user_data)
+
+        # get associated data
+        associated_data = self.context.get('associated', None)
+        if associated_data is None:
+            raise serializers.ValidationError(
+                'Associated data is not provided'
+            )
+
+        associated_id = associated_data.get('id', None)
+        try:
+            associated = m.User.objects.get(pk=associated_id)
+        except m.User.objects.DoesNotExist:
+            raise serializers.ValidationError(
+                'Such associated user does not exist'
+            )
+
+        return m.CustomerProfile.objects.create(
             user=user,
             associated=associated,
             **validated_data
         )
-        return customer
 
     def update(self, instance, validated_data):
+        # get user data and update
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
         user = instance.user
-        user_context = self.context.get('user')
-
-        user.username = user_context.get('username', user.username)
-        user.mobile = user_context.get('mobile', user.mobile)
-        user.name = user_context.get('name', user.name)
-        user.set_password(user_context.get('password', user.password))
+        user.username = user_data.get('username', user.username)
+        user.mobile = user_data.get('mobile', user.mobile)
+        user.name = user_data.get('name', user.name)
+        user.set_password(user_data.get('password', user.password))
         user.save()
 
-        instance.good = validated_data.get('good', instance.good)
-        instance.payment_unit = validated_data.get(
-            'payment_unit', instance.payment_unit
-        )
-        instance.address = validated_data.get('address', instance.address)
-        associated_id = self.context.get('associated')
-        associated = get_object_or_404(m.CompanyStaffProfile, pk=associated_id)
-        instance.associated = associated
+        # get associated data
+        associated_data = self.context.get('associated', None)
+        if associated_data is None:
+            raise serializers.ValidationError(
+                'Associated data is not provided'
+            )
+
+        associated_id = associated_data.get('id', None)
+        try:
+            associated = m.User.objects.get(pk=associated_id)
+            instance.associated = associated
+        except m.User.objects.DoesNotExist:
+            raise serializers.ValidationError(
+                'Such associated user does not exist'
+            )
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
         instance.save()
         return instance

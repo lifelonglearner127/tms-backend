@@ -11,7 +11,7 @@ router.register(
     r'profile', v.StaffProfileViewSet, base_name='profile'
 )
 router.register(
-    r'customer', v.CustomerViewSet, base_name='customer'
+    r'customer', v.CustomerProfileViewSet, base_name='customer'
 )
 
 urlpatterns = [

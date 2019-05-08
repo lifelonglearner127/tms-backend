@@ -14,21 +14,65 @@ def jwt_response_payload_handler(token, user=None, request=None):
 
 
 class UserViewSet(StaffViewSet):
-
+    """
+    Viewset for User
+    """
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
 
 
 class StaffProfileViewSet(StaffViewSet):
-
+    """
+    Viewset for Staff
+    """
     queryset = m.StaffProfile.objects.all()
     serializer_class = s.StaffProfileSerializer
 
+    def create(self, request):
+        context = {
+            'user': request.data.pop('user')
+        }
 
-class CustomerViewSet(StaffViewSet):
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
 
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+        context = {
+            'user': request.data.pop('user')
+        }
+
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class CustomerProfileViewSet(StaffViewSet):
+    """
+    Viewset for Customer
+    """
     queryset = m.CustomerProfile.objects.all()
-    serializer_class = s.CustomerSerializer
+    serializer_class = s.CustomerProfileSerializer
 
     def create(self, request):
         context = {
@@ -54,12 +98,14 @@ class CustomerViewSet(StaffViewSet):
             'user': request.data.pop('user'),
             'associated': request.data.pop('associated')
         }
+
         serializer = self.serializer_class(
             serializer_instance,
             data=request.data,
             context=context,
             partial=True
         )
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
