@@ -1,29 +1,28 @@
 from django.contrib import admin
-from .models import (
-    Product, LoadingStation, UnLoadingStation, QualityStation, OilStation
-)
+
+from . import models as m
 
 
-@admin.register(Product)
+@admin.register(m.Product)
 class ProductAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(LoadingStation)
+@admin.register(m.LoadingStation)
 class LoadingStationAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(UnLoadingStation)
+@admin.register(m.UnLoadingStation)
 class UnLoadingStationAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(QualityStation)
+@admin.register(m.QualityStation)
 class QualityStationAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(OilStation)
+@admin.register(m.OilStation)
 class OilStationAdmin(admin.ModelAdmin):
     pass

@@ -130,5 +130,7 @@ class ShortOilStationAPIView(ShortAPIView):
 
 
 class ProductCategoriesView(ChoicesView):
-
+    """
+    APIView for returning product categories
+    """
     static_choices = PRODUCT_TYPE

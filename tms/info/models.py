@@ -5,7 +5,9 @@ from ..core.models import TimeStampedModel, BasicContactModel
 
 
 class Product(TimeStampedModel):
-
+    """
+    Product model
+    """
     name = models.CharField(
         max_length=100
     )
@@ -27,9 +29,14 @@ class Product(TimeStampedModel):
 
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class Station(BasicContactModel):
-
+    """
+    Station model, used as base class
+    """
     centroid = models.CharField(
         max_length=10,
         null=True,
@@ -68,7 +75,9 @@ class Station(BasicContactModel):
 
 
 class LoadStation(Station):
-
+    """
+    LoadStation model, used as base class
+    """
     product = models.ForeignKey(
         Product,
         on_delete=models.SET_NULL,
@@ -80,16 +89,32 @@ class LoadStation(Station):
 
 
 class LoadingStation(LoadStation):
-    pass
+    """
+    LoadingStation model
+    """
+    def __str__(self):
+        return self.name
 
 
 class UnLoadingStation(LoadStation):
-    pass
+    """
+    UnLoadingStation model
+    """
+    def __str__(self):
+        return self.name
 
 
 class QualityStation(Station):
-    pass
+    """
+    QualityStation model
+    """
+    def __str__(self):
+        return self.name
 
 
 class OilStation(Station):
-    pass
+    """
+    OilStation model
+    """
+    def __str__(self):
+        return self.name
