@@ -32,6 +32,17 @@ class AuthSerializer(serializers.ModelSerializer):
         )
 
 
+class MainUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User's main data
+    """
+    class Meta:
+        model = m.User
+        fields =(
+            'id', 'username', 'mobile', 'name', 'role', 'password'
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User
@@ -45,7 +56,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for StaffProfile
     """
-    user = UserSerializer(read_only=True)
+    user = MainUserSerializer(read_only=True)
 
     class Meta:
         model = m.StaffProfile
@@ -58,7 +69,6 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'User data is not provided'
             )
-
         user = m.User.objects.create_user(**user_data)
         profile = m.StaffProfile.objects.create(
             user=user,
@@ -72,6 +82,10 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'User data is not provided'
             )
+        password = user_data.pop('password', None)
+        if password is not None:
+            instance.user.set_password(password)
+
         for (key, value) in user_data.items():
             setattr(instance.user, key, value)
         instance.user.save()
@@ -87,8 +101,8 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for Customer
     """
-    user = UserSerializer(read_only=True)
-    associated = UserSerializer(read_only=True)
+    user = MainUserSerializer(read_only=True)
+    associated = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.CustomerProfile

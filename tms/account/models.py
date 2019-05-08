@@ -164,7 +164,19 @@ class StaffProfile(models.Model):
         on_delete=models.CASCADE
     )
 
+    id_card = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
     birthday = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    emergency_number = models.CharField(
+        max_length=100,
         null=True,
         blank=True
     )
@@ -176,6 +188,24 @@ class StaffProfile(models.Model):
     )
 
     spouse_number = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    parent_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    parent_number = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    address = models.CharField(
         max_length=100,
         null=True,
         blank=True
