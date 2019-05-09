@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants
 
 
 class ShortUserSerializer(serializers.ModelSerializer):
@@ -115,7 +116,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'User data is not provided'
             )
-
+        user_data.setdefault('role', constants.USER_ROLE_CUSTOMER)
         user = m.User.objects.create_user(**user_data)
 
         # get associated data

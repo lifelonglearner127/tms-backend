@@ -111,6 +111,10 @@ class OrderSerializer(serializers.ModelSerializer):
         for product_deliver in ordered_products_delivers:
             # get ordered details of each products
             product_data = product_deliver.pop('product', None)
+            unloading_stations_delivers = product_deliver.pop(
+                'unloading_stations', None
+            )
+
             if product_data is None:
                 raise serializers.ValidationError(
                     'Ordered Product is not provided'
@@ -129,9 +133,6 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
             # get unloading stations of each ordered products
-            unloading_stations_delivers = product_deliver.pop(
-                'unloading_stations', None
-            )
             if unloading_stations_delivers is None:
                 raise serializers.ValidationError(
                     'Unloading station is not provided'
@@ -221,6 +222,9 @@ class OrderSerializer(serializers.ModelSerializer):
         for product_deliver in ordered_products_delivers:
             # get ordered details of each products
             product_data = product_deliver.pop('product', None)
+            unloading_stations_delivers = product_deliver.pop(
+                'unloading_stations', None
+            )
             if product_data is None:
                 raise serializers.ValidationError(
                     'Ordered Product is not provided'
@@ -239,9 +243,6 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
             # get unloading stations of each ordered products
-            unloading_stations_delivers = product_deliver.pop(
-                'unloading_stations', None
-            )
             if unloading_stations_delivers is None:
                 raise serializers.ValidationError(
                     'Unloading station is not provided'
