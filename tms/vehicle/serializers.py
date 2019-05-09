@@ -10,3 +10,10 @@ class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Vehicle
         fields = '__all__'
+
+
+class VehicleDocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.VehicleDocument
+        fields = '__all__'

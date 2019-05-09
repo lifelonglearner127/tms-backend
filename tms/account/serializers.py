@@ -38,7 +38,7 @@ class MainUserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = m.User
-        fields =(
+        fields = (
             'id', 'username', 'mobile', 'name', 'role', 'password'
         )
 

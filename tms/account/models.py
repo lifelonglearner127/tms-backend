@@ -221,7 +221,7 @@ class CustomerProfile(models.Model):
     Customer Profile Model
     """
     user = models.OneToOneField(
-        User,   
+        User,
         on_delete=models.CASCADE
     )
 

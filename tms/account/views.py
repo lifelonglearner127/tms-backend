@@ -128,9 +128,10 @@ class StaffDocumentViewSet(StaffViewSet):
         )
 
     def create(self, request, staff_pk=None):
-        request.data.setdefault('staff', staff_pk)
+        data = request.data.copy()
+        data.setdefault('staff', staff_pk)
 
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -139,12 +140,13 @@ class StaffDocumentViewSet(StaffViewSet):
         )
 
     def update(self, request, staff_pk=None, pk=None):
-        request.data.setdefault('staff', staff_pk)
+        data = request.data.copy()
+        data.setdefault('staff', staff_pk)
 
         instance = self.get_object()
         serializer = self.serializer_class(
             instance,
-            data=request.data,
+            data=data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)

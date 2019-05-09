@@ -47,5 +47,26 @@ class VehicleDocument(models.Model):
     )
 
     code = models.CharField(
-        max_length=100
+        max_length=100,
+        null=True,
+        blank=True
     )
+
+    document_type = models.CharField(
+        max_length=1,
+        choices=constants.VEHICLE_DOCUMENT_TYPE,
+        default=constants.VEHICLE_DOCUMENT_TYPE_D1
+    )
+
+    authority = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    registered_on = models.DateField()
+
+    expires_on = models.DateField()
+
+    def __str__(self):
+        return '{}\'s {} document'.format(self.vehicle.no, self.code)
