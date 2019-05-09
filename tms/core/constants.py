@@ -53,6 +53,16 @@ USER_ROLE = (
 )
 
 
+# Account app - Account constants
+# ----------------------------------------------------------------------------
+USER_DOCUMENT_TYPE_D1 = '1'
+USER_DOCUMENT_TYPE_D2 = '2'
+USER_DOCUMENT_TYPE = (
+    (USER_DOCUMENT_TYPE_D1, 'D1'),
+    (USER_DOCUMENT_TYPE_D2, 'D2')
+)
+
+
 # Job app - Job status constants
 # ----------------------------------------------------------------------------
 JOB_STATUS_PENDING = 'P'

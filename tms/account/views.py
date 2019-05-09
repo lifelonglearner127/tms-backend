@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..core.views import StaffViewSet, ShortAPIView
+from ..core.constants import USER_DOCUMENT_TYPE
+from ..core.views import StaffViewSet, ShortAPIView, ChoicesView
 from . import models as m
 from . import serializers as s
 
@@ -115,6 +116,45 @@ class CustomerProfileViewSet(StaffViewSet):
         )
 
 
+class StaffDocumentViewSet(StaffViewSet):
+    """
+    Viewset for document
+    """
+    serializer_class = s.StaffDocumentSerializer
+
+    def get_queryset(self):
+        return m.StaffDocument.objects.filter(
+            staff__id=self.kwargs['staff_pk']
+        )
+
+    def create(self, request, staff_pk=None):
+        request.data.setdefault('staff', staff_pk)
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, staff_pk=None, pk=None):
+        request.data.setdefault('staff', staff_pk)
+
+        instance = self.get_object()
+        serializer = self.serializer_class(
+            instance,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data, status=status.HTTP_200_OK
+        )
+
+
 class ShortStaffAPIView(ShortAPIView):
     """
     View to list short data of customer profiles
@@ -133,3 +173,10 @@ class ShortCustomerAPIView(ShortAPIView):
 
     def get_queryset(self):
         return m.User.customers.all()
+
+
+class UserDocumentTypeAPIView(ChoicesView):
+    """
+    APIView for returning product categories
+    """
+    static_choices = USER_DOCUMENT_TYPE

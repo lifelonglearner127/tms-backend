@@ -161,6 +161,7 @@ class StaffProfile(models.Model):
     """
     user = models.OneToOneField(
         User,
+        related_name='profile',
         on_delete=models.CASCADE
     )
 
@@ -220,7 +221,7 @@ class CustomerProfile(models.Model):
     Customer Profile Model
     """
     user = models.OneToOneField(
-        User,
+        User,   
         on_delete=models.CASCADE
     )
 
@@ -251,3 +252,39 @@ class CustomerProfile(models.Model):
 
     def __str__(self):
         return '{} - {}\'s profile'.format(self.user.role, self.user.username)
+
+
+class StaffDocument(models.Model):
+    """
+    Staff Document Model
+    """
+    staff = models.ForeignKey(
+        StaffProfile,
+        related_name='documents',
+        on_delete=models.CASCADE
+    )
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    no = models.CharField(
+        max_length=100
+    )
+
+    document_type = models.CharField(
+        max_length=1,
+        choices=constants.USER_DOCUMENT_TYPE,
+        default=constants.USER_DOCUMENT_TYPE_D1
+    )
+
+    expires_on = models.DateField()
+
+    description = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return '{}\'s {} document' .format(self.staff.user.username, self.name)

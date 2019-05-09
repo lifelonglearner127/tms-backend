@@ -174,3 +174,12 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class StaffDocumentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for StaffDocument
+    """
+    class Meta:
+        model = m.StaffDocument
+        fields = '__all__'
