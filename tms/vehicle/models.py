@@ -1,7 +1,28 @@
 from django.db import models
+from django.db.models import Q
 
 from ..core import constants
 from ..core.models import TimeStampedModel
+
+
+class InProgressVehicle(models.Manager):
+    """
+    Manager for retrieving in progress vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            jobs__status=constants.JOB_STATUS_INPROGRESS
+        )
+
+
+class AvailableVehicle(models.Manager):
+    """
+    Manager for retrieving available vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            ~Q(jobs__status=constants.JOB_STATUS_INPROGRESS)
+        )
 
 
 class Vehicle(TimeStampedModel):
@@ -32,6 +53,10 @@ class Vehicle(TimeStampedModel):
         max_digits=5,
         decimal_places=1
     )
+
+    objects = models.Manager()
+    inprogress = InProgressVehicle()
+    availables = AvailableVehicle()
 
     def __str__(self):
         return self.no

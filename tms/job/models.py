@@ -35,12 +35,13 @@ class Job(CreatedTimeModel):
 
     mission = models.ForeignKey(
         OrderProductDeliver,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
 
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.SET_NULL,
+        related_name='jobs',
         null=True,
         blank=True
     )
