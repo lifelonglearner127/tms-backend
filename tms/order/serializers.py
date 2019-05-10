@@ -21,7 +21,7 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderProductDeliver
         fields = (
-            'weight', 'unloading_station',
+            'id', 'weight', 'unloading_station',
         )
 
 
@@ -38,7 +38,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderProduct
         fields = (
-            'product', 'total_weight', 'unloading_stations'
+            'id', 'product', 'total_weight', 'unloading_stations'
         )
 
 
@@ -275,3 +275,10 @@ class OrderSerializer(serializers.ModelSerializer):
                 )
 
         return instance
+
+
+class JobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Job
+        fields = '__all__'
