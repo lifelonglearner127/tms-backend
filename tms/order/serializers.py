@@ -6,8 +6,10 @@ from ..info.serializers import (
     ShortUnLoadingStationSerializer, ShortLoadingStationSerializer,
     ShortProductSerializer
 )
-from ..account.serializers import ShortUserSerializer
-from ..account.models import User
+from ..account.serializers import (
+    ShortCustomerProfileSerializer, ShortStaffProfileSerializer
+)
+from ..account.models import StaffProfile, CustomerProfile
 
 
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
@@ -51,8 +53,8 @@ class OrderSerializer(serializers.ModelSerializer):
     )
 
     loading_station = ShortLoadingStationSerializer(read_only=True)
-    assignee = ShortUserSerializer(read_only=True)
-    customer = ShortUserSerializer(read_only=True)
+    assignee = ShortStaffProfileSerializer(read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
 
     class Meta:
         model = m.Order
@@ -66,8 +68,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         customer_id = customer_data.get('id', None)
         try:
-            customer = User.objects.get(pk=customer_id)
-        except User.DoesNotExist:
+            customer = CustomerProfile.objects.get(pk=customer_id)
+        except CustomerProfile.DoesNotExist:
             raise serializers.ValidationError('Such customer does not exist')
 
         # get assignee
@@ -77,8 +79,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         assignee_id = assignee_data.get('id', None)
         try:
-            assignee = User.objects.get(pk=assignee_id)
-        except User.DoesNotExist:
+            assignee = StaffProfile.objects.get(pk=assignee_id)
+        except StaffProfile.DoesNotExist:
             raise serializers.ValidationError('Such staff does not exist')
 
         # get loading station
@@ -174,8 +176,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         customer_id = customer_data.get('id', None)
         try:
-            customer = User.objects.get(pk=customer_id)
-        except User.DoesNotExist:
+            customer = CustomerProfile.objects.get(pk=customer_id)
+        except CustomerProfile.DoesNotExist:
             raise serializers.ValidationError('Such customer does not exist')
 
         # get assignee
@@ -185,8 +187,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         assignee_id = assignee_data.get('id', None)
         try:
-            assignee = User.objects.get(pk=assignee_id)
-        except User.DoesNotExist:
+            assignee = StaffProfile.objects.get(pk=assignee_id)
+        except StaffProfile.DoesNotExist:
             raise serializers.ValidationError('Such staff does not exist')
 
         # get loading station

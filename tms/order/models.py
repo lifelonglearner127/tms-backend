@@ -1,10 +1,10 @@
 from django.db import models
-from django.conf import settings
 
 from ..core import constants
 from ..core.models import TimeStampedModel, CreatedTimeModel
 from ..info.models import LoadingStation, UnLoadingStation, Product
 from ..vehicle.models import Vehicle
+from ..account.models import StaffProfile, CustomerProfile
 
 
 class PendingOrderManager():
@@ -66,16 +66,14 @@ class Order(TimeStampedModel):
     )
 
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        StaffProfile,
         on_delete=models.SET_NULL,
-        related_name="assigned_order",
         null=True
     )
 
     customer = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True
+        CustomerProfile,
+        on_delete=models.CASCADE,
     )
 
     loading_station = models.ForeignKey(
@@ -92,11 +90,6 @@ class Order(TimeStampedModel):
         max_length=100
     )
 
-    products = models.ManyToManyField(
-        Product,
-        through='OrderProduct'
-    )
-
     source = models.CharField(
         max_length=1,
         choices=constants.ORDER_SOURCE,
@@ -107,6 +100,11 @@ class Order(TimeStampedModel):
         max_length=1,
         choices=constants.ORDER_STATUS,
         default=constants.ORDER_STATUS_PENDING
+    )
+
+    products = models.ManyToManyField(
+        Product,
+        through='OrderProduct'
     )
 
     objects = models.Manager()
@@ -251,7 +249,7 @@ class Job(CreatedTimeModel):
     )
 
     driver = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        StaffProfile,
         on_delete=models.SET_NULL,
         related_name='jobs_as_primary',
         null=True,
@@ -259,7 +257,7 @@ class Job(CreatedTimeModel):
     )
 
     escort = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        StaffProfile,
         on_delete=models.SET_NULL,
         related_name='jobs_as_escort',
         null=True,
