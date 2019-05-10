@@ -129,8 +129,7 @@ class OrderProduct(models.Model):
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.SET_NULL,
-        null=True
+        on_delete=models.CASCADE
     )
 
     total_weight = models.PositiveIntegerField()
@@ -188,8 +187,7 @@ class OrderProductDeliver(models.Model):
 
     unloading_station = models.ForeignKey(
         UnLoadingStation,
-        on_delete=models.SET_NULL,
-        null=True
+        on_delete=models.CASCADE
     )
 
     weight = models.PositiveIntegerField()
@@ -242,26 +240,20 @@ class Job(CreatedTimeModel):
 
     vehicle = models.ForeignKey(
         Vehicle,
-        on_delete=models.SET_NULL,
-        related_name='jobs',
-        null=True,
-        blank=True
+        on_delete=models.CASCADE,
+        related_name='jobs'
     )
 
     driver = models.ForeignKey(
         StaffProfile,
-        on_delete=models.SET_NULL,
-        related_name='jobs_as_primary',
-        null=True,
-        blank=True
+        on_delete=models.CASCADE,
+        related_name='jobs_as_primary'
     )
 
     escort = models.ForeignKey(
         StaffProfile,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='jobs_as_escort',
-        null=True,
-        blank=True
     )
 
     status = models.CharField(

@@ -155,6 +155,26 @@ class User(AbstractBaseUser):
         return False
 
 
+class StaffDriverManager(models.Manager):
+    """
+    Driver staff manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user__role=constants.USER_ROLE_DRIVER
+        )
+
+
+class StaffEscortManager(models.Manager):
+    """
+    Escort staff manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user__role=constants.USER_ROLE_ESCORT
+        )
+
+
 class StaffProfile(models.Model):
     """
     Company Staff Profile Model
@@ -211,6 +231,10 @@ class StaffProfile(models.Model):
         null=True,
         blank=True
     )
+
+    objects = models.Manager()
+    drivers = StaffDriverManager()
+    escorts = StaffEscortManager()
 
     def __str__(self):
         return '{}\'s profile'.format(self.user.username)

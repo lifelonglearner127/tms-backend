@@ -3,6 +3,15 @@ from rest_framework import serializers
 from . import models as m
 
 
+class ShortVehicleSerializer(serializers.ModelSerializer):
+    """
+    Serializer for short data of vehicle
+    """
+    class Meta:
+        model = m.Vehicle
+        fields = '__all__'
+
+
 class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer

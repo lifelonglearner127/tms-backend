@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from ..core.views import StaffViewSet, ChoicesView
 from ..core.constants import VEHICLE_MODEL_TYPE, VEHICLE_BRAND
@@ -13,6 +14,18 @@ class VehicleViewSet(StaffViewSet):
     """
     queryset = m.Vehicle.objects.all()
     serializer_class = s.VehicleSerializer
+
+    @action(detail=False)
+    def short(self, request):
+        serializer = s.ShortVehicleSerializer(
+            m.Vehicle.objects.all(),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class VehicleDocumentViewSet(StaffViewSet):

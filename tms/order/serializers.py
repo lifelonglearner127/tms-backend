@@ -12,6 +12,13 @@ from ..account.serializers import (
 from ..account.models import StaffProfile, CustomerProfile
 
 
+class JobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Job
+        fields = '__all__'
+
+
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
     """
     Serializer for unloading stations selected for product delivery
@@ -277,10 +284,3 @@ class OrderSerializer(serializers.ModelSerializer):
                 )
 
         return instance
-
-
-class JobSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Job
-        fields = '__all__'
