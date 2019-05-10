@@ -53,6 +53,24 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortStaffProfileSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='user.name')
+
+    class Meta:
+        model = m.StaffProfile
+        fields = (
+            'id', 'name'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.user.username
+
+        return ret
+
+
 class StaffProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for StaffProfile
@@ -98,12 +116,30 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ShortCustomerProfileSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='user.name')
+
+    class Meta:
+        model = m.CustomerProfile
+        fields = (
+            'id', 'name'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.user.username
+
+        return ret
+
+
 class CustomerProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for Customer
     """
     user = MainUserSerializer(read_only=True)
-    associated = ShortUserSerializer(read_only=True)
+    associated_with = ShortStaffProfileSerializer(read_only=True)
 
     class Meta:
         model = m.CustomerProfile
@@ -120,7 +156,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         user = m.User.objects.create_user(**user_data)
 
         # get associated data
-        associated_data = self.context.get('associated', None)
+        associated_data = self.context.get('associated_with', None)
         if associated_data is None:
             raise serializers.ValidationError(
                 'Associated data is not provided'
@@ -128,15 +164,15 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
         associated_id = associated_data.get('id', None)
         try:
-            associated = m.User.objects.get(pk=associated_id)
-        except m.User.objects.DoesNotExist:
+            associated = m.StaffProfile.objects.get(pk=associated_id)
+        except m.StaffProfile.objects.DoesNotExist:
             raise serializers.ValidationError(
                 'Such associated user does not exist'
             )
 
         return m.CustomerProfile.objects.create(
             user=user,
-            associated=associated,
+            associated_with=associated,
             **validated_data
         )
 
@@ -155,7 +191,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         user.save()
 
         # get associated data
-        associated_data = self.context.get('associated', None)
+        associated_data = self.context.get('associated_with', None)
         if associated_data is None:
             raise serializers.ValidationError(
                 'Associated data is not provided'
@@ -163,9 +199,9 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
         associated_id = associated_data.get('id', None)
         try:
-            associated = m.User.objects.get(pk=associated_id)
-            instance.associated = associated
-        except m.User.objects.DoesNotExist:
+            associated_with = m.StaffProfile.objects.get(pk=associated_id)
+            instance.associated_with = associated_with
+        except m.StaffProfile.objects.DoesNotExist:
             raise serializers.ValidationError(
                 'Such associated user does not exist'
             )

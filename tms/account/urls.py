@@ -27,7 +27,5 @@ staff_router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(staff_router.urls)),
-    url(r'^short/staff/$', v.ShortStaffAPIView.as_view()),
-    url(r'^short/customer/$', v.ShortCustomerAPIView.as_view()),
     url(r'^options/document-type/$', v.UserDocumentTypeAPIView.as_view())
 ]

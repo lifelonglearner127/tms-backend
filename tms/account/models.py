@@ -161,7 +161,7 @@ class StaffProfile(models.Model):
     """
     user = models.OneToOneField(
         User,
-        related_name='profile',
+        related_name='staff_profile',
         on_delete=models.CASCADE
     )
 
@@ -213,7 +213,7 @@ class StaffProfile(models.Model):
     )
 
     def __str__(self):
-        return '{} - {}\'s profile'.format(self.user.role, self.user.username)
+        return '{}\'s profile'.format(self.user.username)
 
 
 class CustomerProfile(models.Model):
@@ -222,6 +222,7 @@ class CustomerProfile(models.Model):
     """
     user = models.OneToOneField(
         User,
+        related_name='customer_profile',
         on_delete=models.CASCADE
     )
 
@@ -237,9 +238,9 @@ class CustomerProfile(models.Model):
         blank=True
     )
 
-    associated = models.ForeignKey(
-        User,
-        related_name='associated',
+    associated_with = models.ForeignKey(
+        StaffProfile,
+        related_name='in_charges',
         on_delete=models.SET_NULL,
         null=True
     )
@@ -251,7 +252,7 @@ class CustomerProfile(models.Model):
     )
 
     def __str__(self):
-        return '{} - {}\'s profile'.format(self.user.role, self.user.username)
+        return '{}\'s profile'.format(self.user.username)
 
 
 class StaffDocument(models.Model):

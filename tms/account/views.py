@@ -1,8 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from ..core.constants import USER_DOCUMENT_TYPE
-from ..core.views import StaffViewSet, ShortAPIView, ChoicesView
+from ..core.views import StaffViewSet, ChoicesView
 from . import models as m
 from . import serializers as s
 
@@ -67,6 +68,17 @@ class StaffProfileViewSet(StaffViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False)
+    def short(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            m.StaffProfile.objects.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class CustomerProfileViewSet(StaffViewSet):
     """
@@ -78,7 +90,7 @@ class CustomerProfileViewSet(StaffViewSet):
     def create(self, request):
         context = {
             'user': request.data.pop('user'),
-            'associated': request.data.pop('associated')
+            'associated_with': request.data.pop('associated_with')
         }
 
         serializer = self.serializer_class(
@@ -97,7 +109,7 @@ class CustomerProfileViewSet(StaffViewSet):
         serializer_instance = self.get_object()
         context = {
             'user': request.data.pop('user'),
-            'associated': request.data.pop('associated')
+            'associated_with': request.data.pop('associated_with')
         }
 
         serializer = self.serializer_class(
@@ -110,6 +122,17 @@ class CustomerProfileViewSet(StaffViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False)
+    def short(self, request):
+        serializer = s.ShortCustomerProfileSerializer(
+            m.CustomerProfile.objects.all(),
+            many=True
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -155,26 +178,6 @@ class StaffDocumentViewSet(StaffViewSet):
         return Response(
             serializer.data, status=status.HTTP_200_OK
         )
-
-
-class ShortStaffAPIView(ShortAPIView):
-    """
-    View to list short data of customer profiles
-    """
-    serializer_class = s.ShortUserSerializer
-
-    def get_queryset(self):
-        return m.User.staffs.all()
-
-
-class ShortCustomerAPIView(ShortAPIView):
-    """
-    View to list short data of customer profiles
-    """
-    serializer_class = s.ShortUserSerializer
-
-    def get_queryset(self):
-        return m.User.customers.all()
 
 
 class UserDocumentTypeAPIView(ChoicesView):
