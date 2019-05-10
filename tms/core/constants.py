@@ -71,19 +71,6 @@ USER_DOCUMENT_TYPE = (
 )
 
 
-# Job app - Job status constants
-# ----------------------------------------------------------------------------
-# job status choices
-JOB_STATUS_PENDING = 'P'
-JOB_STATUS_INPROGRESS = 'I'
-JOB_STATUS_COMPLETE = 'C'
-JOB_STATUS = (
-    (JOB_STATUS_PENDING, 'Pending'),
-    (JOB_STATUS_INPROGRESS, 'In Progress'),
-    (JOB_STATUS_COMPLETE, 'Complete')
-)
-
-
 # Order app - Order status constants
 # ----------------------------------------------------------------------------
 # order status choices
@@ -102,6 +89,16 @@ ORDER_SOURCE_CUSTOMER = 'C'
 ORDER_SOURCE = (
     (ORDER_SOURCE_INTERNAL, 'From Staff'),
     (ORDER_SOURCE_CUSTOMER, 'From Customer')
+)
+
+# job status choices
+JOB_STATUS_PENDING = 'P'
+JOB_STATUS_INPROGRESS = 'I'
+JOB_STATUS_COMPLETE = 'C'
+JOB_STATUS = (
+    (JOB_STATUS_PENDING, 'Pending'),
+    (JOB_STATUS_INPROGRESS, 'In Progress'),
+    (JOB_STATUS_COMPLETE, 'Complete')
 )
 
 

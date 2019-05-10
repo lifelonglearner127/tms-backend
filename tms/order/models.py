@@ -2,8 +2,9 @@ from django.db import models
 from django.conf import settings
 
 from ..core import constants
-from ..core.models import TimeStampedModel
+from ..core.models import TimeStampedModel, CreatedTimeModel
 from ..info.models import LoadingStation, UnLoadingStation, Product
+from ..vehicle.models import Vehicle
 
 
 class PendingOrderManager():
@@ -200,3 +201,88 @@ class OrderProductDeliver(models.Model):
             self.weight, self.order_product.order.alias,
             self.order_product.product.name, self.unloading_station.name
         )
+
+
+class PendingJobManager(models.Manager):
+    """
+    Pending Job Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.JOB_STATUS_PENDING
+        )
+
+
+class InProgressJobManager(models.Manager):
+    """
+    In Progress Job Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.JOB_STATUS_INPROGRESS
+        )
+
+
+class CompleteJobManager(models.Manager):
+    """
+    Complete Job Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=constants.JOB_STATUS_COMPLETE
+        )
+
+
+class Job(CreatedTimeModel):
+    """
+    Job model
+    """
+    mission = models.ForeignKey(
+        OrderProductDeliver,
+        on_delete=models.CASCADE,
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        related_name='jobs',
+        null=True,
+        blank=True
+    )
+
+    driver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='jobs_as_primary',
+        null=True,
+        blank=True
+    )
+
+    escort = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='jobs_as_escort',
+        null=True,
+        blank=True
+    )
+
+    status = models.CharField(
+        max_length=1,
+        choices=constants.JOB_STATUS,
+        default=constants.JOB_STATUS_PENDING
+    )
+
+    started_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    objects = models.Manager()
+    pendings = PendingJobManager()
+    inprogress = InProgressJobManager()
+    completeds = CompleteJobManager()
