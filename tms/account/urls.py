@@ -1,21 +1,23 @@
 from django.conf.urls import url, include
+from django.urls import path
+
 from rest_framework_nested import routers
 
 from .import views as v
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(
-    r'user', v.UserViewSet, base_name='user'
+    r'users', v.UserViewSet, base_name='user'
 )
 router.register(
-    r'customer', v.CustomerProfileViewSet, base_name='customer'
+    r'customers', v.CustomerProfileViewSet, base_name='customer'
 )
 router.register(
-    r'staff', v.StaffProfileViewSet, base_name='staff'
+    r'staffs', v.StaffProfileViewSet, base_name='staff'
 )
 staff_router = routers.NestedSimpleRouter(
     router,
-    r'staff',
+    r'staffs',
     lookup='staff'
 )
 staff_router.register(
@@ -27,5 +29,5 @@ staff_router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(staff_router.urls)),
-    url(r'^options/document-type/$', v.UserDocumentTypeAPIView.as_view())
+    path('options/document-type', v.UserDocumentTypeAPIView.as_view())
 ]

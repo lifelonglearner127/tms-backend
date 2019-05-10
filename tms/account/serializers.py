@@ -54,7 +54,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ShortStaffProfileSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for short data of staff profile
+    """
     name = serializers.CharField(source='user.name')
 
     class Meta:
@@ -117,7 +119,9 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
 
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for short data of customer profile
+    """
     name = serializers.CharField(source='user.name')
 
     class Meta:

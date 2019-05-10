@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
-from ..core.views import StaffViewSet, ShortAPIView, ChoicesView
+from ..core.views import StaffViewSet, ChoicesView
 from ..core.constants import PRODUCT_TYPE
 from . import models as m
 from . import serializers as s
@@ -13,6 +14,17 @@ class ProductViewSet(StaffViewSet):
     """
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
+
+    @action(detail=False)
+    def short(self, request):
+        serializer = s.ShortProductSerializer(
+            m.Product.objects.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class LoadStationViewSet(StaffViewSet):
@@ -56,6 +68,17 @@ class LoadStationViewSet(StaffViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False)
+    def short(self, request):
+        serializer = s.ShortLoadingStationSerializer(
+            m.LoadingStation.objects.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class LoadingStationViewSet(LoadStationViewSet):
     """
@@ -86,46 +109,6 @@ class OilStationViewSet(StaffViewSet):
     Viewset for Oil Station
     """
     queryset = m.OilStation.objects.all()
-    serializer_class = s.OilStationSerializer
-
-
-class ShortProductAPIView(ShortAPIView):
-    """
-    View to list short data of product
-    """
-    model_class = m.Product
-    serializer_class = s.ShortProductSerializer
-
-
-class ShortLoadingStationAPIView(ShortAPIView):
-    """
-    View to list short data of loading stations
-    """
-    model_class = m.LoadingStation
-    serializer_class = s.ShortLoadingStationSerializer
-
-
-class ShortUnLoadingStationAPIView(ShortAPIView):
-    """
-    View to list short data of unloading stations
-    """
-    model_class = m.UnLoadingStation
-    serializer_class = s.ShortUnLoadingStationSerializer
-
-
-class ShortQualityStationAPIView(ShortAPIView):
-    """
-    View to list short data of quality stations
-    """
-    model_class = m.QualityStation
-    serializer_class = s.QualityStationSerializer
-
-
-class ShortOilStationAPIView(ShortAPIView):
-    """
-    View to list short data of oil stations
-    """
-    model_class = m.OilStation
     serializer_class = s.OilStationSerializer
 
 

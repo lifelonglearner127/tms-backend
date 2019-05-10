@@ -1,30 +1,35 @@
 from django.conf.urls import url, include
+from django.urls import path
+
 from rest_framework.routers import DefaultRouter
 from .import views
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
-    r'products', views.ProductViewSet, base_name='product'
+    r'products', views.ProductViewSet, base_name='products'
 )
 router.register(
-    r'place/load', views.LoadingStationViewSet, base_name='loading'
+    r'loading-stations',
+    views.LoadingStationViewSet,
+    base_name='loading-stations'
 )
 router.register(
-    r'place/unload', views.UnLoadingStationViewSet, base_name='unloading'
+    r'unloading-stations',
+    views.UnLoadingStationViewSet,
+    base_name='unloading-stations'
 )
 router.register(
-    r'place/quality', views.QualityStationViewSet, base_name='quality'
+    r'quality-stations',
+    views.QualityStationViewSet,
+    base_name='quality-stations'
 )
 router.register(
-    r'place/oil', views.OilStationViewSet, base_name='oil'
+    r'oil-stations',
+    views.OilStationViewSet,
+    base_name='oil-stations'
 )
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^product-categories/$', views.ProductCategoriesView.as_view()),
-    url(r'^short/products/$', views.ShortProductAPIView.as_view()),
-    url(r'^short/loading/$', views.ShortLoadingStationAPIView.as_view()),
-    url(r'^short/unloading/$', views.ShortUnLoadingStationAPIView.as_view()),
-    url(r'^short/quality/$', views.ShortUnLoadingStationAPIView.as_view()),
-    url(r'^short/oil/$', views.ShortUnLoadingStationAPIView.as_view()),
+    path('options/product-categories', views.ProductCategoriesView.as_view()),
 ]
