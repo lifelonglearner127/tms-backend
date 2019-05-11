@@ -10,13 +10,21 @@ from ..account.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 )
 from ..account.models import StaffProfile, CustomerProfile
+from ..vehicle.models import Vehicle
+from ..vehicle.serializers import ShortVehicleSerializer
 
 
 class JobSerializer(serializers.ModelSerializer):
 
+    vehicle = ShortVehicleSerializer(read_only=True)
+    driver = ShortStaffProfileSerializer(read_only=True)
+    escort = ShortStaffProfileSerializer(read_only=True)
+
     class Meta:
         model = m.Job
-        fields = '__all__'
+        fields = (
+            'id', 'vehicle', 'driver', 'escort'
+        )
 
 
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
@@ -27,10 +35,14 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    jobs = JobSerializer(
+        source='job_set', many=True, read_only=True
+    )
+
     class Meta:
         model = m.OrderProductDeliver
         fields = (
-            'id', 'weight', 'unloading_station',
+            'id', 'weight', 'unloading_station', 'jobs'
         )
 
 
@@ -258,6 +270,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 )
 
             for unloading_station_deliver in unloading_stations_delivers:
+                jobs = unloading_station_deliver.pop('jobs', None)
                 # get unlaoding station
                 unloading_station_data = unloading_station_deliver.pop(
                     'unloading_station', None
@@ -277,10 +290,57 @@ class OrderSerializer(serializers.ModelSerializer):
                         'Such unloading station does not exist'
                     )
 
-                m.OrderProductDeliver.objects.create(
+                deliver = m.OrderProductDeliver.objects.create(
                     order_product=order_product,
                     unloading_station=unloading_station,
                     **unloading_station_deliver
                 )
+
+                for job in jobs:
+                    driver_data = job.get('driver', None)
+                    if driver_data is None:
+                        raise serializers.ValidationError(
+                            'driver is not provided'
+                        )
+                    try:
+                        driver_id = driver_data.get('id', None)
+                        driver = StaffProfile.drivers.get(pk=driver_id)
+                    except StaffProfile.DoesNotExist:
+                        raise serializers.ValidationError(
+                            'Such driver does not exist'
+                        )
+
+                    esocrt_data = job.get('escort', None)
+                    if esocrt_data is None:
+                        raise serializers.ValidationError(
+                            'driver is not provided'
+                        )
+                    try:
+                        escort_id = esocrt_data.get('id', None)
+                        escort = StaffProfile.escorts.get(pk=escort_id)
+                    except StaffProfile.DoesNotExist:
+                        raise serializers.ValidationError(
+                            'Such escort does not exist'
+                        )
+
+                    vehicle_data = job.get('vehicle', None)
+                    if vehicle_data is None:
+                        raise serializers.ValidationError(
+                            'vehhicle is not provided'
+                        )
+                    try:
+                        vehicle_id = vehicle_data.get('id', None)
+                        vehicle = Vehicle.objects.get(pk=vehicle_id)
+                    except StaffProfile.DoesNotExist:
+                        raise serializers.ValidationError(
+                            'Such driver does not exist'
+                        )
+
+                    m.Job.objects.create(
+                        mission=deliver,
+                        vehicle=vehicle,
+                        driver=driver,
+                        escort=escort
+                    )
 
         return instance

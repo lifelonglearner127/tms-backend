@@ -192,6 +192,11 @@ class OrderProductDeliver(models.Model):
 
     weight = models.PositiveIntegerField()
 
+    jobs = models.ManyToManyField(
+        Vehicle,
+        through='Job'
+    )
+
     def __str__(self):
         return '{} in {}-{} to {}'.format(
             self.weight, self.order_product.order.alias,
@@ -240,8 +245,7 @@ class Job(CreatedTimeModel):
 
     vehicle = models.ForeignKey(
         Vehicle,
-        on_delete=models.CASCADE,
-        related_name='jobs'
+        on_delete=models.CASCADE
     )
 
     driver = models.ForeignKey(

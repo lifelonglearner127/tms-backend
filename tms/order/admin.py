@@ -16,3 +16,8 @@ class OrderProductAdmin(admin.ModelAdmin):
 @admin.register(m.OrderProductDeliver)
 class OrderProductDeliverAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.Job)
+class JobAdmin(admin.ModelAdmin):
+    pass
