@@ -100,6 +100,13 @@ class User(AbstractBaseUser):
         validators=[validate_mobile]
     )
 
+    device_token = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
+    )
+
     name = models.CharField(
         max_length=10,
         null=True,
