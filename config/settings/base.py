@@ -156,6 +156,26 @@ JWT_AUTH = {
     'JWT_VERIFY_EXPIRATION': False
 }
 
-CORS_ORIGIN_WHITELIST = (
+CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080'
-)
+]
+
+
+# OpenAPI Settings
+# ----------------------------------------------------------------------------
+G7SANDBOX = env.bool("G7SANDBOX", False)
+
+if G7SANDBOX:
+    OPENAPI_HOST = 'http://demo.dsp.chinawayltd.com'
+    OPENAPI_BASEURL = '/altair/rest'
+    OPENAPI_VEHICLE_BASIC_ACCESS_ID = 'vt8hc8'
+    OPENAPI_VEHICLE_BASIC_SECRET = 'Vstn1zquSry4b18DwkmeOY6pQUuPa0vn'
+    OPENAPI_VEHICLE_DATA_ACCESS_ID = 'd3un7m'
+    OPENAPI_VEHICLE_DATA_SECRET = 'XohiKSlObj70BIQ3nF3achF6n2gaCaeU'
+else:
+    OPENAPI_HOST = 'http://openapi.huoyunren.com'
+    OPENAPI_BASEURL = ''
+    OPENAPI_VEHICLE_BASIC_ACCESS_ID = 'jxnwrs'
+    OPENAPI_VEHICLE_BASIC_SECRET = 'W2Hxj0mC5Yc1b19mZJGb8wD4QW6D3Rgt'
+    OPENAPI_VEHICLE_DATA_ACCESS_ID = 'jxnwrs'
+    OPENAPI_VEHICLE_DATA_SECRET = 'W2Hxj0mC5Yc1b19mZJGb8wD4QW6D3Rgt'
