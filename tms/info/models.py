@@ -37,21 +37,18 @@ class Station(BasicContactModel):
     """
     Station model, used as base class
     """
-    centroid = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True
-    )
+    longitude = models.FloatField()
 
-    radius = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True
+    latitude = models.FloatField()
+
+    radius = models.DecimalField(
+        max_digits=10,
+        decimal_places=1
     )
 
     price = models.DecimalField(
-        max_digits=5,
-        decimal_places=1,
+        max_digits=10,
+        decimal_places=3,
         null=True,
         blank=True
     )
