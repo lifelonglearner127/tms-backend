@@ -394,7 +394,7 @@
         "pk": 1,
         "fields": {
             "model": "T",
-            "no": "Model-1",
+            "plate_num": "鲁UG2802",
             "code": "Model-1",
             "brand": "T",
             "load": 100,
@@ -407,7 +407,20 @@
         "pk": 2,
         "fields": {
             "model": "T",
-            "no": "Model-2",
+            "plate_num": "鲁UC6753",
+            "code": "Model-2",
+            "brand": "T",
+            "load": 100,
+            "created": "2013-03-16T17:41:28+00:00",
+            "updated": "2013-03-16T17:41:28+00:00"
+        }
+    },
+    {
+        "model": "vehicle.Vehicle",
+        "pk": 3,
+        "fields": {
+            "model": "T",
+            "plate_num": "鲁UA3161",
             "code": "Model-2",
             "brand": "T",
             "load": 100,

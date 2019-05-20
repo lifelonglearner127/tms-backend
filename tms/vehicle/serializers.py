@@ -26,3 +26,14 @@ class VehicleDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.VehicleDocument
         fields = '__all__'
+
+
+class VehiclePlaybackSerializer(serializers.Serializer):
+    """
+    Serializer for vehicle playback
+    """
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+    speed = serializers.IntegerField()
+    course = serializers.IntegerField()
+    time = serializers.IntegerField()

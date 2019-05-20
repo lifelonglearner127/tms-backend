@@ -55,4 +55,19 @@ class G7Interface:
             req.set_body(json.dumps(body))
             req.set_content_type(constant.CONTENT_TYPE_JSON)
 
-        print(cli.execute(req))
+        try:
+            status, headers, body = cli.execute(req)
+            if status != 200:
+                # TODO: logging
+                err_str = 'G7 Interface return non-success status code'
+                raise Exception(err_str)
+
+            body = json.loads(body.decode('utf-8'))
+            if body['code'] or body['sub_code']:
+                # TODO: logging
+                raise Exception(body)
+
+            return body['data']
+        except Exception as e:
+            print(e)
+            # TODO: logging

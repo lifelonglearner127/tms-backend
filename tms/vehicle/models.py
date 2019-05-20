@@ -35,8 +35,9 @@ class Vehicle(TimeStampedModel):
         default=constants.VEHICLE_MODEL_TYPE_TRUCK
     )
 
-    no = models.CharField(
-        max_length=100
+    plate_num = models.CharField(
+        max_length=100,
+        unique=True
     )
 
     code = models.CharField(
