@@ -9,13 +9,15 @@ class TMSAuthenticationBackend:
     Authentication against either phone number or username
     """
     def authenticate(
-        self, request, username=None, password=None, device_token=None
+        self, request, username=None, password=None,
+        role=None, device_token=None
     ):
         if username.isdigit():
             kwargs = {'mobile': username}
         else:
             kwargs = {'username': username}
         try:
+            device_token = kwargs.pop('device_token', None)
             user = UserModel.objects.get(**kwargs)
             if user.check_password(password):
                 if device_token is not None:

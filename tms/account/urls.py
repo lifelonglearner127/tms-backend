@@ -29,5 +29,7 @@ staff_router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(staff_router.urls)),
+    path('auth/obtain_token', v.ObtainJWTAPIView.as_view()),
+    path('auth/verify_token', v.VerifyJWTAPIView.as_view()),
     path('options/document-type', v.UserDocumentTypeAPIView.as_view())
 ]
