@@ -39,3 +39,13 @@ set DJANGO_SETTINGS_MODULE=config.settings.local
 python manage.py migrate
 python manage.py runserver
 ```
+
+Running on Heroku
+```
+heroku config:set OPENAPI_HOST = ''
+heroku config:set OPENAPI_BASEURL = ''
+heroku config:set OPENAPI_VEHICLE_BASIC_ACCESS_ID = ''
+heroku config:set OPENAPI_VEHICLE_BASIC_SECRET = ''
+heroku config:set OPENAPI_VEHICLE_DATA_ACCESS_ID = ''
+heroku config:set OPENAPI_VEHICLE_DATA_SECRET = ''
+```
