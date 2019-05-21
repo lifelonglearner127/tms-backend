@@ -16,5 +16,10 @@ ALLOWED_HOSTS = [
     'https://tms-frontend-heroku.herokuapp.com'
 ]
 
+CORS_ORIGIN_WHITELIST = [
+    'https://tms-heroku.herokuapp.com',
+    'https://tms-frontend-heroku.herokuapp.com'
+]
+
 os.makedirs(str(APPS_DIR.path("static")), exist_ok=True)
 django_heroku.settings(locals())

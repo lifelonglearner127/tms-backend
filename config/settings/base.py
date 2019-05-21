@@ -171,10 +171,6 @@ JWT_AUTH = {
     'JWT_VERIFY_EXPIRATION': False
 }
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:8080'
-]
-
 
 # OpenAPI Settings
 # ----------------------------------------------------------------------------
