@@ -1,4 +1,4 @@
-# gluru-backend
+# tms-backend
 Vehicle Management System
 
 ## Prequisites
@@ -34,6 +34,7 @@ cp .env.example .env
 Running Locally
 ```
 pipenv shell
+set DJANGO_READ_DOT_ENV_FILE=True
 set DJANGO_SETTINGS_MODULE=config.settings.local
 python manage.py migrate
 python manage.py runserver
