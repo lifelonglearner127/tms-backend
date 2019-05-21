@@ -2,7 +2,7 @@
 """
 Base settings to build other settings upon
 """
-
+import os
 import environ
 
 ROOT_DIR = (environ.Path(__file__) - 3)
@@ -133,6 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Static
 # ----------------------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 STATIC_ROOT = str(ROOT_DIR("staticfiles"))
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [str(APPS_DIR.path("static"))]
