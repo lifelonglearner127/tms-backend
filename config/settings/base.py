@@ -101,11 +101,9 @@ TEMPLATES = [
 # Database
 # ----------------------------------------------------------------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(ROOT_DIR.path('db.sqlite3')),
-    },
+    'default': env.db(),
 }
+
 
 # Password Validation
 # ----------------------------------------------------------------------------
@@ -163,19 +161,9 @@ CORS_ORIGIN_WHITELIST = [
 
 # OpenAPI Settings
 # ----------------------------------------------------------------------------
-G7SANDBOX = env.bool("G7SANDBOX", False)
-
-if G7SANDBOX:
-    OPENAPI_HOST = 'http://demo.dsp.chinawayltd.com'
-    OPENAPI_BASEURL = '/altair/rest'
-    OPENAPI_VEHICLE_BASIC_ACCESS_ID = 'vt8hc8'
-    OPENAPI_VEHICLE_BASIC_SECRET = 'Vstn1zquSry4b18DwkmeOY6pQUuPa0vn'
-    OPENAPI_VEHICLE_DATA_ACCESS_ID = 'd3un7m'
-    OPENAPI_VEHICLE_DATA_SECRET = 'XohiKSlObj70BIQ3nF3achF6n2gaCaeU'
-else:
-    OPENAPI_HOST = 'http://openapi.huoyunren.com'
-    OPENAPI_BASEURL = ''
-    OPENAPI_VEHICLE_BASIC_ACCESS_ID = 'jxnwrs'
-    OPENAPI_VEHICLE_BASIC_SECRET = 'W2Hxj0mC5Yc1b19mZJGb8wD4QW6D3Rgt'
-    OPENAPI_VEHICLE_DATA_ACCESS_ID = 'jxnwrs'
-    OPENAPI_VEHICLE_DATA_SECRET = 'W2Hxj0mC5Yc1b19mZJGb8wD4QW6D3Rgt'
+OPENAPI_HOST = env.str('OPENAPI_HOST')
+OPENAPI_BASEURL = env.str('OPENAPI_BASEURL')
+OPENAPI_VEHICLE_BASIC_ACCESS_ID = env.str('OPENAPI_VEHICLE_BASIC_ACCESS_ID')
+OPENAPI_VEHICLE_BASIC_SECRET = env.str('OPENAPI_VEHICLE_BASIC_SECRET')
+OPENAPI_VEHICLE_DATA_ACCESS_ID = env.str('OPENAPI_VEHICLE_DATA_ACCESS_ID')
+OPENAPI_VEHICLE_DATA_SECRET = env.str('OPENAPI_VEHICLE_DATA_SECRET')
