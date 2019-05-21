@@ -21,6 +21,7 @@ dj-database-url = "*"
 whitenoise = "*"
 psycopg2 = "*"
 django-heroku = "*"
+django-rest-swagger = "*"
 
 [requires]
 python_version = "3.6"

@@ -16,11 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework_swagger.views import get_swagger_view
 from rest_framework_jwt.views import (
     obtain_jwt_token, verify_jwt_token
 )
 
+schema_view = get_swagger_view(title='TMS API')
 urlpatterns = [
+    path('', schema_view),
     path('admin/', admin.site.urls),
     path('api/auth/obtain_token/', obtain_jwt_token),
     path('api/auth/verify_token/', verify_jwt_token),
