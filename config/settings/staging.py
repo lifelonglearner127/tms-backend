@@ -1,3 +1,4 @@
+import os
 import django_heroku
 
 from .base import *  # noqa
@@ -12,4 +13,5 @@ SECRET_KEY = env(
 )
 ALLOWED_HOSTS = ['tms-heroku.herokuapp.com']
 
+os.makedirs(str(APPS_DIR.path("static")), exist_ok=True)
 django_heroku.settings(locals())
