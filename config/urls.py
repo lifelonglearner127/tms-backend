@@ -23,12 +23,28 @@ from rest_framework_jwt.views import (
 
 schema_view = get_swagger_view(title='TMS API')
 urlpatterns = [
-    path('', schema_view),
-    path('admin/', admin.site.urls),
-    path('api/auth/obtain_token/', obtain_jwt_token),
-    path('api/auth/verify_token/', verify_jwt_token),
-    path('api/', include(('tms.account.urls', 'account'), namespace='account')),
-    path('api/', include(('tms.info.urls', 'info'), namespace='info')),
-    path('api/', include(('tms.vehicle.urls', 'vehicle'), namespace='vehicle')),
-    path('api/', include(('tms.order.urls', 'order'), namespace='order')),
+    path(
+        '', schema_view
+    ),
+    path(
+        'admin/', admin.site.urls
+    ),
+    path(
+        'api/auth/obtain_token/', obtain_jwt_token
+    ),
+    path(
+        'api/auth/verify_token/', verify_jwt_token
+    ),
+    path(
+        'api/', include(('tms.account.urls', 'account'), namespace='account')
+    ),
+    path(
+        'api/', include(('tms.info.urls', 'info'), namespace='info')
+    ),
+    path(
+        'api/', include(('tms.vehicle.urls', 'vehicle'), namespace='vehicle')
+    ),
+    path(
+        'api/', include(('tms.order.urls', 'order'), namespace='order')
+    ),
 ]

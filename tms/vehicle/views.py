@@ -59,7 +59,9 @@ class VehicleViewSet(StaffViewSet):
                 for x in data:
                     paths.append([x.pop('lng'), x.pop('lat')])
                     print(x)
-                    x['time'] = datetime.utcfromtimestamp(int(x['time'])/1000).strftime('%Y-%m-%d %H:%M:%S')
+                    x['time'] = datetime.utcfromtimestamp(
+                        int(x['time'])/1000
+                    ).strftime('%Y-%m-%d %H:%M:%S')
 
                 results = {
                     'paths': paths,

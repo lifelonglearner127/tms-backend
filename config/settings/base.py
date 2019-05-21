@@ -2,7 +2,6 @@
 """
 Base settings to build other settings upon
 """
-import os
 import environ
 
 ROOT_DIR = (environ.Path(__file__) - 3)
