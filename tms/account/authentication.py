@@ -11,7 +11,6 @@ class JWTAuthentication(BaseAuthentication):
     authentication_header_prefix = 'JWT'
 
     def authenticate(self, request):
-        request.user = None
         auth_header = get_authorization_header(request).split()
         auth_header_prefix = self.authentication_header_prefix.lower()
 
@@ -49,7 +48,7 @@ class JWTAuthentication(BaseAuthentication):
 
         User = get_user_model()
         try:
-            user = User.objects.get(pk=payload['username'])
+            user = User.objects.get(username=payload['username'])
         except User.DoesNotExist:
             msg = 'No user matching this token was found.'
             raise exceptions.AuthenticationFailed(msg)

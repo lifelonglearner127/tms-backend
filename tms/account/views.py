@@ -25,7 +25,7 @@ class JWTAPIView(APIView):
             return Response({
                 'token': token,
                 'user': s.AuthSerializer(user).data
-            })
+            }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
