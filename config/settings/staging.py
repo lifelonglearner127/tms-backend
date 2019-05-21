@@ -12,7 +12,8 @@ SECRET_KEY = env(
     default="i1t=60pmfy@f2yloh#mzj7%)#jtgll(3wb@@@23w=l(ai&!q1%",
 )
 ALLOWED_HOSTS = [
-    'tms-heroku.herokuapp.com', 'tms-frontend-heroku.herokuapp.com'
+    'https://tms-heroku.herokuapp.com',
+    'https://tms-frontend-heroku.herokuapp.com'
 ]
 
 os.makedirs(str(APPS_DIR.path("static")), exist_ok=True)
