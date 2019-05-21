@@ -1,2 +1,3 @@
 [flake8]
-exclude = .git,*migrations*
+exclude = .git,*migrations*,config/settings/base.py
+

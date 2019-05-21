@@ -21,5 +21,5 @@ CORS_ORIGIN_WHITELIST = [
     'https://tms-frontend-heroku.herokuapp.com'
 ]
 
-os.makedirs(str(APPS_DIR.path("static")), exist_ok=True)
+os.makedirs(str(APPS_DIR.path("static")), exist_ok=True)    # noqa
 django_heroku.settings(locals())
