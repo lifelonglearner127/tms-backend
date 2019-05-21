@@ -100,9 +100,17 @@ TEMPLATES = [
 
 # Database
 # ----------------------------------------------------------------------------
-DATABASES = {
-    'default': env.db(),
-}
+if env.str('DATABASE_URL', default=''):
+    DATABASES = {
+        'default': env.db(),
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(ROOT_DIR.path('db.sqlite3')),
+        },
+    }
 
 
 # Password Validation
