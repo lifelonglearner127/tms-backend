@@ -75,10 +75,10 @@ class LoadStation(Station):
     """
     LoadStation model, used as base class
     """
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.SET_NULL,
-        null=True
+    product_category = models.CharField(
+        max_length=10,
+        choices=constants.PRODUCT_TYPE,
+        default=constants.PRODUCT_TYPE_GASOLINE
     )
 
     class Meta:

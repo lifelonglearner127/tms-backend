@@ -16,8 +16,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         context = {
             'assignee': request.data.pop('assignee'),
             'customer': request.data.pop('customer'),
-            'products': request.data.pop('products'),
-            'loading_station': request.data.pop('loading_station')
+            'loading_stations': request.data.pop('loading_stations')
         }
 
         serializer = self.serializer_class(
@@ -38,8 +37,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         context = {
             'assignee': request.data.pop('assignee'),
             'customer': request.data.pop('customer'),
-            'products': request.data.pop('products'),
-            'loading_station': request.data.pop('loading_station')
+            'loading_stations': request.data.pop('loading_stations')
         }
 
         serializer = self.serializer_class(
@@ -58,6 +56,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         )
 
 
+class OrderLoadingStationViewSet(viewsets.ModelViewSet):
+    """
+    OrderProduct Viewset
+    """
+    serializer_class = s.OrderLoadingStationSerializer
+
+    def get_queryset(self):
+        return m.OrderLoadingStation.objects.filter(
+            order__id=self.kwargs['order_pk']
+        )
+
+
 class OrderProductViewSet(viewsets.ModelViewSet):
     """
     OrderProduct Viewset
@@ -66,7 +76,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return m.OrderProduct.objects.filter(
-            order__id=self.kwargs['order_pk']
+            order_loading_station__id=self.kwargs['orderloadingstation_pk']
         )
 
 
@@ -79,16 +89,4 @@ class OrderProductDeliverViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return m.OrderProductDeliver.objects.filter(
             order_product__id=self.kwargs['orderproduct_pk']
-        )
-
-
-class JobViewSet(viewsets.ModelViewSet):
-    """
-    Job Viewset
-    """
-    serializer_class = s.JobSerializer
-
-    def get_queryset(self):
-        return m.Job.objects.filter(
-            mission__id=self.kwargs['mission_pk']
         )

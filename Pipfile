@@ -22,6 +22,7 @@ psycopg2 = "*"
 django-heroku = "*"
 django-rest-swagger = "*"
 pyjwt = "*"
+paho-mqtt = "*"
 
 [requires]
 python_version = "3.6"

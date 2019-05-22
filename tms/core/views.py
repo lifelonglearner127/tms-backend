@@ -1,11 +1,36 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .permissions import IsStaffUser
 from .serializers import ChoiceSerializer
 
 
-class StaffViewSet(viewsets.ModelViewSet):
+class TMSViewSet(viewsets.ModelViewSet):
+    """
+    Vieweset only allowed for admin or staff permission
+    """
+    short_serializer_class = None
+
+    def get_short_serializer_class(self):
+        if self.short_serializer_class is not None:
+            return self.short_serializer_class
+
+        return self.serializer_class
+
+    @action(detail=False)
+    def short(self, request):
+        serializer = self.get_short_serializer_class()(
+            self.queryset,
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class StaffViewSet(TMSViewSet):
     """
     Vieweset only allowed for admin or staff permission
     """

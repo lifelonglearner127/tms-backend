@@ -1,60 +1,10 @@
 from django.db import models
 
+from . import managers
 from ..core import constants
-from ..core.models import TimeStampedModel, CreatedTimeModel
+from ..core.models import TimeStampedModel
 from ..info.models import LoadingStation, UnLoadingStation, Product
-from ..vehicle.models import Vehicle
 from ..account.models import StaffProfile, CustomerProfile
-
-
-class PendingOrderManager():
-    """
-    Pending Order Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_PENDING
-        )
-
-
-class InProgressOrderManager():
-    """
-    In Progress Order Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_INPROGRESS
-        )
-
-
-class CompleteOrderManager():
-    """
-    Complete Order Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_COMPLETE
-        )
-
-
-class InternalOrderManager():
-    """
-    Internal Order Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.ORDER_SOURCE_INTERNAL
-        )
-
-
-class CustomerOrderManager():
-    """
-    Customer Order Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.ORDER_SOURCE_CUSTOMER
-        )
 
 
 class Order(TimeStampedModel):
@@ -76,21 +26,7 @@ class Order(TimeStampedModel):
         on_delete=models.CASCADE,
     )
 
-    loading_station = models.ForeignKey(
-        LoadingStation,
-        on_delete=models.SET_NULL,
-        null=True
-    )
-
-    rest_place = models.CharField(
-        max_length=100
-    )
-
-    change_place = models.CharField(
-        max_length=100
-    )
-
-    source = models.CharField(
+    order_source = models.CharField(
         max_length=1,
         choices=constants.ORDER_SOURCE,
         default=constants.ORDER_SOURCE_INTERNAL
@@ -102,28 +38,60 @@ class Order(TimeStampedModel):
         default=constants.ORDER_STATUS_PENDING
     )
 
+    loading_stations = models.ManyToManyField(
+        LoadingStation,
+        through='OrderLoadingStation'
+    )
+
+    objects = models.Manager()
+    pendings = managers.PendingOrderManager()
+    inprogress = managers.InProgressOrderManager()
+    completeds = managers.CompleteOrderManager()
+    from_internal = managers.InternalOrderManager()
+    from_customer = managers.CustomerOrderManager()
+
+    def __str__(self):
+        return self.alias
+
+
+class OrderLoadingStation(models.Model):
+    """
+    Intermediate model for order model and loading station
+    Currently order has only one loading station, but I create it
+    for future business logic
+    """
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE
+    )
+
+    loading_station = models.ForeignKey(
+        LoadingStation,
+        on_delete=models.CASCADE
+    )
+
     products = models.ManyToManyField(
         Product,
         through='OrderProduct'
     )
 
-    objects = models.Manager()
-    pendings = PendingOrderManager()
-    inprogress = InProgressOrderManager()
-    completeds = CompleteOrderManager()
-    from_internal = InternalOrderManager()
-    from_customer = CustomerOrderManager()
+    time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
-        return self.alias
+        return '{} - Load from {} at {}'.format(
+            self.order.alias, self.loading_station.name, self.time
+        )
 
 
 class OrderProduct(models.Model):
     """
     Intermediate model for order model and product model
     """
-    order = models.ForeignKey(
-        Order,
+    order_loading_station = models.ForeignKey(
+        OrderLoadingStation,
         on_delete=models.CASCADE
     )
 
@@ -192,91 +160,10 @@ class OrderProductDeliver(models.Model):
 
     weight = models.PositiveIntegerField()
 
-    jobs = models.ManyToManyField(
-        Vehicle,
-        through='Job'
-    )
-
     def __str__(self):
-        return '{} in {}-{} to {}'.format(
-            self.weight, self.order_product.order.alias,
-            self.order_product.product.name, self.unloading_station.name
+        return '{} - from {} to {}: {} of {}'.format(
+            self.order_product.order_loading_station.order,
+            self.order_product.order_loading_station.name,
+            self.unloading_station.name,
+            self.weight, self.order_product.total_weight
         )
-
-
-class PendingJobManager(models.Manager):
-    """
-    Pending Job Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.JOB_STATUS_PENDING
-        )
-
-
-class InProgressJobManager(models.Manager):
-    """
-    In Progress Job Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.JOB_STATUS_INPROGRESS
-        )
-
-
-class CompleteJobManager(models.Manager):
-    """
-    Complete Job Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            status=constants.JOB_STATUS_COMPLETE
-        )
-
-
-class Job(CreatedTimeModel):
-    """
-    Job model
-    """
-    mission = models.ForeignKey(
-        OrderProductDeliver,
-        on_delete=models.CASCADE,
-    )
-
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE
-    )
-
-    driver = models.ForeignKey(
-        StaffProfile,
-        on_delete=models.CASCADE,
-        related_name='jobs_as_primary'
-    )
-
-    escort = models.ForeignKey(
-        StaffProfile,
-        on_delete=models.CASCADE,
-        related_name='jobs_as_escort',
-    )
-
-    status = models.CharField(
-        max_length=1,
-        choices=constants.JOB_STATUS,
-        default=constants.JOB_STATUS_PENDING
-    )
-
-    started_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finished_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    objects = models.Manager()
-    pendings = PendingJobManager()
-    inprogress = InProgressJobManager()
-    completeds = CompleteJobManager()

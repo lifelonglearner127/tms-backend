@@ -1,0 +1,82 @@
+[
+  {
+      "model": "account.User",
+      "pk": 2,
+      "fields": {
+          "username": "staff",
+          "email": "staff@email.com",
+          "mobile": "000000",
+          "name": "Staff",
+          "role": "S",
+          "date_joined": "2013-03-16T17:41:28+00:00",
+          "last_seen": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+    "model": "account.User",
+    "pk": 3,
+    "fields": {
+        "username": "driver",
+        "email": "driver@email.com",
+        "mobile": "000001",
+        "name": "Driver",
+        "role": "D",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 4,
+    "fields": {
+        "username": "escort",
+        "email": "escort@email.com",
+        "mobile": "000002",
+        "name": "Driver",
+        "role": "E",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 5,
+    "fields": {
+        "username": "customer",
+        "email": "customer@email.com",
+        "mobile": "000003",
+        "name": "Customer",
+        "role": "C",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 2,
+    "fields": {
+      "user": 2
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 3,
+    "fields": {
+      "user": 3
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 4,
+    "fields": {
+      "user": 4
+    }
+  },
+  {
+    "model": "account.CustomerProfile",
+    "pk": 1,
+    "fields": {
+      "user": 5
+    }
+  }
+]

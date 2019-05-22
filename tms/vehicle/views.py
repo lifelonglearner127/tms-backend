@@ -17,18 +17,7 @@ class VehicleViewSet(StaffViewSet):
     """
     queryset = m.Vehicle.objects.all()
     serializer_class = s.VehicleSerializer
-
-    @action(detail=False)
-    def short(self, request):
-        serializer = s.ShortVehicleSerializer(
-            m.Vehicle.objects.all(),
-            many=True
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    short_serializer_class = s.ShortVehicleSerializer
 
     @action(detail=True, methods=['get'], url_path='vehicle-playback')
     def vehicle_history_track_query(self, request, pk=None):

@@ -1,50 +1,9 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
+from . import managers
 from ..core import constants
 from ..core.validations import validate_mobile
-
-
-class AdminManager(models.Manager):
-    """
-    Admin Model Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(role=constants.USER_ROLE_ADMIN)
-
-
-class StaffManager(models.Manager):
-    """
-    Staff Model Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            role__in=[constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
-        )
-
-
-class DriverManager(models.Manager):
-    """
-    Driver Model Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(role=constants.USER_ROLE_DRIVER)
-
-
-class EscortManager(models.Manager):
-    """
-    Escort Model Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(role=constants.USER_ROLE_ESCORT)
-
-
-class CustomerManager(models.Manager):
-    """
-    Customer Model Manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(role=constants.USER_ROLE_CUSTOMER)
 
 
 class UserManager(BaseUserManager):
@@ -137,11 +96,11 @@ class User(AbstractBaseUser):
             [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
 
     objects = UserManager()
-    admins = AdminManager()
-    staffs = StaffManager()
-    drivers = DriverManager()
-    escorts = EscortManager()
-    customers = CustomerManager()
+    admins = managers.AdminManager()
+    staffs = managers.StaffManager()
+    drivers = managers.DriverManager()
+    escorts = managers.EscortManager()
+    customers = managers.CustomerManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -160,26 +119,6 @@ class User(AbstractBaseUser):
             return True
 
         return False
-
-
-class StaffDriverManager(models.Manager):
-    """
-    Driver staff manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            user__role=constants.USER_ROLE_DRIVER
-        )
-
-
-class StaffEscortManager(models.Manager):
-    """
-    Escort staff manager
-    """
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            user__role=constants.USER_ROLE_ESCORT
-        )
 
 
 class StaffProfile(models.Model):
@@ -240,8 +179,8 @@ class StaffProfile(models.Model):
     )
 
     objects = models.Manager()
-    drivers = StaffDriverManager()
-    escorts = StaffEscortManager()
+    drivers = managers.StaffDriverManager()
+    escorts = managers.StaffEscortManager()
 
     def __str__(self):
         return '{}\'s profile'.format(self.user.username)

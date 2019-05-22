@@ -60,6 +60,7 @@ class StaffProfileViewSet(StaffViewSet):
     """
     queryset = m.StaffProfile.objects.all()
     serializer_class = s.StaffProfileSerializer
+    short_serializer_class = s.ShortStaffProfileSerializer
 
     def create(self, request):
         context = {
@@ -94,17 +95,6 @@ class StaffProfileViewSet(StaffViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=False)
-    def short(self, request):
-        serializer = s.ShortStaffProfileSerializer(
-            m.StaffProfile.objects.all(),
-            many=True
-        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -139,6 +129,7 @@ class CustomerProfileViewSet(StaffViewSet):
     """
     queryset = m.CustomerProfile.objects.all()
     serializer_class = s.CustomerProfileSerializer
+    short_serializer_class = s.ShortCustomerProfileSerializer
 
     def create(self, request):
         context = {
@@ -175,17 +166,6 @@ class CustomerProfileViewSet(StaffViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=False)
-    def short(self, request):
-        serializer = s.ShortCustomerProfileSerializer(
-            m.CustomerProfile.objects.all(),
-            many=True
-        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK

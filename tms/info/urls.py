@@ -6,7 +6,9 @@ from .import views
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
-    r'products', views.ProductViewSet, base_name='products'
+    r'products',
+    views.ProductViewSet,
+    base_name='products'
 )
 router.register(
     r'loading-stations',

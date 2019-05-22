@@ -1,431 +1,543 @@
 [
-    {
-        "model": "info.Product",
-        "pk": 1,
-        "fields": {
-            "name": "Product1",
-            "code": "product-1-code",
-            "category": "gas",
-            "price": 1,
-            "description": "This is the description for Product1",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.Product",
-        "pk": 2,
-        "fields": {
-            "name": "Product2",
-            "code": "product-2-code",
-            "category": "gas",
-            "price": 1,
-            "description": "This is the description for Product2",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.Product",
-        "pk": 3,
-        "fields": {
-            "name": "Product3",
-            "code": "product-3-code",
-            "category": "gas",
-            "price": 1,
-            "description": "This is the description for Product3",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.Product",
-        "pk": 4,
-        "fields": {
-            "name": "Product4",
-            "code": "product-4-code",
-            "category": "oil",
-            "price": 1,
-            "description": "This is the description for Product4",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.Product",
-        "pk": 5,
-        "fields": {
-            "name": "Product5",
-            "code": "product-5-code",
-            "category": "oil",
-            "price": 1,
-            "description": "This is the description for Product6",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.Product",
-        "pk": 6,
-        "fields": {
-            "name": "Product6",
-            "code": "product-6-code",
-            "category": "oil",
-            "price": 1,
-            "description": "This is the description for Product6",
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 1,
-        "fields": {
-            "name": "Loading A",
-            "contact": "Zhang Shi Jun",
-            "mobile": "123456789",
-            "address": "Tongzhou District Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 1,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 2,
-        "fields": {
-            "name": "Loading B",
-            "contact": "Zhen He",
-            "mobile": "123456789",
-            "address": "Tongzhou District Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 2,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 3,
-        "fields": {
-            "name": "Loading C",
-            "contact": "Zhen Ge",
-            "mobile": "123456789",
-            "address": "Jilin",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 3,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 4,
-        "fields": {
-            "name": "Loading D",
-            "contact": "D Manager",
-            "mobile": "123456789",
-            "address": "Chaoyang District Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 4,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 5,
-        "fields": {
-            "name": "Loading E",
-            "contact": "E Manager",
-            "mobile": "123456789",
-            "address": "Shen Zhen District Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 5,
-            "product": 1,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.LoadingStation",
-        "pk": 6,
-        "fields": {
-            "name": "Loading F",
-            "contact": "F Manager",
-            "mobile": "123456789",
-            "address": "Shang hai",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 6,
-            "working_time": 1,
-            "average_time": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 1,
-        "fields": {
-            "name": "UnLoading A",
-            "contact": "UnLoading A",
-            "mobile": "123456789",
-            "address": "UnLoading A",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 2,
-        "fields": {
-            "name": "UnLoading B",
-            "contact": "UnLoading B",
-            "mobile": "123456789",
-            "address": "Loading B",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 2,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 3,
-        "fields": {
-            "name": "UnLoading C",
-            "contact": "C Manager",
-            "mobile": "123456789",
-            "address": "Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 3,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 4,
-        "fields": {
-            "name": "UnLoading D",
-            "contact": "D Manager",
-            "mobile": "123456789",
-            "address": "Shang hai",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 4,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 5,
-        "fields": {
-            "name": "UnLoading E",
-            "contact": "E Manager",
-            "mobile": "123456789",
-            "address": "UnLoading A",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 5,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.UnLoadingStation",
-        "pk": 6,
-        "fields": {
-            "name": "UnLoading F",
-            "contact": "F Manager",
-            "mobile": "123456789",
-            "address": "Loading B",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "product": 6,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 1,
-        "fields": {
-            "name": "Oil A",
-            "contact": "Oil A",
-            "mobile": "123456789",
-            "address": "Oil A",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 2,
-        "fields": {
-            "name": "Oil B",
-            "contact": "Oil B",
-            "mobile": "123456789",
-            "address": "Loading B",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 3,
-        "fields": {
-            "name": "Oil C",
-            "contact": "C Manager",
-            "mobile": "123456789",
-            "address": "Beijing",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 4,
-        "fields": {
-            "name": "Oil D",
-            "contact": "D Manager",
-            "mobile": "123456789",
-            "address": "Shang hai",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 5,
-        "fields": {
-            "name": "Oil E",
-            "contact": "E Manager",
-            "mobile": "123456789",
-            "address": "Oil A",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "info.OilStation",
-        "pk": 6,
-        "fields": {
-            "name": "Oil F",
-            "contact": "F Manager",
-            "mobile": "123456789",
-            "address": "Loading B",
-            "longitude": 116.397428,
-            "latitude": 39.90923,
-            "radius": 100,
-            "price": 1,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "vehicle.Vehicle",
-        "pk": 1,
-        "fields": {
-            "model": "T",
-            "plate_num": "鲁UG2802",
-            "code": "Model-1",
-            "brand": "T",
-            "load": 100,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "vehicle.Vehicle",
-        "pk": 2,
-        "fields": {
-            "model": "T",
-            "plate_num": "鲁UC6753",
-            "code": "Model-2",
-            "brand": "T",
-            "load": 100,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
-    },
-    {
-        "model": "vehicle.Vehicle",
-        "pk": 3,
-        "fields": {
-            "model": "T",
-            "plate_num": "鲁UA3161",
-            "code": "Model-2",
-            "brand": "T",
-            "load": 100,
-            "created": "2013-03-16T17:41:28+00:00",
-            "updated": "2013-03-16T17:41:28+00:00"
-        }
+  {
+      "model": "account.User",
+      "pk": 2,
+      "fields": {
+          "username": "staff",
+          "email": "staff@email.com",
+          "mobile": "000000",
+          "name": "Staff",
+          "role": "S",
+          "date_joined": "2013-03-16T17:41:28+00:00",
+          "last_seen": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+    "model": "account.User",
+    "pk": 3,
+    "fields": {
+        "username": "driver",
+        "email": "driver@email.com",
+        "mobile": "000001",
+        "name": "Driver",
+        "role": "D",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
     }
+  },
+  {
+    "model": "account.User",
+    "pk": 4,
+    "fields": {
+        "username": "escort",
+        "email": "escort@email.com",
+        "mobile": "000002",
+        "name": "Driver",
+        "role": "E",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 5,
+    "fields": {
+        "username": "customer",
+        "email": "customer@email.com",
+        "mobile": "000003",
+        "name": "Customer",
+        "role": "C",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 6,
+    "fields": {
+        "username": "customer2",
+        "email": "customer2@email.com",
+        "mobile": "000004",
+        "name": "Customer2",
+        "role": "C",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 2,
+    "fields": {
+      "user": 2
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 3,
+    "fields": {
+      "user": 3
+    }
+  },
+  {
+    "model": "account.StaffProfile",
+    "pk": 4,
+    "fields": {
+      "user": 4
+    }
+  },
+  {
+    "model": "account.CustomerProfile",
+    "pk": 1,
+    "fields": {
+      "user": 5
+    }
+  },
+  {
+    "model": "account.CustomerProfile",
+    "pk": 2,
+    "fields": {
+      "user": 6
+    }
+  },
+  {
+    "model": "info.Product",
+    "pk": 1,
+    "fields": {
+        "name": "Product1",
+        "code": "product-1-code",
+        "category": "gas",
+        "price": 1,
+        "description": "This is the description for Product1",
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+      "model": "info.Product",
+      "pk": 2,
+      "fields": {
+          "name": "Product2",
+          "code": "product-2-code",
+          "category": "gas",
+          "price": 1,
+          "description": "This is the description for Product2",
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.Product",
+      "pk": 3,
+      "fields": {
+          "name": "Product3",
+          "code": "product-3-code",
+          "category": "gas",
+          "price": 1,
+          "description": "This is the description for Product3",
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.Product",
+      "pk": 4,
+      "fields": {
+          "name": "Product4",
+          "code": "product-4-code",
+          "category": "oil",
+          "price": 1,
+          "description": "This is the description for Product4",
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.Product",
+      "pk": 5,
+      "fields": {
+          "name": "Product5",
+          "code": "product-5-code",
+          "category": "oil",
+          "price": 1,
+          "description": "This is the description for Product6",
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.Product",
+      "pk": 6,
+      "fields": {
+          "name": "Product6",
+          "code": "product-6-code",
+          "category": "oil",
+          "price": 1,
+          "description": "This is the description for Product6",
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 1,
+      "fields": {
+          "name": "Loading A",
+          "contact": "Zhang Shi Jun",
+          "mobile": "123456789",
+          "address": "Tongzhou District Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 2,
+      "fields": {
+          "name": "Loading B",
+          "contact": "Zhen He",
+          "mobile": "123456789",
+          "address": "Tongzhou District Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 3,
+      "fields": {
+          "name": "Loading C",
+          "contact": "Zhen Ge",
+          "mobile": "123456789",
+          "address": "Jilin",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 4,
+      "fields": {
+          "name": "Loading D",
+          "contact": "D Manager",
+          "mobile": "123456789",
+          "address": "Chaoyang District Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 5,
+      "fields": {
+          "name": "Loading E",
+          "contact": "E Manager",
+          "mobile": "123456789",
+          "address": "Shen Zhen District Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 5,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.LoadingStation",
+      "pk": 6,
+      "fields": {
+          "name": "Loading F",
+          "contact": "F Manager",
+          "mobile": "123456789",
+          "address": "Shang hai",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 1,
+      "fields": {
+          "name": "UnLoading A",
+          "contact": "UnLoading A",
+          "mobile": "123456789",
+          "address": "UnLoading A",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 2,
+      "fields": {
+          "name": "UnLoading B",
+          "contact": "UnLoading B",
+          "mobile": "123456789",
+          "address": "Loading B",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 3,
+      "fields": {
+          "name": "UnLoading C",
+          "contact": "C Manager",
+          "mobile": "123456789",
+          "address": "Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "gas",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 4,
+      "fields": {
+          "name": "UnLoading D",
+          "contact": "D Manager",
+          "mobile": "123456789",
+          "address": "Shang hai",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 5,
+      "fields": {
+          "name": "UnLoading E",
+          "contact": "E Manager",
+          "mobile": "123456789",
+          "address": "UnLoading A",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.UnLoadingStation",
+      "pk": 6,
+      "fields": {
+          "name": "UnLoading F",
+          "contact": "F Manager",
+          "mobile": "123456789",
+          "address": "Loading B",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "product_category": "oil",
+          "working_time": 1,
+          "average_time": 2,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 1,
+      "fields": {
+          "name": "Oil A",
+          "contact": "Oil A",
+          "mobile": "123456789",
+          "address": "Oil A",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 2,
+      "fields": {
+          "name": "Oil B",
+          "contact": "Oil B",
+          "mobile": "123456789",
+          "address": "Loading B",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 3,
+      "fields": {
+          "name": "Oil C",
+          "contact": "C Manager",
+          "mobile": "123456789",
+          "address": "Beijing",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 4,
+      "fields": {
+          "name": "Oil D",
+          "contact": "D Manager",
+          "mobile": "123456789",
+          "address": "Shang hai",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 5,
+      "fields": {
+          "name": "Oil E",
+          "contact": "E Manager",
+          "mobile": "123456789",
+          "address": "Oil A",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "info.OilStation",
+      "pk": 6,
+      "fields": {
+          "name": "Oil F",
+          "contact": "F Manager",
+          "mobile": "123456789",
+          "address": "Loading B",
+          "longitude": 116.397428,
+          "latitude": 39.90923,
+          "radius": 100,
+          "price": 1,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "vehicle.Vehicle",
+      "pk": 1,
+      "fields": {
+          "model": "T",
+          "plate_num": "鲁UG2802",
+          "code": "Model-1",
+          "brand": "T",
+          "load": 100,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "vehicle.Vehicle",
+      "pk": 2,
+      "fields": {
+          "model": "T",
+          "plate_num": "鲁UC6753",
+          "code": "Model-2",
+          "brand": "T",
+          "load": 100,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  },
+  {
+      "model": "vehicle.Vehicle",
+      "pk": 3,
+      "fields": {
+          "model": "T",
+          "plate_num": "鲁UA3161",
+          "code": "Model-2",
+          "brand": "T",
+          "load": 100,
+          "created": "2013-03-16T17:41:28+00:00",
+          "updated": "2013-03-16T17:41:28+00:00"
+      }
+  }
 ]

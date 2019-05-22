@@ -22,51 +22,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LoadStationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for short data of Load Station
-    Used for base class for Loading, Unloading Station
-    """
-    def create(self, validated_data):
-        product_data = self.context.get('product', None)
-        if product_data is None:
-            raise serializers.ValidationError('No product is provided')
-
-        product_id = product_data.get('id', None)
-        if product_id is None:
-            raise serializers.ValidationError('Invalid product data structure')
-
-        try:
-            product = m.Product.objects.get(pk=product_id)
-        except m.Product.DoesNotExist:
-            raise serializers.ValidationError('Could not found such product')
-
-        return self.Meta.model.objects.create(
-            product=product, **validated_data
-        )
-
-    def update(self, instance, validated_data):
-        product_data = self.context.get('product', None)
-        if product_data is None:
-            raise serializers.ValidationError('No product is provided')
-
-        product_id = product_data.get('id', None)
-        if product_id is None:
-            raise serializers.ValidationError('Invalid product data structure')
-
-        try:
-            product = m.Product.objects.get(pk=product_id)
-        except m.Product.DoesNotExist:
-            raise serializers.ValidationError('Could not found such product')
-
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
-
-        instance.product = product
-        instance.save()
-        return instance
-
-
 class ShortLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Loading Station
@@ -78,7 +33,7 @@ class ShortLoadingStationSerializer(serializers.ModelSerializer):
         )
 
 
-class LoadingStationSerializer(LoadStationSerializer):
+class LoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station
     """
@@ -100,7 +55,7 @@ class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
         )
 
 
-class UnLoadingStationSerializer(LoadStationSerializer):
+class UnLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for UnLoading Station
     """

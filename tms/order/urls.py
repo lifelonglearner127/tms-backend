@@ -11,47 +11,47 @@ router.register(
     r'orders', v.OrderViewSet, base_name='order'
 )
 
-# /orders/{order_pk}/products
-# /orders/{order_pk}/products/{pk}
+# /orders/{order_pk}/loading-stations
+# /orders/{order_pk}/loading-stations/{pk}
 order_router = routers.NestedSimpleRouter(
     router,
     r'orders',
     lookup='order'
 )
 order_router.register(
-    r'products',
-    v.OrderProductViewSet,
-    base_name='ordered-products'
+    r'loading-stations',
+    v.OrderLoadingStationViewSet,
+    base_name='order-loading-stations'
 )
 
-# /orders/{order_pk}/products/{product_pk}/delivers
-# /orders/{order_pk}/products/{product_pk}/delivers/{pk}
-orderproduct_router = routers.NestedSimpleRouter(
+# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products
+# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/{pk}
+orderloadingstation_router = routers.NestedSimpleRouter(
     order_router,
+    r'loading-stations',
+    lookup='orderloadingstation'
+)
+orderloadingstation_router.register(
+    r'products',
+    v.OrderProductViewSet,
+    base_name='order-loadingstations'
+)
+
+# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/delivers
+# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/delivers/{pk}
+orderproduct_router = routers.NestedSimpleRouter(
+    orderloadingstation_router,
     r'products',
     lookup='orderproduct'
 )
 orderproduct_router.register(
     r'delivers',
     v.OrderProductDeliverViewSet,
-    base_name='ordered-product-delivers'
-)
-
-# /orders/{order_pk}/products/{product_pk}/delivers/{deliver_pk}/jobs
-# /orders/{order_pk}/products/{product_pk}/delivers/{deliver_pk}/jobs/{pk}
-deliever_router = routers.NestedSimpleRouter(
-    orderproduct_router,
-    r'delivers',
-    lookup='mission'
-)
-deliever_router.register(
-    r'jobs',
-    v.JobViewSet,
-    base_name='jobs'
+    base_name='delivers'
 )
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(order_router.urls)),
+    url(r'^', include(orderloadingstation_router.urls)),
     url(r'^', include(orderproduct_router.urls)),
-    url(r'^', include(deliever_router.urls)),
 ]
