@@ -67,7 +67,8 @@ class Path(models.Model):
     )
 
     way_points = ArrayField(
-        models.PositiveIntegerField()
+        models.PositiveIntegerField(),
+        size=16
     )
 
     policy = models.PositiveIntegerField()

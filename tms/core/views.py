@@ -21,7 +21,7 @@ class TMSViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def short(self, request):
         serializer = self.get_short_serializer_class()(
-            self.queryset,
+            self.get_queryset(),
             many=True
         )
         return Response(

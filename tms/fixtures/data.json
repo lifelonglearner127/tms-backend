@@ -539,5 +539,47 @@
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
+  },
+  {
+    "model": "road.Point",
+    "pk": 1,
+    "fields": {
+        "name": "Origin",
+        "latitude": 39.983412,
+        "longitude": 116.303843,
+        "address": "Origin Address"
+    }
+  },
+  {
+    "model": "road.Point",
+    "pk": 2,
+    "fields": {
+        "name": "Destination",
+        "latitude": 39.992093,
+        "longitude": 116.407012,
+        "address": "Destination Address"
+    }
+  },
+  {
+    "model": "road.Point",
+    "pk": 3,
+    "fields": {
+        "name": "WayPoint",
+        "latitude": 39.896436,
+        "longitude": 116.321354,
+        "address": "Waypoint Address"
+    }
+  },
+  {
+    "model": "road.Path",
+    "pk": 1,
+    "fields": {
+        "name": "A-B-C",
+        "origin": 1,
+        "destination": 2,
+        "way_points": [3],
+        "policy": 0,
+        "distance": 0
+    }
   }
 ]
