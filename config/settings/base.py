@@ -45,7 +45,8 @@ LOCAL_APPS = [
     'tms.info',
     'tms.core',
     'tms.order',
-    'tms.vehicle'
+    'tms.vehicle',
+    'tms.job'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

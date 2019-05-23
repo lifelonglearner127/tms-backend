@@ -161,9 +161,9 @@ class OrderProductDeliver(models.Model):
     weight = models.PositiveIntegerField()
 
     def __str__(self):
-        return '{} - from {} to {}: {} of {}'.format(
+        return 'Order {}: from {} to {}: {} of {}'.format(
             self.order_product.order_loading_station.order,
-            self.order_product.order_loading_station.name,
+            self.order_product.order_loading_station.loading_station.name,
             self.unloading_station.name,
             self.weight, self.order_product.total_weight
         )

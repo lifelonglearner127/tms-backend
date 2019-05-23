@@ -60,7 +60,7 @@ class Vehicle(TimeStampedModel):
     availables = AvailableVehicle()
 
     def __str__(self):
-        return self.no
+        return self.plate_num
 
 
 class VehicleDocument(models.Model):
