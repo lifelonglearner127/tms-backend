@@ -12,10 +12,3 @@ ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080'
 ]
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(ROOT_DIR.path('db.sqlite3')),   # noqa
-    },
-}

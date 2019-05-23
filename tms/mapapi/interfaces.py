@@ -9,13 +9,17 @@ from .endpoints import MAPAPI_ENDPOINTS
 class RoutePlanInterface:
 
     @staticmethod
-    def call_map_api_interface(origin, destination):
+    def call_map_api_interface(origin, destination, way_points=None):
         queries = {
             'key': settings.MAP_WEB_SERVICE_API_KEY,
             'origin': ','.join(map(str, origin)),
             'destination': ','.join(map(str, destination)),
             'size': 2
         }
+
+        for point in way_points:
+            waypoint = ','.join(map(str, point))
+            queries['waypoints'] = '|'.join(waypoint)
 
         r = requests.get(
             MAPAPI_ENDPOINTS['RoutePlan']['URL'], params=queries

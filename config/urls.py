@@ -42,4 +42,7 @@ urlpatterns = [
     path(
         'api/', include(('tms.job.urls', 'job'), namespace='job')
     ),
+    path(
+        'api/', include(('tms.road.urls', 'road'), namespace='road')
+    ),
 ]

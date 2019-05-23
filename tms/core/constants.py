@@ -91,6 +91,9 @@ ORDER_SOURCE = (
     (ORDER_SOURCE_CUSTOMER, 'From Customer')
 )
 
+
+# job app
+# ----------------------------------------------------------------------------
 # job status choices
 JOB_PROGRESS_NOT_STARTED = 'NT'
 JOB_PROGRESS_STARTED = 'ST'
@@ -112,6 +115,15 @@ JOB_PROGRESS = (
     (JOB_PROGRESS_COMPLETE, 'Complete')
 )
 
+
+# road app
+# ----------------------------------------------------------------------------
+BLACKDOT_TYPE_ROAD_REPAIR = 'R'
+BLACKDOT_TYPE_ROAD_LIMIT_TIME = 'L'
+BLACKDOT_TYPE = (
+    (BLACKDOT_TYPE_ROAD_REPAIR, 'Repair Road'),
+    (BLACKDOT_TYPE_ROAD_LIMIT_TIME, 'Time Limit')
+)
 
 # Metric Units constants
 # ----------------------------------------------------------------------------
