@@ -1,6 +1,10 @@
+from datetime import datetime
+from django.db.models import Q
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from ..core import constants
 from . import models as m
 from . import serializers as s
 
@@ -27,6 +31,44 @@ class JobViewSet(viewsets.ModelViewSet):
         return Response(
             {'msg': 'Success'},
             status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=False, url_path='done')
+    def previous_jobs(self, request):
+        serializer = self.serializer_class(
+            m.Job.objects.filter(finished_at__lte=datetime.now()),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='current')
+    def progress_jobs(self, request):
+        serializer = self.serializer_class(
+            m.Job.objects.filter(
+                ~(Q(progress=constants.JOB_PROGRESS_NOT_STARTED) |
+                  Q(progress=constants.JOB_PROGRESS_COMPLETE))
+            ).first()
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='future')
+    def future_jobs(self, request):
+        serializer = self.serializer_class(
+            m.Job.objects.filter(progress=constants.JOB_PROGRESS_NOT_STARTED),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
         )
 
 
