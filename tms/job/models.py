@@ -70,6 +70,8 @@ class Job(models.Model):
         through='Mission'
     )
 
+    total_weight = models.PositiveIntegerField()
+
     objects = models.Manager()
     pendings = managers.PendingJobManager()
     inprogress = managers.InProgressJobManager()
@@ -86,6 +88,11 @@ class Mission(models.Model):
     mission = models.ForeignKey(
         OrderProductDeliver,
         on_delete=models.CASCADE
+    )
+
+    mission_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True
     )
 
     loading_weight = models.PositiveIntegerField(

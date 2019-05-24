@@ -4,6 +4,9 @@ from rest_framework import serializers
 
 from . import models as m
 from ..order.models import OrderProductDeliver
+from ..order.serializers import (
+    ShortOrderProductDeliverSerializer
+)
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
 from ..road.serializers import RouteDataSerializer
@@ -11,10 +14,12 @@ from ..road.serializers import RouteDataSerializer
 
 class MissionSerializer(serializers.ModelSerializer):
 
+    mission = ShortOrderProductDeliverSerializer()
+
     class Meta:
         model = m.Mission
         fields = (
-            'loading_weight', 'unloading_weight', 'is_completed'
+            'loading_weight', 'unloading_weight', 'is_completed', 'mission'
         )
 
 
@@ -31,7 +36,8 @@ class JobSerializer(serializers.ModelSerializer):
             mission = get_object_or_404(OrderProductDeliver, pk=mission_id)
             m.Mission.objects.create(
                 mission=mission,
-                job=job
+                job=job,
+                **validated_data
             )
         return job
 
@@ -48,4 +54,6 @@ class JobDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Job
-        fields = '__all__'
+        fields = (
+            'id', 'vehicle', 'driver', 'escort', 'route', 'missions'
+        )

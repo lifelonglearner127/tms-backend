@@ -138,9 +138,9 @@ class OrderProduct(models.Model):
     )
 
     def __str__(self):
-        return '{}-{}: {}{}'.format(
-            self.order.alias, self.product.name,
-            self.total_weight, self.weight_unit
+        return 'Order from {}- {} of {}'.format(
+            self.order_loading_station.loading_station,
+            self.total_weight, self.product.name
         )
 
 

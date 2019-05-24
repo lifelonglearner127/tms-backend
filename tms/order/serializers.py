@@ -12,6 +12,34 @@ from ..account.serializers import (
 from ..account.models import StaffProfile, CustomerProfile
 
 
+class ShortOrderProductSerializer(serializers.ModelSerializer):
+
+    product = ShortProductSerializer()
+
+    class Meta:
+        model = m.OrderProduct
+        fields = (
+            'product',
+        )
+
+
+class ShortOrderProductDeliverSerializer(serializers.ModelSerializer):
+
+    unloading_station = ShortUnLoadingStationSerializer(
+        read_only=True
+    )
+
+    order_product = ShortOrderProductSerializer(
+        read_only=True
+    )
+
+    class Meta:
+        model = m.OrderProductDeliver
+        fields = (
+            'id', 'unloading_station', 'order_product'
+        )
+
+
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
     """
     Serializer for unloading stations selected for product delivery
