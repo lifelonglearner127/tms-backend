@@ -44,10 +44,10 @@ LOCAL_APPS = [
     'tms.account.apps.AccountConfig',
     'tms.info.apps.InfoConfig',
     'tms.core',
-    'tms.order.OrderConfig',
-    'tms.vehicle.VehicleConfig',
-    'tms.job.JobConfig',
-    'tms.road.RoadConfig'
+    'tms.order.apps.OrderConfig',
+    'tms.vehicle.apps.VehicleConfig',
+    'tms.job.apps.JobConfig',
+    'tms.road.apps.RoadConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
