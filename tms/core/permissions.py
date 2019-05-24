@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .constants import USER_ROLE_STAFF, USER_ROLE_ADMIN
+from . import constants as c
 
 
 class IsStaffUser(permissions.BasePermission):
@@ -12,5 +12,15 @@ class IsStaffUser(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return (
             request.method in permissions.SAFE_METHODS or
-            request.user.role in [USER_ROLE_STAFF, USER_ROLE_ADMIN]
+            request.user.role in [c.USER_ROLE_STAFF, c.USER_ROLE_ADMIN]
         )
+
+
+class IsDriverOrEscortUser(permissions.BasePermission):
+    """
+    Permission to only allow admin and staff roles
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.role in [
+            c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+        ]

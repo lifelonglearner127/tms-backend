@@ -101,6 +101,17 @@ class StaffProfileViewSet(StaffViewSet):
         )
 
     @action(detail=False)
+    def staffs(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            m.StaffProfile.staffs.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False)
     def drivers(self, request):
         serializer = s.ShortStaffProfileSerializer(
             m.StaffProfile.drivers.all(),

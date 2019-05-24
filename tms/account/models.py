@@ -96,11 +96,11 @@ class User(AbstractBaseUser):
             [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
 
     objects = UserManager()
-    admins = managers.AdminManager()
-    staffs = managers.StaffManager()
-    drivers = managers.DriverManager()
-    escorts = managers.EscortManager()
-    customers = managers.CustomerManager()
+    admins = managers.UserAdminManager()
+    staffs = managers.UserStaffManager()
+    drivers = managers.UserDriverManager()
+    escorts = managers.UserEscortManager()
+    customers = managers.UserCustomerManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -179,6 +179,7 @@ class StaffProfile(models.Model):
     )
 
     objects = models.Manager()
+    staffs = managers.StaffStaffManager()
     drivers = managers.StaffDriverManager()
     escorts = managers.StaffEscortManager()
 
