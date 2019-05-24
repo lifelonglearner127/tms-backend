@@ -13,6 +13,6 @@ class BlackPointAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.Path)
-class PathAdmin(admin.ModelAdmin):
+@admin.register(m.Route)
+class RouteAdmin(admin.ModelAdmin):
     pass

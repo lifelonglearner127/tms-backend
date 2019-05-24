@@ -48,27 +48,16 @@ class BlackPoint(BasePoint):
         )
 
 
-class Path(models.Model):
+class Route(models.Model):
 
     name = models.CharField(
         max_length=100,
     )
 
-    origin = models.ForeignKey(
-        Point,
-        on_delete=models.CASCADE,
-        related_name='origins'
-    )
-
-    destination = models.ForeignKey(
-        Point,
-        on_delete=models.CASCADE,
-        related_name='destinations'
-    )
-
-    way_points = ArrayField(
+    # current map api allow only 16 waypoints
+    path = ArrayField(
         models.PositiveIntegerField(),
-        size=16
+        size=18
     )
 
     policy = models.PositiveIntegerField()
@@ -76,6 +65,4 @@ class Path(models.Model):
     distance = models.PositiveIntegerField()
 
     def __str__(self):
-        return 'Path from {} to {}'.format(
-            self.origin.name, self.destination.name
-        )
+        return self.name

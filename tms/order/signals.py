@@ -6,13 +6,11 @@ from ..core.pushy import PushyAPI
 
 @receiver(post_save, sender=Job)
 def job_created(sender, instance, created, **kwargs):
-    # Payload data you want to send to devices
+    if instance.driver.user.device_token is None:
+        return
+
+    to = [instance.driver.user.device_token]
     data = {'message': 'New job is assgiend to you'}
-
-    # The recipient device tokens
-    to = [sender.driver.user.device_token]
-
-    # Optional push notification options (such as iOS notification fields)
     options = {
         'notification': {
             'badge': 1,

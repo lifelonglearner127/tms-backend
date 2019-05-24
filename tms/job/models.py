@@ -6,7 +6,7 @@ from ..core import constants
 from ..account.models import StaffProfile
 from ..vehicle.models import Vehicle
 from ..order.models import OrderProductDeliver
-from ..road.models import Path
+from ..road.models import Route
 
 
 class Job(models.Model):
@@ -30,8 +30,8 @@ class Job(models.Model):
         related_name='jobs_as_escort',
     )
 
-    path = models.ForeignKey(
-        Path,
+    route = models.ForeignKey(
+        Route,
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -96,4 +96,8 @@ class Mission(models.Model):
     unloading_weight = models.PositiveIntegerField(
         null=True,
         blank=True
+    )
+
+    is_completed = models.BooleanField(
+        default=False
     )

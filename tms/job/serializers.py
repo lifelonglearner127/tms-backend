@@ -6,14 +6,16 @@ from . import models as m
 from ..order.models import OrderProductDeliver
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
-from ..road.serializers import PathDataSerializer
+from ..road.serializers import RouteDataSerializer
 
 
 class MissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Mission
-        fields = '__all__'
+        fields = (
+            'loading_weight', 'unloading_weight', 'is_completed'
+        )
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -39,7 +41,7 @@ class JobDataSerializer(serializers.ModelSerializer):
     vehicle = ShortVehicleSerializer()
     driver = ShortStaffProfileSerializer()
     escort = ShortStaffProfileSerializer()
-    path = PathDataSerializer()
+    route = RouteDataSerializer()
     missions = MissionSerializer(
         source='mission_set', many=True, read_only=True
     )

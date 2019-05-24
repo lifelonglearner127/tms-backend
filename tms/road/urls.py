@@ -5,9 +5,9 @@ from .import views as v
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
-    r'paths',
-    v.PathViewSet,
-    base_name='path'
+    r'routes',
+    v.RouteViewSet,
+    base_name='route'
 )
 
 router.register(

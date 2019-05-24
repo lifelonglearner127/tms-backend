@@ -7,7 +7,14 @@ class PointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Point
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'address'
+        )
+
+    def to_representation(self, point):
+        ret = super().to_representation(point)
+        ret['lnglat'] = [point.longitude, point.latitude]
+        return ret
 
 
 class BlackPointSerializer(serializers.ModelSerializer):
@@ -17,30 +24,30 @@ class BlackPointSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PathSerializer(serializers.ModelSerializer):
+class RouteSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = m.Path
+        model = m.Route
         fields = '__all__'
 
 
-class WayPointsField(serializers.ListField):
+class PathField(serializers.ListField):
 
     def to_representation(self, value):
+        paths = m.Point.objects.filter(id__in=value)
+        paths = dict([(point.id, point) for point in paths])
 
         serializer = PointSerializer(
-            m.Point.objects.filter(pk__in=value),
+            [paths[id] for id in value],
             many=True
         )
         return serializer.data
 
 
-class PathDataSerializer(serializers.ModelSerializer):
+class RouteDataSerializer(serializers.ModelSerializer):
 
-    origin = PointSerializer()
-    destination = PointSerializer()
-    way_points = WayPointsField()
+    path = PathField()
 
     class Meta:
-        model = m.Path
+        model = m.Route
         fields = '__all__'
