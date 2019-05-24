@@ -244,11 +244,12 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
     Serializer for short data of customer profile
     """
     name = serializers.CharField(source='user.name')
+    mobile = serializers.CharField(source='user.mobile')
 
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'name'
+            'id', 'name', 'mobile'
         )
 
     def to_representation(self, instance):

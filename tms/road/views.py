@@ -26,4 +26,4 @@ class PathViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'update']:
             return s.PathSerializer
         else:
-            return s.PathListSerializer
+            return s.PathDataSerializer

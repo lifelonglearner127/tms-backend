@@ -1,10 +1,12 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants
 from ..account.models import StaffProfile
 from ..vehicle.models import Vehicle
 from ..order.models import OrderProductDeliver
+from ..road.models import Path
 
 
 class Job(models.Model):
@@ -28,10 +30,17 @@ class Job(models.Model):
         related_name='jobs_as_escort',
     )
 
+    path = models.ForeignKey(
+        Path,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
     progress = models.CharField(
         max_length=2,
-        choices=constants.JOB_PROGRESS,
-        default=constants.JOB_PROGRESS_NOT_STARTED
+        choices=constants.JOB_STATUS,
+        default=constants.JOB_STATUS_NOT_STARTED
     )
 
     started_at = models.DateTimeField(
@@ -39,12 +48,14 @@ class Job(models.Model):
         blank=True
     )
 
-    arrived_at_loading_station = models.DateTimeField(
+    arrived_time = ArrayField(
+        models.DateTimeField(),
         null=True,
         blank=True
     )
 
-    arrived_at_quality_station = models.DateTimeField(
+    departure_time = ArrayField(
+        models.DateTimeField(),
         null=True,
         blank=True
     )
@@ -75,11 +86,6 @@ class Mission(models.Model):
     mission = models.ForeignKey(
         OrderProductDeliver,
         on_delete=models.CASCADE
-    )
-
-    arrived_at_unloading_station = models.DateTimeField(
-        null=True,
-        blank=True
     )
 
     loading_weight = models.PositiveIntegerField(

@@ -35,7 +35,7 @@ class WayPointsField(serializers.ListField):
         return serializer.data
 
 
-class PathListSerializer(serializers.ModelSerializer):
+class PathDataSerializer(serializers.ModelSerializer):
 
     origin = PointSerializer()
     destination = PointSerializer()
