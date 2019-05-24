@@ -41,13 +41,13 @@ THIRD_PARTY_APPS = [
     'corsheaders'
 ]
 LOCAL_APPS = [
-    'tms.account',
-    'tms.info',
+    'tms.account.apps.AccountConfig',
+    'tms.info.apps.InfoConfig',
     'tms.core',
-    'tms.order',
-    'tms.vehicle',
-    'tms.job',
-    'tms.road'
+    'tms.order.OrderConfig',
+    'tms.vehicle.VehicleConfig',
+    'tms.job.JobConfig',
+    'tms.road.RoadConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

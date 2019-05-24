@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class OrderConfig(AppConfig):
-    name = 'order'
+    name = 'tms.order'
 
     def ready(self):
         from . import signals   # noqa
