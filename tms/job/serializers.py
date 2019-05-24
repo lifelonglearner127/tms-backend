@@ -30,14 +30,15 @@ class JobSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        mission_ids = self.context.get('missions')
+        mission_ids = self.context.get('mission_ids')
+        mission_weights = self.context.get('mission_weights')
         job = m.Job.objects.create(**validated_data)
-        for mission_id in mission_ids:
+        for i, mission_id in enumerate(mission_ids):
             mission = get_object_or_404(OrderProductDeliver, pk=mission_id)
             m.Mission.objects.create(
                 mission=mission,
                 job=job,
-                **validated_data
+                mission_weight=mission_weights[i]
             )
         return job
 

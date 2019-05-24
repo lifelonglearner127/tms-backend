@@ -23,28 +23,46 @@ class JobViewSet(viewsets.ModelViewSet):
             return s.JobDataSerializer
 
     def create(self, request):
-        data = request.data
-        for job in data:
-            context = {
-                'missions': job.pop('missions', None)
-            }
-            serializer = self.serializer_class(
-                data=job, context=context
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+        jobs = []
 
-        return Response(
-            {'msg': 'Success'},
-            status=status.HTTP_201_CREATED
-        )
+        # if vehicle & driver & escort is mulitple selected for delivers
+        # we assume that this is one job
+        for deliver in request.data:
+            new_job = True
+            driver_id = deliver.get('driver', None)
+            escort_id = deliver.get('escort', None)
+            vehicle_id = deliver.get('vehicle', None)
+            deliver_id = deliver.get('mission', None)
+            mission_weight = deliver.get('mission_weight', 0)
 
-    def update(self, request):
-        data = request.data
-        for job in data:
+            for job in jobs:
+                if (
+                    job['driver'] == driver_id and
+                    job['escort'] == escort_id and
+                    job['vehicle'] == vehicle_id
+                ):
+                    job['mission_ids'].append(deliver_id)
+                    job['mission_weights'].append(mission_weight)
+                    job['total_weight'] += int(mission_weight)
+                    new_job = False
+                    continue
+
+            if new_job:
+                jobs.append({
+                    'driver': driver_id,
+                    'escort': escort_id,
+                    'vehicle': vehicle_id,
+                    'mission_ids': [deliver_id],
+                    'mission_weights': [mission_weight],
+                    'total_weight': int(mission_weight)
+                })
+
+        for job in jobs:
             context = {
-                'missions': job.pop('missions', None)
+                'mission_ids': job.pop('mission_ids', []),
+                'mission_weights': job.pop('mission_weights', [])
             }
+
             serializer = self.serializer_class(
                 data=job, context=context
             )
