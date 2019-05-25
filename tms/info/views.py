@@ -9,8 +9,13 @@ class ProductViewSet(StaffViewSet):
     Viewset for products
     """
     queryset = m.Product.objects.all()
-    serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return s.ProductInfoSerializer
+        else:
+            return s.ProductSerializer
 
 
 class LoadingStationViewSet(StaffViewSet):
@@ -18,8 +23,13 @@ class LoadingStationViewSet(StaffViewSet):
     Viewset for Loading Station
     """
     queryset = m.LoadingStation.objects.all()
-    serializer_class = s.LoadingStationSerializer
     short_serializer_class = s.ShortLoadingStationSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return s.LoadingStationInfoSerializer
+        else:
+            return s.LoadingStationSerializer
 
 
 class UnLoadingStationViewSet(StaffViewSet):
@@ -27,8 +37,13 @@ class UnLoadingStationViewSet(StaffViewSet):
     Viewset for UnLoading Station
     """
     queryset = m.UnLoadingStation.objects.all()
-    serializer_class = s.UnLoadingStationSerializer
     short_serializer_class = s.ShortUnLoadingStationSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return s.UnLoadingStationInfoSerializer
+        else:
+            return s.UnLoadingStationSerializer
 
 
 class QualityStationViewSet(StaffViewSet):

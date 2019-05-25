@@ -13,6 +13,17 @@ class ShortProductSerializer(serializers.ModelSerializer):
         )
 
 
+class ProductInfoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Product
+    """
+    category = serializers.CharField(source='get_category_display')
+
+    class Meta:
+        model = m.Product
+        fields = '__all__'
+
+
 class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product
@@ -33,12 +44,23 @@ class ShortLoadingStationSerializer(serializers.ModelSerializer):
         )
 
 
+class LoadingStationInfoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Loading Station
+    """
+    product_category = serializers.CharField(
+        source='get_product_category_display'
+    )
+
+    class Meta:
+        model = m.LoadingStation
+        fields = '__all__'
+
+
 class LoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station
     """
-    product = ShortProductSerializer(read_only=True)
-
     class Meta:
         model = m.LoadingStation
         fields = '__all__'
@@ -55,12 +77,23 @@ class ShortUnLoadingStationSerializer(serializers.ModelSerializer):
         )
 
 
+class UnLoadingStationInfoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for UnLoading Station
+    """
+    product_category = serializers.CharField(
+        source='get_product_category_display'
+    )
+
+    class Meta:
+        model = m.UnLoadingStation
+        fields = '__all__'
+
+
 class UnLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for UnLoading Station
     """
-    product = ShortProductSerializer(read_only=True)
-
     class Meta:
         model = m.UnLoadingStation
         fields = '__all__'
