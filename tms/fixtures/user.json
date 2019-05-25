@@ -59,15 +59,15 @@
     }
   },
   {
-    "model": "account.StaffProfile",
-    "pk": 3,
+    "model": "account.DriverProfile",
+    "pk": 1,
     "fields": {
       "user": 3
     }
   },
   {
-    "model": "account.StaffProfile",
-    "pk": 4,
+    "model": "account.EscortProfile",
+    "pk": 1,
     "fields": {
       "user": 4
     }

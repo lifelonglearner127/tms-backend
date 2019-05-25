@@ -15,6 +15,12 @@ router.register(
 router.register(
     r'staffs', v.StaffProfileViewSet, base_name='staff'
 )
+router.register(
+    r'drivers', v.DriverProfileViewSet, base_name='driver'
+)
+router.register(
+    r'escorts', v.EscortProfileViewSet, base_name='escort'
+)
 staff_router = routers.NestedSimpleRouter(
     router,
     r'staffs',

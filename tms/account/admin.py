@@ -88,6 +88,16 @@ class StaffProfileAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.DriverProfile)
+class DriverProfileAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.EscortProfile)
+class EscortProfileAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.StaffDocument)
 class StaffDocumentAdmin(admin.ModelAdmin):
     pass

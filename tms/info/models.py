@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..core import constants
+from ..core import constants as c
 from ..core.models import TimeStampedModel, BasicContactModel
 
 
@@ -18,8 +18,8 @@ class Product(TimeStampedModel):
 
     category = models.CharField(
         max_length=10,
-        choices=constants.PRODUCT_TYPE,
-        default=constants.PRODUCT_TYPE_GASOLINE
+        choices=c.PRODUCT_TYPE,
+        default=c.PRODUCT_TYPE_GASOLINE
     )
 
     price = models.DecimalField(
@@ -77,8 +77,8 @@ class LoadStation(Station):
     """
     product_category = models.CharField(
         max_length=10,
-        choices=constants.PRODUCT_TYPE,
-        default=constants.PRODUCT_TYPE_GASOLINE
+        choices=c.PRODUCT_TYPE,
+        default=c.PRODUCT_TYPE_GASOLINE
     )
 
     class Meta:

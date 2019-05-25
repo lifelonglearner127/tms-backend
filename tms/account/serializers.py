@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from . import models as m
 from . import utils
-from ..core import constants
+from ..core import constants as c
 
 
 class PasswordField(serializers.CharField):
@@ -239,6 +239,124 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ShortDriverProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.DriverProfile
+        fields = (
+            'id', 'name'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.user.username
+
+        return ret
+
+
+class DriverProfileSerializer(serializers.ModelSerializer):
+
+    user = MainUserSerializer(read_only=True)
+
+    class Meta:
+        model = m.DriverProfile
+        fields = '__all__'
+
+    def create(self, validated_data):
+        # get user data and create
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+        user = m.User.objects.create_user(**user_data)
+        profile = m.DriverProfile.objects.create(
+            user=user,
+            **validated_data
+        )
+        return profile
+
+    def update(self, instance, validated_data):
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+        password = user_data.pop('password', None)
+        if password is not None:
+            instance.user.set_password(password)
+
+        for (key, value) in user_data.items():
+            setattr(instance.user, key, value)
+        instance.user.save()
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        return instance
+
+
+class ShortEscortProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.EscortProfile
+        fields = (
+            'id', 'name'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.user.username
+
+        return ret
+
+
+class EscortProfileSerializer(serializers.ModelSerializer):
+
+    user = MainUserSerializer(read_only=True)
+
+    class Meta:
+        model = m.EscortProfile
+        fields = '__all__'
+
+    def create(self, validated_data):
+        # get user data and create
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+        user = m.User.objects.create_user(**user_data)
+        profile = m.EscortProfile.objects.create(
+            user=user,
+            **validated_data
+        )
+        return profile
+
+    def update(self, instance, validated_data):
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError(
+                'User data is not provided'
+            )
+        password = user_data.pop('password', None)
+        if password is not None:
+            instance.user.set_password(password)
+
+        for (key, value) in user_data.items():
+            setattr(instance.user, key, value)
+        instance.user.save()
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        return instance
+
+
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of customer profile
@@ -278,7 +396,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'User data is not provided'
             )
-        user_data.setdefault('role', constants.USER_ROLE_CUSTOMER)
+        user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
         user = m.User.objects.create_user(**user_data)
 
         # get associated data

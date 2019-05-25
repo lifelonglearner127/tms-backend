@@ -1,5 +1,5 @@
 from ..core.views import StaffViewSet, ChoicesView
-from ..core.constants import PRODUCT_TYPE
+from ..core import constants as c
 from . import models as m
 from . import serializers as s
 
@@ -51,4 +51,4 @@ class ProductCategoriesView(ChoicesView):
     """
     APIView for returning product categories
     """
-    static_choices = PRODUCT_TYPE
+    static_choices = c.PRODUCT_TYPE

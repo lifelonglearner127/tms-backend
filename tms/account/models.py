@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from . import managers
-from ..core import constants
+from ..core import constants as c
 from ..core.validations import validate_mobile
 
 
@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, password, **extra_fields):
-        extra_fields.setdefault('role', constants.USER_ROLE_ADMIN)
+        extra_fields.setdefault('role', c.USER_ROLE_ADMIN)
 
         user = self.create_user(
             username,
@@ -86,14 +86,14 @@ class User(AbstractBaseUser):
 
     role = models.CharField(
         max_length=1,
-        choices=constants.USER_ROLE,
-        default=constants.USER_ROLE_STAFF
+        choices=c.USER_ROLE,
+        default=c.USER_ROLE_STAFF
     )
 
     @property
     def is_staff(self):
         return self.role in \
-            [constants.USER_ROLE_ADMIN, constants.USER_ROLE_STAFF]
+            [c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
 
     objects = UserManager()
     admins = managers.UserAdminManager()
@@ -109,27 +109,22 @@ class User(AbstractBaseUser):
         return self.username
 
     def has_perm(self, perm, obj=None):
-        if self.is_active and self.role == constants.USER_ROLE_ADMIN:
+        if self.is_active and self.role == c.USER_ROLE_ADMIN:
             return True
 
         return False
 
     def has_module_perms(self, app_label):
-        if self.is_active and self.role == constants.USER_ROLE_ADMIN:
+        if self.is_active and self.role == c.USER_ROLE_ADMIN:
             return True
 
         return False
 
 
-class StaffProfile(models.Model):
+class BaseStaffProfile(models.Model):
     """
     Company Staff Profile Model
     """
-    user = models.OneToOneField(
-        User,
-        related_name='staff_profile',
-        on_delete=models.CASCADE
-    )
 
     id_card = models.CharField(
         max_length=100,
@@ -178,13 +173,70 @@ class StaffProfile(models.Model):
         blank=True
     )
 
-    objects = models.Manager()
-    staffs = managers.StaffStaffManager()
-    drivers = managers.StaffDriverManager()
-    escorts = managers.StaffEscortManager()
+    class Meta:
+        abstract = True
+
+
+class StaffProfile(BaseStaffProfile):
+
+    user = models.OneToOneField(
+        User,
+        related_name='staff_profile',
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
-        return '{}\'s profile'.format(self.user.username)
+        return '{}-{}\'s profile'.format(
+            self.user.role, self.user.username
+        )
+
+
+class DriverProfile(BaseStaffProfile):
+
+    user = models.OneToOneField(
+        User,
+        related_name='driver_profile',
+        on_delete=models.CASCADE
+    )
+
+    status = models.CharField(
+        max_length=1,
+        choices=c.DRIVER_STATUS,
+        default=c.DRIVER_STATUS_AVAILABLE
+    )
+
+    objects = models.Manager()
+    availables = managers.AvailableDriverManager()
+    inworks = managers.InWorkDriverManager()
+
+    def __str__(self):
+        return '{}-{}\'s profile'.format(
+            self.user.role, self.user.username
+        )
+
+
+class EscortProfile(BaseStaffProfile):
+
+    user = models.OneToOneField(
+        User,
+        related_name='escort_profile',
+        on_delete=models.CASCADE
+    )
+
+    status = models.CharField(
+        max_length=1,
+        choices=c.DRIVER_STATUS,
+        default=c.DRIVER_STATUS_AVAILABLE
+    )
+
+    objects = models.Manager()
+    availables = managers.AvailableDriverManager()
+    inworks = managers.InWorkDriverManager()
+
+    def __str__(self):
+        return '{}-{}\'s profile'.format(
+            self.user.role, self.user.username
+        )
 
 
 class CustomerProfile(models.Model):
@@ -246,8 +298,8 @@ class StaffDocument(models.Model):
 
     document_type = models.CharField(
         max_length=1,
-        choices=constants.USER_DOCUMENT_TYPE,
-        default=constants.USER_DOCUMENT_TYPE_D1
+        choices=c.USER_DOCUMENT_TYPE,
+        default=c.USER_DOCUMENT_TYPE_D1
     )
 
     expires_on = models.DateField()

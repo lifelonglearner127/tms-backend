@@ -1,9 +1,8 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
-from ..core.constants import USER_DOCUMENT_TYPE
+from ..core import constants as c
 from ..core.views import StaffViewSet, ChoicesView
 from . import models as m
 from . import serializers as s
@@ -54,13 +53,7 @@ class UserViewSet(StaffViewSet):
     serializer_class = s.UserSerializer
 
 
-class StaffProfileViewSet(StaffViewSet):
-    """
-    Viewset for Staff
-    """
-    queryset = m.StaffProfile.objects.all()
-    serializer_class = s.StaffProfileSerializer
-    short_serializer_class = s.ShortStaffProfileSerializer
+class BaseStaffProfileViewSet(StaffViewSet):
 
     def create(self, request):
         context = {
@@ -100,38 +93,32 @@ class StaffProfileViewSet(StaffViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False)
-    def staffs(self, request):
-        serializer = s.ShortStaffProfileSerializer(
-            m.StaffProfile.staffs.all(),
-            many=True
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
 
-    @action(detail=False)
-    def drivers(self, request):
-        serializer = s.ShortStaffProfileSerializer(
-            m.StaffProfile.drivers.all(),
-            many=True
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+class StaffProfileViewSet(BaseStaffProfileViewSet):
+    """
+    Viewset for Staff
+    """
+    queryset = m.StaffProfile.objects.all()
+    serializer_class = s.StaffProfileSerializer
+    short_serializer_class = s.ShortStaffProfileSerializer
 
-    @action(detail=False)
-    def escorts(self, request):
-        serializer = s.ShortStaffProfileSerializer(
-            m.StaffProfile.escorts.all(),
-            many=True
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+
+class DriverProfileViewSet(BaseStaffProfileViewSet):
+    """
+    Viewset for Staff
+    """
+    queryset = m.DriverProfile.objects.all()
+    serializer_class = s.DriverProfileSerializer
+    short_serializer_class = s.ShortDriverProfileSerializer
+
+
+class EscortProfileViewSet(BaseStaffProfileViewSet):
+    """
+    Viewset for Staff
+    """
+    queryset = m.EscortProfile.objects.all()
+    serializer_class = s.EscortProfileSerializer
+    short_serializer_class = s.ShortEscortProfileSerializer
 
 
 class CustomerProfileViewSet(StaffViewSet):
@@ -228,4 +215,4 @@ class UserDocumentTypeAPIView(ChoicesView):
     """
     APIView for returning product categories
     """
-    static_choices = USER_DOCUMENT_TYPE
+    static_choices = c.USER_DOCUMENT_TYPE

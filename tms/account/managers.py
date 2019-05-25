@@ -73,3 +73,23 @@ class StaffEscortManager(models.Manager):
         return super().get_queryset().filter(
             user__role=c.USER_ROLE_ESCORT
         )
+
+
+class AvailableDriverManager(models.Manager):
+    """
+    Available Driver Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=c.DRIVER_STATUS_AVAILABLE
+        )
+
+
+class InWorkDriverManager(models.Manager):
+    """
+    Working Driver Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=c.DRIVER_STATUS_INWORK
+        )

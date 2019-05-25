@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 from . import managers
-from ..core import constants
-from ..account.models import StaffProfile
+from ..core import constants as c
+from ..account.models import DriverProfile, EscortProfile
 from ..vehicle.models import Vehicle
 from ..order.models import OrderProductDeliver
 from ..road.models import Route
@@ -19,15 +19,15 @@ class Job(models.Model):
     )
 
     driver = models.ForeignKey(
-        StaffProfile,
+        DriverProfile,
         on_delete=models.CASCADE,
-        related_name='jobs_as_primary'
+        related_name='jobs'
     )
 
     escort = models.ForeignKey(
-        StaffProfile,
+        EscortProfile,
         on_delete=models.CASCADE,
-        related_name='jobs_as_escort',
+        related_name='jobs',
     )
 
     route = models.ForeignKey(
@@ -39,8 +39,8 @@ class Job(models.Model):
 
     progress = models.CharField(
         max_length=2,
-        choices=constants.JOB_STATUS,
-        default=constants.JOB_STATUS_NOT_STARTED
+        choices=c.JOB_STATUS,
+        default=c.JOB_STATUS_NOT_STARTED
     )
 
     started_at = models.DateTimeField(

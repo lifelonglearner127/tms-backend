@@ -4,7 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..core import constants
+from ..core import constants as c
 from ..core.permissions import IsDriverOrEscortUser
 from . import models as m
 from . import serializers as s
@@ -98,8 +98,8 @@ class JobViewSet(viewsets.ModelViewSet):
     def progress_jobs(self, request):
         serializer = self.serializer_class(
             request.user.staff_profile.jobs_as_primary.filter(
-                ~(Q(progress=constants.JOB_PROGRESS_NOT_STARTED) |
-                  Q(progress=constants.JOB_PROGRESS_COMPLETE))
+                ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
+                  Q(progress=c.JOB_PROGRESS_COMPLETE))
             ).first()
         )
 
@@ -115,7 +115,7 @@ class JobViewSet(viewsets.ModelViewSet):
     def future_jobs(self, request):
         serializer = self.serializer_class(
             request.user.staff_profile.jobs_as_primary.filter(
-                progress=constants.JOB_PROGRESS_NOT_STARTED
+                progress=c.JOB_PROGRESS_NOT_STARTED
             ),
             many=True
         )

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework_jwt.settings import api_settings
 
-from ...core import constants
+from ...core import constants as c
 
 
 UserModel = get_user_model()
@@ -19,7 +19,7 @@ class LoginTestSet(APITestCase):
             username='admin',
             mobile='123',
             password='gibupjo127',
-            role=constants.USER_ROLE_ADMIN
+            role=c.USER_ROLE_ADMIN
         )
         payload = jwt_payload_handler(self.admin)
         self.admin_token = jwt_encode_handler(payload)
@@ -28,7 +28,7 @@ class LoginTestSet(APITestCase):
             username='staff',
             mobile='456',
             password='gibupjo127',
-            role=constants.USER_ROLE_STAFF
+            role=c.USER_ROLE_STAFF
         )
         payload = jwt_payload_handler(self.staff)
         self.staff_token = jwt_encode_handler(payload)
@@ -37,7 +37,7 @@ class LoginTestSet(APITestCase):
             username='driver',
             mobile='789',
             password='gibupjo127',
-            role=constants.USER_ROLE_DRIVER
+            role=c.USER_ROLE_DRIVER
         )
         payload = jwt_payload_handler(self.driver)
         self.driver_token = jwt_encode_handler(payload)
@@ -46,7 +46,7 @@ class LoginTestSet(APITestCase):
             username='escrot',
             mobile='123456',
             password='gibupjo127',
-            role=constants.USER_ROLE_ESCORT
+            role=c.USER_ROLE_ESCORT
         )
         payload = jwt_payload_handler(self.escort)
         self.escort_token = jwt_encode_handler(payload)
@@ -55,7 +55,7 @@ class LoginTestSet(APITestCase):
             username='customer',
             mobile='456789',
             password='gibupjo127',
-            role=constants.USER_ROLE_CUSTOMER
+            role=c.USER_ROLE_CUSTOMER
         )
         payload = jwt_payload_handler(self.customer)
         self.customer_token = jwt_encode_handler(payload)

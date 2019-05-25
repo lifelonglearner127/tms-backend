@@ -45,6 +45,15 @@ VEHICLE_DOCUMENT_TYPE = (
     (VEHICLE_DOCUMENT_TYPE_D2, 'D2')
 )
 
+# vehicle status
+VEHICLE_STATUS_AVAILABLE = 'A'
+VEHICLE_STATUS_INWORK = 'P'
+VEHICLE_STATUS_REPAIR = 'R'
+VEHICLE_STATUS = (
+    (VEHICLE_STATUS_AVAILABLE, 'Available'),
+    (VEHICLE_STATUS_INWORK, 'In Work'),
+    (VEHICLE_STATUS_REPAIR, 'Repair')
+)
 
 # Account app - Account constants
 # ----------------------------------------------------------------------------
@@ -60,6 +69,14 @@ USER_ROLE = (
     (USER_ROLE_DRIVER, 'Driver'),
     (USER_ROLE_ESCORT, 'Escort'),
     (USER_ROLE_CUSTOMER, 'Customer')
+)
+
+# driver status
+DRIVER_STATUS_AVAILABLE = 'A'
+DRIVER_STATUS_INWORK = 'W'
+DRIVER_STATUS = (
+    (DRIVER_STATUS_AVAILABLE, 'Available'),
+    (DRIVER_STATUS_INWORK, 'In Work')
 )
 
 # user document type choices

@@ -1,7 +1,7 @@
 from django.db import models
 
 from . import managers
-from ..core import constants
+from ..core import constants as c
 from ..core.models import TimeStampedModel
 from ..info.models import LoadingStation, UnLoadingStation, Product
 from ..account.models import StaffProfile, CustomerProfile
@@ -28,14 +28,14 @@ class Order(TimeStampedModel):
 
     order_source = models.CharField(
         max_length=1,
-        choices=constants.ORDER_SOURCE,
-        default=constants.ORDER_SOURCE_INTERNAL
+        choices=c.ORDER_SOURCE,
+        default=c.ORDER_SOURCE_INTERNAL
     )
 
     status = models.CharField(
         max_length=1,
-        choices=constants.ORDER_STATUS,
-        default=constants.ORDER_STATUS_PENDING
+        choices=c.ORDER_STATUS,
+        default=c.ORDER_STATUS_PENDING
     )
 
     loading_stations = models.ManyToManyField(
@@ -104,8 +104,8 @@ class OrderProduct(models.Model):
 
     weight_unit = models.CharField(
         max_length=2,
-        choices=constants.UNIT_WEIGHT,
-        default=constants.UNIT_WEIGHT_TON
+        choices=c.UNIT_WEIGHT,
+        default=c.UNIT_WEIGHT_TON
     )
 
     loss = models.PositiveIntegerField(
@@ -114,14 +114,14 @@ class OrderProduct(models.Model):
 
     loss_unit = models.CharField(
         max_length=2,
-        choices=constants.UNIT_WEIGHT,
-        default=constants.UNIT_WEIGHT_TON
+        choices=c.UNIT_WEIGHT,
+        default=c.UNIT_WEIGHT_TON
     )
 
     payment_unit = models.CharField(
         max_length=2,
-        choices=constants.UNIT_WEIGHT,
-        default=constants.UNIT_WEIGHT_TON
+        choices=c.UNIT_WEIGHT,
+        default=c.UNIT_WEIGHT_TON
     )
 
     is_split = models.BooleanField(

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
-from ..core import constants
+from ..core import constants as c
 
 
 class BasePoint(models.Model):
@@ -38,8 +38,8 @@ class BlackPoint(BasePoint):
 
     category = models.CharField(
         max_length=1,
-        choices=constants.BLACKDOT_TYPE,
-        default=constants.BLACKDOT_TYPE_ROAD_REPAIR
+        choices=c.BLACKDOT_TYPE,
+        default=c.BLACKDOT_TYPE_ROAD_REPAIR
     )
 
     def __str__(self):

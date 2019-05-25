@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..core import constants
+from ..core import constants as c
 
 
 class PendingJobManager(models.Manager):
@@ -9,7 +9,7 @@ class PendingJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.JOB_STATUS_PENDING
+            status=c.JOB_STATUS_PENDING
         )
 
 
@@ -19,7 +19,7 @@ class InProgressJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.JOB_STATUS_INPROGRESS
+            status=c.JOB_STATUS_INPROGRESS
         )
 
 
@@ -29,5 +29,5 @@ class CompleteJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.JOB_STATUS_COMPLETE
+            status=c.JOB_STATUS_COMPLETE
         )

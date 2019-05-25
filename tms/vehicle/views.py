@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 
 from ..openapi.interfaces import G7Interface
 from ..core.views import StaffViewSet, ChoicesView
-from ..core.constants import VEHICLE_MODEL_TYPE, VEHICLE_BRAND
+from ..core import constants as c
 from . import serializers as s
 from . import models as m
 
@@ -108,11 +108,11 @@ class VehicleModelAPIView(ChoicesView):
     """
     APIView for returning vehicle models
     """
-    static_choices = VEHICLE_MODEL_TYPE
+    static_choices = c.VEHICLE_MODEL_TYPE
 
 
 class VehicleBrandAPIView(ChoicesView):
     """
     APIView for returning vehicle brand
     """
-    static_choices = VEHICLE_BRAND
+    static_choices = c.VEHICLE_BRAND

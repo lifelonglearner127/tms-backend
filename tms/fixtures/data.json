@@ -72,15 +72,15 @@
     }
   },
   {
-    "model": "account.StaffProfile",
-    "pk": 3,
+    "model": "account.DriverProfile",
+    "pk": 1,
     "fields": {
       "user": 3
     }
   },
   {
-    "model": "account.StaffProfile",
-    "pk": 4,
+    "model": "account.EscortProfile",
+    "pk": 1,
     "fields": {
       "user": 4
     }
@@ -571,13 +571,11 @@
     }
   },
   {
-    "model": "road.Path",
+    "model": "road.Route",
     "pk": 1,
     "fields": {
         "name": "A-B-C",
-        "origin": 1,
-        "destination": 2,
-        "way_points": [3],
+        "path": [1,2,3],
         "policy": 0,
         "distance": 0
     }

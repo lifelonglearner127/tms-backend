@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..core import constants
+from ..core import constants as c
 
 
 class PendingOrderManager(models.Manager):
@@ -9,7 +9,7 @@ class PendingOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_PENDING
+            status=c.ORDER_STATUS_PENDING
         )
 
 
@@ -19,7 +19,7 @@ class InProgressOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_INPROGRESS
+            status=c.ORDER_STATUS_INPROGRESS
         )
 
 
@@ -29,7 +29,7 @@ class CompleteOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.ORDER_STATUS_COMPLETE
+            status=c.ORDER_STATUS_COMPLETE
         )
 
 
@@ -39,7 +39,7 @@ class InternalOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.ORDER_SOURCE_INTERNAL
+            status=c.ORDER_SOURCE_INTERNAL
         )
 
 
@@ -49,5 +49,5 @@ class CustomerOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=constants.ORDER_SOURCE_CUSTOMER
+            status=c.ORDER_SOURCE_CUSTOMER
         )
