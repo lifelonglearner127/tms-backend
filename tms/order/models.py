@@ -3,7 +3,9 @@ from django.db import models
 from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel
-from ..info.models import LoadingStation, UnLoadingStation, Product
+from ..info.models import (
+    LoadingStation, UnLoadingStation, QualityStation, Product
+)
 from ..account.models import StaffProfile, CustomerProfile
 
 
@@ -70,19 +72,26 @@ class OrderLoadingStation(models.Model):
         on_delete=models.CASCADE
     )
 
+    quality_station = models.ForeignKey(
+        QualityStation,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
     products = models.ManyToManyField(
         Product,
         through='OrderProduct'
     )
 
-    time = models.DateTimeField(
+    due_time = models.DateTimeField(
         null=True,
         blank=True
     )
 
     def __str__(self):
         return '{} - Load from {} at {}'.format(
-            self.order.alias, self.loading_station.name, self.time
+            self.order.alias, self.loading_station.name, self.due_time
         )
 
 

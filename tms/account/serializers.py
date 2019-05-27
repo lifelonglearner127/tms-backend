@@ -501,7 +501,8 @@ class CompanyMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'username', 'mobile', 'name', 'password', 'role_name', 'role', 'profile'
+            'id', 'username', 'mobile', 'name', 'password', 'role_name',
+            'role', 'profile'
         )
 
     def create(self, validated_data):

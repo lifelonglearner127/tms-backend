@@ -52,6 +52,7 @@ class QualityStationViewSet(StaffViewSet):
     """
     queryset = m.QualityStation.objects.all()
     serializer_class = s.QualityStationSerializer
+    short_serializer_class = s.ShortQualityStationSerializer
 
 
 class OilStationViewSet(StaffViewSet):

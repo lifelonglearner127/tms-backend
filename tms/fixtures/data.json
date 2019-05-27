@@ -502,6 +502,36 @@
       }
   },
   {
+    "model": "info.QualityStation",
+    "pk": 1,
+    "fields": {
+        "name": "Quality Station A",
+        "contact": "Quality Station A Contact",
+        "mobile": "123456789",
+        "address": "Quality Station A Address",
+        "longitude": 116.397428,
+        "latitude": 39.90923,
+        "radius": 100,
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "info.QualityStation",
+    "pk": 2,
+    "fields": {
+        "name": "Quality Station B",
+        "contact": "Quality Station B Contact",
+        "mobile": "123456789",
+        "address": "Quality Station B Address",
+        "longitude": 116.397428,
+        "latitude": 39.90923,
+        "radius": 100,
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
       "model": "vehicle.Vehicle",
       "pk": 1,
       "fields": {

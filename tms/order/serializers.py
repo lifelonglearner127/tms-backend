@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..info.models import UnLoadingStation, LoadingStation
+from ..info.models import UnLoadingStation, LoadingStation, QualityStation
 from ..info.serializers import (
     ShortUnLoadingStationSerializer, ShortLoadingStationSerializer,
-    ShortProductSerializer
+    ShortProductSerializer, ShortQualityStationSerializer
 )
 from ..account.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer
@@ -77,7 +77,7 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
     Serializer for ordred loading statins
     """
     loading_station = ShortLoadingStationSerializer(read_only=True)
-
+    quality_station = ShortQualityStationSerializer(read_only=True)
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
@@ -85,7 +85,7 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderLoadingStation
         fields = (
-            'id', 'loading_station', 'time', 'products'
+            'id', 'loading_station', 'quality_station', 'due_time', 'products'
         )
 
 
@@ -149,18 +149,28 @@ class OrderSerializer(serializers.ModelSerializer):
                     'Products data are not provided'
                 )
 
-            station_data = loading_station_data.pop('loading_station', None)
+            station_data = loading_station_data.pop(
+                'loading_station', None
+            )
             loading_station_id = station_data.get('id', None)
 
+            station_data = loading_station_data.pop(
+                'quality_station', None
+            )
+            quality_station_id = station_data.get('id', None)
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
                 loading_station = LoadingStation.objects.get(
                     pk=loading_station_id
                 )
+                quality_station = QualityStation.objects.get(
+                    pk=quality_station_id
+                )
                 order_loading_station = m.OrderLoadingStation.objects.create(
                     order=order,
                     loading_station=loading_station,
+                    quality_station=quality_station,
                     **loading_station_data
                 )
             except LoadingStation.DoesNotExist:

@@ -32,13 +32,13 @@ class VehiclePositionSerializer(serializers.ModelSerializer):
     """
     Serializer for vehicle playback
     """
-    position = serializers.SerializerMethodField()
+    lnglat = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Vehicle
         fields = (
-            'plate_num', 'speed', 'position'
+            'plate_num', 'speed', 'lnglat'
         )
 
-    def get_position(self, obj):
+    def get_lnglat(self, obj):
         return [obj.longitude, obj.latitude]
