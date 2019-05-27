@@ -216,3 +216,50 @@ class UserDocumentTypeAPIView(ChoicesView):
     APIView for returning product categories
     """
     static_choices = c.USER_DOCUMENT_TYPE
+
+
+class CompanyMemberViewSet(StaffViewSet):
+    """
+    """
+    serializer_class = s.CompanyMemberSerializer
+
+    def get_queryset(self):
+        return m.User.companymembers.all()
+
+    def create(self, request):
+        context = {
+            'profile': request.data.pop('profile')
+        }
+
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+        context = {
+            'profile': request.data.pop('profile')
+        }
+
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

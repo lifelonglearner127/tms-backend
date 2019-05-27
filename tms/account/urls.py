@@ -21,6 +21,9 @@ router.register(
 router.register(
     r'escorts', v.EscortProfileViewSet, base_name='escort'
 )
+router.register(
+    r'company-members', v.CompanyMemberViewSet, base_name='company-members'
+)
 staff_router = routers.NestedSimpleRouter(
     router,
     r'staffs',

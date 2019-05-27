@@ -194,6 +194,13 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
         return ret
 
 
+class OnlyStaffProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.StaffProfile
+        fields = '__all__'
+
+
 class StaffProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for StaffProfile
@@ -241,6 +248,8 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
 class ShortDriverProfileSerializer(serializers.ModelSerializer):
 
+    name = serializers.CharField(source='user.name')
+
     class Meta:
         model = m.DriverProfile
         fields = (
@@ -253,6 +262,13 @@ class ShortDriverProfileSerializer(serializers.ModelSerializer):
             ret['name'] = instance.user.username
 
         return ret
+
+
+class OnlyDriverProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.DriverProfile
+        fields = '__all__'
 
 
 class DriverProfileSerializer(serializers.ModelSerializer):
@@ -300,6 +316,8 @@ class DriverProfileSerializer(serializers.ModelSerializer):
 
 class ShortEscortProfileSerializer(serializers.ModelSerializer):
 
+    name = serializers.CharField(source='user.name')
+
     class Meta:
         model = m.EscortProfile
         fields = (
@@ -312,6 +330,13 @@ class ShortEscortProfileSerializer(serializers.ModelSerializer):
             ret['name'] = instance.user.username
 
         return ret
+
+
+class OnlyEscortProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.EscortProfile
+        fields = '__all__'
 
 
 class EscortProfileSerializer(serializers.ModelSerializer):
@@ -464,3 +489,105 @@ class StaffDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.StaffDocument
         fields = '__all__'
+
+
+class CompanyMemberSerializer(serializers.ModelSerializer):
+
+    profile = serializers.SerializerMethodField()
+    role_name = serializers.CharField(
+        source='get_role_display', read_only=True
+    )
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'username', 'mobile', 'name', 'password', 'role_name', 'role', 'profile'
+        )
+
+    def create(self, validated_data):
+        # get user data and create
+        profile_data = self.context.get('profile', None)
+        if profile_data is None:
+            raise serializers.ValidationError(
+                'Profile data is not provided'
+            )
+        user = m.User.objects.create_user(**validated_data)
+        if user.role == c.USER_ROLE_STAFF:
+            m.StaffProfile.objects.create(
+                user=user,
+                **profile_data
+            )
+        elif user.role == c.USER_ROLE_DRIVER:
+            m.DriverProfile.objects.create(
+                user=user,
+                **profile_data
+            )
+        elif user.role == c.USER_ROLE_ESCORT:
+            m.EscortProfile.objects.create(
+                user=user,
+                **profile_data
+            )
+
+        return user
+
+    def update(self, instance, validated_data):
+        profile_data = self.context.get('profile', None)
+        if profile_data is None:
+            raise serializers.ValidationError(
+                'Profile data is not provided'
+            )
+        password = validated_data.pop('password', None)
+        if password is not None:
+            instance.set_password(password)
+
+        pre_role = instance.role
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        if pre_role == instance.role:
+            if instance.role == c.USER_ROLE_STAFF:
+                for (key, value) in profile_data.items():
+                    setattr(instance.staff_profile, key, value)
+                instance.staff_profile.save()
+            elif instance.role == c.USER_ROLE_DRIVER:
+                for (key, value) in profile_data.items():
+                    setattr(instance.driver_profile, key, value)
+                instance.driver_profile.save()
+            elif instance.role == c.USER_ROLE_ESCORT:
+                for (key, value) in profile_data.items():
+                    setattr(instance.escort_profile, key, value)
+                instance.escort_profile.save()
+        else:
+            if pre_role == c.USER_ROLE_STAFF:
+                instance.staff_profile.delete()
+            elif pre_role == c.USER_ROLE_DRIVER:
+                instance.driver_profile.delete()
+            elif pre_role == c.USER_ROLE_ESCORT:
+                instance.escort_profile.delete()
+
+            if instance.role == c.USER_ROLE_STAFF:
+                m.StaffProfile.objects.create(
+                    user=instance,
+                    **profile_data
+                )
+            elif instance.role == c.USER_ROLE_DRIVER:
+                m.DriverProfile.objects.create(
+                    user=instance,
+                    **profile_data
+                )
+            elif instance.role == c.USER_ROLE_ESCORT:
+                m.EscortProfile.objects.create(
+                    user=instance,
+                    **profile_data
+                )
+
+        return instance
+
+    def get_profile(self, user):
+        if user.role == c.USER_ROLE_DRIVER:
+            return OnlyDriverProfileSerializer(user.driver_profile).data
+        elif user.role == c.USER_ROLE_ESCORT:
+            return OnlyEscortProfileSerializer(user.escort_profile).data
+        elif user.role == c.USER_ROLE_STAFF:
+            return OnlyStaffProfileSerializer(user.staff_profile).data

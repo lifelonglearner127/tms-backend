@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 from ..core import constants as c
 
@@ -43,6 +44,14 @@ class UserCustomerManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(role=c.USER_ROLE_CUSTOMER)
+
+
+class UserCompanyMemberManager(models.Manager):
+    """
+    Company Member Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(~Q(role=c.USER_ROLE_CUSTOMER))
 
 
 class StaffStaffManager(models.Manager):

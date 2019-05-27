@@ -101,6 +101,7 @@ class User(AbstractBaseUser):
     drivers = managers.UserDriverManager()
     escorts = managers.UserEscortManager()
     customers = managers.UserCustomerManager()
+    companymembers = managers.UserCompanyMemberManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
