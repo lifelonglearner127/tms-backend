@@ -5,17 +5,17 @@ from com.chinawayltd.api.gateway.sdk import client
 from com.chinawayltd.api.gateway.sdk.http import request
 from com.chinawayltd.api.gateway.sdk.common import constant
 
-from .endpoints import G7_OPENAPI_ENDPOINTS
+from .endpoints import G7_HTTP_ENDPOINTS
 
 
 vehicle_basic_client = client.DefaultClient(
-    app_key=settings.OPENAPI_VEHICLE_BASIC_ACCESS_ID,
-    app_secret=settings.OPENAPI_VEHICLE_BASIC_SECRET
+    app_key=settings.G7_HTTP_VEHICLE_BASIC_ACCESS_ID,
+    app_secret=settings.G7_HTTP_VEHICLE_BASIC_SECRET
 )
 
 vehicle_data_client = client.DefaultClient(
-    app_key=settings.OPENAPI_VEHICLE_DATA_ACCESS_ID,
-    app_secret=settings.OPENAPI_VEHICLE_DATA_SECRET
+    app_key=settings.G7_HTTP_VEHICLE_DATA_ACCESS_ID,
+    app_secret=settings.G7_HTTP_VEHICLE_DATA_SECRET
 )
 
 
@@ -26,7 +26,7 @@ class G7Interface:
         cli = None
         api_call = None
 
-        for module_name, module in G7_OPENAPI_ENDPOINTS.items():
+        for module_name, module in G7_HTTP_ENDPOINTS.items():
             for name, api in module.items():
                 if name == api_name:
                     if module_name == 'VEHICLE_BASIC':
@@ -40,9 +40,9 @@ class G7Interface:
             return
 
         req = request.Request(
-            host=settings.OPENAPI_HOST,
+            host=settings.G7_HTTP_HOST,
             protocol=constant.HTTP,
-            baseurl=settings.OPENAPI_BASEURL,
+            baseurl=settings.G7_HTTP_BASEURL,
             url=api_call['URL'],
             method=api_call['METHOD'],
             time_out=30000

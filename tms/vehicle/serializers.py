@@ -28,12 +28,17 @@ class VehicleDocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class VehiclePlaybackSerializer(serializers.Serializer):
+class VehiclePositionSerializer(serializers.ModelSerializer):
     """
     Serializer for vehicle playback
     """
-    lat = serializers.FloatField()
-    lng = serializers.FloatField()
-    speed = serializers.IntegerField()
-    course = serializers.IntegerField()
-    time = serializers.IntegerField()
+    position = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Vehicle
+        fields = (
+            'plate_num', 'speed', 'position'
+        )
+
+    def get_position(self, obj):
+        return [obj.longitude, obj.latitude]

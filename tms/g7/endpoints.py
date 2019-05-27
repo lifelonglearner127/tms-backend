@@ -1,4 +1,4 @@
-G7_OPENAPI_ENDPOINTS = {
+G7_HTTP_ENDPOINTS = {
     'VEHICLE_BASIC': {
         'VEHICLE_ADD': {
             'URL': '/v1/base/truck/add_self_truck',

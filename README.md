@@ -42,10 +42,10 @@ python manage.py runserver
 
 Running on Heroku
 ```
-heroku config:set OPENAPI_HOST = ''
-heroku config:set OPENAPI_BASEURL = ''
-heroku config:set OPENAPI_VEHICLE_BASIC_ACCESS_ID = ''
-heroku config:set OPENAPI_VEHICLE_BASIC_SECRET = ''
-heroku config:set OPENAPI_VEHICLE_DATA_ACCESS_ID = ''
-heroku config:set OPENAPI_VEHICLE_DATA_SECRET = ''
+heroku config:set G7_HTTP_HOST = ''
+heroku config:set G7_HTTP_BASEURL = ''
+heroku config:set G7_HTTP_VEHICLE_BASIC_ACCESS_ID = ''
+heroku config:set G7_HTTP_VEHICLE_BASIC_SECRET = ''
+heroku config:set G7_HTTP_VEHICLE_DATA_ACCESS_ID = ''
+heroku config:set G7_HTTP_VEHICLE_DATA_SECRET = ''
 ```

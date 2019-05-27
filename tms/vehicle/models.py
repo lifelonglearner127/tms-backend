@@ -41,6 +41,21 @@ class Vehicle(TimeStampedModel):
         default=c.VEHICLE_STATUS_AVAILABLE
     )
 
+    longitude = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    latitude = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    speed = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
     objects = models.Manager()
     inworks = managers.InWorkVehicleManager()
     availables = managers.AvailableVehicleManager()

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from ..openapi.interfaces import G7Interface
+from ..g7.interfaces import G7Interface
 from ..core.views import StaffViewSet, ChoicesView
 from ..core import constants as c
 from . import serializers as s
@@ -19,7 +19,7 @@ class VehicleViewSet(StaffViewSet):
     serializer_class = s.VehicleSerializer
     short_serializer_class = s.ShortVehicleSerializer
 
-    @action(detail=True, methods=['get'], url_path='vehicle-playback')
+    @action(detail=True, methods=['get'], url_path='playback')
     def vehicle_history_track_query(self, request, pk=None):
         vehicle = self.get_object()
         from_datetime = self.request.query_params.get('from', None)
@@ -59,6 +59,16 @@ class VehicleViewSet(StaffViewSet):
 
         return Response(
             results,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='position')
+    def vehicle_position(self, request):
+        vehicles = m.Vehicle.objects.all()
+        serializer = s.VehiclePositionSerializer(vehicles, many=True)
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK
         )
 
