@@ -62,11 +62,14 @@ def on_message_locations(client, userdata, msg):
         longitude = item['lng']
         latitude = item['lat']
         speed = item['speed']
-        vehicle = get_object_or_404(Vehicle, plate_num=plate_num)
-        vehicle.longitude = longitude
-        vehicle.latitude = latitude
-        vehicle.speed = speed
-        vehicle.save()
+        try:
+            vehicle = Vehicle.objects.get(plate_num=plate_num)
+            vehicle.longitude = longitude
+            vehicle.latitude = latitude
+            vehicle.speed = speed
+            vehicle.save()
+        except Vehicle.DoesNotExist:
+            pass
 
 
 client = mqtt.Client(client_id=settings.G7_MQTT_POSITION_CLIENT_ID)
