@@ -42,10 +42,16 @@ python manage.py runserver
 
 Running on Heroku
 ```
-heroku config:set G7_HTTP_HOST = ''
-heroku config:set G7_HTTP_BASEURL = ''
-heroku config:set G7_HTTP_VEHICLE_BASIC_ACCESS_ID = ''
-heroku config:set G7_HTTP_VEHICLE_BASIC_SECRET = ''
-heroku config:set G7_HTTP_VEHICLE_DATA_ACCESS_ID = ''
-heroku config:set G7_HTTP_VEHICLE_DATA_SECRET = ''
+heroku config:set G7_HTTP_HOST=''
+heroku config:set G7_HTTP_BASEURL=''
+heroku config:set G7_HTTP_VEHICLE_BASIC_ACCESS_ID=''
+heroku config:set G7_HTTP_VEHICLE_BASIC_SECRET=''
+heroku config:set G7_HTTP_VEHICLE_DATA_ACCESS_ID=''
+heroku config:set G7_HTTP_VEHICLE_DATA_SECRET=''
+
+heroku config:set G7_MQTT_HOST=''
+heroku config:set G7_MQTT_POSITION_TOPIC=''
+heroku config:set G7_MQTT_POSITION_CLIENT_ID=''
+heroku config:set G7_MQTT_POSITION_ACCESS_ID=''
+heroku config:set G7_MQTT_POSITION_SECRET=''
 ```
