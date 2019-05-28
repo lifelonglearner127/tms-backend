@@ -60,9 +60,11 @@ class JobDataSerializer(serializers.ModelSerializer):
         source='route.stations', many=True, read_only=True
     )
 
+    progress = serializers.CharField(source='get_progress_display')
+
     class Meta:
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations',
-            'route', 'missions'
+            'route', 'missions', 'progress'
         )
