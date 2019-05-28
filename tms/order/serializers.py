@@ -1,11 +1,8 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..info.models import UnLoadingStation, LoadingStation, QualityStation
-from ..info.serializers import (
-    ShortUnLoadingStationSerializer, ShortLoadingStationSerializer,
-    ShortProductSerializer, ShortQualityStationSerializer
-)
+from ..info.models import Station
+from ..info.serializers import ShortStationSerializer, ShortProductSerializer
 from ..account.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 )
@@ -25,7 +22,7 @@ class ShortOrderProductSerializer(serializers.ModelSerializer):
 
 class ShortOrderProductDeliverSerializer(serializers.ModelSerializer):
 
-    unloading_station = ShortUnLoadingStationSerializer(
+    unloading_station = ShortStationSerializer(
         read_only=True
     )
 
@@ -44,7 +41,7 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
     """
     Serializer for unloading stations selected for product delivery
     """
-    unloading_station = ShortUnLoadingStationSerializer(
+    unloading_station = ShortStationSerializer(
         read_only=True
     )
 
@@ -76,8 +73,8 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
     """
     Serializer for ordred loading statins
     """
-    loading_station = ShortLoadingStationSerializer(read_only=True)
-    quality_station = ShortQualityStationSerializer(read_only=True)
+    loading_station = ShortStationSerializer(read_only=True)
+    quality_station = ShortStationSerializer(read_only=True)
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
@@ -86,6 +83,18 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
         model = m.OrderLoadingStation
         fields = (
             'id', 'loading_station', 'quality_station', 'due_time', 'products'
+        )
+
+
+class ShortOrderLoadingStationSerializer(serializers.ModelSerializer):
+
+    loading_station = ShortStationSerializer(read_only=True)
+    quality_station = ShortStationSerializer(read_only=True)
+
+    class Meta:
+        model = m.OrderLoadingStation
+        fields = (
+            'loading_station', 'quality_station'
         )
 
 
@@ -161,10 +170,10 @@ class OrderSerializer(serializers.ModelSerializer):
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
-                loading_station = LoadingStation.objects.get(
+                loading_station = Station.loading_stations.get(
                     pk=loading_station_id
                 )
-                quality_station = QualityStation.objects.get(
+                quality_station = Station.quality_stations.get(
                     pk=quality_station_id
                 )
                 order_loading_station = m.OrderLoadingStation.objects.create(
@@ -173,7 +182,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     quality_station=quality_station,
                     **loading_station_data
                 )
-            except LoadingStation.DoesNotExist:
+            except Station.DoesNotExist:
                 raise serializers.ValidationError(
                     'Such loading station does not exist'
                     )
@@ -217,10 +226,10 @@ class OrderSerializer(serializers.ModelSerializer):
                         station_id = station_data.get(
                             'id', None
                         )
-                        unloading_station = UnLoadingStation.objects.get(
+                        unloading_station = Station.unloading_stations.get(
                             pk=station_id
                         )
-                    except UnLoadingStation.DoesNotExist:
+                    except Station.DoesNotExist:
                         raise serializers.ValidationError(
                             'Such unloading station does not exist'
                         )
@@ -287,7 +296,7 @@ class OrderSerializer(serializers.ModelSerializer):
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
-                loading_station = LoadingStation.objects.get(
+                loading_station = Station.loading_stations.get(
                     pk=loading_station_id
                 )
                 order_loading_station = m.OrderLoadingStation.objects.create(
@@ -295,7 +304,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     loading_station=loading_station,
                     **loading_station_data
                 )
-            except LoadingStation.DoesNotExist:
+            except Station.DoesNotExist:
                 raise serializers.ValidationError(
                     'Such loading station does not exist'
                     )
@@ -339,10 +348,10 @@ class OrderSerializer(serializers.ModelSerializer):
                         station_id = station_data.get(
                             'id', None
                         )
-                        unloading_station = UnLoadingStation.objects.get(
+                        unloading_station = Station.unloading_stations.get(
                             pk=station_id
                         )
-                    except UnLoadingStation.DoesNotExist:
+                    except Station.DoesNotExist:
                         raise serializers.ValidationError(
                             'Such unloading station does not exist'
                         )

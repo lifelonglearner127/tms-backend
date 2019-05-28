@@ -1,5 +1,6 @@
 from django.db import models
 
+from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel, BasicContactModel
 
@@ -37,6 +38,12 @@ class Station(BasicContactModel):
     """
     Station model, used as base class
     """
+    station_type = models.CharField(
+        max_length=1,
+        choices=c.STATION_TYPE,
+        default=c.STATION_TYPE_LOADING_STATION
+    )
+
     longitude = models.FloatField()
 
     latitude = models.FloatField()
@@ -44,6 +51,12 @@ class Station(BasicContactModel):
     radius = models.DecimalField(
         max_digits=10,
         decimal_places=1
+    )
+
+    product_category = models.CharField(
+        max_length=10,
+        choices=c.PRODUCT_TYPE,
+        default=c.PRODUCT_TYPE_GASOLINE
     )
 
     price = models.DecimalField(
@@ -67,51 +80,13 @@ class Station(BasicContactModel):
         blank=True
     )
 
-    class Meta:
-        abstract = True
-
-
-class LoadStation(Station):
-    """
-    LoadStation model, used as base class
-    """
-    product_category = models.CharField(
-        max_length=10,
-        choices=c.PRODUCT_TYPE,
-        default=c.PRODUCT_TYPE_GASOLINE
-    )
+    objects = models.Manager()
+    loading = managers.LoadingStationManager()
+    unloading = managers.UnLoadingStationManager()
+    quality = managers.QualityStationManager()
+    oil = managers.OilStationManager()
 
     class Meta:
-        abstract = True
-
-
-class LoadingStation(LoadStation):
-    """
-    LoadingStation model
-    """
-    def __str__(self):
-        return self.name
-
-
-class UnLoadingStation(LoadStation):
-    """
-    UnLoadingStation model
-    """
-    def __str__(self):
-        return self.name
-
-
-class QualityStation(Station):
-    """
-    QualityStation model
-    """
-    def __str__(self):
-        return self.name
-
-
-class OilStation(Station):
-    """
-    OilStation model
-    """
-    def __str__(self):
-        return self.name
+        unique_together = (
+            'longitude', 'latitude'
+        )

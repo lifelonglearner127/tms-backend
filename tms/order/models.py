@@ -3,9 +3,7 @@ from django.db import models
 from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel
-from ..info.models import (
-    LoadingStation, UnLoadingStation, QualityStation, Product
-)
+from ..info.models import Station, Product
 from ..account.models import StaffProfile, CustomerProfile
 
 
@@ -41,8 +39,9 @@ class Order(TimeStampedModel):
     )
 
     loading_stations = models.ManyToManyField(
-        LoadingStation,
-        through='OrderLoadingStation'
+        Station,
+        through='OrderLoadingStation',
+        through_fields=('order', 'loading_station')
     )
 
     objects = models.Manager()
@@ -68,13 +67,15 @@ class OrderLoadingStation(models.Model):
     )
 
     loading_station = models.ForeignKey(
-        LoadingStation,
-        on_delete=models.CASCADE
+        Station,
+        on_delete=models.CASCADE,
+        related_name='loading_stations'
     )
 
     quality_station = models.ForeignKey(
-        QualityStation,
+        Station,
         on_delete=models.SET_NULL,
+        related_name='unloading_stations',
         null=True,
         blank=True
     )
@@ -142,7 +143,7 @@ class OrderProduct(models.Model):
     )
 
     unloading_stations = models.ManyToManyField(
-        UnLoadingStation,
+        Station,
         through='OrderProductDeliver'
     )
 
@@ -163,7 +164,7 @@ class OrderProductDeliver(models.Model):
     )
 
     unloading_station = models.ForeignKey(
-        UnLoadingStation,
+        Station,
         on_delete=models.CASCADE
     )
 

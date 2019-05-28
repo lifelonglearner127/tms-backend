@@ -178,14 +178,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 1,
       "fields": {
           "name": "Loading A",
           "contact": "Zhang Shi Jun",
           "mobile": "123456789",
           "address": "Tongzhou District Beijing",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 117.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -197,14 +198,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 2,
       "fields": {
           "name": "Loading B",
           "contact": "Zhen He",
           "mobile": "123456789",
           "address": "Tongzhou District Beijing",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 115.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -216,14 +218,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 3,
       "fields": {
           "name": "Loading C",
           "contact": "Zhen Ge",
           "mobile": "123456789",
           "address": "Jilin",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 114.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -235,14 +238,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 4,
       "fields": {
           "name": "Loading D",
           "contact": "D Manager",
           "mobile": "123456789",
           "address": "Chaoyang District Beijing",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 113.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -254,14 +258,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 5,
       "fields": {
           "name": "Loading E",
           "contact": "E Manager",
           "mobile": "123456789",
           "address": "Shen Zhen District Beijing",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 112.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 5,
@@ -273,14 +278,15 @@
       }
   },
   {
-      "model": "info.LoadingStation",
+      "model": "info.Station",
       "pk": 6,
       "fields": {
           "name": "Loading F",
           "contact": "F Manager",
           "mobile": "123456789",
           "address": "Shang hai",
-          "longitude": 116.397428,
+          "station_type": "L",
+          "longitude": 111.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -292,15 +298,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 1,
+      "model": "info.Station",
+      "pk": 7,
       "fields": {
           "name": "UnLoading A",
           "contact": "UnLoading A",
           "mobile": "123456789",
           "address": "UnLoading A",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 39.90933,
           "radius": 100,
           "price": 1,
           "product_category": "gas",
@@ -311,15 +318,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 2,
+      "model": "info.Station",
+      "pk": 8,
       "fields": {
           "name": "UnLoading B",
           "contact": "UnLoading B",
           "mobile": "123456789",
-          "address": "Loading B",
+          "address": "UnLoading B",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 38.910923,
           "radius": 100,
           "price": 1,
           "product_category": "gas",
@@ -330,15 +338,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 3,
+      "model": "info.Station",
+      "pk": 9,
       "fields": {
           "name": "UnLoading C",
           "contact": "C Manager",
           "mobile": "123456789",
           "address": "Beijing",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 37.90923,
           "radius": 100,
           "price": 1,
           "product_category": "gas",
@@ -349,15 +358,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 4,
+      "model": "info.Station",
+      "pk": 10,
       "fields": {
           "name": "UnLoading D",
           "contact": "D Manager",
           "mobile": "123456789",
           "address": "Shang hai",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 36.90923,
           "radius": 100,
           "price": 1,
           "product_category": "oil",
@@ -368,15 +378,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 5,
+      "model": "info.Station",
+      "pk": 11,
       "fields": {
           "name": "UnLoading E",
           "contact": "E Manager",
           "mobile": "123456789",
           "address": "UnLoading A",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 35.90923,
           "radius": 100,
           "price": 1,
           "product_category": "oil",
@@ -387,15 +398,16 @@
       }
   },
   {
-      "model": "info.UnLoadingStation",
-      "pk": 6,
+      "model": "info.Station",
+      "pk": 12,
       "fields": {
           "name": "UnLoading F",
           "contact": "F Manager",
           "mobile": "123456789",
           "address": "Loading B",
+          "station_type": "U",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 34.90923,
           "radius": 100,
           "price": 1,
           "product_category": "oil",
@@ -406,13 +418,14 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 1,
+      "model": "info.Station",
+      "pk": 13,
       "fields": {
           "name": "Oil A",
           "contact": "Oil A",
           "mobile": "123456789",
           "address": "Oil A",
+          "station_type": "O",
           "longitude": 116.397428,
           "latitude": 39.90923,
           "radius": 100,
@@ -422,15 +435,16 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 2,
+      "model": "info.Station",
+      "pk": 14,
       "fields": {
           "name": "Oil B",
           "contact": "Oil B",
           "mobile": "123456789",
           "address": "Loading B",
-          "longitude": 116.397428,
-          "latitude": 39.90923,
+          "station_type": "O",
+          "longitude": 114.397428,
+          "latitude": 35.90923,
           "radius": 100,
           "price": 1,
           "created": "2013-03-16T17:41:28+00:00",
@@ -438,15 +452,16 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 3,
+      "model": "info.Station",
+      "pk": 15,
       "fields": {
           "name": "Oil C",
           "contact": "C Manager",
           "mobile": "123456789",
           "address": "Beijing",
+          "station_type": "O",
           "longitude": 116.397428,
-          "latitude": 39.90923,
+          "latitude": 38.90923,
           "radius": 100,
           "price": 1,
           "created": "2013-03-16T17:41:28+00:00",
@@ -454,14 +469,15 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 4,
+      "model": "info.Station",
+      "pk": 16,
       "fields": {
           "name": "Oil D",
           "contact": "D Manager",
           "mobile": "123456789",
           "address": "Shang hai",
-          "longitude": 116.397428,
+          "station_type": "O",
+          "longitude": 119.397428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -470,14 +486,15 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 5,
+      "model": "info.Station",
+      "pk": 17,
       "fields": {
           "name": "Oil E",
           "contact": "E Manager",
           "mobile": "123456789",
           "address": "Oil A",
-          "longitude": 116.397428,
+          "station_type": "O",
+          "longitude": 114.392428,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -486,14 +503,15 @@
       }
   },
   {
-      "model": "info.OilStation",
-      "pk": 6,
+      "model": "info.Station",
+      "pk": 18,
       "fields": {
           "name": "Oil F",
           "contact": "F Manager",
           "mobile": "123456789",
           "address": "Loading B",
-          "longitude": 116.397428,
+          "station_type": "O",
+          "longitude": 116.397422,
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
@@ -502,14 +520,15 @@
       }
   },
   {
-    "model": "info.QualityStation",
-    "pk": 1,
+    "model": "info.Station",
+    "pk": 19,
     "fields": {
         "name": "Quality Station A",
         "contact": "Quality Station A Contact",
         "mobile": "123456789",
         "address": "Quality Station A Address",
-        "longitude": 116.397428,
+        "station_type": "Q",
+        "longitude": 116.396428,
         "latitude": 39.90923,
         "radius": 100,
         "created": "2013-03-16T17:41:28+00:00",
@@ -517,14 +536,15 @@
     }
   },
   {
-    "model": "info.QualityStation",
-    "pk": 2,
+    "model": "info.Station",
+    "pk": 20,
     "fields": {
         "name": "Quality Station B",
         "contact": "Quality Station B Contact",
         "mobile": "123456789",
         "address": "Quality Station B Address",
-        "longitude": 116.397428,
+        "station_type": "Q",
+        "longitude": 116.357428,
         "latitude": 39.90923,
         "radius": 100,
         "created": "2013-03-16T17:41:28+00:00",
@@ -569,45 +589,5 @@
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
-  },
-  {
-    "model": "road.Point",
-    "pk": 1,
-    "fields": {
-        "name": "Origin",
-        "latitude": 39.983412,
-        "longitude": 116.303843,
-        "address": "Origin Address"
-    }
-  },
-  {
-    "model": "road.Point",
-    "pk": 2,
-    "fields": {
-        "name": "Destination",
-        "latitude": 39.992093,
-        "longitude": 116.407012,
-        "address": "Destination Address"
-    }
-  },
-  {
-    "model": "road.Point",
-    "pk": 3,
-    "fields": {
-        "name": "WayPoint",
-        "latitude": 39.896436,
-        "longitude": 116.321354,
-        "address": "Waypoint Address"
-    }
-  },
-  {
-    "model": "road.Route",
-    "pk": 1,
-    "fields": {
-        "name": "A-B-C",
-        "path": [1,2,3],
-        "policy": 0,
-        "distance": 0
-    }
   }
 ]

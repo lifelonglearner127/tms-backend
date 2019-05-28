@@ -8,6 +8,18 @@ PRODUCT_TYPE = (
     (PRODUCT_TYPE_OIL, 'Oil')
 )
 
+# station type
+STATION_TYPE_LOADING_STATION = 'L'
+STATION_TYPE_UNLOADING_STATION = 'U'
+STATION_TYPE_QUALITY_STATION = 'Q'
+STATION_TYPE_OIL_STATION = 'O'
+STATION_TYPE = (
+    (STATION_TYPE_LOADING_STATION, 'Loading Station'),
+    (STATION_TYPE_UNLOADING_STATION, 'Unloading Station'),
+    (STATION_TYPE_QUALITY_STATION, 'Quality Station'),
+    (STATION_TYPE_OIL_STATION, 'Oil Station')
+)
+
 # duration unit choices
 DURATION_UNIT_MINITE = 'M'
 DURATION_UNIT_HOUR = 'H'
@@ -131,6 +143,18 @@ BLACKDOT_TYPE = (
     (BLACKDOT_TYPE_ROAD_REPAIR, 'Repair Road'),
     (BLACKDOT_TYPE_ROAD_LIMIT_TIME, 'Time Limit')
 )
+
+POINT_TYPE_LOADING_STATION = 'L'
+POINT_TYPE_UNLOADING_STATION = 'U'
+POINT_TYPE_QUALITY_STATION = 'Q'
+POINT_TYPE_OIL_STATION = 'O'
+POINT_TYPE = (
+    (POINT_TYPE_LOADING_STATION, 'Loading Station'),
+    (POINT_TYPE_UNLOADING_STATION, 'Unloading Station'),
+    (POINT_TYPE_QUALITY_STATION, 'Quality Station'),
+    (POINT_TYPE_OIL_STATION, 'Oil Station')
+)
+
 
 # Metric Units constants
 # ----------------------------------------------------------------------------

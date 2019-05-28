@@ -5,7 +5,7 @@ from rest_framework import serializers
 from . import models as m
 from ..order.models import OrderProductDeliver
 from ..order.serializers import (
-    ShortOrderProductDeliverSerializer
+    ShortOrderProductDeliverSerializer, ShortStationSerializer,
 )
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
@@ -19,7 +19,8 @@ class MissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Mission
         fields = (
-            'loading_weight', 'unloading_weight', 'is_completed', 'mission'
+            'mission_weight', 'loading_weight', 'unloading_weight',
+            'is_completed', 'mission'
         )
 
 
@@ -52,9 +53,17 @@ class JobDataSerializer(serializers.ModelSerializer):
     missions = MissionSerializer(
         source='mission_set', many=True, read_only=True
     )
+    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'route', 'missions'
+            'id', 'vehicle', 'driver', 'escort',
+            'distance', 'route', 'missions'
         )
+
+    def get_distance(self, job):
+        if job.route is not None:
+            return job.route.distance
+        else:
+            return 0

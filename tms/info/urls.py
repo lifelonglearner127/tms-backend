@@ -11,24 +11,9 @@ router.register(
     base_name='products'
 )
 router.register(
-    r'loading-stations',
-    views.LoadingStationViewSet,
-    base_name='loading-stations'
-)
-router.register(
-    r'unloading-stations',
-    views.UnLoadingStationViewSet,
-    base_name='unloading-stations'
-)
-router.register(
-    r'quality-stations',
-    views.QualityStationViewSet,
-    base_name='quality-stations'
-)
-router.register(
-    r'oil-stations',
-    views.OilStationViewSet,
-    base_name='oil-stations'
+    r'stations',
+    views.StationViewSet,
+    base_name='stations'
 )
 
 urlpatterns = [

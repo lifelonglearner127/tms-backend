@@ -1,3 +1,7 @@
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from ..core.views import StaffViewSet, ChoicesView
 from ..core import constants as c
 from . import models as m
@@ -18,49 +22,101 @@ class ProductViewSet(StaffViewSet):
             return s.ProductSerializer
 
 
-class LoadingStationViewSet(StaffViewSet):
+class StationViewSet(StaffViewSet):
     """
     Viewset for Loading Station
     """
-    queryset = m.LoadingStation.objects.all()
-    short_serializer_class = s.ShortLoadingStationSerializer
+    queryset = m.Station.objects.all()
+    short_serializer_class = s.ShortStationSerializer
 
     def get_serializer_class(self):
         if self.action in ['list']:
-            return s.LoadingStationInfoSerializer
+            return s.StationInfoSerializer
         else:
-            return s.LoadingStationSerializer
+            return s.StationSerializer
 
-
-class UnLoadingStationViewSet(StaffViewSet):
-    """
-    Viewset for UnLoading Station
-    """
-    queryset = m.UnLoadingStation.objects.all()
-    short_serializer_class = s.ShortUnLoadingStationSerializer
-
-    def get_serializer_class(self):
-        if self.action in ['list']:
-            return s.UnLoadingStationInfoSerializer
+    @action(detail=False)
+    def short(self, request):
+        station_type = self.request.query_params.get('type', None)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION,
+            c.STATION_TYPE_OIL_STATION, c.STATION_TYPE_QUALITY_STATION
+        ]:
+            queryset = m.Station.objects.filter(station_type=station_type)
         else:
-            return s.UnLoadingStationSerializer
+            queryset = self.get_queryset()
 
+        serializer = self.get_short_serializer_class()(
+            queryset,
+            many=True
+        )
 
-class QualityStationViewSet(StaffViewSet):
-    """
-    Viewset for Quality Station
-    """
-    queryset = m.QualityStation.objects.all()
-    serializer_class = s.QualityStationSerializer
-    short_serializer_class = s.ShortQualityStationSerializer
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
+        return queryset
+        # serializer = self.get_short_serializer_class()(
+        #     self.get_queryset(),
+        #     many=True
+        # )
+        # return Response(
+        #     serializer.data,
+        #     status=status.HTTP_200_OK
+        # )
+    
+    @action(detail=False, url_path='loading-stations')
+    def loading_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.loading.all(),
+        )
 
-class OilStationViewSet(StaffViewSet):
-    """
-    Viewset for Oil Station
-    """
-    queryset = m.OilStation.objects.all()
-    serializer_class = s.OilStationSerializer
+        serializer = self.get_serializer_class()(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='unloading-stations')
+    def unloading_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.unloading.all(),
+        )
+
+        serializer = self.get_serializer_class()(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='quality-stations')
+    def quality_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.quality.all(),
+        )
+
+        serializer = self.get_serializer_class()(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='oil-stations')
+    def oil_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.oil.all(),
+        )
+
+        serializer = self.get_serializer_class()(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
 
 
 class ProductCategoriesView(ChoicesView):

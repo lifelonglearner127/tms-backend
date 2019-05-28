@@ -1,11 +1,10 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants as c
 from ..account.models import DriverProfile, EscortProfile
 from ..vehicle.models import Vehicle
-from ..order.models import OrderProductDeliver
+from ..order.models import Order, OrderProductDeliver
 from ..road.models import Route
 
 
@@ -13,6 +12,11 @@ class Job(models.Model):
     """
     Job model
     """
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE
+    )
+
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE
@@ -48,14 +52,22 @@ class Job(models.Model):
         blank=True
     )
 
-    arrived_time = ArrayField(
-        models.DateTimeField(),
+    arrived_time_at_loading_station = models.DateTimeField(
+        null=True,
+        blank=True
+    ),
+
+    departure_time_at_loading_station = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    departure_time = ArrayField(
-        models.DateTimeField(),
+    arrived_time_at_quality_station = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    departure_time_at_quality_station = models.DateTimeField(
         null=True,
         blank=True
     )

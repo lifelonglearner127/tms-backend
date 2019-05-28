@@ -17,10 +17,11 @@ class BlackPointViewSet(viewsets.ModelViewSet):
     serializer_class = s.BlackPointSerializer
 
 
-class RouteViewSet(viewsets.ModelViewSet):
+class RouteViewSet(StaffViewSet):
 
     queryset = m.Route.objects.all()
     serializer_class = s.RouteSerializer
+    short_serializer_class = s.ShortRouteSerializer
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:

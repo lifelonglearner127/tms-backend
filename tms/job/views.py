@@ -29,10 +29,12 @@ class JobViewSet(viewsets.ModelViewSet):
         # we assume that this is one job
         for deliver in request.data:
             new_job = True
+            order_id = deliver.get('order', None)
             driver_id = deliver.get('driver', None)
             escort_id = deliver.get('escort', None)
             vehicle_id = deliver.get('vehicle', None)
             deliver_id = deliver.get('mission', None)
+            route_id = deliver.get('route', None)
             mission_weight = deliver.get('mission_weight', 0)
 
             for job in jobs:
@@ -49,9 +51,11 @@ class JobViewSet(viewsets.ModelViewSet):
 
             if new_job:
                 jobs.append({
+                    'order': order_id,
                     'driver': driver_id,
                     'escort': escort_id,
                     'vehicle': vehicle_id,
+                    'route': route_id,
                     'mission_ids': [deliver_id],
                     'mission_weights': [mission_weight],
                     'total_weight': int(mission_weight)

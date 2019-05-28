@@ -24,6 +24,15 @@ class BlackPointSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortRouteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Route
+        fields = (
+            'id', 'name'
+        )
+
+
 class RouteSerializer(serializers.ModelSerializer):
 
     class Meta:
