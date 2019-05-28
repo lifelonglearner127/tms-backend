@@ -24,3 +24,7 @@ class IsDriverOrEscortUser(permissions.BasePermission):
         return request.user and request.user.role in [
             c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
         ]
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.driver_profile and\
+            request.user.driver_profile == obj.driver

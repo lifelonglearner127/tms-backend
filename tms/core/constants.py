@@ -124,14 +124,14 @@ ORDER_SOURCE = (
 # job app
 # ----------------------------------------------------------------------------
 # job status choices
-JOB_STATUS_NOT_STARTED = 'N'
-JOB_STATUS_INPROGRESS = 'P'
-JOB_STATUS_COMPLETE = 'C'
+JOB_PROGRESS_NOT_STARTED = 'N'
+JOB_PROGRESS_TO_LOADING_STATION = 'L'
+JOB_PROGRESS_COMPLETE = 'C'
 
-JOB_STATUS = (
-    (JOB_STATUS_NOT_STARTED, 'Not Started'),
-    (JOB_STATUS_INPROGRESS, 'Started'),
-    (JOB_STATUS_COMPLETE, 'Complete')
+JOB_PROGRESS = (
+    (JOB_PROGRESS_NOT_STARTED, 'Not Started'),
+    (JOB_PROGRESS_TO_LOADING_STATION, 'To Loading Station'),
+    (JOB_PROGRESS_COMPLETE, 'Complete')
 )
 
 

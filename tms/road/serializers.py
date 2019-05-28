@@ -59,6 +59,4 @@ class RouteDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Route
-        fields = (
-            'name', 'policy', 'distance', 'path'
-        )
+        fields = '__all__'

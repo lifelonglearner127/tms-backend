@@ -34,11 +34,14 @@ class JobSerializer(serializers.ModelSerializer):
         mission_ids = self.context.get('mission_ids')
         mission_weights = self.context.get('mission_weights')
         job = m.Job.objects.create(**validated_data)
+        stations = job.route.stations[2:]
+
         for i, mission_id in enumerate(mission_ids):
             mission = get_object_or_404(OrderProductDeliver, pk=mission_id)
             m.Mission.objects.create(
                 mission=mission,
                 job=job,
+                step=stations.index(mission.unloading_station),
                 mission_weight=mission_weights[i]
             )
         return job
@@ -56,17 +59,10 @@ class JobDataSerializer(serializers.ModelSerializer):
     stations = ShortStationSerializer(
         source='route.stations', many=True, read_only=True
     )
-    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations',
-            'distance', 'route', 'missions'
+            'route', 'missions'
         )
-
-    def get_distance(self, job):
-        if job.route is not None:
-            return job.route.distance
-        else:
-            return 0

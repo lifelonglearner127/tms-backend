@@ -1,5 +1,5 @@
-from datetime import datetime
 from django.db.models import Q
+from django.utils import timezone as datetime
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -83,8 +83,8 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def previous_jobs(self, request):
-        serializer = self.serializer_class(
-            request.user.staff_profile.jobs_as_primary.filter(
+        serializer = s.JobDataSerializer(
+            request.user.driver_profile.jobs.filter(
                 finished_at__lte=datetime.now()
             ),
             many=True
@@ -100,8 +100,8 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def progress_jobs(self, request):
-        serializer = self.serializer_class(
-            request.user.staff_profile.jobs_as_primary.filter(
+        serializer = s.JobDataSerializer(
+            request.user.driver_profile.jobs.filter(
                 ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
                   Q(progress=c.JOB_PROGRESS_COMPLETE))
             ).first()
@@ -117,8 +117,8 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def future_jobs(self, request):
-        serializer = self.serializer_class(
-            request.user.staff_profile.jobs_as_primary.filter(
+        serializer = s.JobDataSerializer(
+            request.user.driver_profile.jobs.filter(
                 progress=c.JOB_PROGRESS_NOT_STARTED
             ),
             many=True
@@ -126,6 +126,28 @@ class JobViewSet(viewsets.ModelViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(
+        detail=True, url_path='progress'
+    )
+    def progress_update(self, request, pk=None):
+        job = self.get_object()
+        step = self.request.query_params.get('step', None)
+
+        if step == 'start':
+            job.started_at = datetime.now()
+            job.progress = c.JOB_PROGRESS_TO_LOADING_STATION
+        elif step == '':
+            pass
+        elif step == 'complete':
+            job.job.finished_at = datetime.now()
+            job.progress = c.JOB_PROGRESS_COMPLETE
+
+        job.save()
+        return Response(
+            {'progress': job.progress},
             status=status.HTTP_200_OK
         )
 

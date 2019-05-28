@@ -43,8 +43,8 @@ class Job(models.Model):
 
     progress = models.CharField(
         max_length=2,
-        choices=c.JOB_STATUS,
-        default=c.JOB_STATUS_NOT_STARTED
+        choices=c.JOB_PROGRESS,
+        default=c.JOB_PROGRESS_NOT_STARTED
     )
 
     started_at = models.DateTimeField(
@@ -102,6 +102,8 @@ class Mission(models.Model):
         on_delete=models.CASCADE
     )
 
+    step = models.PositiveIntegerField()
+
     mission_weight = models.PositiveIntegerField(
         null=True,
         blank=True
@@ -120,3 +122,6 @@ class Mission(models.Model):
     is_completed = models.BooleanField(
         default=False
     )
+
+    class Meta:
+        ordering = ['step']
