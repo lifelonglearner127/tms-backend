@@ -53,12 +53,15 @@ class JobDataSerializer(serializers.ModelSerializer):
     missions = MissionSerializer(
         source='mission_set', many=True, read_only=True
     )
+    stations = ShortStationSerializer(
+        source='route.stations', many=True, read_only=True
+    )
     distance = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort',
+            'id', 'vehicle', 'driver', 'escort', 'stations',
             'distance', 'route', 'missions'
         )
 

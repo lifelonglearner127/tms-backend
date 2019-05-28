@@ -57,15 +57,7 @@ class StationViewSet(StaffViewSet):
         )
 
         return queryset
-        # serializer = self.get_short_serializer_class()(
-        #     self.get_queryset(),
-        #     many=True
-        # )
-        # return Response(
-        #     serializer.data,
-        #     status=status.HTTP_200_OK
-        # )
-    
+
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):
         page = self.paginate_queryset(

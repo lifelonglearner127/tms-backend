@@ -70,7 +70,7 @@ class Route(models.Model):
     policy = models.PositiveIntegerField()
 
     distance = models.PositiveIntegerField()
-    
+
     @property
     def stations(self):
         points = Point.objects.filter(id__in=self.path)
@@ -83,11 +83,11 @@ class Route(models.Model):
             if point.category == c.POINT_TYPE_LOADING_STATION and \
                len(stations) == 0:
                 try:
-                    station = Station.loading_stations.get(
+                    station = Station.loading.get(
                         longitude=point.longitude,
                         latitude=point.latitude
                     )
-                    stations.append({'loading_station': station})
+                    stations.append(station)
                 except Station.DoesNotExist:
                     break
             elif (
@@ -95,11 +95,11 @@ class Route(models.Model):
                 len(stations) == 1
             ):
                 try:
-                    station = Station.quality_stations.get(
+                    station = Station.quality.get(
                         longitude=point.longitude,
                         latitude=point.latitude
                     )
-                    stations.append({'quality_station': station})
+                    stations.append(station)
                 except Station.DoesNotExist:
                     break
 
@@ -108,11 +108,11 @@ class Route(models.Model):
                 len(stations) > 1
             ):
                 try:
-                    station = Station.unloading_stations.get(
+                    station = Station.unloading.get(
                         longitude=point.longitude,
                         latitude=point.latitude
                     )
-                    stations.append({'unloading_station': station})
+                    stations.append(station)
                 except Station.DoesNotExist:
                     break
             else:

@@ -170,10 +170,10 @@ class OrderSerializer(serializers.ModelSerializer):
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
-                loading_station = Station.loading_stations.get(
+                loading_station = Station.loading.get(
                     pk=loading_station_id
                 )
-                quality_station = Station.quality_stations.get(
+                quality_station = Station.quality.get(
                     pk=quality_station_id
                 )
                 order_loading_station = m.OrderLoadingStation.objects.create(
@@ -226,7 +226,7 @@ class OrderSerializer(serializers.ModelSerializer):
                         station_id = station_data.get(
                             'id', None
                         )
-                        unloading_station = Station.unloading_stations.get(
+                        unloading_station = Station.unloading.get(
                             pk=station_id
                         )
                     except Station.DoesNotExist:
@@ -296,7 +296,7 @@ class OrderSerializer(serializers.ModelSerializer):
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
-                loading_station = Station.loading_stations.get(
+                loading_station = Station.loading.get(
                     pk=loading_station_id
                 )
                 order_loading_station = m.OrderLoadingStation.objects.create(
@@ -348,7 +348,7 @@ class OrderSerializer(serializers.ModelSerializer):
                         station_id = station_data.get(
                             'id', None
                         )
-                        unloading_station = Station.unloading_stations.get(
+                        unloading_station = Station.unloading.get(
                             pk=station_id
                         )
                     except Station.DoesNotExist:

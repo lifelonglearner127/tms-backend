@@ -16,7 +16,6 @@ Including another URLconf
 import json
 import paho.mqtt.client as mqtt
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 
 from django.contrib import admin
 from django.urls import path, include
