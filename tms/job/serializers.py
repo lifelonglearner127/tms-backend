@@ -66,5 +66,5 @@ class JobDataSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations',
-            'route', 'missions', 'progress'
+            'route', 'missions', 'progress', 'total_weight'
         )
