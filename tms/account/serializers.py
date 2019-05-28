@@ -25,8 +25,15 @@ class AuthSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'username', 'role'
+            'id', 'username', 'role', 'name'
         )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.username
+
+        return ret
 
 
 class ObtainJWTSerializer(serializers.Serializer):
