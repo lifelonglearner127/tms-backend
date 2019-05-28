@@ -130,24 +130,94 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, url_path='progress'
+        detail=True, url_path='update-progress'
     )
     def progress_update(self, request, pk=None):
         job = self.get_object()
-        step = self.request.query_params.get('step', None)
 
-        if step == 'start':
-            job.started_at = datetime.now()
+        if job.progress == c.JOB_PROGRESS_NOT_STARTED:
+            job.started_on = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_LOADING_STATION
-        elif step == '':
-            pass
-        elif step == 'complete':
-            job.job.finished_at = datetime.now()
-            job.progress = c.JOB_PROGRESS_COMPLETE
+
+        elif job.progress == c.JOB_PROGRESS_TO_LOADING_STATION:
+            job.arrived_time_at_loading_station = datetime.now()
+            job.progress = c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+            job.started_loading_on = datetime.now()
+            job.progress = c.JOB_PROGRESS_LOADING_AT_LOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
+            job.finished_loading_on = datetime.now()
+            job.progress = c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
+            job.departure_time_at_loading_station = datetime.now()
+            job.progress = c.JOB_PROGRESS_TO_QUALITY_STATION
+
+        elif job.progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
+            job.arrived_time_at_quality_station = datetime.now()
+            job.progress = c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION
+
+        elif job.progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
+            job.started_checking_on = datetime.now()
+            job.progress = c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION
+
+        elif job.progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
+            job.finished_checking_on = datetime.now()
+            job.progress = c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION
+
+        elif job.progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
+            job.departure_time_at_quality_station = datetime.now()
+            job.progress = c.JOB_PROGRESS_TO_UNLOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_TO_UNLOADING_STATION:
+            current_mission = job.mission_set.filter(
+                is_completed=False
+            ).first()
+            current_mission.arrived_time_at_station = datetime.now()
+            current_mission.save()
+            job.progress = c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION
+
+        elif job.progress == c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION:
+            current_mission = job.mission_set.filter(
+                is_completed=False
+            ).first()
+            current_mission.started_unloading_on = datetime.now()
+            current_mission.save()
+            job.progress = c.JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION:
+            current_mission = job.mission_set.filter(
+                is_completed=False
+            ).first()
+            current_mission.finished_unloading_on = datetime.now()
+            current_mission.save()
+            job.progress = c.JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION
+
+        elif job.progress == c.JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION:
+            current_mission = job.mission_set.filter(
+                is_completed=False
+            ).first()
+            current_mission.is_completed = True
+            current_mission.departure_time_at_station = datetime.now()
+            current_mission.save()
+
+            if job.mission_set.filter(is_completed=False).exists():
+                job.progress = c.JOB_PROGRESS_TO_UNLOADING_STATION
+            else:
+                job.progress = c.JOB_PROGRESS_COMPLETE
+
+        else:
+            return Response(
+                s.JobProgressSerializer(job).data,
+                status=status.HTTP_200_OK
+            )
 
         job.save()
+
         return Response(
-            {'progress': job.progress},
+            s.JobProgressSerializer(job).data,
             status=status.HTTP_200_OK
         )
 

@@ -589,5 +589,125 @@
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
+  },
+  {
+    "model": "road.Route",
+    "pk": 1,
+    "fields": {
+        "name": "A-A-A-B-C",
+        "path": [1,19,7,8,9],
+        "policy": 0,
+        "distance": 408628
+    }
+  },
+  {
+    "model": "order.Order",
+    "pk": 1,
+    "fields": {
+        "alias": "Order 1",
+        "assignee": 2,
+        "customer": 1,
+        "order_source": "I",
+        "status": "P",
+        "created": "2019-05-19T00:00:00+00:00",
+        "updated": "2019-05-19T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.OrderLoadingStation",
+    "pk": 1,
+    "fields": {
+        "order": 1,
+        "loading_station": 1,
+        "quality_station": 19,
+        "due_time": "2019-05-21T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.OrderProduct",
+    "pk": 1,
+    "fields": {
+        "order_loading_station": 1,
+        "product": 1,
+        "total_weight": 2
+    }
+  },
+  {
+    "model": "order.OrderProduct",
+    "pk": 2,
+    "fields": {
+        "order_loading_station": 1,
+        "product": 2,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProductDeliver",
+    "pk": 1,
+    "fields": {
+        "order_product": 1,
+        "unloading_station": 7,
+        "weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProductDeliver",
+    "pk": 2,
+    "fields": {
+        "order_product": 1,
+        "unloading_station": 8,
+        "weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProductDeliver",
+    "pk": 3,
+    "fields": {
+        "order_product": 2,
+        "unloading_station": 9,
+        "weight": 1
+    }
+  },
+  {
+    "model": "job.Job",
+    "pk": 1,
+    "fields": {
+        "order": 1,
+        "vehicle": 1,
+        "driver": 1,
+        "escort": 1,
+        "route": 1,
+        "total_weight": 3
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 3,
+    "fields": {
+        "job": 1,
+        "step": 0,
+        "mission": 1,
+        "mission_weight": 1
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 2,
+    "fields": {
+        "job": 1,
+        "step": 1,
+        "mission": 2,
+        "mission_weight": 1
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 1,
+    "fields": {
+        "job": 1,
+        "step": 2,
+        "mission": 3,
+        "mission_weight": 1
+    }
   }
 ]

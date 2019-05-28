@@ -80,14 +80,14 @@ class OrderLoadingStation(models.Model):
         blank=True
     )
 
-    products = models.ManyToManyField(
-        Product,
-        through='OrderProduct'
-    )
-
     due_time = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    products = models.ManyToManyField(
+        Product,
+        through='OrderProduct'
     )
 
     def __str__(self):

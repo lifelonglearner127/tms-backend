@@ -9,7 +9,18 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = m.Vehicle
-        fields = '__all__'
+        fields = (
+            'id', 'plate_num'
+        )
+
+
+class MainVehicleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Vehicle
+        fields = (
+            'id', 'plate_num', 'longitude', 'latitude', 'speed'
+        )
 
 
 class VehicleSerializer(serializers.ModelSerializer):

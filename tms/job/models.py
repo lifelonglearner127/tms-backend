@@ -41,13 +41,22 @@ class Job(models.Model):
         blank=True
     )
 
-    progress = models.CharField(
-        max_length=2,
+    progress = models.PositiveIntegerField(
         choices=c.JOB_PROGRESS,
         default=c.JOB_PROGRESS_NOT_STARTED
     )
 
-    started_at = models.DateTimeField(
+    start_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finish_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -56,6 +65,16 @@ class Job(models.Model):
         null=True,
         blank=True
     ),
+
+    started_loading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_loading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     departure_time_at_loading_station = models.DateTimeField(
         null=True,
@@ -67,12 +86,22 @@ class Job(models.Model):
         blank=True
     )
 
+    started_checking_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_checking_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     departure_time_at_quality_station = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    finished_at = models.DateTimeField(
+    finished_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -115,6 +144,26 @@ class Mission(models.Model):
     )
 
     unloading_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    arrived_time_at_station = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_unloading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_unloading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    departure_time_at_station = models.DateTimeField(
         null=True,
         blank=True
     )
