@@ -140,20 +140,62 @@ JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION = 12
 JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION = 13
 
 JOB_PROGRESS = (
-    (JOB_PROGRESS_NOT_STARTED, 'Job Progress - Not Started'),
-    (JOB_PROGRESS_COMPLETE, 'Job Progress - Completed'),
-    (JOB_PROGRESS_TO_LOADING_STATION, 'Job Progress - To Loading Station'),
-    (JOB_PROGRESS_ARRIVED_AT_LOADING_STATION, 'Job Progress - Arrived at Loading Station'),
-    (JOB_PROGRESS_LOADING_AT_LOADING_STATION, 'Job Progress - Loading at Loading Station'),
-    (JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION, 'Job Progress - Finish Loading at Loading Station'),
-    (JOB_PROGRESS_TO_QUALITY_STATION, 'Job Progress - To Quality Station'),
-    (JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION, 'Job Progress - Arrived at Quality Station'),
-    (JOB_PROGRESS_CHECKING_AT_QUALITY_STATION, 'Job Progress - Checking at Quality Station'),
-    (JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION, 'Job Progress - Finish Checking at Quality Station'),
-    (JOB_PROGRESS_TO_UNLOADING_STATION, 'Job Progress - To Unloading Station'),
-    (JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION, 'Job Progress - Arrived at Unloading Station'),
-    (JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION, 'Job Progress - Unloading at Unloading Station'),
-    (JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION, 'Job Progress - Finish Unloading Station')
+    (
+        JOB_PROGRESS_NOT_STARTED,
+        'Job Progress - Not Started'
+    ),
+    (
+        JOB_PROGRESS_COMPLETE,
+        'Job Progress - Completed'
+    ),
+    (
+        JOB_PROGRESS_TO_LOADING_STATION,
+        'Job Progress - To Loading Station'
+    ),
+    (
+        JOB_PROGRESS_ARRIVED_AT_LOADING_STATION,
+        'Job Progress - Arrived at Loading Station'
+    ),
+    (
+        JOB_PROGRESS_LOADING_AT_LOADING_STATION,
+        'Job Progress - Loading at Loading Station'
+    ),
+    (
+        JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION,
+        'Job Progress - Finish Loading at Loading Station'
+    ),
+    (
+        JOB_PROGRESS_TO_QUALITY_STATION,
+        'Job Progress - To Quality Station'
+    ),
+    (
+        JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION,
+        'Job Progress - Arrived at Quality Station'
+    ),
+    (
+        JOB_PROGRESS_CHECKING_AT_QUALITY_STATION,
+        'Job Progress - Checking at Quality Station'
+    ),
+    (
+        JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION,
+        'Job Progress - Finish Checking at Quality Station'
+    ),
+    (
+        JOB_PROGRESS_TO_UNLOADING_STATION,
+        'Job Progress - To Unloading Station'
+    ),
+    (
+        JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION,
+        'Job Progress - Arrived at Unloading Station'
+    ),
+    (
+        JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION,
+        'Job Progress - Unloading at Unloading Station'
+    ),
+    (
+        JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION,
+        'Job Progress - Finish Unloading Station'
+    )
 )
 
 # bill document type

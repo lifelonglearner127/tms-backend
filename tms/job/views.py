@@ -1,8 +1,6 @@
 from django.db.models import Q
 from django.utils import timezone as datetime
-from rest_framework import viewsets, status
-from rest_framework.exceptions import ParseError
-from rest_framework.views import APIView
+from rest_framework import viewsets, status, mixins
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -146,44 +144,45 @@ class JobViewSet(viewsets.ModelViewSet):
     )
     def progress_update(self, request, pk=None):
         job = self.get_object()
+        progress = job.progress
 
-        if job.progress == c.JOB_PROGRESS_NOT_STARTED:
+        if progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_LOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_TO_LOADING_STATION:
+        elif progress == c.JOB_PROGRESS_TO_LOADING_STATION:
             job.arrived_time_at_loading_station = datetime.now()
             job.progress = c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
             job.started_loading_on = datetime.now()
             job.progress = c.JOB_PROGRESS_LOADING_AT_LOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
+        elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
             job.finished_loading_on = datetime.now()
             job.progress = c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
+        elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
             job.departure_time_at_loading_station = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_QUALITY_STATION
 
-        elif job.progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
+        elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
             job.arrived_time_at_quality_station = datetime.now()
             job.progress = c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION
 
-        elif job.progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
             job.started_checking_on = datetime.now()
             job.progress = c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION
 
-        elif job.progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
+        elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
             job.finished_checking_on = datetime.now()
             job.progress = c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION
 
-        elif job.progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
+        elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
             job.departure_time_at_quality_station = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_UNLOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_TO_UNLOADING_STATION:
+        elif progress == c.JOB_PROGRESS_TO_UNLOADING_STATION:
             current_mission = job.mission_set.filter(
                 is_completed=False
             ).first()
@@ -191,7 +190,7 @@ class JobViewSet(viewsets.ModelViewSet):
             current_mission.save()
             job.progress = c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION
 
-        elif job.progress == c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION:
+        elif progress == c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION:
             current_mission = job.mission_set.filter(
                 is_completed=False
             ).first()
@@ -199,7 +198,7 @@ class JobViewSet(viewsets.ModelViewSet):
             current_mission.save()
             job.progress = c.JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION:
+        elif progress == c.JOB_PROGRESS_UNLOADING_AT_UNLOADING_STATION:
             current_mission = job.mission_set.filter(
                 is_completed=False
             ).first()
@@ -207,7 +206,7 @@ class JobViewSet(viewsets.ModelViewSet):
             current_mission.save()
             job.progress = c.JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION
 
-        elif job.progress == c.JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION:
+        elif progress == c.JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION:
             current_mission = job.mission_set.filter(
                 is_completed=False
             ).first()
@@ -237,7 +236,7 @@ class JobViewSet(viewsets.ModelViewSet):
     @action(
         detail=True, url_path='upload', methods=['post'],
         permission_classes=[IsDriverOrEscortUser],
-        parser_classes=[MultiPartParser]
+        parser_classes=[MultiPartParser, FormParser]
     )
     def upload(self, request, pk=None):
 
@@ -289,7 +288,9 @@ class MissionViewSet(viewsets.ModelViewSet):
         )
 
 
-class DriverNotificationViewSet(viewsets.ModelViewSet):
+class DriverNotificationViewSet(mixins.RetrieveModelMixin,
+                                mixins.ListModelMixin,
+                                viewsets.GenericViewSet):
     """
     """
     permission_classes = [IsDriverOrEscortUser]
