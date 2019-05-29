@@ -85,7 +85,7 @@ class JobViewSet(viewsets.ModelViewSet):
     def previous_jobs(self, request):
         serializer = s.JobDataSerializer(
             request.user.driver_profile.jobs.filter(
-                finished_at__lte=datetime.now()
+                finished_on__lte=datetime.now()
             ),
             many=True
         )
@@ -100,15 +100,23 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def progress_jobs(self, request):
-        serializer = s.JobDataSerializer(
-            request.user.driver_profile.jobs.filter(
-                ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
-                  Q(progress=c.JOB_PROGRESS_COMPLETE))
+        job = request.user.driver_profile.jobs.filter(
+            ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
+                Q(progress=c.JOB_PROGRESS_COMPLETE))
+        ).first()
+
+        if job is None:
+            job = request.user.driver_profile.jobs.filter(
+                progress=c.JOB_PROGRESS_NOT_STARTED
             ).first()
-        )
+
+        if job is not None:
+            ret = s.JobDataSerializer(job).data
+        else:
+            ret = {}
 
         return Response(
-            serializer.data,
+            ret,
             status=status.HTTP_200_OK
         )
 
@@ -130,7 +138,8 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, url_path='update-progress'
+        detail=True, url_path='update-progress',
+        permission_classes=[IsDriverOrEscortUser]
     )
     def progress_update(self, request, pk=None):
         job = self.get_object()
@@ -207,6 +216,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 job.progress = c.JOB_PROGRESS_TO_UNLOADING_STATION
             else:
                 job.progress = c.JOB_PROGRESS_COMPLETE
+                job.finished_on = datetime.now()
 
         else:
             return Response(
