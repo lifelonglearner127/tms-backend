@@ -62,15 +62,15 @@ class JobDataSerializer(serializers.ModelSerializer):
         source='route.stations', many=True, read_only=True
     )
 
-    progress = serializers.CharField(source='get_progress_display')
+    progress_msg = serializers.CharField(source='get_progress_display')
     mission_count = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations',
-            'route', 'missions', 'progress', 'total_weight', 'start_due_time',
-            'finish_due_time', 'mission_count'
+            'route', 'missions', 'progress', 'progress_msg' 'total_weight',
+            'start_due_time', 'finish_due_time', 'mission_count'
         )
 
     def get_mission_count(self, obj):
@@ -79,10 +79,19 @@ class JobDataSerializer(serializers.ModelSerializer):
 
 class JobProgressSerializer(serializers.ModelSerializer):
 
-    msg = serializers.CharField(source='get_progress_display')
+    progress_msg = serializers.CharField(source='get_progress_display')
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'progress', 'msg'
+            'id', 'progress', 'progress_msg'
+        )
+
+
+class JobBillDocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.JobBillDocument
+        fields = (
+            'id', 'job', 'document', 'category'
         )

@@ -16,6 +16,7 @@ Including another URLconf
 import json
 import paho.mqtt.client as mqtt
 from django.conf import settings
+from django.conf.urls.static import static
 
 from django.contrib import admin
 from django.urls import path, include
@@ -50,6 +51,12 @@ urlpatterns = [
         'api/', include(('tms.road.urls', 'road'), namespace='road')
     ),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
 
 
 def on_message_locations(client, userdata, msg):

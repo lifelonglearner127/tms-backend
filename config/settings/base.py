@@ -148,6 +148,13 @@ STATICFILES_FINDERS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+# media
+# ----------------------------------------------------------------------------
+MEDIA_URL =  '/media/'
+MEDIA_ROOT = str(ROOT_DIR("media"))
+
+
 # Django Rest Framework
 # ----------------------------------------------------------------------------
 REST_FRAMEWORK = {

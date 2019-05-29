@@ -156,6 +156,17 @@ JOB_PROGRESS = (
     (JOB_PROGRESS_FINISH_UNLOADING_AT_UNLOADING_STATION, 'Job Progress - Finish Unloading Station')
 )
 
+# bill document type
+BILL_FROM_OIL_STATION = 'O'
+BILL_FROM_LOADING_STATION = 'L'
+BILL_FROM_UNLOADING_STATION = 'U'
+BILL_FROM_QUALITY_STATION = 'Q'
+BILL_TYPE = (
+    (BILL_FROM_OIL_STATION, 'Bill from Oil Station'),
+    (BILL_FROM_LOADING_STATION, 'Bill from Loading Station'),
+    (BILL_FROM_UNLOADING_STATION, 'Bill from UnLoading Station'),
+    (BILL_FROM_QUALITY_STATION, 'Bill from Quality Station')
+)
 
 # road app
 # ----------------------------------------------------------------------------

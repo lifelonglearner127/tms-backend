@@ -11,3 +11,8 @@ class JobAdmin(admin.ModelAdmin):
 @admin.register(m.Mission)
 class MissionAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.JobBillDocument)
+class JobBillDocumentAdmin(admin.ModelAdmin):
+    pass

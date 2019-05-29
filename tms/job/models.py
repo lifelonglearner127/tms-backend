@@ -174,3 +174,22 @@ class Mission(models.Model):
 
     class Meta:
         ordering = ['step']
+
+
+class JobBillDocument(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    document = models.ImageField()
+
+    category = models.CharField(
+        max_length=1,
+        choices=c.BILL_TYPE,
+        default=c.BILL_FROM_LOADING_STATION
+    )
+
+    def __str__(self):
+        return self.get_category_display()
