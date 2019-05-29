@@ -45,12 +45,15 @@ class VehicleViewSet(StaffViewSet):
             else:
                 paths = []
 
+                index = 0
                 for x in data:
                     paths.append([x.pop('lng'), x.pop('lat')])
                     print(x)
+                    x['no'] = index
                     x['time'] = datetime.utcfromtimestamp(
                         int(x['time'])/1000
                     ).strftime('%Y-%m-%d %H:%M:%S')
+                    index = index + 1
 
                 results = {
                     'paths': paths,
