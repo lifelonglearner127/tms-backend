@@ -67,7 +67,11 @@ class VehicleViewSet(StaffViewSet):
 
     @action(detail=False, url_path='position')
     def vehicle_position(self, request):
-        vehicles = m.Vehicle.objects.all()
+        vehicles = m.Vehicle.objects.exclude(
+            longitude__isnull=True
+        ).exclude(
+            latitude__isnull=True
+        )
         serializer = s.VehiclePositionSerializer(vehicles, many=True)
 
         return Response(

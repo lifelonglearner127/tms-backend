@@ -150,7 +150,7 @@ class JobViewSet(viewsets.ModelViewSet):
             job.progress = c.JOB_PROGRESS_TO_LOADING_STATION
 
         elif progress == c.JOB_PROGRESS_TO_LOADING_STATION:
-            job.arrived_time_at_loading_station = datetime.now()
+            job.arrived_loading_station_on = datetime.now()
             job.progress = c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION
 
         elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
@@ -162,11 +162,11 @@ class JobViewSet(viewsets.ModelViewSet):
             job.progress = c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION
 
         elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
-            job.departure_time_at_loading_station = datetime.now()
+            job.departure_loading_station_on = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_QUALITY_STATION
 
         elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
-            job.arrived_time_at_quality_station = datetime.now()
+            job.arrived_quality_station_on = datetime.now()
             job.progress = c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION
 
         elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
@@ -178,14 +178,14 @@ class JobViewSet(viewsets.ModelViewSet):
             job.progress = c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION
 
         elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
-            job.departure_time_at_quality_station = datetime.now()
+            job.departure_quality_station_on = datetime.now()
             job.progress = c.JOB_PROGRESS_TO_UNLOADING_STATION
 
         elif progress == c.JOB_PROGRESS_TO_UNLOADING_STATION:
             current_mission = job.mission_set.filter(
                 is_completed=False
             ).first()
-            current_mission.arrived_time_at_station = datetime.now()
+            current_mission.arrived_station_on = datetime.now()
             current_mission.save()
             job.progress = c.JOB_PRGORESS_ARRIVED_AT_UNLOADING_STATION
 
@@ -210,7 +210,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 is_completed=False
             ).first()
             current_mission.is_completed = True
-            current_mission.departure_time_at_station = datetime.now()
+            current_mission.departure_station_on = datetime.now()
             current_mission.save()
 
             if job.mission_set.filter(is_completed=False).exists():

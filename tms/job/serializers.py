@@ -20,8 +20,8 @@ class MissionSerializer(serializers.ModelSerializer):
         model = m.Mission
         fields = (
             'mission_weight', 'loading_weight', 'unloading_weight',
-            'arrived_time_at_station', 'started_unloading_on',
-            'finished_unloading_on', 'departure_time_at_station',
+            'arrived_station_on', 'started_unloading_on',
+            'finished_unloading_on', 'departure_station_on',
             'is_completed', 'mission'
         )
 

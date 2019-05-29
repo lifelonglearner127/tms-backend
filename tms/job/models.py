@@ -62,10 +62,10 @@ class Job(models.Model):
         blank=True
     )
 
-    arrived_time_at_loading_station = models.DateTimeField(
+    arrived_loading_station_on = models.DateTimeField(
         null=True,
         blank=True
-    ),
+    )
 
     started_loading_on = models.DateTimeField(
         null=True,
@@ -77,12 +77,12 @@ class Job(models.Model):
         blank=True
     )
 
-    departure_time_at_loading_station = models.DateTimeField(
+    departure_loading_station_on = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    arrived_time_at_quality_station = models.DateTimeField(
+    arrived_quality_station_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -97,7 +97,7 @@ class Job(models.Model):
         blank=True
     )
 
-    departure_time_at_quality_station = models.DateTimeField(
+    departure_quality_station_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -149,7 +149,7 @@ class Mission(models.Model):
         blank=True
     )
 
-    arrived_time_at_station = models.DateTimeField(
+    arrived_station_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -164,7 +164,7 @@ class Mission(models.Model):
         blank=True
     )
 
-    departure_time_at_station = models.DateTimeField(
+    departure_station_on = models.DateTimeField(
         null=True,
         blank=True
     )

@@ -601,6 +601,16 @@
     }
   },
   {
+    "model": "road.Route",
+    "pk": 2,
+    "fields": {
+        "name": "A-A-A",
+        "path": [1,19,7],
+        "policy": 0,
+        "distance": 112054
+    }
+  },
+  {
     "model": "order.Order",
     "pk": 1,
     "fields": {
@@ -614,6 +624,45 @@
     }
   },
   {
+    "model": "order.Order",
+    "pk": 2,
+    "fields": {
+        "alias": "Order 2",
+        "assignee": 2,
+        "customer": 1,
+        "order_source": "I",
+        "status": "C",
+        "created": "2019-05-16T00:00:00+00:00",
+        "updated": "2019-05-16T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.Order",
+    "pk": 3,
+    "fields": {
+        "alias": "Order 3",
+        "assignee": 2,
+        "customer": 1,
+        "order_source": "I",
+        "status": "C",
+        "created": "2019-05-16T00:00:00+00:00",
+        "updated": "2019-05-16T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.Order",
+    "pk": 4,
+    "fields": {
+        "alias": "Order 4",
+        "assignee": 2,
+        "customer": 1,
+        "order_source": "I",
+        "status": "C",
+        "created": "2019-05-16T00:00:00+00:00",
+        "updated": "2019-05-16T00:00:00+00:00"
+    }
+  },
+  {
     "model": "order.OrderLoadingStation",
     "pk": 1,
     "fields": {
@@ -621,6 +670,36 @@
         "loading_station": 1,
         "quality_station": 19,
         "due_time": "2019-05-21T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.OrderLoadingStation",
+    "pk": 2,
+    "fields": {
+        "order": 2,
+        "loading_station": 1,
+        "quality_station": 19,
+        "due_time": "2019-05-18T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.OrderLoadingStation",
+    "pk": 3,
+    "fields": {
+        "order": 3,
+        "loading_station": 1,
+        "quality_station": 19,
+        "due_time": "2019-05-18T00:00:00+00:00"
+    }
+  },
+  {
+    "model": "order.OrderLoadingStation",
+    "pk": 4,
+    "fields": {
+        "order": 4,
+        "loading_station": 1,
+        "quality_station": 19,
+        "due_time": "2019-05-18T00:00:00+00:00"
     }
   },
   {
@@ -638,6 +717,33 @@
     "fields": {
         "order_loading_station": 1,
         "product": 2,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProduct",
+    "pk": 3,
+    "fields": {
+        "order_loading_station": 2,
+        "product": 1,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProduct",
+    "pk": 4,
+    "fields": {
+        "order_loading_station": 3,
+        "product": 1,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProduct",
+    "pk": 5,
+    "fields": {
+        "order_loading_station": 4,
+        "product": 1,
         "total_weight": 1
     }
   },
@@ -669,6 +775,33 @@
     }
   },
   {
+    "model": "order.OrderProductDeliver",
+    "pk": 4,
+    "fields": {
+        "order_product": 3,
+        "unloading_station": 7,
+        "weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProductDeliver",
+    "pk": 5,
+    "fields": {
+        "order_product": 4,
+        "unloading_station": 7,
+        "weight": 1
+    }
+  },
+  {
+    "model": "order.OrderProductDeliver",
+    "pk": 6,
+    "fields": {
+        "order_product": 5,
+        "unloading_station": 7,
+        "weight": 1
+    }
+  },
+  {
     "model": "job.Job",
     "pk": 1,
     "fields": {
@@ -681,8 +814,57 @@
     }
   },
   {
-    "model": "job.Mission",
+    "model": "job.Job",
+    "pk": 2,
+    "fields": {
+        "order": 2,
+        "vehicle": 1,
+        "driver": 1,
+        "escort": 1,
+        "route": 2,
+        "total_weight": 1,
+        "progress": 1,
+        "start_due_time": "2019-05-17T00:00:00+00:00",
+        "finish_due_time": "2019-05-21T00:00:00+00:00",
+        "started_on": "2019-05-18T00:00:00+00:00",
+        "arrived_loading_station_on": "2019-05-18T01:00:00+00:00",
+        "started_loading_on": "2019-05-18T01:05:00+00:00",
+        "finished_loading_on": "2019-05-18T01:10:00+00:00",
+        "departure_loading_station_on": "2019-05-18T01:15:00+00:00",
+        "arrived_quality_station_on": "2019-05-18T02:00:00+00:00",
+        "started_checking_on": "2019-05-18T02:05:00+00:00",
+        "finished_checking_on": "2019-05-18T02:10:00+00:00",
+        "departure_quality_station_on": "2019-05-18T02:15:00+00:00",
+        "finished_on": "2019-05-19T00:15:00+00:00"
+    }
+  },
+  {
+    "model": "job.Job",
     "pk": 3,
+    "fields": {
+        "order": 3,
+        "vehicle": 1,
+        "driver": 1,
+        "escort": 1,
+        "route": 1,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "job.Job",
+    "pk": 4,
+    "fields": {
+        "order": 4,
+        "vehicle": 1,
+        "driver": 1,
+        "escort": 1,
+        "route": 1,
+        "total_weight": 1
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 1,
     "fields": {
         "job": 1,
         "step": 0,
@@ -702,11 +884,48 @@
   },
   {
     "model": "job.Mission",
-    "pk": 1,
+    "pk": 3,
     "fields": {
         "job": 1,
         "step": 2,
         "mission": 3,
+        "mission_weight": 1
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 4,
+    "fields": {
+        "job": 2,
+        "mission": 4,
+        "step": 0,
+        "mission_weight": 1,
+        "loading_weight": 1,
+        "unloading_weight": 1,
+        "arrived_station_on": "2019-05-19T00:00:00+00:00",
+        "started_unloading_on": "2019-05-19T00:05:00+00:00",
+        "finished_unloading_on": "2019-05-19T00:10:00+00:00",
+        "departure_station_on": "2019-05-19T00:15:00+00:00",
+        "is_completed": true
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 5,
+    "fields": {
+        "job": 3,
+        "step": 0,
+        "mission": 5,
+        "mission_weight": 1
+    }
+  },
+  {
+    "model": "job.Mission",
+    "pk": 6,
+    "fields": {
+        "job": 4,
+        "step": 0,
+        "mission": 6,
         "mission_weight": 1
     }
   }
