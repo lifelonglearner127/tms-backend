@@ -194,3 +194,27 @@ class JobBillDocument(models.Model):
 
     def __str__(self):
         return self.get_category_display()
+
+
+class DriverNotification(models.Model):
+
+    driver = models.ForeignKey(
+        DriverProfile,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+
+    message = models.TextField()
+
+    sent = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    is_read = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+        return 'Meessage to {} at {}'.format(
+            self.driver.user.username, self.sent
+        )

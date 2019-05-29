@@ -10,6 +10,9 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.register(
     r'jobs', v.JobViewSet, base_name='job'
 )
+router.register(
+    r'notifications', v.DriverNotificationViewSet, base_name='notification'
+)
 
 # /jobs/{job_pk}/missions
 # /jobs/{job_pk}/missions/{pk}

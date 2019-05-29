@@ -95,3 +95,12 @@ class JobBillDocumentSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'job', 'document', 'category'
         )
+
+
+class DriverNotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.DriverNotification
+        fields = (
+            'message', 'sent', 'is_read'
+        )
