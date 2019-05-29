@@ -19,7 +19,8 @@ class Job(models.Model):
 
     vehicle = models.ForeignKey(
         Vehicle,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='jobs'
     )
 
     driver = models.ForeignKey(

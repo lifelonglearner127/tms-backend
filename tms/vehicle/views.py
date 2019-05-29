@@ -72,6 +72,35 @@ class VehicleViewSet(StaffViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, url_path="current_info")
+    def current_info(self, request, pk=None):
+        vehicle = self.get_object()
+        # todo: get bound of vehicle with driver and escort
+
+        queries = {
+            'plate_num': vehicle.plate_num,
+            'fields': 'loc, status',
+            'addr_required': True,
+        }
+
+        data = G7Interface.call_g7_http_interface(
+            'VEHICLE_STATUS_INQUIRY',
+            queries=queries
+        )
+
+        print(data)
+        ret = {
+            'plate_num': vehicle.plate_num,
+            'driver': 'Driver',
+            'escort': 'Escort',
+            'gpsno': data['gpsno'],
+            'location': data['loc']['address']
+        }
+        return Response(
+            ret,
+            status=status.HTTP_200_OK
+        )
+
 
 class VehicleDocumentViewSet(StaffViewSet):
     """
