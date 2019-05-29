@@ -253,6 +253,30 @@ class JobViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    @action(
+        detail=True, url_path='documents',
+        permission_classes=[IsDriverOrEscortUser]
+    )
+    def documents(self, request, pk=None):
+        job = self.get_object()
+        category = request.query_params.get('category', None)
+
+        if category is not None:
+            serializer = s.JobBillDocumentSerializer(
+                job.bills.filter(category=category),
+                many=True
+            )
+        else:
+            serializer = s.JobBillDocumentSerializer(
+                job.bills.all(),
+                many=True
+            )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class MissionViewSet(viewsets.ModelViewSet):
     """

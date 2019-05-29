@@ -180,7 +180,8 @@ class JobBillDocument(models.Model):
 
     job = models.ForeignKey(
         Job,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='bills'
     )
 
     document = models.ImageField()
