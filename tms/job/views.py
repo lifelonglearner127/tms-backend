@@ -1,7 +1,6 @@
 from django.db.models import Q
 from django.utils import timezone as datetime
 from rest_framework import viewsets, status, mixins
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -235,13 +234,13 @@ class JobViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True, url_path='upload', methods=['post'],
-        permission_classes=[IsDriverOrEscortUser],
-        parser_classes=[MultiPartParser, FormParser]
+        permission_classes=[IsDriverOrEscortUser]
     )
     def upload(self, request, pk=None):
-
+        data = request.data
+        data['job'] = pk
         serializer = s.JobBillDocumentSerializer(
-            data=request.data
+            data=data
         )
 
         serializer.is_valid(raise_exception=True)
