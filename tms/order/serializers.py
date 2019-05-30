@@ -290,18 +290,28 @@ class OrderSerializer(serializers.ModelSerializer):
                     'Products data are not provided'
                 )
 
-            station_data = loading_station_data.pop('loading_station', None)
-            loading_station_id = station_data.get('id', None)
-
             # select_object_or_404 can be used but I use try/catch for
             # rich error msg
             try:
+                station_data = loading_station_data.pop(
+                    'loading_station', None
+                )
+                loading_station_id = station_data.get('id', None)
                 loading_station = Station.loading.get(
                     pk=loading_station_id
+                )
+
+                station_data = loading_station_data.pop(
+                    'quality_station', None
+                )
+                quality_station_id = station_data.get('id', None)
+                quality_station = Station.quality.get(
+                    pk=quality_station_id
                 )
                 order_loading_station = m.OrderLoadingStation.objects.create(
                     order=instance,
                     loading_station=loading_station,
+                    quality_station=quality_station,
                     **loading_station_data
                 )
             except Station.DoesNotExist:
