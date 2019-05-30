@@ -13,5 +13,6 @@ ALLOWED_HOSTS = [
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    '47.98.111.251'
+    'http://47.98.111.251',
+    'https://47.98.111.251'
 ]
