@@ -7,9 +7,20 @@ from ..order.models import OrderProductDeliver
 from ..order.serializers import (
     ShortOrderProductDeliverSerializer, ShortStationSerializer,
 )
-from ..vehicle.serializers import MainVehicleSerializer
+from ..vehicle.serializers import MainVehicleSerializer, ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
-from ..road.serializers import RouteDataSerializer
+from ..road.serializers import RouteDataSerializer, ShortRouteSerializer
+
+
+class ShortMissionSerializer(serializers.ModelSerializer):
+
+    mission = ShortOrderProductDeliverSerializer()
+
+    class Meta:
+        model = m.Mission
+        fields = (
+            'mission', 'mission_weight'
+        )
 
 
 class MissionSerializer(serializers.ModelSerializer):
@@ -23,6 +34,23 @@ class MissionSerializer(serializers.ModelSerializer):
             'arrived_station_on', 'started_unloading_on',
             'finished_unloading_on', 'departure_station_on',
             'is_completed', 'mission'
+        )
+
+
+class ShortJobSerializer(serializers.ModelSerializer):
+
+    driver = ShortStaffProfileSerializer()
+    escort = ShortStaffProfileSerializer()
+    vehicle = ShortVehicleSerializer()
+    route = ShortRouteSerializer()
+    missions = ShortMissionSerializer(
+        source='mission_set', many=True, read_only=True
+    )
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'driver', 'escort', 'vehicle', 'missions', 'route'
         )
 
 

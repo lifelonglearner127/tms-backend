@@ -14,7 +14,8 @@ class Job(models.Model):
     """
     order = models.ForeignKey(
         Order,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='jobs'
     )
 
     vehicle = models.ForeignKey(

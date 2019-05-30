@@ -95,13 +95,13 @@ class VehicleViewSet(StaffViewSet):
             queries=queries
         )
 
-        print(data)
         ret = {
             'plate_num': vehicle.plate_num,
             'driver': 'Driver',
             'escort': 'Escort',
             'gpsno': data['gpsno'],
-            'location': data['loc']['address']
+            'location': data['loc']['address'],
+            'speed': data['loc']['speed']
         }
         return Response(
             ret,

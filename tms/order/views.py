@@ -1,8 +1,10 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import models as m
 from . import serializers as s
+from ..job.serializers import ShortJobSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -49,6 +51,19 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='jobs')
+    def get_jobs(self, request, pk=None):
+        order = self.get_object()
+        serializer = ShortJobSerializer(
+            order.jobs.all(),
+            many=True
+        )
 
         return Response(
             serializer.data,
