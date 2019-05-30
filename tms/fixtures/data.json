@@ -89,14 +89,16 @@
     "model": "account.CustomerProfile",
     "pk": 1,
     "fields": {
-      "user": 5
+      "user": 5,
+      "associated_with": 2
     }
   },
   {
     "model": "account.CustomerProfile",
     "pk": 2,
     "fields": {
-      "user": 6
+      "user": 6,
+      "associated_with": 2
     }
   },
   {

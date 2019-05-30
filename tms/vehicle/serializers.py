@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..job.models import Job
 
 
 class ShortVehicleSerializer(serializers.ModelSerializer):
@@ -27,15 +28,24 @@ class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer
     """
-    model_name = serializers.CharField(source='get_model_display')
-    brand_name = serializers.CharField(source='get_brand_display')
+    model_name = serializers.CharField(
+        source='get_model_display', read_only=True
+    )
+    brand_name = serializers.CharField(
+        source='get_brand_display',
+        read_only=True
+    )
+    jobs = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Vehicle
         fields = (
-            'model', 'model_name', 'plate_num', 'code', 'brand', 'brand_name',
-            'load', 'longitude', 'latitude', 'jobs'
+            'id', 'model', 'model_name', 'plate_num', 'code', 'brand',
+            'brand_name', 'load', 'longitude', 'latitude', 'jobs'
         )
+
+    def get_jobs(self, obj):
+        return obj.jobs.count()
 
 
 class VehicleDocumentSerializer(serializers.ModelSerializer):
