@@ -27,9 +27,15 @@ class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer
     """
+    model_name = serializers.CharField(source='get_model_display')
+    brand_name = serializers.CharField(source='get_brand_display')
+
     class Meta:
         model = m.Vehicle
-        fields = '__all__'
+        fields = (
+            'model', 'model_name', 'plate_num', 'code', 'brand', 'brand_name',
+            'load', 'longitude', 'latitude', 'jobs'
+        )
 
 
 class VehicleDocumentSerializer(serializers.ModelSerializer):
