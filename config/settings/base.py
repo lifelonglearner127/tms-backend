@@ -17,7 +17,7 @@ if READ_DOT_ENV_FILE:
 # Generals
 # ----------------------------------------------------------------------------
 DEBUG = env.bool("DJANGO_DEBUG", False)
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'   # en-us
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -181,7 +181,6 @@ JWT_AUTH = {
     'tms.account.views.jwt_response_payload_handler',
     'JWT_VERIFY_EXPIRATION': False
 }
-
 
 
 # G7 Settings

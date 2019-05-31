@@ -13,13 +13,8 @@ class ProductViewSet(StaffViewSet):
     Viewset for products
     """
     queryset = m.Product.objects.all()
+    serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
-
-    def get_serializer_class(self):
-        if self.action in ['list']:
-            return s.ProductInfoSerializer
-        else:
-            return s.ProductSerializer
 
 
 class StationViewSet(StaffViewSet):
@@ -27,13 +22,8 @@ class StationViewSet(StaffViewSet):
     Viewset for Loading Station
     """
     queryset = m.Station.objects.all()
+    serializer_class = s.StationSerializer
     short_serializer_class = s.ShortStationSerializer
-
-    def get_serializer_class(self):
-        if self.action in ['list']:
-            return s.StationInfoSerializer
-        else:
-            return s.StationSerializer
 
     @action(detail=False)
     def short(self, request):

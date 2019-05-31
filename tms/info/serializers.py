@@ -13,17 +13,6 @@ class ShortProductSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductInfoSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Product
-    """
-    category = serializers.CharField(source='get_category_display')
-
-    class Meta:
-        model = m.Product
-        fields = '__all__'
-
-
 class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product
@@ -31,6 +20,12 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Product
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['category_name'] = instance.get_category_display()
+
+        return ret
 
 
 class ShortStationSerializer(serializers.ModelSerializer):
@@ -44,19 +39,6 @@ class ShortStationSerializer(serializers.ModelSerializer):
         )
 
 
-class StationInfoSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Loading Station
-    """
-    product_category = serializers.CharField(
-        source='get_product_category_display'
-    )
-
-    class Meta:
-        model = m.Station
-        fields = '__all__'
-
-
 class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station
@@ -64,3 +46,9 @@ class StationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Station
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['product_category_name'] = instance.get_product_category_display()
+
+        return ret
