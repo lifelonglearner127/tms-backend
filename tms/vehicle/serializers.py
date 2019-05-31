@@ -64,7 +64,7 @@ class VehiclePositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Vehicle
         fields = (
-            'id', 'speed', 'lnglat'
+            'id', 'lnglat'
         )
 
     def get_lnglat(self, obj):
