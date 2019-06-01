@@ -429,6 +429,18 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'User data is not provided'
             )
         user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
+
+        # check if user id exists already
+        user_validator = {}
+        if m.User.objects.filter(username=user_data['username']).exists():
+            user_validator['username'] = 'duplicate'
+
+        if m.User.objects.filter(mobile=user_data['mobile']).exists():
+            user_validator['mobile'] = 'duplicate'
+
+        if user_validator:
+            raise serializers.ValidationError(user_validator)
+
         user = m.User.objects.create_user(**user_data)
 
         # get associated data
@@ -460,6 +472,22 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'User data is not provided'
             )
         user = instance.user
+
+        # check if user id & mobile exists already
+        user_validator = {}
+        if m.User.objects.exclude(pk=user.id).filter(
+            username=user_data['username']
+        ).exists():
+            user_validator['username'] = 'duplicate'
+
+        if m.User.objects.exclude(pk=user.id).filter(
+            mobile=user_data['mobile']
+        ).exists():
+            user_validator['mobile'] = 'duplicate'
+
+        if user_validator:
+            raise serializers.ValidationError(user_validator)
+
         user.username = user_data.get('username', user.username)
         user.mobile = user_data.get('mobile', user.mobile)
         user.name = user_data.get('name', user.name)
