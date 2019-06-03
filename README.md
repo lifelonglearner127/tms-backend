@@ -4,7 +4,7 @@ Vehicle Management System
 ## Prequisites
  - Postgresql
  - Python3.6
- - Pipenv
+ - virtualenv
 
 ### Install & Configure Postgresql
 Please refer to this [link](https://www.postgresql.org/download/) to install Postgresql
@@ -22,7 +22,9 @@ GRANT ALL PRIVILEGES ON DATABASE "database_name" to my_username;
 ```
 git clone git@github.com:lifelonglearner127/tms-backend.git
 cd tms-backend
-pipenv install
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 Configure Environment Variables
@@ -33,9 +35,8 @@ cp .env.example .env
 
 Running Locally
 ```
-pipenv shell
 export DJANGO_READ_DOT_ENV_FILE=True
-set DJANGO_SETTINGS_MODULE=config.settings.local
+export DJANGO_SETTINGS_MODULE=config.settings.local
 python manage.py migrate
 python manage.py runserver
 ```
