@@ -12,16 +12,19 @@ class OrderViewSet(viewsets.ModelViewSet):
     Order Viewset
     """
     queryset = m.Order.objects.all()
-    serializer_class = s.OrderSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['update', 'create']:
+            return s.OrderCreateUpdateSerializer
+        else:
+            return s.OrderSerializer
 
     def create(self, request):
         context = {
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
             'loading_stations': request.data.pop('loading_stations')
         }
 
-        serializer = self.serializer_class(
+        serializer = self.get_serializer_class()(
             data=request.data, context=context
         )
 
@@ -37,12 +40,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer_instance = self.get_object()
 
         context = {
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
             'loading_stations': request.data.pop('loading_stations')
         }
 
-        serializer = self.serializer_class(
+        serializer = self.get_serializer_class()(
             serializer_instance,
             data=request.data,
             context=context,
