@@ -9,8 +9,7 @@ SECRET_KEY = env(
     default="i1t=60pmfy@f2yloh#mzj7%)#jtgll(3wb@@@23w=l(ai&!q1%",
 )
 ALLOWED_HOSTS = [
-    '0.0.0.0',
-    '47.98.111.251'
+    '*'
 ]
 
 CORS_ORIGIN_WHITELIST = [

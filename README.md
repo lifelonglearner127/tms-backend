@@ -41,8 +41,11 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Running on Heroku
+
+## Deployment
+### Deploying to Heroku
 ```
+heroku create tms-backend
 heroku config:set G7_HTTP_HOST=''
 heroku config:set G7_HTTP_BASEURL=''
 heroku config:set G7_HTTP_VEHICLE_BASIC_ACCESS_ID=''
@@ -55,4 +58,53 @@ heroku config:set G7_MQTT_POSITION_TOPIC=''
 heroku config:set G7_MQTT_POSITION_CLIENT_ID=''
 heroku config:set G7_MQTT_POSITION_ACCESS_ID=''
 heroku config:set G7_MQTT_POSITION_SECRET=''
+git push heroku master
 ```
+
+
+### Deploying to Alibaba Cloud
+1. In order to deploy django app to Alibaba Cloud, we need to intall Prerequisites.
+ - Python & Pip & Virtualenv
+```
+sudo apt-get install python-pip
+sudo pip install virtualenv
+```
+> Important! Please double check python version before installing Prerequisites. This part can be skipped if these prerequisites are already installed.
+ 
+ - Nginx
+```
+sudo apt-get install nginx
+```
+> Important! This part can be skipped if these prerequisites are already installed.
+ 
+ - [Install Postgresql](https://www.postgresql.org/download/)
+```
+sudo su postgres
+psql
+CREATE DATABASE tms;
+CREATE USER dev WITH PASSWORD 'admin123';
+GRANT ALL PRIVILEGES ON DATABASE "tms" to dev;
+```
+> Important! This part can be skipped if these prerequisites are already installed.
+
+2. Clone and setup db
+```
+mkdir ~/.virtualenvs && cd ~/.virtaulenvs
+virtualenv tms-backend
+source tms-backend/bin/activate
+cd ~ && mkdir Projects && cd Projects && git clone https://github.com/lifelonglearner127/tms-backend.git
+cd tms-backend && pip install -r requirements.txt
+export DJANGO_READ_DOT_ENV_FILE=True
+export DJANGO_SETTINGS_MODULE=config.settings.local
+python manage.py collectstatic
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+3. Configure wsgi & nginx
+```
+cp tms_backend /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
+systemctl restart nginx
+```
+
