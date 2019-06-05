@@ -34,17 +34,21 @@ class VehicleSerializer(serializers.ModelSerializer):
         source='get_brand_display',
         read_only=True
     )
-    jobs = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Vehicle
         fields = (
             'id', 'model', 'model_name', 'plate_num', 'code', 'brand',
-            'brand_name', 'load', 'longitude', 'latitude', 'jobs'
+            'brand_name', 'load', 'longitude', 'latitude', 'branches',
+            'branch_count'
         )
 
-    def get_jobs(self, obj):
-        return obj.jobs.count()
+    def validate(self, data):
+        if data['load'] != sum(data['branches']):
+            raise serializers.ValidationError({
+                'branches': 'Sum of branches weight exceed total weight'
+            })
+        return data
 
 
 class VehicleDocumentSerializer(serializers.ModelSerializer):

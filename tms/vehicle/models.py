@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants as c
@@ -35,6 +36,10 @@ class Vehicle(TimeStampedModel):
         decimal_places=1
     )
 
+    branches = ArrayField(
+        models.PositiveIntegerField()
+    )
+
     status = models.CharField(
         max_length=1,
         choices=c.VEHICLE_STATUS,
@@ -55,6 +60,10 @@ class Vehicle(TimeStampedModel):
         null=True,
         blank=True
     )
+
+    @property
+    def branch_count(self):
+        return len(self.branches)
 
     objects = models.Manager()
     inworks = managers.InWorkVehicleManager()

@@ -19,6 +19,23 @@ class VehicleViewSet(StaffViewSet):
     serializer_class = s.VehicleSerializer
     short_serializer_class = s.ShortVehicleSerializer
 
+    def create(self, request):
+        branches = request.data.get('branches', None)
+        if branches is None:
+            load = request.data.get('load', 0)
+            data = request.data.copy()
+            data.setdefault('branches', [load])
+            serializer = self.serializer_class(data=data)
+        else:
+            serializer = self.serializer_class(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
+
     @action(detail=True, methods=['get'], url_path='playback')
     def vehicle_history_track_query(self, request, pk=None):
         vehicle = self.get_object()
