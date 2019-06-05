@@ -6,7 +6,6 @@ from ..info.serializers import ShortStationSerializer, ShortProductSerializer
 from ..account.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 )
-from ..account.models import StaffProfile, CustomerProfile
 
 
 class ShortOrderProductSerializer(serializers.ModelSerializer):

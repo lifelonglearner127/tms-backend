@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..job.models import Job
 
 
 class ShortVehicleSerializer(serializers.ModelSerializer):
