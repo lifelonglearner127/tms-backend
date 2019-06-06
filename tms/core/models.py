@@ -11,7 +11,6 @@ class CreatedTimeModel(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['-created']
 
 
 class TimeStampedModel(models.Model):
@@ -28,7 +27,6 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['-updated']
 
 
 class BasicContactModel(TimeStampedModel):

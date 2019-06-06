@@ -54,6 +54,9 @@ class Order(TimeStampedModel):
     def __str__(self):
         return self.alias
 
+    class Meta:
+        ordering = ['-updated']
+
 
 class OrderLoadingStation(models.Model):
     """

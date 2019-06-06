@@ -6,6 +6,8 @@ from rest_framework import serializers
 from . import models as m
 from . import utils
 from ..core import constants as c
+from ..info.models import Product
+from ..info.serializers import ShortProductSerializer
 
 
 class PasswordField(serializers.CharField):
@@ -419,6 +421,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     """
     user = MainUserSerializer(read_only=True)
     associated_with = ShortStaffProfileSerializer(read_only=True)
+    products = ShortProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = m.CustomerProfile
@@ -428,90 +431,106 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         # get user data and create one
         user_data = self.context.get('user', None)
         if user_data is None:
-            raise serializers.ValidationError(
-                'User data is not provided'
-            )
+            raise serializers.ValidationError({
+                'user': 'User Data is not provided'
+            })
         user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
 
         # check if user id exists already
-        user_validator = {}
         if m.User.objects.filter(username=user_data['username']).exists():
-            user_validator['username'] = 'duplicate'
-
-        if m.User.objects.filter(mobile=user_data['mobile']).exists():
-            user_validator['mobile'] = 'duplicate'
-
-        if user_validator:
-            raise serializers.ValidationError(user_validator)
-
-        user = m.User.objects.create_user(**user_data)
+            raise serializers.ValidationError({
+                'username': 'Such user already exists'
+            })
 
         # get associated data
         associated_data = self.context.get('associated_with', None)
         if associated_data is None:
-            raise serializers.ValidationError(
-                'Associated data is not provided'
-            )
+            raise serializers.ValidationError({
+                'association': 'Association data is not provided'
+            })
 
-        associated_id = associated_data.get('id', None)
         try:
+            associated_id = associated_data.get('id', None)
             associated = m.StaffProfile.objects.get(pk=associated_id)
         except m.StaffProfile.objects.DoesNotExist:
-            raise serializers.ValidationError(
-                'Such associated user does not exist'
-            )
+            raise serializers.ValidationError({
+                'association': 'Such association user does not exist'
+            })
 
-        return m.CustomerProfile.objects.create(
+        products_data = self.context.get('products', None)
+        if products_data is None:
+            raise serializers.ValidationError({
+                'product': 'Product data is not provided'
+            })
+
+        user = m.User.objects.create_user(**user_data)
+        customer = m.CustomerProfile.objects.create(
             user=user,
             associated_with=associated,
             **validated_data
         )
 
+        for product_data in products_data:
+            product_id = product_data.get('id', None)
+            try:
+                product = Product.objects.get(pk=product_id)
+                customer.products.add(product)
+            except Product.DoesNotExist:
+                pass
+
+        return customer
+
     def update(self, instance, validated_data):
         # get user data and update
         user_data = self.context.get('user', None)
         if user_data is None:
-            raise serializers.ValidationError(
-                'User data is not provided'
-            )
+            raise serializers.ValidationError({
+                'user': 'User Data is not provided'
+            })
         user = instance.user
 
-        # check if user id & mobile exists already
-        user_validator = {}
+        # check if user id exists already
         if m.User.objects.exclude(pk=user.id).filter(
             username=user_data['username']
         ).exists():
-            user_validator['username'] = 'duplicate'
-
-        if m.User.objects.exclude(pk=user.id).filter(
-            mobile=user_data['mobile']
-        ).exists():
-            user_validator['mobile'] = 'duplicate'
-
-        if user_validator:
-            raise serializers.ValidationError(user_validator)
+            raise serializers.ValidationError({
+                'username': 'Such user already exists'
+            })
 
         user.username = user_data.get('username', user.username)
-        user.mobile = user_data.get('mobile', user.mobile)
-        user.name = user_data.get('name', user.name)
         user.set_password(user_data.get('password', user.password))
         user.save()
 
         # get associated data
         associated_data = self.context.get('associated_with', None)
         if associated_data is None:
-            raise serializers.ValidationError(
-                'Associated data is not provided'
-            )
+            raise serializers.ValidationError({
+                'association': 'Association data is not provided'
+            })
 
-        associated_id = associated_data.get('id', None)
         try:
+            associated_id = associated_data.get('id', None)
             associated_with = m.StaffProfile.objects.get(pk=associated_id)
             instance.associated_with = associated_with
         except m.StaffProfile.objects.DoesNotExist:
-            raise serializers.ValidationError(
-                'Such associated user does not exist'
-            )
+            raise serializers.ValidationError({
+                'association': 'Such association does not exist'
+            })
+
+        products_data = self.context.get('products', None)
+        if products_data is None:
+            raise serializers.ValidationError({
+                'product': 'Product data is not provided'
+            })
+
+        instance.products.clear()
+        for product_data in products_data:
+            product_id = product_data.get('id', None)
+            try:
+                product = Product.objects.get(pk=product_id)
+                instance.products.add(product)
+            except Product.DoesNotExist:
+                pass
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)

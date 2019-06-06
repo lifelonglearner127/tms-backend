@@ -3,7 +3,9 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from . import managers
 from ..core import constants as c
+from ..core.models import BasicContactModel
 from ..core.validations import validate_mobile
+from ..info.models import Product
 
 
 class UserManager(BaseUserManager):
@@ -67,7 +69,7 @@ class User(AbstractBaseUser):
     )
 
     name = models.CharField(
-        max_length=10,
+        max_length=100,
         null=True,
         blank=True
     )
@@ -240,7 +242,7 @@ class EscortProfile(BaseStaffProfile):
         )
 
 
-class CustomerProfile(models.Model):
+class CustomerProfile(BasicContactModel):
     """
     Customer Profile Model
     """
@@ -250,33 +252,39 @@ class CustomerProfile(models.Model):
         on_delete=models.CASCADE
     )
 
-    good = models.CharField(
+    products = models.ManyToManyField(
+        Product
+    )
+
+    product_characteristics = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    payment_unit = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
+    payment_method = models.CharField(
+        max_length=1,
+        choices=c.PAYMENT_METHOD,
+        default=c.PAYMENT_METHOD_TON
     )
 
     associated_with = models.ForeignKey(
         StaffProfile,
-        related_name='in_charges',
+        related_name='customers',
         on_delete=models.SET_NULL,
         null=True
     )
 
-    address = models.CharField(
-        max_length=100,
+    customer_request = models.TextField(
         null=True,
         blank=True
     )
 
     def __str__(self):
         return '{}\'s profile'.format(self.user.username)
+
+    class Meta:
+        ordering = ['-updated']
 
 
 class StaffDocument(models.Model):

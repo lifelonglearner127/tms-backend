@@ -90,7 +90,12 @@
     "pk": 1,
     "fields": {
       "user": 5,
-      "associated_with": 2
+      "associated_with": 2,
+      "name": "Customer1",
+      "contact": "customer",
+      "mobile": "111",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
@@ -98,7 +103,12 @@
     "pk": 2,
     "fields": {
       "user": 6,
-      "associated_with": 2
+      "associated_with": 2,
+      "name": "Customer1",
+      "contact": "customer",
+      "mobile": "111",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {

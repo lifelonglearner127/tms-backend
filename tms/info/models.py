@@ -32,6 +32,9 @@ class Product(TimeStampedModel):
 
     description = models.TextField()
 
+    class Meta:
+        ordering = ['-updated']
+
     def __str__(self):
         return self.name
 
@@ -107,7 +110,5 @@ class Station(BasicContactModel):
     oil = managers.OilStationManager()
 
     class Meta:
-        unique_together = (
-            'longitude', 'latitude'
-        )
+        unique_together = ('longitude', 'latitude')
         ordering = ['-updated']

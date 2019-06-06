@@ -70,6 +70,9 @@ class Vehicle(TimeStampedModel):
     availables = managers.AvailableVehicleManager()
     repairs = managers.RepairVehicleManager()
 
+    class Meta:
+        ordering = ['-updated']
+
     def __str__(self):
         return self.plate_num
 

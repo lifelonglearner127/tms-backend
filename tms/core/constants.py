@@ -37,6 +37,15 @@ PRICE_VARY_DURATION_UNIT = (
     (PRICE_VARY_DURATION_UNIT_YEAR, '年')
 )
 
+PAYMENT_METHOD_TON = 'T'
+PAYMENT_METHOD_TON_PER_DISTANCE = 'D'
+PAYMENT_METHOD_PRICE = 'P'
+PAYMENT_METHOD = (
+    (PAYMENT_METHOD_TON, '吨'),
+    (PAYMENT_METHOD_TON_PER_DISTANCE, '吨/公里'),
+    (PAYMENT_METHOD_PRICE, '一口价')
+)
+
 
 # Vehicle app - Vehicle constants
 # ----------------------------------------------------------------------------
