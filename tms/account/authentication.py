@@ -35,11 +35,14 @@ class JWTAuthentication(BaseAuthentication):
         return self._authenticate_credentials(request, token)
 
     def _authenticate_credentials(self, request, token):
+        options = {
+            'verify_exp': False
+        }
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY)
-        except jwt.ExpiredSignature:
-            msg = 'Signature has expired.'
-            raise exceptions.AuthenticationFailed(msg)
+            payload = jwt.decode(token, settings.SECRET_KEY, options=options)
+        # except jwt.ExpiredSignature:
+        #     msg = 'Signature has expired.'
+        #     raise exceptions.AuthenticationFailed(msg)
         except jwt.DecodeError:
             msg = 'Error decoding signature.'
             raise exceptions.AuthenticationFailed(msg)

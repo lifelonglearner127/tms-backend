@@ -94,11 +94,14 @@ class VerificationBaseSerializer(serializers.Serializer):
     def _check_payload(self, token):
         # Check payload valid (based off of JSONWebTokenAuthentication,
         # may want to refactor)
+        options = {
+            'verify_exp': False
+        }
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY)
-        except jwt.ExpiredSignature:
-            msg = 'Signature has expired.'
-            raise serializers.ValidationError(msg)
+            payload = jwt.decode(token, settings.SECRET_KEY, options=options)
+        # except jwt.ExpiredSignature:
+        #     msg = 'Signature has expired.'
+        #     raise serializers.ValidationError(msg)
         except jwt.DecodeError:
             msg = 'Error decoding signature.'
             raise serializers.ValidationError(msg)
