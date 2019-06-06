@@ -415,6 +415,22 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
         return ret
 
 
+class CustomerPaymentMethodField(serializers.Field):
+
+    def to_representation(self, value):
+        ret = {
+            'value': value.payment_method,
+            'text': value.get_payment_method_display()
+        }
+        return ret
+
+    def to_internal_value(self, data):
+        ret = {
+            'payment_method': data['value']
+        }
+        return ret
+
+
 class CustomerProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for Customer
@@ -422,6 +438,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     user = MainUserSerializer(read_only=True)
     associated_with = ShortStaffProfileSerializer(read_only=True)
     products = ShortProductSerializer(many=True, read_only=True)
+    payment_method = CustomerPaymentMethodField(source='*')
 
     class Meta:
         model = m.CustomerProfile

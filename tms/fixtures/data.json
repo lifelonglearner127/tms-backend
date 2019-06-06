@@ -91,9 +91,12 @@
     "fields": {
       "user": 5,
       "associated_with": 2,
-      "name": "Customer1",
-      "contact": "customer",
-      "mobile": "111",
+      "name": "Customer Name 1",
+      "contact": "Customer Contact 1",
+      "mobile": "0123456789",
+      "address": "Address 1",
+      "products": [1,2],
+      "product_characteristics": "Product Characteristics 1",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -104,9 +107,12 @@
     "fields": {
       "user": 6,
       "associated_with": 2,
-      "name": "Customer1",
-      "contact": "customer",
-      "mobile": "111",
+      "name": "Customer Name 2",
+      "contact": "Customer Contact 2",
+      "mobile": "0123456789",
+      "address": "Address 2",
+      "products": [1,2],
+      "product_characteristics": "Product Characteristics 2",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
