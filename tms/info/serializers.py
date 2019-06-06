@@ -39,14 +39,13 @@ class ShortStationSerializer(serializers.ModelSerializer):
         )
 
 
-class StationSerializer(serializers.ModelSerializer):
+class WorkStationSerializer(serializers.ModelSerializer):
     """
-    Serializer for Loading Station
+    Serializer for Loading Station, Unloading Station, Quality Station
     """
     product_category_name = serializers.CharField(
         source='get_product_category_display', read_only=True
     )
-
     working_time_display = serializers.SerializerMethodField()
     average_time_display = serializers.SerializerMethodField()
 
@@ -68,3 +67,23 @@ class StationSerializer(serializers.ModelSerializer):
     def get_average_time_display(self, instance):
         return str(instance.average_time) +\
             str(instance.get_average_time_measure_unit_display())
+
+
+class OilStationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Oil Station
+    """
+    price_vary_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address',
+            'longitude', 'latitude', 'radius', 'price',
+            'price_vary_duration', 'price_vary_duration_unit',
+            'price_vary_display'
+        )
+
+    def get_price_vary_display(self, instance):
+        return str(instance.price_vary_duration) + '个' +\
+            str(instance.get_price_vary_duration_unit_display())

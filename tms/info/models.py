@@ -50,9 +50,9 @@ class Station(BasicContactModel):
 
     latitude = models.FloatField()
 
-    radius = models.DecimalField(
-        max_digits=10,
-        decimal_places=1
+    radius = models.PositiveIntegerField(
+        null=True,
+        blank=True
     )
 
     product_category = models.CharField(
@@ -88,6 +88,17 @@ class Station(BasicContactModel):
         max_length=1,
         choices=c.TIME_MEASURE_UNIT,
         default=c.TIME_MEASURE_UNIT_HOUR
+    )
+
+    price_vary_duration = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    price_vary_duration_unit = models.CharField(
+        max_length=1,
+        choices=c.PRICE_VARY_DURATION_UNIT,
+        default=c.PRICE_VARY_DURATION_UNIT_MONTH
     )
 
     objects = models.Manager()

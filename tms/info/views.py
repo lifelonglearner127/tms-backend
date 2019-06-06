@@ -22,8 +22,6 @@ class StationViewSet(StaffViewSet):
     Viewset for Loading Station
     """
     queryset = m.Station.objects.all()
-    serializer_class = s.StationSerializer
-    short_serializer_class = s.ShortStationSerializer
 
     @action(detail=False)
     def short(self, request):
@@ -36,10 +34,7 @@ class StationViewSet(StaffViewSet):
         else:
             queryset = self.get_queryset()
 
-        serializer = self.get_short_serializer_class()(
-            queryset,
-            many=True
-        )
+        serializer = s.ShortStationSerializer(queryset, many=True)
 
         return Response(
             serializer.data,
@@ -54,10 +49,7 @@ class StationViewSet(StaffViewSet):
             m.Station.loading.all(),
         )
 
-        serializer = self.get_serializer_class()(
-            page,
-            many=True
-        )
+        serializer = s.WorkStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
@@ -67,10 +59,7 @@ class StationViewSet(StaffViewSet):
             m.Station.unloading.all(),
         )
 
-        serializer = self.get_serializer_class()(
-            page,
-            many=True
-        )
+        serializer = s.WorkStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
@@ -80,10 +69,7 @@ class StationViewSet(StaffViewSet):
             m.Station.quality.all(),
         )
 
-        serializer = self.get_serializer_class()(
-            page,
-            many=True
-        )
+        serializer = s.WorkStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
@@ -93,10 +79,7 @@ class StationViewSet(StaffViewSet):
             m.Station.oil.all(),
         )
 
-        serializer = self.get_serializer_class()(
-            page,
-            many=True
-        )
+        serializer = s.OilStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 

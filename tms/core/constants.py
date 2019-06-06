@@ -28,6 +28,15 @@ TIME_MEASURE_UNIT = (
     (TIME_MEASURE_UNIT_HOUR, '小时'),
 )
 
+PRICE_VARY_DURATION_UNIT_WEEK = 'W'
+PRICE_VARY_DURATION_UNIT_MONTH = 'M'
+PRICE_VARY_DURATION_UNIT_YEAR = 'Y'
+PRICE_VARY_DURATION_UNIT = (
+    (PRICE_VARY_DURATION_UNIT_WEEK, '周'),
+    (PRICE_VARY_DURATION_UNIT_MONTH, '月'),
+    (PRICE_VARY_DURATION_UNIT_YEAR, '年')
+)
+
 
 # Vehicle app - Vehicle constants
 # ----------------------------------------------------------------------------
