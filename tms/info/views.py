@@ -22,6 +22,7 @@ class StationViewSet(StaffViewSet):
     Viewset for Loading Station
     """
     queryset = m.Station.objects.all()
+    serializer_class = s.StationSerializer
 
     @action(detail=False)
     def short(self, request):

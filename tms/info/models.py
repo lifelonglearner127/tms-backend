@@ -42,8 +42,7 @@ class Station(BasicContactModel):
     """
     station_type = models.CharField(
         max_length=1,
-        choices=c.STATION_TYPE,
-        default=c.STATION_TYPE_LOADING_STATION
+        choices=c.STATION_TYPE
     )
 
     longitude = models.FloatField()
@@ -111,3 +110,4 @@ class Station(BasicContactModel):
         unique_together = (
             'longitude', 'latitude'
         )
+        ordering = ['-updated']

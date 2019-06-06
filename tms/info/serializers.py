@@ -39,6 +39,13 @@ class ShortStationSerializer(serializers.ModelSerializer):
         )
 
 
+class StationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = '__all__'
+
+
 class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
