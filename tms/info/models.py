@@ -62,24 +62,32 @@ class Station(BasicContactModel):
     )
 
     price = models.DecimalField(
-        max_digits=10,
-        decimal_places=3,
-        null=True,
-        blank=True
-    )
-
-    working_time = models.DecimalField(
         max_digits=5,
         decimal_places=1,
         null=True,
         blank=True
     )
 
-    average_time = models.DecimalField(
-        max_digits=5,
-        decimal_places=1,
+    working_time = models.PositiveIntegerField(
         null=True,
         blank=True
+    )
+
+    working_time_measure_unit = models.CharField(
+        max_length=1,
+        choices=c.TIME_MEASURE_UNIT,
+        default=c.TIME_MEASURE_UNIT_HOUR
+    )
+
+    average_time = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    average_time_measure_unit = models.CharField(
+        max_length=1,
+        choices=c.TIME_MEASURE_UNIT,
+        default=c.TIME_MEASURE_UNIT_HOUR
     )
 
     objects = models.Manager()

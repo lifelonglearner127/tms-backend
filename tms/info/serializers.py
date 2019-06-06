@@ -43,12 +43,28 @@ class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station
     """
+    product_category_name = serializers.CharField(
+        source='get_product_category_display', read_only=True
+    )
+
+    working_time_display = serializers.SerializerMethodField()
+    average_time_display = serializers.SerializerMethodField()
+
     class Meta:
         model = m.Station
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address',
+            'longitude', 'latitude', 'radius', 'product_category',
+            'price', 'working_time', 'working_time_measure_unit',
+            'average_time', 'average_time_measure_unit',
+            'product_category_name', 'working_time_display',
+            'average_time_display'
+        )
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['product_category_name'] = instance.get_product_category_display()
+    def get_working_time_display(self, instance):
+        return str(instance.price) + '元/' + str(instance.working_time) +\
+            str(instance.get_working_time_measure_unit_display())
 
-        return ret
+    def get_average_time_display(self, instance):
+        return str(instance.average_time) +\
+            str(instance.get_average_time_measure_unit_display())

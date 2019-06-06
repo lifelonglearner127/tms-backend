@@ -1,11 +1,11 @@
-# Info app - Product constants
+# Info app
 # ----------------------------------------------------------------------------
 # product type choices
-PRODUCT_TYPE_GASOLINE = 'gas'
-PRODUCT_TYPE_OIL = 'oil'
+PRODUCT_TYPE_GASOLINE = 'G'
+PRODUCT_TYPE_OIL = 'O'
 PRODUCT_TYPE = (
-    (PRODUCT_TYPE_GASOLINE, 'Gas'),
-    (PRODUCT_TYPE_OIL, 'Oil')
+    (PRODUCT_TYPE_GASOLINE, '汽油'),
+    (PRODUCT_TYPE_OIL, '油')
 )
 
 # station type
@@ -14,18 +14,18 @@ STATION_TYPE_UNLOADING_STATION = 'U'
 STATION_TYPE_QUALITY_STATION = 'Q'
 STATION_TYPE_OIL_STATION = 'O'
 STATION_TYPE = (
-    (STATION_TYPE_LOADING_STATION, 'Loading Station'),
-    (STATION_TYPE_UNLOADING_STATION, 'Unloading Station'),
-    (STATION_TYPE_QUALITY_STATION, 'Quality Station'),
-    (STATION_TYPE_OIL_STATION, 'Oil Station')
+    (STATION_TYPE_LOADING_STATION, '装货地'),
+    (STATION_TYPE_UNLOADING_STATION, '卸货地'),
+    (STATION_TYPE_QUALITY_STATION, '质检点'),
+    (STATION_TYPE_OIL_STATION, '合作油站')
 )
 
 # duration unit choices
-DURATION_UNIT_MINITE = 'M'
-DURATION_UNIT_HOUR = 'H'
-DURATION_UNIT = (
-    (DURATION_UNIT_MINITE, 'Minute'),
-    (DURATION_UNIT_HOUR, 'Hour'),
+TIME_MEASURE_UNIT_MINITE = 'M'
+TIME_MEASURE_UNIT_HOUR = 'H'
+TIME_MEASURE_UNIT = (
+    (TIME_MEASURE_UNIT_MINITE, '分钟'),
+    (TIME_MEASURE_UNIT_HOUR, '小时'),
 )
 
 
@@ -35,8 +35,8 @@ DURATION_UNIT = (
 VEHICLE_MODEL_TYPE_TRUCK = 'T'
 VEHICLE_MODEL_TYPE_SEMI_TRAILER = 'S'
 VEHICLE_MODEL_TYPE = (
-    (VEHICLE_MODEL_TYPE_TRUCK, 'Truck'),
-    (VEHICLE_MODEL_TYPE_SEMI_TRAILER, 'Semi-trailer')
+    (VEHICLE_MODEL_TYPE_TRUCK, '牵引车'),
+    (VEHICLE_MODEL_TYPE_SEMI_TRAILER, '半挂罐车')
 )
 
 # vehicle brand choices
@@ -44,9 +44,9 @@ VEHICLE_BRAND_TONGHUA = 'T'
 VEHICLE_BRAND_LIBERATION = 'L'
 VEHICLE_BRAND_YANGZHOU = 'Y'
 VEHICLE_BRAND = (
-    (VEHICLE_BRAND_TONGHUA, 'Tonghua'),
-    (VEHICLE_BRAND_LIBERATION, 'Liberation'),
-    (VEHICLE_BRAND_YANGZHOU, 'Yangzhou')
+    (VEHICLE_BRAND_TONGHUA, '通华'),
+    (VEHICLE_BRAND_LIBERATION, '解放'),
+    (VEHICLE_BRAND_YANGZHOU, '扬州中集')
 )
 
 # vehicle document type choices
@@ -76,11 +76,11 @@ USER_ROLE_DRIVER = 'D'
 USER_ROLE_ESCORT = 'E'
 USER_ROLE_CUSTOMER = 'C'
 USER_ROLE = (
-    (USER_ROLE_ADMIN, 'Admin'),
-    (USER_ROLE_STAFF, 'Staff'),
-    (USER_ROLE_DRIVER, 'Driver'),
-    (USER_ROLE_ESCORT, 'Escort'),
-    (USER_ROLE_CUSTOMER, 'Customer')
+    (USER_ROLE_ADMIN, '管理人员'),
+    (USER_ROLE_STAFF, '工作人员'),
+    (USER_ROLE_DRIVER, '驾驶人员'),
+    (USER_ROLE_ESCORT, '押运人员'),
+    (USER_ROLE_CUSTOMER, '客户')
 )
 
 # driver status
@@ -116,8 +116,8 @@ ORDER_STATUS = (
 ORDER_SOURCE_INTERNAL = 'I'
 ORDER_SOURCE_CUSTOMER = 'C'
 ORDER_SOURCE = (
-    (ORDER_SOURCE_INTERNAL, 'From Staff'),
-    (ORDER_SOURCE_CUSTOMER, 'From Customer')
+    (ORDER_SOURCE_INTERNAL, '内部'),
+    (ORDER_SOURCE_CUSTOMER, 'App')
 )
 
 

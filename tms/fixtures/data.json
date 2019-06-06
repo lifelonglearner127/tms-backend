@@ -192,9 +192,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
-          "product_category": "gas",
+          "product_category": "G",
           "working_time": 1,
+          "working_time_measure_unit": "H",
           "average_time": 2,
+          "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -212,9 +214,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
-          "product_category": "gas",
+          "product_category": "G",
           "working_time": 1,
+          "working_time_measure_unit": "H",
           "average_time": 2,
+          "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -232,9 +236,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
-          "product_category": "gas",
+          "product_category": "G",
           "working_time": 1,
+          "working_time_measure_unit": "H",
           "average_time": 2,
+          "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -252,9 +258,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
-          "product_category": "oil",
+          "product_category": "O",
           "working_time": 1,
+          "working_time_measure_unit": "M",
           "average_time": 2,
+          "average_time_measure_unit": "M",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -272,9 +280,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 5,
-          "product_category": "oil",
+          "product_category": "O",
           "working_time": 1,
+          "working_time_measure_unit": "M",
           "average_time": 2,
+          "average_time_measure_unit": "M",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -292,9 +302,11 @@
           "latitude": 39.90923,
           "radius": 100,
           "price": 1,
-          "product_category": "oil",
+          "product_category": "O",
           "working_time": 1,
+          "working_time_measure_unit": "M",
           "average_time": 2,
+          "average_time_measure_unit": "M",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -562,6 +574,7 @@
           "code": "Model-1",
           "brand": "T",
           "load": 100,
+          "branches": [100],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -575,6 +588,7 @@
           "code": "Model-2",
           "brand": "T",
           "load": 100,
+          "branches": [100],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -588,6 +602,7 @@
           "code": "Model-2",
           "brand": "T",
           "load": 100,
+          "branches": [100],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
