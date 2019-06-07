@@ -22,12 +22,23 @@ class Product(TimeStampedModel):
     category = models.CharField(
         max_length=10,
         choices=c.PRODUCT_TYPE,
-        default=c.PRODUCT_TYPE_GASOLINE
+        default=c.PRODUCT_TYPE_GASOLINE,
+        db_index=True
     )
 
     price = models.DecimalField(
         max_digits=5,
         decimal_places=1
+    )
+
+    weight = models.PositiveIntegerField(
+        default=1
+    )
+
+    measure_unit = models.CharField(
+        max_length=1,
+        choices=c.PRODUCT_MEASURE_UNIT,
+        default=c.PRODUCT_MEASURE_UNIT_TON
     )
 
     description = models.TextField()
@@ -45,7 +56,8 @@ class Station(BasicContactModel):
     """
     station_type = models.CharField(
         max_length=1,
-        choices=c.STATION_TYPE
+        choices=c.STATION_TYPE,
+        db_index=True
     )
 
     longitude = models.FloatField()
@@ -60,7 +72,8 @@ class Station(BasicContactModel):
     product_category = models.CharField(
         max_length=10,
         choices=c.PRODUCT_TYPE,
-        default=c.PRODUCT_TYPE_GASOLINE
+        default=c.PRODUCT_TYPE_GASOLINE,
+        db_index=True
     )
 
     price = models.DecimalField(

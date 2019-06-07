@@ -23,7 +23,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['category_name'] = instance.get_category_display()
+        ret['category_display'] = instance.get_category_display()
+        ret['measure_unit_display'] = instance.get_measure_unit_display()
 
         return ret
 
@@ -50,47 +51,36 @@ class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
     """
-    product_category_name = serializers.CharField(
-        source='get_product_category_display', read_only=True
-    )
-    working_time_display = serializers.SerializerMethodField()
-    average_time_display = serializers.SerializerMethodField()
-
     class Meta:
         model = m.Station
-        fields = (
-            'id', 'name', 'contact', 'mobile', 'address',
-            'longitude', 'latitude', 'radius', 'product_category',
-            'price', 'working_time', 'working_time_measure_unit',
-            'average_time', 'average_time_measure_unit',
-            'product_category_name', 'working_time_display',
-            'average_time_display'
-        )
+        fields = '__all__'
 
-    def get_working_time_display(self, instance):
-        return str(instance.price) + '元/' + str(instance.working_time) +\
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['product_category_display'] =\
+            instance.get_product_category_display()
+
+        ret['working_time_display'] =\
+            str(instance.price) + '元/' +\
+            str(instance.working_time) +\
             str(instance.get_working_time_measure_unit_display())
 
-    def get_average_time_display(self, instance):
-        return str(instance.average_time) +\
+        ret['average_time_display'] =\
+            str(instance.average_time) +\
             str(instance.get_average_time_measure_unit_display())
+
+        return ret
 
 
 class OilStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Oil Station
     """
-    price_vary_display = serializers.SerializerMethodField()
-
     class Meta:
         model = m.Station
-        fields = (
-            'id', 'name', 'contact', 'mobile', 'address',
-            'longitude', 'latitude', 'radius', 'price',
-            'price_vary_duration', 'price_vary_duration_unit',
-            'price_vary_display'
-        )
+        fields = '__all__'
 
-    def get_price_vary_display(self, instance):
-        return str(instance.price_vary_duration) + '个' +\
-            str(instance.get_price_vary_duration_unit_display())
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['price_vary_display'] = str(instance.price_vary_duration) +\
+            '个' + str(instance.get_price_vary_duration_unit_display())
