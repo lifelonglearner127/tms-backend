@@ -25,6 +25,10 @@ class ProductSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         ret['category_display'] = instance.get_category_display()
         ret['measure_unit_display'] = instance.get_measure_unit_display()
+        ret['price_display'] =\
+            str(instance.price) + '元 / ' +\
+            str(instance.unit_weight) +\
+            str(instance.get_measure_unit_display())
 
         return ret
 
@@ -41,7 +45,9 @@ class ShortStationSerializer(serializers.ModelSerializer):
 
 
 class StationSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer for Station
+    """
     class Meta:
         model = m.Station
         fields = '__all__'

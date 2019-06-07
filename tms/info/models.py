@@ -31,7 +31,7 @@ class Product(TimeStampedModel):
         decimal_places=1
     )
 
-    weight = models.PositiveIntegerField(
+    unit_weight = models.PositiveIntegerField(
         default=1
     )
 

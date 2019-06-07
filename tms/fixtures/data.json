@@ -123,7 +123,7 @@
     "fields": {
         "name": "Product1",
         "code": "product-1-code",
-        "category": "gas",
+        "category": "G",
         "price": 1,
         "description": "This is the description for Product1",
         "created": "2013-03-16T17:41:28+00:00",
@@ -136,7 +136,7 @@
       "fields": {
           "name": "Product2",
           "code": "product-2-code",
-          "category": "gas",
+          "category": "G",
           "price": 1,
           "description": "This is the description for Product2",
           "created": "2013-03-16T17:41:28+00:00",
@@ -149,7 +149,7 @@
       "fields": {
           "name": "Product3",
           "code": "product-3-code",
-          "category": "gas",
+          "category": "G",
           "price": 1,
           "description": "This is the description for Product3",
           "created": "2013-03-16T17:41:28+00:00",
@@ -162,7 +162,7 @@
       "fields": {
           "name": "Product4",
           "code": "product-4-code",
-          "category": "oil",
+          "category": "O",
           "price": 1,
           "description": "This is the description for Product4",
           "created": "2013-03-16T17:41:28+00:00",
@@ -175,7 +175,7 @@
       "fields": {
           "name": "Product5",
           "code": "product-5-code",
-          "category": "oil",
+          "category": "O",
           "price": 1,
           "description": "This is the description for Product6",
           "created": "2013-03-16T17:41:28+00:00",
@@ -188,7 +188,7 @@
       "fields": {
           "name": "Product6",
           "code": "product-6-code",
-          "category": "oil",
+          "category": "O",
           "price": 1,
           "description": "This is the description for Product6",
           "created": "2013-03-16T17:41:28+00:00",
