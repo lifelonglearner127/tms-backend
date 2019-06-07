@@ -41,7 +41,10 @@ class Product(TimeStampedModel):
         default=c.PRODUCT_MEASURE_UNIT_TON
     )
 
-    description = models.TextField()
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
 
     class Meta:
         ordering = ['-updated']

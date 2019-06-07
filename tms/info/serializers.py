@@ -90,3 +90,5 @@ class OilStationSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         ret['price_vary_display'] = str(instance.price_vary_duration) +\
             '个' + str(instance.get_price_vary_duration_unit_display())
+
+        return ret

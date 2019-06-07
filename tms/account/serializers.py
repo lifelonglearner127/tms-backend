@@ -568,15 +568,12 @@ class StaffDocumentSerializer(serializers.ModelSerializer):
 class CompanyMemberSerializer(serializers.ModelSerializer):
 
     profile = serializers.SerializerMethodField()
-    role_name = serializers.CharField(
-        source='get_role_display', read_only=True
-    )
 
     class Meta:
         model = m.User
         fields = (
-            'id', 'username', 'mobile', 'name', 'password', 'role_name',
-            'role', 'profile'
+            'id', 'username', 'mobile', 'name', 'password', 'role',
+            'profile'
         )
 
     def create(self, validated_data):
@@ -666,3 +663,8 @@ class CompanyMemberSerializer(serializers.ModelSerializer):
             return OnlyEscortProfileSerializer(user.escort_profile).data
         elif user.role == c.USER_ROLE_STAFF:
             return OnlyStaffProfileSerializer(user.staff_profile).data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['role_display'] = instance.get_role_display()
+        return ret
