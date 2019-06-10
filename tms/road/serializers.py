@@ -3,13 +3,11 @@ from rest_framework import serializers
 from . import models as m
 
 
-class PointSerializer(serializers.ModelSerializer):
+class ShortPointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Point
-        fields = (
-            'id', 'name', 'address'
-        )
+        fields = ('id', 'name')
 
     def to_representation(self, point):
         ret = super().to_representation(point)
@@ -17,10 +15,10 @@ class PointSerializer(serializers.ModelSerializer):
         return ret
 
 
-class BlackPointSerializer(serializers.ModelSerializer):
+class PointSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = m.BlackPoint
+        model = m.Point
         fields = '__all__'
 
 
@@ -46,7 +44,7 @@ class PathField(serializers.ListField):
         paths = m.Point.objects.filter(id__in=value)
         paths = dict([(point.id, point) for point in paths])
 
-        serializer = PointSerializer(
+        serializer = ShortPointSerializer(
             [paths[id] for id in value],
             many=True
         )

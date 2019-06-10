@@ -8,11 +8,6 @@ class PointAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.BlackPoint)
-class BlackPointAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.Route)
 class RouteAdmin(admin.ModelAdmin):
     pass

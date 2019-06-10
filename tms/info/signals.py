@@ -11,5 +11,5 @@ def save_station_position(sender, instance, **kwargs):
         latitude=instance.latitude,
         longitude=instance.longitude,
         category=instance.station_type,
-        defaults={'name': instance.name, 'address': instance.address}
+        defaults={'name': instance.name}
     )

@@ -1,24 +1,24 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from . import managers
 from ..core import constants as c
+from ..core.models import TimeStampedModel
 from ..info.models import Station
 
 
-class BasePoint(models.Model):
-
-    latitude = models.FloatField()
-
-    longitude = models.FloatField()
+class Point(TimeStampedModel):
 
     name = models.CharField(
-        max_length=100,
+        max_length=100
+    )
+
+    latitude = models.FloatField(
         null=True,
         blank=True
     )
 
-    address = models.CharField(
-        max_length=100,
+    longitude = models.FloatField(
         null=True,
         blank=True
     )
@@ -29,30 +29,24 @@ class BasePoint(models.Model):
         default=c.POINT_TYPE_LOADING_STATION
     )
 
-    class Meta:
-        abstract = True
-
-
-class Point(BasePoint):
-
-    def __str__(self):
-        return '{}: ({},{})'.format(
-            self.name, self.latitude, self.longitude
-        )
-
-
-class BlackPoint(BasePoint):
-
-    category = models.CharField(
-        max_length=1,
-        choices=c.BLACKDOT_TYPE,
-        default=c.BLACKDOT_TYPE_ROAD_REPAIR
+    notification_message = models.TextField(
+        null=True,
+        blank=True
     )
 
+    objects = models.Manager()
+    loading = managers.LoadingStationPointManager()
+    unloading = managers.UnLoadingStationPointManager()
+    quality = managers.QualityStationPointManager()
+    oil = managers.OilStationPointManager()
+    station = managers.StationPointManager()
+    black = managers.BlackDotPointManager()
+
+    class Meta:
+        ordering = ['-updated']
+
     def __str__(self):
-        return 'Black Point - {}: ({},{})'.format(
-            self.latitude, self.longitude, self.name
-        )
+        return '{} - {} type'.format(self.name, self.category)
 
 
 class Route(models.Model):

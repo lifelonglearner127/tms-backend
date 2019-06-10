@@ -1,5 +1,4 @@
-from rest_framework import viewsets
-
+from rest_framework.decorators import action
 from ..core.views import StaffViewSet
 from . import models as m
 from . import serializers as s
@@ -10,11 +9,15 @@ class PointViewSet(StaffViewSet):
     queryset = m.Point.objects.all()
     serializer_class = s.PointSerializer
 
+    @action(detail=False, url_path='black')
+    def black_dots(self, request):
+        page = self.paginate_queryset(
+            m.Point.black.all()
+        )
 
-class BlackPointViewSet(viewsets.ModelViewSet):
+        serializer = self.serializer_class(page, many=True)
 
-    queryset = m.BlackPoint.objects.all()
-    serializer_class = s.BlackPointSerializer
+        return self.get_paginated_response(serializer.data)
 
 
 class RouteViewSet(StaffViewSet):
