@@ -229,8 +229,12 @@ class CompanyMemberViewSet(StaffViewSet):
         return m.User.companymembers.all()
 
     def create(self, request):
+        profile = request.data.pop('profile')
+        if 'birthday' in profile and profile['birthday'] == '':
+            profile['birthday'] = None
+
         context = {
-            'profile': request.data.pop('profile')
+            'profile': profile
         }
 
         serializer = self.serializer_class(
@@ -247,8 +251,12 @@ class CompanyMemberViewSet(StaffViewSet):
 
     def update(self, request, pk=None):
         serializer_instance = self.get_object()
+        profile = request.data.pop('profile')
+        if 'birthday' in profile and profile['birthday'] == '':
+            profile['birthday'] = None
+
         context = {
-            'profile': request.data.pop('profile')
+            'profile': profile
         }
 
         serializer = self.serializer_class(
