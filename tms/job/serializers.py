@@ -7,7 +7,7 @@ from ..order.models import OrderProductDeliver
 from ..order.serializers import (
     ShortOrderProductDeliverSerializer, ShortStationSerializer,
 )
-from ..vehicle.serializers import MainVehicleSerializer, ShortVehicleSerializer
+from ..vehicle.serializers import ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
 from ..road.serializers import RouteDataSerializer, ShortRouteSerializer
 
@@ -79,26 +79,29 @@ class JobSerializer(serializers.ModelSerializer):
 
 class JobDataSerializer(serializers.ModelSerializer):
 
-    vehicle = MainVehicleSerializer()
+    vehicle = ShortVehicleSerializer()
     driver = ShortStaffProfileSerializer()
     escort = ShortStaffProfileSerializer()
     route = RouteDataSerializer()
-    missions = MissionSerializer(
+    missions = ShortMissionSerializer(
         source='mission_set', many=True, read_only=True
     )
-    stations = ShortStationSerializer(
-        source='route.stations', many=True, read_only=True
+    loading_station = ShortStationSerializer(
+        source='route.loading_station', read_only=True
     )
-
+    quality_station = ShortStationSerializer(
+        source='route.quality_station', read_only=True
+    )
     progress_msg = serializers.CharField(source='get_progress_display')
     mission_count = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'stations',
-            'route', 'missions', 'progress', 'progress_msg', 'total_weight',
-            'start_due_time', 'finish_due_time', 'mission_count'
+            'id', 'vehicle', 'driver', 'escort', 'loading_station',
+            'quality_station', 'route', 'missions', 'progress',
+            'progress_msg', 'total_weight', 'start_due_time',
+            'finish_due_time', 'mission_count', 'is_paid'
         )
 
     def get_mission_count(self, obj):

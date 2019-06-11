@@ -66,6 +66,32 @@ class Route(models.Model):
     distance = models.PositiveIntegerField()
 
     @property
+    def loading_station(self):
+        try:
+            pt = Point.objects.get(pk=self.path[0])
+            return Station.loading.get(
+                longitude=pt.longitude,
+                latitude=pt.latitude
+            )
+        except Point.DoesNotExist:
+            return None
+        except Station.DoesNotExist:
+            return None
+
+    @property
+    def quality_station(self):
+        try:
+            pt = Point.objects.get(pk=self.path[1])
+            return Station.quality.get(
+                longitude=pt.longitude,
+                latitude=pt.latitude
+            )
+        except Point.DoesNotExist:
+            return None
+        except Station.DoesNotExist:
+            return None
+
+    @property
     def stations(self):
         points = Point.objects.filter(id__in=self.path)
         points = dict([(point.id, point) for point in points])

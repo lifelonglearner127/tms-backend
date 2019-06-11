@@ -115,6 +115,10 @@ class Job(models.Model):
 
     total_weight = models.PositiveIntegerField()
 
+    is_paid = models.BooleanField(
+        default=False
+    )
+
     objects = models.Manager()
     pendings = managers.PendingJobManager()
     inprogress = managers.InProgressJobManager()
