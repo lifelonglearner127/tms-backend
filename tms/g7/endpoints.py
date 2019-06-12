@@ -61,6 +61,10 @@ G7_HTTP_ENDPOINTS = {
         'BULK_VEHICLE_STATUS_BY_GPS': {
             'URL': '/v1/device/truck/current_info_by_gpsno',
             'METHOD': 'POST'
+        },
+        'GET_MILEAGE': {
+            'URL': '/v1/device/gps/getTruckMileage',
+            'METHOD': 'POST'
         }
     }
 }

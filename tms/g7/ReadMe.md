@@ -2,6 +2,8 @@
  - [Vehicle history track query](#vehicle-history-track-query)
  - [Vehicle GPS total mileage inquiry](#vehicle-gps-total-mileage-inquiry)
  - [Vehicle GPS daily mileage inquiry](#vehicle-gps-daily-mileage-inquiry)
+ - [Vehicle status inquiry](#vehicle-status-inquiry)
+ - [Query vehicle status based on equipment](#query-vehicle-status-based-on-equipment)
 
 ## Vehicle history track query
 ### Code
@@ -173,3 +175,61 @@ data = G7Interface.call_g7_http_interface(
 }
 ```
 
+## Query vehicle status based on equipment
+### Code
+```
+from tms.g7.interfaces import G7Interface
+queries = {
+    'gpsno': '91302991',
+    'fields': 'loc,status,cold,driver',
+    'addr_required': True
+}
+data = G7Interface.call_g7_http_interface(
+    'VEHICLE_STATUS_BY_GPS',
+    queries=queries
+)
+```
+### Request Parameter
+```
+{
+    'plate_num': '鲁UA3161',
+    'fields': 'loc,status,cold,driver',
+    'addr_required': True
+}
+```
+### Response
+```
+{
+    'code': 0,
+    'msg': 'succ',
+    'sub_code': 0,
+    'sub_msg': None,
+    'req_id': '2573667680196508672',
+    'data': {
+        'gpsno': '91302991',
+        'time': '2019-06-11 23:16:30',
+        'loc': {
+            'lng': '116.43025177923609',
+            'lat': '37.46722295367001',
+            'address': '山东省德州市德城区 距德州北外环/崇德五大道(路口)约263米 山东省德州市德城区东南约291米处',
+            'speed': 41,
+            'course': 299,
+            'gps_time': '2019-06-11 23:16:28',
+            'location_type': 0
+        },
+        'status': {
+            'battery': -1,
+            'acc': 0,
+            'gps': 1,
+            'gsm': -1,
+            'voltage': -1,
+            'main_vol': 251,
+            'battery_vol': 40,
+            'properties': 'acc:0,gps:1,mg:154240.0,doorStatus:0,driftStatus:0,loadStatus:3,satellites:12,signal:26,move:1,engine:1,gpsSpeed:41,batteryVol:40,mainVol:251,deviceRunningTime:2889726,emsengine:1104'
+        },
+        'cold': None,
+        'driver': None,
+        'gpsStatus': 4
+    }
+}
+```
