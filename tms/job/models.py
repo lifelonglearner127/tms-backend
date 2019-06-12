@@ -115,6 +115,31 @@ class Job(models.Model):
 
     total_weight = models.PositiveIntegerField()
 
+    total_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    empty_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    heavy_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    highway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    normalway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
     is_paid = models.BooleanField(
         default=False
     )

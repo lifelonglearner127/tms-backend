@@ -79,6 +79,42 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
+        detail=False, url_path='mileage'
+    )
+    def get_mileage(self, request):
+        page = self.paginate_queryset(
+            m.Job.objects.all(),
+        )
+
+        serializer = s.JobMileageSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(
+        detail=False, url_path='cost'
+    )
+    def get_cost(self, request):
+        pass
+
+    @action(
+        detail=False, url_path='time'
+    )
+    def get_time(self, request):
+        page = self.paginate_queryset(
+            m.Job.objects.all(),
+        )
+
+        serializer = s.JobTimeSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(
+        detail=False, url_path='driving'
+    )
+    def get_driving(self, request):
+        pass
+
+    @action(
         detail=False, url_path='done',
         permission_classes=[IsDriverOrEscortUser]
     )

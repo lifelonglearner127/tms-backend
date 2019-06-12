@@ -5,7 +5,8 @@ from rest_framework import serializers
 from . import models as m
 from ..order.models import OrderProductDeliver
 from ..order.serializers import (
-    ShortOrderProductDeliverSerializer, ShortStationSerializer,
+    ShortOrderSerializer, ShortOrderProductDeliverSerializer,
+    ShortStationSerializer,
 )
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..account.serializers import ShortStaffProfileSerializer
@@ -116,6 +117,91 @@ class JobProgressSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'progress', 'progress_msg'
+        )
+
+
+class JobMileageSerializer(serializers.ModelSerializer):
+
+    order = ShortOrderSerializer()
+    vehicle = ShortVehicleSerializer()
+    driver = ShortStaffProfileSerializer()
+    escort = ShortStaffProfileSerializer()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order', 'vehicle', 'driver', 'escort', 'total_mileage',
+            'empty_mileage', 'highway_mileage', 'normalway_mileage'
+        )
+
+
+class LoadingStationTimeField(serializers.Field):
+
+    def to_representation(self, value):
+        ret = {
+            "arrived_on": value.arrived_loading_station_on,
+            "started_working_on": value.started_loading_on,
+            "finsihed_working_on": value.finished_loading_on,
+            "departure_on": value.departure_loading_station_on
+        }
+        return ret
+
+    def to_internal_value(self, data):
+        ret = {
+            "arrived_loading_station_on": data['arrived_on']
+        }
+        return ret
+
+
+class QualityStationTimeField(serializers.Field):
+
+    def to_representation(self, value):
+        ret = {
+            "arrived_on": value.arrived_quality_station_on,
+            "started_working_on": value.started_checking_on,
+            "finsihed_working_on": value.finished_checking_on,
+            "departure_on": value.departure_quality_station_on
+        }
+        return ret
+
+    def to_internal_value(self, data):
+        ret = {
+            "arrived_loading_station_on": data['arrived_on']
+        }
+        return ret
+
+
+class UnLoadingStationTimeField(serializers.Field):
+    def to_representation(self, value):
+        ret = []
+        for station in value.all():
+            ret.append({
+                "arrived_on": station.arrived_station_on,
+                "started_working_on": station.started_unloading_on,
+                "finsihed_working_on": station.finished_unloading_on,
+                "departure_on": station.departure_station_on
+            })
+
+        return ret
+
+    def to_internal_value(self, data):
+        pass
+
+
+class JobTimeSerializer(serializers.ModelSerializer):
+
+    order = ShortOrderSerializer()
+    vehicle = ShortVehicleSerializer()
+    loading_station_time = LoadingStationTimeField(source='*')
+    quality_station_time = QualityStationTimeField(source='*')
+    unloading_station_time = UnLoadingStationTimeField(source='mission_set')
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order', 'vehicle', 'started_on', 'finished_on',
+            'loading_station_time', 'quality_station_time',
+            'unloading_station_time'
         )
 
 

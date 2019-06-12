@@ -457,6 +457,15 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ShortOrderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Order
+        fields = (
+            'id', 'alias'
+        )
+
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     Order serializer
