@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
+from ..core.utils import format_datetime
 from ..order.models import OrderProductDeliver
 from ..order.serializers import (
     ShortOrderSerializer, ShortOrderProductDeliverSerializer,
@@ -140,10 +141,10 @@ class LoadingStationTimeField(serializers.Field):
 
     def to_representation(self, value):
         ret = {
-            "arrived_on": value.arrived_loading_station_on,
-            "started_working_on": value.started_loading_on,
-            "finsihed_working_on": value.finished_loading_on,
-            "departure_on": value.departure_loading_station_on
+            "arrived_on": format_datetime(value.arrived_loading_station_on),
+            "started_working_on": format_datetime(value.started_loading_on),
+            "finished_working_on": format_datetime(value.finished_loading_on),
+            "departure_on": format_datetime(value.departure_loading_station_on)
         }
         return ret
 
@@ -158,10 +159,10 @@ class QualityStationTimeField(serializers.Field):
 
     def to_representation(self, value):
         ret = {
-            "arrived_on": value.arrived_quality_station_on,
-            "started_working_on": value.started_checking_on,
-            "finsihed_working_on": value.finished_checking_on,
-            "departure_on": value.departure_quality_station_on
+            "arrived_on": format_datetime(value.arrived_quality_station_on),
+            "started_working_on": format_datetime(value.started_checking_on),
+            "finished_working_on": format_datetime(value.finished_checking_on),
+            "departure_on": format_datetime(value.departure_quality_station_on)
         }
         return ret
 
@@ -177,10 +178,14 @@ class UnLoadingStationTimeField(serializers.Field):
         ret = []
         for station in value.all():
             ret.append({
-                "arrived_on": station.arrived_station_on,
-                "started_working_on": station.started_unloading_on,
-                "finsihed_working_on": station.finished_unloading_on,
-                "departure_on": station.departure_station_on
+                "arrived_on":
+                    format_datetime(station.arrived_station_on),
+                "started_working_on":
+                    format_datetime(station.started_unloading_on),
+                "finished_working_on":
+                    format_datetime(station.finished_unloading_on),
+                "departure_on":
+                    format_datetime(station.departure_station_on)
             })
 
         return ret
@@ -193,6 +198,8 @@ class JobTimeSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
+    driver = ShortStaffProfileSerializer()
+    escort = ShortStaffProfileSerializer()
     loading_station_time = LoadingStationTimeField(source='*')
     quality_station_time = QualityStationTimeField(source='*')
     unloading_station_time = UnLoadingStationTimeField(source='mission_set')
@@ -200,8 +207,8 @@ class JobTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order', 'vehicle', 'started_on', 'finished_on',
-            'loading_station_time', 'quality_station_time',
+            'id', 'order', 'vehicle', 'driver', 'escort', 'started_on',
+            'finished_on', 'loading_station_time', 'quality_station_time',
             'unloading_station_time'
         )
 
