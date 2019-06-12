@@ -131,7 +131,8 @@ class JobMileageSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'order', 'vehicle', 'driver', 'escort', 'total_mileage',
-            'empty_mileage', 'highway_mileage', 'normalway_mileage'
+            'empty_mileage', 'heavy_mileage', 'highway_mileage',
+            'normalway_mileage'
         )
 
 
