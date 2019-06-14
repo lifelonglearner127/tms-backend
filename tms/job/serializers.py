@@ -213,6 +213,34 @@ class JobTimeSerializer(serializers.ModelSerializer):
         )
 
 
+class JobCostField(serializers.Field):
+
+    def to_representation(self, value):
+        ret = []
+        for bill in value.bills.all():
+            ret.append({
+                'cost': bill.cost,
+                'category': bill.category,
+                'document': bill.document.url
+            })
+
+        return ret
+
+    def to_internal_value(self, data):
+        pass
+
+
+class JobCostSerializer(serializers.ModelSerializer):
+
+    costs = JobCostField(source='*')
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order', 'vehicle', 'costs'
+        )
+
+
 class Base64ImageField(serializers.ImageField):
 
     def to_internal_value(self, data):

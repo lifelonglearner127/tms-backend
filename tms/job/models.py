@@ -215,6 +215,11 @@ class JobBillDocument(models.Model):
         related_name='bills'
     )
 
+    cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=1
+    )
+
     document = models.ImageField()
 
     category = models.CharField(
@@ -224,4 +229,7 @@ class JobBillDocument(models.Model):
     )
 
     def __str__(self):
-        return self.get_category_display()
+        return '{} on {} job'.format(
+            self.get_category_display(),
+            self.job.id
+        )

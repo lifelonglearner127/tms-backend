@@ -83,7 +83,7 @@ class JobViewSet(viewsets.ModelViewSet):
     )
     def get_mileage(self, request):
         page = self.paginate_queryset(
-            m.Job.objects.all(),
+            m.Job.objects.all()
         )
 
         serializer = s.JobMileageSerializer(page, many=True)
@@ -94,7 +94,11 @@ class JobViewSet(viewsets.ModelViewSet):
         detail=False, url_path='cost'
     )
     def get_cost(self, request):
-        pass
+        page = self.paginate_queryset(
+            m.Job.objects.all()
+        )
+        serializer = s.JobCostSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False, url_path='time'
