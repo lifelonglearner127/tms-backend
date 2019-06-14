@@ -16,8 +16,3 @@ class MissionAdmin(admin.ModelAdmin):
 @admin.register(m.JobBillDocument)
 class JobBillDocumentAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(m.DriverNotification)
-class DriverNotificationAdmin(admin.ModelAdmin):
-    pass

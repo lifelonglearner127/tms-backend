@@ -38,7 +38,8 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_swagger',
-    'corsheaders'
+    'corsheaders',
+    'channels'
 ]
 LOCAL_APPS = [
     'tms.account.apps.AccountConfig',
@@ -48,7 +49,8 @@ LOCAL_APPS = [
     'tms.vehicle.apps.VehicleConfig',
     'tms.job.apps.JobConfig',
     'tms.road.apps.RoadConfig',
-    'tms.g7.apps.G7Config'
+    'tms.g7.apps.G7Config',
+    'tms.notification.apps.NotificationConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -201,3 +203,8 @@ G7_MQTT_POSITION_SECRET = env.str('G7_MQTT_POSITION_SECRET')
 # MapAPI Settings
 # ----------------------------------------------------------------------------
 MAP_WEB_SERVICE_API_KEY = env.str('MAP_WEB_SERVICE_API_KEY')
+
+
+# Django Channels Settings
+# ----------------------------------------------------------------------------
+ASGI_APPLICATION = 'config.routing.application'

@@ -321,15 +321,3 @@ class MissionViewSet(viewsets.ModelViewSet):
         return m.Mission.objects.filter(
             job__id=self.kwargs['job_pk']
         )
-
-
-class DriverNotificationViewSet(mixins.RetrieveModelMixin,
-                                mixins.ListModelMixin,
-                                viewsets.GenericViewSet):
-    """
-    """
-    permission_classes = [IsDriverOrEscortUser]
-    serializer_class = s.DriverNotificationSerializer
-
-    def get_queryset(self):
-        return self.request.user.driver_profile.notifications.all()
