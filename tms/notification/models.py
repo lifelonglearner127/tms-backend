@@ -17,6 +17,6 @@ class DriverJobNotification(models.Model):
     )
 
     def __str__(self):
-        return 'Meessage to {} at {}'.format(
-            self.driver.user.username, self.sent
+        return 'Meessage to {}'.format(
+            self.driver.user.username
         )

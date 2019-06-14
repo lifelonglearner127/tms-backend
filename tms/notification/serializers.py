@@ -6,4 +6,6 @@ class DriverJobNotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.DriverJobNotification
-        fields = '__all__'
+        fields = (
+            'id', 'message', 'is_read'
+        )

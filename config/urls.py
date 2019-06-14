@@ -33,22 +33,53 @@ urlpatterns = [
         'admin/', admin.site.urls
     ),
     path(
-        'api/', include(('tms.account.urls', 'account'), namespace='account')
+        'api/',
+        include(
+            ('tms.account.urls', 'account'),
+            namespace='account'
+        )
     ),
     path(
-        'api/', include(('tms.info.urls', 'info'), namespace='info')
+        'api/',
+        include(
+            ('tms.info.urls', 'info'),
+            namespace='info'
+        )
     ),
     path(
-        'api/', include(('tms.vehicle.urls', 'vehicle'), namespace='vehicle')
+        'api/',
+        include(
+            ('tms.vehicle.urls', 'vehicle'),
+            namespace='vehicle'
+        )
     ),
     path(
-        'api/', include(('tms.order.urls', 'order'), namespace='order')
+        'api/',
+        include(
+            ('tms.order.urls', 'order'),
+            namespace='order'
+        )
     ),
     path(
-        'api/', include(('tms.job.urls', 'job'), namespace='job')
+        'api/',
+        include(
+            ('tms.job.urls', 'job'),
+            namespace='job'
+        )
     ),
     path(
-        'api/', include(('tms.road.urls', 'road'), namespace='road')
+        'api/',
+        include(
+            ('tms.road.urls', 'road'),
+            namespace='road'
+        )
+    ),
+    path(
+        'api/',
+        include(
+            ('tms.notification.urls', 'notification'),
+            namespace='notification'
+        )
     ),
 ]
 
