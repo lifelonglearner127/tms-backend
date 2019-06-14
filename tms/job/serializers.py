@@ -249,11 +249,16 @@ class Base64ImageField(serializers.ImageField):
 
 class JobBillDocumentSerializer(serializers.ModelSerializer):
 
-    document = Base64ImageField()
+    bill = Base64ImageField()
 
     class Meta:
         model = m.JobBillDocument
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['category_display'] = instance.get_category_display()
+        return ret
 
 
 class JobCostSerializer(serializers.ModelSerializer):

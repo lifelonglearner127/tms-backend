@@ -284,7 +284,8 @@ class JobViewSet(viewsets.ModelViewSet):
         data = request.data
         data['job'] = pk
         serializer = s.JobBillDocumentSerializer(
-            data=data
+            data=data,
+            context={'request': request}
         )
 
         serializer.is_valid(raise_exception=True)
@@ -296,8 +297,7 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, url_path='bill-documents',
-        permission_classes=[IsDriverOrEscortUser]
+        detail=True, url_path='bill-documents'
     )
     def bill_documents(self, request, pk=None):
         job = self.get_object()

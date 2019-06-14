@@ -220,7 +220,7 @@ class JobBillDocument(models.Model):
         decimal_places=1
     )
 
-    document = models.ImageField()
+    bill = models.ImageField()
 
     category = models.PositiveIntegerField(
         choices=c.BILL_TYPE,
