@@ -97,7 +97,11 @@ class JobViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(
             m.Job.objects.all()
         )
-        serializer = s.JobCostSerializer(page, many=True)
+        serializer = s.JobCostSerializer(
+            page,
+            many=True,
+            context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(
@@ -273,10 +277,10 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, url_path='upload', methods=['post'],
+        detail=True, url_path='upload-bill-document', methods=['post'],
         permission_classes=[IsDriverOrEscortUser]
     )
-    def upload(self, request, pk=None):
+    def upload_bill_document(self, request, pk=None):
         data = request.data
         data['job'] = pk
         serializer = s.JobBillDocumentSerializer(
@@ -292,22 +296,24 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, url_path='documents',
+        detail=True, url_path='bill-documents',
         permission_classes=[IsDriverOrEscortUser]
     )
-    def documents(self, request, pk=None):
+    def bill_documents(self, request, pk=None):
         job = self.get_object()
         category = request.query_params.get('category', None)
 
         if category is not None:
             serializer = s.JobBillDocumentSerializer(
                 job.bills.filter(category=category),
-                many=True
+                many=True,
+                context={'request': request}
             )
         else:
             serializer = s.JobBillDocumentSerializer(
                 job.bills.all(),
-                many=True
+                many=True,
+                context={'request': request}
             )
 
         return Response(
