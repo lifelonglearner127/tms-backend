@@ -222,8 +222,7 @@ class JobBillDocument(models.Model):
 
     document = models.ImageField()
 
-    category = models.CharField(
-        max_length=1,
+    category = models.PositiveIntegerField(
         choices=c.BILL_TYPE,
         default=c.BILL_FROM_LOADING_STATION
     )
@@ -233,3 +232,8 @@ class JobBillDocument(models.Model):
             self.get_category_display(),
             self.job.id
         )
+
+    class Meta:
+        ordering = [
+            'category'
+        ]

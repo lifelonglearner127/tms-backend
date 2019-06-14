@@ -232,6 +232,8 @@ class JobCostField(serializers.Field):
 
 class JobCostSerializer(serializers.ModelSerializer):
 
+    order = ShortOrderSerializer()
+    vehicle = ShortVehicleSerializer()
     costs = JobCostField(source='*')
 
     class Meta:
