@@ -29,6 +29,31 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class ApprovedModel(models.Model):
+
+    request_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    approved = models.BooleanField(
+        default=False
+    )
+
+    approved_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ['approved', '-approved_time', '-request_time']
+
+
 class BasicContactModel(TimeStampedModel):
     """
     Used as base class for models needing basic contact info

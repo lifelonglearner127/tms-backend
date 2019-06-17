@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants as c
-from ..core.models import TimeStampedModel
+from ..core.models import TimeStampedModel, ApprovedModel
 
 
 class Vehicle(TimeStampedModel):
@@ -241,3 +241,20 @@ class Vehicle(TimeStampedModel):
 
     def __str__(self):
         return self.plate_num
+
+
+class VehicleMaintenanceRequest(ApprovedModel):
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    category = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_MAINTENANCE
+    )
+
+    maintenace_from = models.DateField()
+
+    maintenace_to = models.DateField()

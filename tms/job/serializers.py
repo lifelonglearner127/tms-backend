@@ -272,3 +272,55 @@ class JobCostSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'order', 'vehicle', 'bills'
         )
+
+
+class ParkingRequestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.ParkingRequest
+        fields = '__all__'
+
+
+class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+    driver = ShortStaffProfileSerializer()
+    escort = ShortStaffProfileSerializer()
+
+    class Meta:
+        model = m.ParkingRequest
+        fields = '__all__'
+
+
+class DriverChangeRequest(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.DriverChangeRequest
+        fields = '__all__'
+
+
+class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
+
+    job = ShortJobSerializer()
+    new_driver = ShortStaffProfileSerializer()
+
+    class Meta:
+        model = m.DriverChangeRequest
+        fields = '__all__'
+
+
+class EscortChangeRequest(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.EscortChangeRequest
+        fields = '__all__'
+
+
+class EscortChangeRequestDataViewSerializer(serializers.ModelSerializer):
+
+    job = ShortJobSerializer()
+    new_escort = ShortStaffProfileSerializer()
+
+    class Meta:
+        model = m.EscortChangeRequest
+        fields = '__all__'

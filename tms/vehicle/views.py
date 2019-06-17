@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..g7.interfaces import G7Interface
-from ..core.views import StaffViewSet, ChoicesView
+from ..core.views import StaffViewSet, ChoicesView, ApproveViewSet
 from ..core import constants as c
 from . import serializers as s
 from . import models as m
@@ -124,6 +124,13 @@ class VehicleViewSet(StaffViewSet):
             ret,
             status=status.HTTP_200_OK
         )
+
+
+class VehicleMaintenanceRequestViewSet(ApproveViewSet):
+
+    queryset = m.VehicleMaintenanceRequest.objects.all()
+    serializer_class = s.VehicleMaintenanceRequestSerializer
+    data_view_serializer_class = s.VehicleMaintenanceRequestDataViewSerializer
 
 
 class VehicleModelAPIView(ChoicesView):

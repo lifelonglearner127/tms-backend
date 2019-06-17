@@ -84,6 +84,12 @@ VEHICLE_STATUS = (
     (VEHICLE_STATUS_REPAIR, 'Repair')
 )
 
+# vehicle maintenace type
+VEHICLE_MAINTENANCE_REPAIR = 'R'
+VEHICLE_MAINTENANCE = (
+    (VEHICLE_MAINTENANCE_REPAIR, 'Repair'),
+)
+
 # Account app - Account constants
 # ----------------------------------------------------------------------------
 # user role choices

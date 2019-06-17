@@ -331,3 +331,24 @@ class MissionViewSet(viewsets.ModelViewSet):
         return m.Mission.objects.filter(
             job__id=self.kwargs['job_pk']
         )
+
+
+class ParkingRequest(viewsets.ModelViewSet):
+
+    queryset = m.ParkingRequest.objects.all()
+    serializer_class = s.ParkingRequestSerializer
+    data_view_serializer = s.ParkingRequestDataViewSerializer
+
+
+class DriverChangeRequest(viewsets.ModelViewSet):
+
+    queryset = m.DriverChangeRequest.objects.all()
+    serializer_class = s.DriverChangeRequest
+    data_view_serializer = s.DriverChangeRequestDataViewSerializer
+
+
+class EscortChangeRequest(viewsets.ModelViewSet):
+
+    queryset = m.EscortChangeRequest.objects.all()
+    serializer_class = s.EscortChangeRequest
+    data_view_serializer = s.EscortChangeRequestDataViewSerializer

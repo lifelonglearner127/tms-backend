@@ -59,3 +59,19 @@ class VehiclePositionSerializer(serializers.ModelSerializer):
 
     def get_lnglat(self, obj):
         return [obj.longitude, obj.latitude]
+
+
+class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.VehicleMaintenanceRequest
+        fields = '__all__'
+
+
+class VehicleMaintenanceRequestDataViewSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+
+    class Meta:
+        model = m.VehicleMaintenanceRequest
+        fields = '__all__'

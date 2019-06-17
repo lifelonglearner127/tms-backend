@@ -1,3 +1,5 @@
+from django.utils import timezone as datetime
+
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -11,6 +13,14 @@ class TMSViewSet(viewsets.ModelViewSet):
     Vieweset only allowed for admin or staff permission
     """
     short_serializer_class = None
+    data_view_serializer_class = None
+
+    def get_serializer_class(self):
+        if self.action not in ['create', 'update'] and\
+           self.data_view_serializer_class is not None:
+            return self.data_view_serializer_class
+        else:
+            return self.serializer_class
 
     def get_short_serializer_class(self):
         if self.short_serializer_class is not None:
@@ -35,6 +45,16 @@ class StaffViewSet(TMSViewSet):
     Vieweset only allowed for admin or staff permission
     """
     permission_classes = [IsStaffUser]
+
+
+class ApproveViewSet(TMSViewSet):
+
+    @action(detail=True, url_path='approve')
+    def approve(self, request, pk=None):
+        instance = self.get_object()
+        instance.approved = True
+        instance.approved_time = datetime.now()
+        instance.save()
 
 
 class StaffAPIView(APIView):

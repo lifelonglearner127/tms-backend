@@ -2,6 +2,7 @@ from django.db import models
 
 from . import managers
 from ..core import constants as c
+from ..core.models import ApprovedModel
 from ..account.models import DriverProfile, EscortProfile
 from ..vehicle.models import Vehicle
 from ..order.models import Order, OrderProductDeliver
@@ -237,3 +238,60 @@ class JobBillDocument(models.Model):
         ordering = [
             'category'
         ]
+
+
+class ParkingRequest(ApprovedModel):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='parking_requests'
+    )
+
+    driver = models.ForeignKey(
+        DriverProfile,
+        on_delete=models.CASCADE,
+        related_name='parking_requests'
+    )
+
+    escort = models.ForeignKey(
+        EscortProfile,
+        on_delete=models.CASCADE,
+        related_name='parking_requests'
+    )
+
+
+class DriverChangeRequest(ApprovedModel):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    new_driver = models.ForeignKey(
+        DriverProfile,
+        on_delete=models.CASCADE
+    )
+
+    change_time = models.DateTimeField()
+
+
+class EscortChangeRequest(ApprovedModel):
+
+    models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    new_escort = models.ForeignKey(
+        EscortProfile,
+        on_delete=models.CASCADE
+    )
+
+    change_time = models.DateTimeField()
