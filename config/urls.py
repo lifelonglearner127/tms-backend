@@ -81,6 +81,13 @@ urlpatterns = [
             namespace='notification'
         )
     ),
+    path(
+        'api/hr/',
+        include(
+            ('tms.hr.urls', 'hr'),
+            namespace='hr'
+        )
+    ),
 ]
 
 if settings.DEBUG:
