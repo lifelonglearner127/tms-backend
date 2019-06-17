@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..core import constants as c
+from ..core.views import ApproveViewSet
 from ..core.permissions import IsDriverOrEscortUser
 from . import models as m
 from . import serializers as s
@@ -333,22 +334,22 @@ class MissionViewSet(viewsets.ModelViewSet):
         )
 
 
-class ParkingRequest(viewsets.ModelViewSet):
+class ParkingRequestViewSet(ApproveViewSet):
 
     queryset = m.ParkingRequest.objects.all()
     serializer_class = s.ParkingRequestSerializer
     data_view_serializer = s.ParkingRequestDataViewSerializer
 
 
-class DriverChangeRequest(viewsets.ModelViewSet):
+class DriverChangeRequestViewSet(ApproveViewSet):
 
     queryset = m.DriverChangeRequest.objects.all()
-    serializer_class = s.DriverChangeRequest
+    serializer_class = s.DriverChangeRequestSerializer
     data_view_serializer = s.DriverChangeRequestDataViewSerializer
 
 
-class EscortChangeRequest(viewsets.ModelViewSet):
+class EscortChangeRequestViewSet(ApproveViewSet):
 
     queryset = m.EscortChangeRequest.objects.all()
-    serializer_class = s.EscortChangeRequest
+    serializer_class = s.EscortChangeRequestSerializer
     data_view_serializer = s.EscortChangeRequestDataViewSerializer

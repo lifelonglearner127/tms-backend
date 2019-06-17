@@ -255,6 +255,10 @@ class VehicleMaintenanceRequest(ApprovedModel):
         choices=c.VEHICLE_MAINTENANCE
     )
 
-    maintenace_from = models.DateField()
+    maintenance_from = models.DateField()
 
-    maintenace_to = models.DateField()
+    maintenance_to = models.DateField()
+
+    class Meta:
+        ordering = ['approved', '-approved_time', '-request_time']
+        unique_together = ['vehicle', 'approved']

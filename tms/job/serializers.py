@@ -292,8 +292,11 @@ class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DriverChangeRequest(serializers.ModelSerializer):
-
+class DriverChangeRequestSerializer(serializers.ModelSerializer):
+    """
+    TODO:
+        1) Validation - new driver should be different from job's driver
+    """
     class Meta:
         model = m.DriverChangeRequest
         fields = '__all__'
@@ -309,8 +312,11 @@ class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EscortChangeRequest(serializers.ModelSerializer):
-
+class EscortChangeRequestSerializer(serializers.ModelSerializer):
+    """
+    TODO:
+        1) Validation - new escort should be different from job's escort
+    """
     class Meta:
         model = m.EscortChangeRequest
         fields = '__all__'

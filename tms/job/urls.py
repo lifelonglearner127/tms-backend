@@ -10,6 +10,22 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.register(
     r'jobs', v.JobViewSet, base_name='job'
 )
+router.register(
+    r'parking-request',
+    v.ParkingRequestViewSet,
+    base_name='parking-request'
+)
+router.register(
+    r'driver-change',
+    v.DriverChangeRequestViewSet,
+    base_name='driver-change'
+)
+router.register(
+    r'escort-change',
+    v.EscortChangeRequestViewSet,
+    base_name='escort-change'
+)
+
 # /jobs/{job_pk}/missions
 # /jobs/{job_pk}/missions/{pk}
 job_router = routers.NestedSimpleRouter(

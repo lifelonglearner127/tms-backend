@@ -16,3 +16,18 @@ class MissionAdmin(admin.ModelAdmin):
 @admin.register(m.JobBillDocument)
 class JobBillDocumentAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.ParkingRequest)
+class ParkingRequestAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.DriverChangeRequest)
+class DriverChangeRequestAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.EscortChangeRequest)
+class EscortChangeRequestAdmin(admin.ModelAdmin):
+    pass

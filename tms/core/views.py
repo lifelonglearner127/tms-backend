@@ -56,6 +56,12 @@ class ApproveViewSet(TMSViewSet):
         instance.approved_time = datetime.now()
         instance.save()
 
+        serializer = self.get_serializer_class()(instance)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class StaffAPIView(APIView):
     """

@@ -281,10 +281,14 @@ class DriverChangeRequest(ApprovedModel):
 
     change_time = models.DateTimeField()
 
+    class Meta:
+        ordering = ['approved', '-approved_time', '-request_time']
+        unique_together = ['job', 'new_driver']
+
 
 class EscortChangeRequest(ApprovedModel):
 
-    models.ForeignKey(
+    job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE
     )
@@ -295,3 +299,7 @@ class EscortChangeRequest(ApprovedModel):
     )
 
     change_time = models.DateTimeField()
+
+    class Meta:
+        ordering = ['approved', '-approved_time', '-request_time']
+        unique_together = ['job', 'new_escort']
