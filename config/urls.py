@@ -88,6 +88,13 @@ urlpatterns = [
             namespace='hr'
         )
     ),
+    path(
+        'api/finance/',
+        include(
+            ('tms.finance.urls', 'finance'),
+            namespace='finance'
+        )
+    ),
 ]
 
 if settings.DEBUG:
