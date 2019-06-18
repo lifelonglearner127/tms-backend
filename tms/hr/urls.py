@@ -10,6 +10,21 @@ router.register(
     v.RestRequestViewSet,
     base_name='rest-request'
 )
+router.register(
+    r'department',
+    v.DepartmentViewSet,
+    base_name='department'
+)
+router.register(
+    r'position',
+    v.PositionViewSet,
+    base_name='position'
+)
+router.register(
+    r'role-management',
+    v.RoleManagementViewSet,
+    base_name='role-management'
+)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

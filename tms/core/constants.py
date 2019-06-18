@@ -276,3 +276,15 @@ UNIT_WEIGHT = (
     (UNIT_WEIGHT_TON, 't'),
     (UNIT_WEIGHT_KILOGRAM, 'Kg')
 )
+
+
+# hr app
+# ----------------------------------------------------------------------------
+PERMISSION_TYPE_NO = 0
+PERMISSION_TYPE_READ = 1
+PERMISSION_TYPE_WRITE = 2
+PERMISSION_TYPE = (
+    (PERMISSION_TYPE_NO, 'No permission'),
+    (PERMISSION_TYPE_READ, 'Read Permission'),
+    (PERMISSION_TYPE_WRITE, 'Write Permission')
+)
