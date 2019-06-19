@@ -1,0 +1,20 @@
+[Unit]
+Description=tms backend asgi server
+After=network.target
+
+
+[Service]
+PIDFile=/run/daphne/tms_backend.pid
+User=root
+Group=root
+WorkingDirectory=/root/Projects/tms-backend
+Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
+ExecStart=/root/.virtualenvs/tms-backend/bin/daphne --bind 0.0.0.0 --port 9000 --verbosity 0 config.asgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+PrivateTmp=true
+
+
+[Install]
+WantedBy=multi-user.target

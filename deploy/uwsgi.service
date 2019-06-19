@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI Emperor Service
+After=network.target
+
+
+[Service]
+ExecStart=/root/.virtualenvs/tms-backend/bin/uwsgi --emperor /etc/uwsgi/sites
+Restart=always
+KillSignal=SIGQUIT
+
+
+[Install]
+WantedBy=multi-user.target
