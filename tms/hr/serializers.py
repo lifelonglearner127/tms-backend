@@ -84,9 +84,9 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         # get user data and create
         user_data = self.context.get('user', None)
         if user_data is None:
-            raise serializers.ValidationError(
-                'User data is not provided'
-            )
+            raise serializers.ValidationError({
+                'user': 'User data is not provided'
+            })
 
         # check if username and mobile exists already
         if m.User.objects.filter(username=user_data['username']).exists():
@@ -111,12 +111,14 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = self.context.get('user', None)
         if user_data is None:
-            raise serializers.ValidationError(
-                'User data is not provided'
-            )
+            raise serializers.ValidationError({
+                'user': 'User data is not provided'
+            })
 
         # check if username and mobile exists already
-        if m.User.objects.filter(username=user_data['username']).exists():
+        if m.User.objects.exclude(pk=instance.user.id).filter(
+            username=user_data['username']
+        ).exists():
             raise serializers.ValidationError({
                 'username': 'Such user already exists'
             })
@@ -169,9 +171,9 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = self.context.get('user', None)
         if user_data is None:
-            raise serializers.ValidationError(
-                'User data is not provided'
-            )
+            raise serializers.ValidationError({
+                'user': 'User data is not provided'
+            })
 
         # check if username and mobile exists already
         if m.User.objects.filter(username=user_data['username']).exists():

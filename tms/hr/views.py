@@ -43,8 +43,8 @@ class StaffProfileViewSet(TMSViewSet):
 
     def create(self, request):
         context = {
-            'user': request.data.pop('user'),
-            'driver_license': request.data.pop('driver_license')
+            'user': request.data.pop('user', None),
+            'driver_license': request.data.pop('driver_license', None)
         }
 
         serializer = self.serializer_class(
@@ -62,8 +62,8 @@ class StaffProfileViewSet(TMSViewSet):
     def update(self, request, pk=None):
         serializer_instance = self.get_object()
         context = {
-            'user': request.data.pop('user'),
-            'driver_license': request.data.pop('driver_license')
+            'user': request.data.pop('user', None),
+            'driver_license': request.data.pop('driver_license', None)
         }
 
         serializer = self.serializer_class(

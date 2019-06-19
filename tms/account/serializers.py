@@ -5,9 +5,6 @@ from rest_framework import serializers
 
 from . import models as m
 from . import utils
-from ..core import constants as c
-from ..info.models import Product
-from ..info.serializers import ShortProductSerializer
 
 
 class PasswordField(serializers.CharField):
