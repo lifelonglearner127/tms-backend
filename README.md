@@ -35,7 +35,6 @@ cp .env.example .env
 
 Running Locally
 ```
-export DJANGO_READ_DOT_ENV_FILE=True
 export DJANGO_SETTINGS_MODULE=config.settings.local
 python manage.py migrate
 python manage.py runserver
@@ -94,7 +93,6 @@ virtualenv tms-backend
 source tms-backend/bin/activate
 cd ~ && mkdir Projects && cd Projects && git clone https://github.com/lifelonglearner127/tms-backend.git
 cd tms-backend && pip install -r requirements.txt
-export DJANGO_READ_DOT_ENV_FILE=True
 export DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba
 cp .env.example .env
 python manage.py collectstatic

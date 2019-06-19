@@ -2,16 +2,21 @@
 """
 Base settings to build other settings upon
 """
+import os
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 ROOT_DIR = (environ.Path(__file__) - 3)
 APPS_DIR = ROOT_DIR.path("tms")
 
 env = environ.Env()
 
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
-if READ_DOT_ENV_FILE:
-    env.read_env(str(ROOT_DIR.path(".env")))
+if not os.path.exists(str(ROOT_DIR.path(".env"))):
+    raise ImproperlyConfigured(
+        'Not Found .env file'
+    )
+
+env.read_env(str(ROOT_DIR.path(".env")))
 
 
 # Generals
