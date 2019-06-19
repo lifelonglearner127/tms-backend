@@ -62,6 +62,28 @@ class ApproveViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='approved-requests')
+    def approved_requests(self, request):
+        serializer = self.get_serializer_class()(
+            self.get_queryset().filter(approved=True),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='unapproved-requests')
+    def unapproved_requests(self, request):
+        serializer = self.get_serializer_class()(
+            self.get_queryset().filter(approved=False),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class StaffAPIView(APIView):
     """

@@ -1,4 +1,5 @@
 from django.db import models
+from . import managers
 
 
 class CreatedTimeModel(models.Model):
@@ -48,6 +49,10 @@ class ApprovedModel(models.Model):
         null=True,
         blank=True
     )
+
+    objects = models.Manager()
+    approved_requests = managers.ApprovedRequestsManager()
+    unapproved_requests = managers.UnApprovedRequestsManager()
 
     class Meta:
         abstract = True
