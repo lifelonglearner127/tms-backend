@@ -68,6 +68,10 @@ class User(AbstractBaseUser):
         blank=True
     )
 
+    channel_name = models.CharField(
+        max_length=100
+    )
+
     name = models.CharField(
         max_length=100,
         null=True,

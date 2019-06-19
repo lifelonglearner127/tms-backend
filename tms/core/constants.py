@@ -288,3 +288,10 @@ PERMISSION_TYPE = (
     (PERMISSION_TYPE_READ, 'Read Permission'),
     (PERMISSION_TYPE_WRITE, 'Write Permission')
 )
+
+
+# notification app
+# ----------------------------------------------------------------------------
+DRIVER_NOTIFICATION_NEW_JOB = 0
+DRIVER_NOTIFICATION_ENTER_AREA = 1
+DRIVER_NOTIFICATION_EXIT_AREA = 2

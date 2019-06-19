@@ -3,5 +3,8 @@ from django.conf.urls import url
 from . import consumers
 
 websocket_urlpatterns = [
-    url(r'^ws/driver/job/notifications/$', consumers.DriverJobConsumer),
+    url(
+        r'^ws/notification/(?P<user_pk>[^/]+)/$',
+        consumers.NotificationConsumer
+    ),
 ]
