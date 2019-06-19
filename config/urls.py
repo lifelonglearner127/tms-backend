@@ -24,10 +24,10 @@ from rest_framework_swagger.views import get_swagger_view
 schema_view = get_swagger_view(title='TMS API')
 urlpatterns = [
     path(
-        '', schema_view
+        'admin/', admin.site.urls
     ),
     path(
-        'admin/', admin.site.urls
+        'api/doc/', schema_view
     ),
     path(
         'api/',
