@@ -40,7 +40,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'corsheaders',
-    # 'channels'
+    'channels'
 ]
 LOCAL_APPS = [
     'tms.account.apps.AccountConfig',
@@ -210,12 +210,12 @@ MAP_WEB_SERVICE_API_KEY = env.str('MAP_WEB_SERVICE_API_KEY')
 
 # Django Channels Settings
 # ----------------------------------------------------------------------------
-# ASGI_APPLICATION = 'config.routing.application'
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         },
-#     },
-# }
+ASGI_APPLICATION = 'config.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
