@@ -1,11 +1,11 @@
 from django.db import models
-from ..account.models import DriverProfile
+from ..hr.models import StaffProfile
 
 
 class DriverJobNotification(models.Model):
 
     driver = models.ForeignKey(
-        DriverProfile,
+        StaffProfile,
         on_delete=models.CASCADE,
         related_name='notifications'
     )

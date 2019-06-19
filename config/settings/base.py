@@ -17,7 +17,8 @@ if READ_DOT_ENV_FILE:
 # Generals
 # ----------------------------------------------------------------------------
 DEBUG = env.bool("DJANGO_DEBUG", False)
-LANGUAGE_CODE = 'zh-hans'   # en-us
+# LANGUAGE_CODE = 'zh-hans'   # en-us
+LANGUAGE_CODE = 'en-us'   # en-us
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -50,7 +51,9 @@ LOCAL_APPS = [
     'tms.job.apps.JobConfig',
     'tms.road.apps.RoadConfig',
     'tms.g7.apps.G7Config',
-    'tms.notification.apps.NotificationConfig'
+    'tms.notification.apps.NotificationConfig',
+    'tms.hr.apps.HrConfig',
+    'tms.finance.apps.FinanceConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -208,3 +211,11 @@ MAP_WEB_SERVICE_API_KEY = env.str('MAP_WEB_SERVICE_API_KEY')
 # Django Channels Settings
 # ----------------------------------------------------------------------------
 ASGI_APPLICATION = 'config.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

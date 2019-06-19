@@ -65,28 +65,48 @@
     }
   },
   {
-    "model": "account.StaffProfile",
+    "model": "hr.Department",
+    "pk": 1,
+    "fields": {
+      "name": "Finance"
+    }
+  },
+  {
+    "model": "hr.Position",
+    "pk": 1,
+    "fields": {
+      "name": "Manager"
+    }
+  },
+  {
+    "model": "hr.StaffProfile",
     "pk": 2,
     "fields": {
-      "user": 2
+      "user": 2,
+      "department": 1,
+      "position": 1
     }
   },
   {
-    "model": "account.DriverProfile",
-    "pk": 1,
+    "model": "hr.StaffProfile",
+    "pk": 3,
     "fields": {
-      "user": 3
+      "user": 3,
+      "department": 1,
+      "position": 1
     }
   },
   {
-    "model": "account.EscortProfile",
-    "pk": 1,
+    "model": "hr.StaffProfile",
+    "pk": 4,
     "fields": {
-      "user": 4
+      "user": 4,
+      "department": 1,
+      "position": 1
     }
   },
   {
-    "model": "account.CustomerProfile",
+    "model": "hr.CustomerProfile",
     "pk": 1,
     "fields": {
       "user": 5,
@@ -102,7 +122,7 @@
     }
   },
   {
-    "model": "account.CustomerProfile",
+    "model": "hr.CustomerProfile",
     "pk": 2,
     "fields": {
       "user": 6,
@@ -872,8 +892,8 @@
     "fields": {
         "order": 1,
         "vehicle": 1,
-        "driver": 1,
-        "escort": 1,
+        "driver": 3,
+        "escort": 4,
         "route": 1,
         "total_weight": 3
     }
@@ -884,8 +904,8 @@
     "fields": {
         "order": 2,
         "vehicle": 1,
-        "driver": 1,
-        "escort": 1,
+        "driver": 3,
+        "escort": 4,
         "route": 2,
         "total_weight": 1,
         "progress": 1,
@@ -914,8 +934,8 @@
     "fields": {
         "order": 3,
         "vehicle": 1,
-        "driver": 1,
-        "escort": 1,
+        "driver": 3,
+        "escort": 4,
         "route": 1,
         "total_weight": 1
     }
@@ -926,8 +946,8 @@
     "fields": {
         "order": 4,
         "vehicle": 1,
-        "driver": 1,
-        "escort": 1,
+        "driver": 3,
+        "escort": 4,
         "route": 1,
         "total_weight": 1
     }

@@ -13,8 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import json
-import paho.mqtt.client as mqtt
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -22,7 +20,6 @@ from django.contrib import admin
 from django.urls import path, include
 
 from rest_framework_swagger.views import get_swagger_view
-from tms.vehicle.models import Vehicle
 
 schema_view = get_swagger_view(title='TMS API')
 urlpatterns = [
@@ -102,36 +99,3 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT
     )
-
-
-def on_message_locations(client, userdata, msg):
-    payload = msg.payload.decode('utf-8')
-    payload = json.loads(payload)
-
-    for item in payload['data']:
-        plate_num = item['plateNum']
-        longitude = item['lng']
-        latitude = item['lat']
-        speed = item['speed']
-        try:
-            vehicle = Vehicle.objects.get(plate_num=plate_num)
-            vehicle.longitude = longitude
-            vehicle.latitude = latitude
-            vehicle.speed = speed
-            vehicle.save()
-        except Vehicle.DoesNotExist:
-            pass
-
-
-client = mqtt.Client(client_id=settings.G7_MQTT_POSITION_CLIENT_ID)
-client.message_callback_add(
-    settings.G7_MQTT_POSITION_TOPIC, on_message_locations
-)
-client.username_pw_set(
-    settings.G7_MQTT_POSITION_ACCESS_ID,
-    password=settings.G7_MQTT_POSITION_SECRET
-)
-
-client.connect(settings.G7_MQTT_HOST, 1883, 60)
-client.subscribe(settings.G7_MQTT_POSITION_TOPIC, 0)
-client.loop_start()

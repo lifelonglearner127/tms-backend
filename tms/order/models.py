@@ -4,7 +4,7 @@ from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel
 from ..info.models import Station, Product
-from ..account.models import StaffProfile, CustomerProfile
+from ..hr.models import StaffProfile, CustomerProfile
 
 
 class Order(TimeStampedModel):

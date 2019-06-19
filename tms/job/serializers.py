@@ -10,7 +10,7 @@ from ..order.serializers import (
     ShortStationSerializer,
 )
 from ..vehicle.serializers import ShortVehicleSerializer
-from ..account.serializers import ShortStaffProfileSerializer
+from ..hr.serializers import ShortStaffProfileSerializer
 from ..road.serializers import RouteDataSerializer, ShortRouteSerializer
 
 

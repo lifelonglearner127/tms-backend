@@ -106,14 +106,6 @@ USER_ROLE = (
     (USER_ROLE_CUSTOMER, '客户')
 )
 
-# driver status
-DRIVER_STATUS_AVAILABLE = 'A'
-DRIVER_STATUS_INWORK = 'W'
-DRIVER_STATUS = (
-    (DRIVER_STATUS_AVAILABLE, 'Available'),
-    (DRIVER_STATUS_INWORK, 'In Work')
-)
-
 # user document type choices
 USER_DOCUMENT_TYPE_D1 = '1'
 USER_DOCUMENT_TYPE_D2 = '2'
@@ -292,10 +284,20 @@ PERMISSION_TYPE = (
 
 # notification app
 # ----------------------------------------------------------------------------
+# driver status
+WORK_STATUS_AVAILABLE = 'A'
+WORK_STATUS_NOT_AVAILABLE = 'N'
+WORK_STATUS = (
+    (WORK_STATUS_AVAILABLE, 'Available'),
+    (WORK_STATUS_NOT_AVAILABLE, 'Not Available')
+)
+
+# driver notification
 DRIVER_NOTIFICATION_NEW_JOB = 0
 DRIVER_NOTIFICATION_ENTER_AREA = 1
 DRIVER_NOTIFICATION_EXIT_AREA = 2
 
+# staff notification
 STAFF_NOTIFICATION_REST_REQUEST = 0
 STAFF_NOTIFICATION_VEHICLE_REPAIR_REQUEST = 1
 STAFF_NOTIFICATION_PARKING_REQUEST = 2

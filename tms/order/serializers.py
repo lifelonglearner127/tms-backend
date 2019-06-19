@@ -3,7 +3,7 @@ from rest_framework import serializers
 from . import models as m
 from ..info.models import Station
 from ..info.serializers import ShortStationSerializer, ShortProductSerializer
-from ..account.serializers import (
+from ..hr.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 )
 

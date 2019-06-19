@@ -6,11 +6,6 @@ from . import views as v
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(
-    r'rest-request',
-    v.RestRequestViewSet,
-    base_name='rest-request'
-)
-router.register(
     r'department',
     v.DepartmentViewSet,
     base_name='department'
@@ -24,6 +19,21 @@ router.register(
     r'role-management',
     v.RoleManagementViewSet,
     base_name='role-management'
+)
+router.register(
+    r'staff-profile',
+    v.StaffProfileViewSet,
+    base_name='staff-profile'
+)
+router.register(
+    r'customer-profile',
+    v.CustomerProfileViewSet,
+    base_name='customer-profile'
+)
+router.register(
+    r'rest-request',
+    v.RestRequestViewSet,
+    base_name='rest-request'
 )
 
 urlpatterns = [

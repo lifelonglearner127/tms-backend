@@ -78,30 +78,5 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
-@admin.register(m.CustomerProfile)
-class CustomerProfileAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.StaffProfile)
-class StaffProfileAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.DriverProfile)
-class DriverProfileAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.EscortProfile)
-class EscortProfileAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.StaffDocument)
-class StaffDocumentAdmin(admin.ModelAdmin):
-    pass
-
-
 admin.site.register(m.User, UserAdmin)
 admin.site.unregister(Group)
