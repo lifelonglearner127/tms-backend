@@ -102,9 +102,15 @@ python manage.py createsuperuser
 
 3. Configure wsgi & nginx
 ```
-cp tms_backend /etc/nginx/sites-available/
+cp deploy/tms_backend.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
-uwsgi uwsgi.ini
 systemctl restart nginx
+
+cp deploy/daphne.service /lib/systemd/system/
+cp deploy/uwsgi.service /lib/systemd/system/
+cp deploy/tms_backend.ini /etc/uwsgi/sites/
 ```
 
+4. Explanation
+Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.
+Check the `deploy` folder
