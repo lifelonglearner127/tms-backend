@@ -20,6 +20,9 @@ class RestRequest(ApprovedModel):
 
     to_date = models.DateField()
 
+    class Meta:
+        unique_together = ['staff', 'from_date', 'to_date']
+
 
 class Department(models.Model):
 
