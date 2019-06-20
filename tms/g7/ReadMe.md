@@ -4,6 +4,7 @@
  - [Vehicle GPS daily mileage inquiry](#vehicle-gps-daily-mileage-inquiry)
  - [Vehicle status inquiry](#vehicle-status-inquiry)
  - [Query vehicle status based on equipment](#query-vehicle-status-based-on-equipment)
+ - [Bulk vehicle status inquiry](#bulk-vehicle-status-inquiry)
 
 ## Vehicle history track query
 ### Code
@@ -233,3 +234,102 @@ data = G7Interface.call_g7_http_interface(
     }
 }
 ```
+## Bulk vehicle status inquiry
+### Code
+```
+from tms.g7.interfaces import G7Interface
+from tms.vehicle.models import Vehicle
+plate_nums = Vehicle.objects.values_list('plate_num', flat=True)
+body = {
+    'plate_nums': list(plate_nums),
+    'fields': ['loc']
+}
+data = G7Interface.call_g7_http_interface(
+    'BULK_VEHICLE_STATUS_INQUIRY',
+    body=body
+)
+```
+### Request Parameter
+```
+{
+    'plate_num': ['鲁UA3161'],
+    'fields': ['loc']
+}
+```
+### Response
+```
+{
+    'code': 0,
+    'msg': 'succ',
+    'sub_code': 0,
+    'sub_msg': None,
+    'req_id': '2573667680196508672',
+    'data': {
+        '鲁UG2802': {
+            'plate_num': '鲁UG2802',
+            'code': 0,
+            'msg': 'ok',
+            'data': {
+                'gpsno': '91302990',
+                'time': '2019-06-21 02:37:15',
+                'loc': {
+                    'lng': '112.88492438805328',
+                    'lat': '37.835018526899056',
+                    'address': None,
+                    'speed': 0,
+                    'course': 197,
+                    'gps_time': '2019-06-21 02:37:08',
+                    'location_type': 0
+                },
+                'status': None,
+                'cold': None,
+                'driver': None,
+                'gpsStatus': 3
+            }
+        },
+        '鲁UA3161': {
+            'plate_num': '鲁UA3161',
+            'code': 0,
+            'msg': 'ok',
+            'data': {
+                'gpsno': '91302991',
+                'time': '2019-06-21 02:34:32',
+                'loc': {
+                    'lng': '120.43016001114678',
+                    'lat': '36.1991544518921',
+                    'address': None,
+                    'speed': 0,
+                    'course': 13,
+                    'gps_time': '2019-06-21 02:34:31',
+                    'location_type': 0
+                },
+                'status': None,
+                'cold': None,
+                'driver': None,
+                'gpsStatus': 3
+            }
+        },
+        '鲁UC6753': {
+            'plate_num': '鲁UC6753',
+            'code': 0,
+            'msg': 'ok',
+            'data': {
+                'gpsno': '91302992',
+                'time': '2019-06-21 02:37:49',
+                'loc': {
+                    'lng': '118.87882951006411',
+                    'lat': '38.06398490721363',
+                    'address': None,
+                    'speed': 0,
+                    'course': 95,
+                    'gps_time': '2019-06-21 02:37:43',
+                    'location_type': 0
+                },
+                'status': None,
+                'cold': None,
+                'driver': None,
+                'gpsStatus': 3
+            }
+        }
+    }
+}

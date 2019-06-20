@@ -84,12 +84,20 @@ class VehicleViewSet(StaffViewSet):
 
     @action(detail=False, url_path='position')
     def vehicle_position(self, request):
-        vehicles = m.Vehicle.objects.exclude(
-            longitude__isnull=True
-        ).exclude(
-            latitude__isnull=True
+        plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
+        body = {
+            'plate_nums': list(plate_nums),
+            'fields': ['loc']
+        }
+
+        data = G7Interface.call_g7_http_interface(
+            'BULK_VEHICLE_STATUS_INQUIRY',
+            body=body
         )
-        serializer = s.VehiclePositionSerializer(vehicles, many=True)
+
+        serializer = s.VehiclePositionSerializer(
+            list(data.values()), many=True
+        )
 
         return Response(
             serializer.data,

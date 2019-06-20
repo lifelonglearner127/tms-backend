@@ -14,15 +14,6 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
         )
 
 
-class MainVehicleSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Vehicle
-        fields = (
-            'id', 'plate_num', 'longitude', 'latitude', 'speed'
-        )
-
-
 class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer
@@ -45,20 +36,15 @@ class VehicleSerializer(serializers.ModelSerializer):
         return data
 
 
-class VehiclePositionSerializer(serializers.ModelSerializer):
+class VehiclePositionSerializer(serializers.Serializer):
     """
     Serializer for vehicle playback
     """
+    plate_num = serializers.CharField()
     lnglat = serializers.SerializerMethodField()
 
-    class Meta:
-        model = m.Vehicle
-        fields = (
-            'id', 'lnglat'
-        )
-
     def get_lnglat(self, obj):
-        return [obj.longitude, obj.latitude]
+        return [float(obj['data']['loc']['lng']), float(obj['data']['loc']['lat'])]
 
 
 class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):

@@ -55,7 +55,7 @@ G7_HTTP_ENDPOINTS = {
             'METHOD': 'GET'
         },
         'BULK_VEHICLE_STATUS_INQUIRY': {
-            'URL': '/v1/device/truck/current_info_by_gpsno',
+            'URL': '/v1/device/truck/current_info/batch',
             'METHOD': 'POST'
         },
         'BULK_VEHICLE_STATUS_BY_GPS': {

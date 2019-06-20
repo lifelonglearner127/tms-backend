@@ -212,21 +212,6 @@ class Vehicle(TimeStampedModel):
         default=c.VEHICLE_STATUS_AVAILABLE
     )
 
-    longitude = models.FloatField(
-        null=True,
-        blank=True
-    )
-
-    latitude = models.FloatField(
-        null=True,
-        blank=True
-    )
-
-    speed = models.PositiveIntegerField(
-        null=True,
-        blank=True
-    )
-
     @property
     def branch_count(self):
         return len(self.branches)
