@@ -1,11 +1,9 @@
-import json
-
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
 from asgiref.sync import async_to_sync
 from ..account.models import User
 
 
-class NotificationConsumer(WebsocketConsumer):
+class NotificationConsumer(JsonWebsocketConsumer):
     def connect(self):
         try:
             user_pk = self.scope['url_route']['kwargs']['user_pk']
@@ -23,13 +21,13 @@ class NotificationConsumer(WebsocketConsumer):
         pass
 
     def notify(self, event):
-        self.send(text_data=json.dumps({
-            'msg_type': event['msg_type'],
+        self.send_json({
+            'content': event['msg_type'],
             'msg': event['msg']
-        }))
+        })
 
 
-class PositionConsumer(WebsocketConsumer):
+class PositionConsumer(JsonWebsocketConsumer):
     def connect(self):
         try:
             user_pk = self.scope['url_route']['kwargs']['user_pk']
@@ -53,7 +51,6 @@ class PositionConsumer(WebsocketConsumer):
         pass
 
     def notify_position(self, event):
-        self.send(text_data=json.dumps({
-            'msg_type': 'position',
-            'data': event['data']
-        }))
+        self.send_json({
+            'content': event['data']
+        })
