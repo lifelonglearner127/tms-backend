@@ -106,16 +106,26 @@ def _on_connect(client, userdata, flags, rc):
 
 def _on_message(client, userdata, message):
     response = json.loads(message.payload.decode('utf-8'))
-    data = response.get('data', None)
+    vehicles = response.get('data', None)
 
-    print(data)
+    if vehicles is None:
+        return
+
+    position = []
+    for vehicle in vehicles:
+        position.append({
+            'plateNum': vehicle['plateNum'],
+            'lnglat': [vehicle['lng'], vehicle['lat']]
+        })
+
+    print(position)
     # send current vehicle position to position consumer
     # in order to display on frontend
     async_to_sync(channel_layer.group_send)(
         'position',
         {
             'type': 'notify_position',
-            'data': data
+            'data': position
         }
     )
 
@@ -123,11 +133,12 @@ def _on_message(client, userdata, message):
     # plate_num = data[0]['plateNum']
 
     # global black_dots
-    current_position = (data[0]['lat'], data[1]['lng'])
-    for dot in black_dots:
-        dot_position = (dot[2], dot[1])
-        if distance.distance(current_position, dot_position).m < 100:
-            pass
+    for vehicle in vehicles:
+        current_position = (vehicle['lat'], vehicle['lng'])
+        for dot in black_dots:
+            dot_position = (dot[2], dot[1])
+            if distance.distance(current_position, dot_position).m < 100:
+                pass
 
 
 def _on_disconnect(client, userdata, rc):
