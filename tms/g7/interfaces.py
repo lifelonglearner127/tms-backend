@@ -45,7 +45,8 @@ class G7Interface:
             baseurl=settings.G7_HTTP_BASEURL,
             url=api_call['URL'],
             method=api_call['METHOD'],
-            time_out=30000
+            time_out=30000,
+            headers={}
         )
 
         if queries is not None:

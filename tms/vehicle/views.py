@@ -110,7 +110,7 @@ class VehicleViewSet(StaffViewSet):
         plate_num = self.request.query_params.get('plate_num', None)
         queries = {
             'plate_num': plate_num,
-            'fields': 'loc, status',
+            'fields': 'loc',
             'addr_required': True,
         }
 
