@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -65,7 +65,6 @@ class VehicleViewSet(StaffViewSet):
                 index = 0
                 for x in data:
                     paths.append([x.pop('lng'), x.pop('lat')])
-                    print(x)
                     x['no'] = index
                     x['time'] = datetime.utcfromtimestamp(
                         int(x['time'])/1000
@@ -104,13 +103,13 @@ class VehicleViewSet(StaffViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, url_path="current_info")
-    def current_info(self, request, pk=None):
-        vehicle = self.get_object()
+    @action(detail=False, url_path="current_info")
+    def current_info(self, request):
         # todo: get bound of vehicle with driver and escort
 
+        plate_num = self.request.query_params.get('plate_num', None)
         queries = {
-            'plate_num': vehicle.plate_num,
+            'plate_num': plate_num,
             'fields': 'loc, status',
             'addr_required': True,
         }
@@ -121,10 +120,10 @@ class VehicleViewSet(StaffViewSet):
         )
 
         ret = {
-            'plate_num': vehicle.plate_num,
+            'plate_num': plate_num,
             'driver': 'Driver',
             'escort': 'Escort',
-            'gpsno': data['gpsno'],
+            'gpsno': data.get('gpsno', ''),
             'location': data['loc']['address'],
             'speed': data['loc']['speed']
         }

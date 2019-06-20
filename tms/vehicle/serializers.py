@@ -42,9 +42,13 @@ class VehiclePositionSerializer(serializers.Serializer):
     """
     plate_num = serializers.CharField()
     lnglat = serializers.SerializerMethodField()
+    speed = serializers.SerializerMethodField()
 
     def get_lnglat(self, obj):
         return [float(obj['data']['loc']['lng']), float(obj['data']['loc']['lat'])]
+
+    def get_speed(self, obj):
+        return [int(obj['data']['loc']['speed'])]
 
 
 class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):

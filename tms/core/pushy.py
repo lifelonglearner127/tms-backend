@@ -26,4 +26,3 @@ class PushyAPI:
             err_str = "Pushy API returned HTTP error " + str(e.code) + \
                 ": " + e.read()
             # TODO logging instead of printing
-            print(err_str)

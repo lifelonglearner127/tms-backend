@@ -43,7 +43,6 @@ def build_sign_str(uri=None, method=None, headers=None, queries=None):
     string_to_sign.append(_format_header(headers=headers))
     string_to_sign.append(_build_resource(uri=uri, queries=queries))
 
-    print(string_to_sign)
     return ''.join(string_to_sign)
 
 
@@ -93,8 +92,6 @@ def convert_utf8(input_string):
 
 
 def _format_header(headers={}):
-    print('headers:')
-    print(headers)
     headers_new = {}
     lf = '\n'
     temp_headers = []
@@ -105,9 +102,6 @@ def _format_header(headers={}):
 
         header_list = list(headers_new.keys())
         header_list.sort()
-
-        print('header_list:')
-        print(header_list)
 
         for k in header_list:
             if k.startswith("X-G7-Ca-".lower()):

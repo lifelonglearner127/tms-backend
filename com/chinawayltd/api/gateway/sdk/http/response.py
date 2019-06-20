@@ -28,7 +28,6 @@ class Response(Request):
         self.__connection = None
         self.set_body(content)
         self.set_content_type(content_type)
-        print("baseurl in Response: " + self.get_baseurl())
 
     def set_ssl_enable(self, enable):
         self.__ssl_enable = enable
@@ -52,7 +51,6 @@ class Response(Request):
         proto, rest = urllib.parse.splittype(self.get_host())
         host, rest = urllib.parse.splithost(rest)
         host, port = urllib.parse.splitport(host)
-        print("baseurl:" + self.get_baseurl())
         return host
 
     def get_http_response(self):
@@ -69,7 +67,6 @@ class Response(Request):
             if self.get_queries() is not None:
                 request_url += urllib.parse.urlencode(self.get_queries())
 
-            print("request_url in get_http_response: " + request_url)
             self.__connection.request(
                 method=self.get_method(), url=request_url,
                 body=self.get_body(), headers=self.get_headers()
@@ -77,7 +74,6 @@ class Response(Request):
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
         except Exception as e:
-            print(e)
             return None, None, None
         finally:
             self.__close_connection()
@@ -92,7 +88,6 @@ class Response(Request):
             self.__connection.connect()
             request_url = self.get_baseurl() + self.get_url() + "?" + \
                 urllib.parse.urlencode(self.get_queries())
-            print("request_url: " + request_url)
             self.__connection.request(
                 method=self.get_method(), url=request_url,
                 body=self.get_body(), headers=self.get_headers()
@@ -100,7 +95,6 @@ class Response(Request):
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
         except Exception as e:
-            print(e)
             return None, None, None
         finally:
             self.__close_connection()
@@ -129,7 +123,6 @@ class Response(Request):
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
         except Exception as e:
-            print(e)
             return None, None, None
         finally:
             self.__close_connection()
@@ -153,7 +146,6 @@ class Response(Request):
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
         except Exception as e:
-            print(e)
             return None, None, None
         finally:
             self.__close_connection()
@@ -163,4 +155,4 @@ class Response(Request):
             if self.__connection is not None:
                 self.__connection.close()
         except Exception as e:
-            print(e)
+            pass

@@ -82,8 +82,8 @@ def load_data_from_db(db_url):
             quality_stations.append(row)
 
         cursor.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+    except psycopg2.DatabaseError:
+        pass
     finally:
         if connection is not None:
             connection.close()
@@ -111,21 +111,21 @@ def _on_message(client, userdata, message):
     if vehicles is None:
         return
 
-    position = []
+    positions = []
     for vehicle in vehicles:
-        position.append({
+        positions.append({
             'plateNum': vehicle['plateNum'],
-            'lnglat': [vehicle['lng'], vehicle['lat']]
+            'lnglat': [vehicle['lng'], vehicle['lat']],
+            'speed': vehicle['speed']
         })
 
-    print(position)
     # send current vehicle position to position consumer
     # in order to display on frontend
     async_to_sync(channel_layer.group_send)(
         'position',
         {
             'type': 'notify_position',
-            'data': position
+            'data': positions
         }
     )
 

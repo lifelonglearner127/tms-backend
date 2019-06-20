@@ -34,8 +34,6 @@ class DefaultClient:
     def execute(self, request=None):
         try:
             headers = self.build_headers(request)
-            print("build_headers:")
-            print(headers)
 
             response = Response(
                 host=request.get_host(),
@@ -88,8 +86,6 @@ class DefaultClient:
                 headers=headers,
                 queries=request.get_queries()
             )
-
-        print(str_to_sign)
 
         headers[constant.X_CA_SIGNATURE] = constant.AUTH_PREFIX + " " + \
             self.__app_key + constant.SPE2_COLON + sha_hmac256.sign(
