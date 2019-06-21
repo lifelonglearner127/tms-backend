@@ -129,7 +129,7 @@ class JobViewSet(viewsets.ModelViewSet):
     )
     def previous_jobs(self, request):
         serializer = s.JobDataSerializer(
-            request.user.driver_profile.jobs.filter(
+            request.user.jobs_as_driver.filter(
                 finished_on__lte=datetime.now()
             ),
             many=True
@@ -171,7 +171,7 @@ class JobViewSet(viewsets.ModelViewSet):
     )
     def future_jobs(self, request):
         serializer = s.JobDataSerializer(
-            request.user.driver_profile.jobs.filter(
+            request.user.jobs_as_driver.filter(
                 progress=c.JOB_PROGRESS_NOT_STARTED
             ),
             many=True
