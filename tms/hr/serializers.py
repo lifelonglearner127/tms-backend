@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -300,6 +301,17 @@ class RestRequestSerializer(serializers.ModelSerializer):
         instance.staff = staff
         instance.save()
         return instance
+
+    def validate(self, data):
+        from_date = data.get('from_date', None)
+        to_date = data.get('to_date', None)
+
+        if from_date > to_date:
+            raise serializers.ValidationError({
+                'to_date': 'Error'
+            })
+
+        return data
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
