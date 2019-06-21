@@ -4,7 +4,7 @@ from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel
 from ..info.models import Station, Product
-from ..hr.models import StaffProfile, CustomerProfile
+from ..account.models import User
 
 
 class Order(TimeStampedModel):
@@ -16,14 +16,16 @@ class Order(TimeStampedModel):
     )
 
     assignee = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.SET_NULL,
+        related_name='charge_orders',
         null=True
     )
 
     customer = models.ForeignKey(
-        CustomerProfile,
+        User,
         on_delete=models.CASCADE,
+        related_name='orders'
     )
 
     order_source = models.CharField(

@@ -3,8 +3,8 @@ from rest_framework import serializers
 from . import models as m
 from ..info.models import Station
 from ..info.serializers import ShortStationSerializer, ShortProductSerializer
-from ..hr.serializers import (
-    ShortCustomerProfileSerializer, ShortStaffProfileSerializer
+from ..account.serializers import (
+    ShortUserSerializer
 )
 
 
@@ -478,8 +478,8 @@ class OrderSerializer(serializers.ModelSerializer):
         source='orderloadingstation_set', many=True, read_only=True
     )
 
-    assignee = ShortStaffProfileSerializer(read_only=True)
-    customer = ShortCustomerProfileSerializer(read_only=True)
+    assignee = ShortUserSerializer(read_only=True)
+    customer = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.Order

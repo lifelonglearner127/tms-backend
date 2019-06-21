@@ -111,6 +111,12 @@ cp deploy/uwsgi.service /lib/systemd/system/
 cp deploy/tms_backend.ini /etc/uwsgi/sites/
 ```
 
-4. Explanation
+4. Run redis & ASGI-MQTT Interface
+```
+docker run -p 6379:6379 -d redis:2.8
+python mqtt/asgimqtt.py -H openapi.huoyunren.com -p 1883 -u tj68yz -P WLJuAPk4zem6Ud2KsuA2D9gpyRb3oEkr -t tj68yz/location -i 2028LY/tj68yz/location -q 0 config.asgi:channel_layer
+```
+
+5. Explanation
 Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.
 Check the `deploy` folder

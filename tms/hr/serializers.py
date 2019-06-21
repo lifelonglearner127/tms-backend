@@ -1,8 +1,8 @@
-from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
+from ..account.models import User
 from ..account.serializers import ShortUserSerializer, MainUserSerializer
 from ..info.models import Product
 from ..info.serializers import ShortProductSerializer
@@ -154,6 +154,7 @@ class StaffProfileDataViewSerializer(serializers.ModelSerializer):
 
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 
+    user_id = serializers.CharField(source='user.id')
     name = serializers.CharField(source='user.name')
     mobile = serializers.CharField(source='user.mobile')
 
@@ -279,26 +280,39 @@ class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
 
 class RestRequestSerializer(serializers.ModelSerializer):
 
-    staff = ShortStaffProfileSerializer(read_only=True)
+    user = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.RestRequest
         fields = '__all__'
 
     def create(self, validated_data):
-        staff_id = self.context.pop('staff')
-        staff = get_object_or_404(m.StaffProfile, pk=staff_id)
+        try:
+            user_id = self.context.pop('user')
+            user = User.companymembers.get(pk=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({
+                'user': 'User does not exist'
+            })
+
         return m.RestRequest.objects.create(
-            staff=staff,
+            user=user,
             **validated_data
         )
 
     def update(self, instance, validated_data):
-        staff_id = self.context.pop('staff')
-        staff = get_object_or_404(m.StaffProfile, pk=staff_id)
+        user_id = self.context.pop('user')
+        try:
+            user_id = self.context.pop('user')
+            user = User.companymembers.get(pk=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({
+                'user': 'User does not exist'
+            })
+
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
-        instance.staff = staff
+        instance.user = user
         instance.save()
         return instance
 

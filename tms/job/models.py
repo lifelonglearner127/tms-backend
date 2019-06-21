@@ -3,7 +3,7 @@ from django.db import models
 from . import managers
 from ..core import constants as c
 from ..core.models import ApprovedModel
-from ..hr.models import StaffProfile
+from ..account.models import User
 from ..vehicle.models import Vehicle
 from ..order.models import Order, OrderProductDeliver
 from ..road.models import Route
@@ -26,13 +26,13 @@ class Job(models.Model):
     )
 
     driver = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE,
         related_name='jobs_as_driver'
     )
 
     escort = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE,
         related_name='jobs_as_escort',
     )
@@ -255,13 +255,13 @@ class ParkingRequest(ApprovedModel):
     )
 
     driver = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE,
         related_name='parking_requests_as_driver'
     )
 
     escort = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE,
         related_name='parking_requests_as_escort'
     )
@@ -275,7 +275,7 @@ class DriverChangeRequest(ApprovedModel):
     )
 
     new_driver = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE
     )
 
@@ -294,7 +294,7 @@ class EscortChangeRequest(ApprovedModel):
     )
 
     new_escort = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE
     )
 

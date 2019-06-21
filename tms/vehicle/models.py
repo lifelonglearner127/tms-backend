@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel, ApprovedModel
+from ..account.models import User
 
 
 class Vehicle(TimeStampedModel):
@@ -232,6 +233,11 @@ class VehicleMaintenanceRequest(ApprovedModel):
 
     vehicle = models.ForeignKey(
         Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    requester = models.ForeignKey(
+        User,
         on_delete=models.CASCADE
     )
 

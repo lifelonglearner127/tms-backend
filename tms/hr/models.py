@@ -219,8 +219,8 @@ class CustomerProfile(BasicContactModel):
 
 class RestRequest(ApprovedModel):
 
-    staff = models.ForeignKey(
-        StaffProfile,
+    user = models.ForeignKey(
+        User,
         on_delete=models.CASCADE
     )
 
@@ -235,4 +235,4 @@ class RestRequest(ApprovedModel):
 
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['staff', 'from_date', 'to_date']
+        unique_together = ['user', 'from_date', 'to_date']

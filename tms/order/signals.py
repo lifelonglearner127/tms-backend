@@ -6,10 +6,10 @@ from ..core.pushy import PushyAPI
 
 @receiver(post_save, sender=Job)
 def job_created(sender, instance, created, **kwargs):
-    if instance.driver.user.device_token is None:
+    if instance.driver.device_token is None:
         return
 
-    to = [instance.driver.user.device_token]
+    to = [instance.driver.device_token]
     data = {'message': 'New job is assgiend to you'}
     options = {
         'notification': {

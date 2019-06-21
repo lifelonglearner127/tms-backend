@@ -138,6 +138,21 @@ class VehicleMaintenanceRequestViewSet(ApproveViewSet):
     serializer_class = s.VehicleMaintenanceRequestSerializer
     data_view_serializer_class = s.VehicleMaintenanceRequestDataViewSerializer
 
+    def create(self, request):
+        data = request.data
+        data['requester'] = request.user.profile.id
+        serializer = self.serializer_class(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
 
 class VehicleModelAPIView(ChoicesView):
     """
@@ -151,3 +166,8 @@ class VehicleBrandAPIView(ChoicesView):
     APIView for returning vehicle brand
     """
     static_choices = c.VEHICLE_BRAND
+
+
+class VehicleMaintenanceRequestCategoriesAPIView(ChoicesView):
+
+    static_choices = c.VEHICLE_MAINTENANCE

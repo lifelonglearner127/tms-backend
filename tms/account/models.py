@@ -101,11 +101,12 @@ class User(AbstractBaseUser):
             [c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
 
     objects = UserManager()
-    admins = managers.UserAdminManager()
-    staffs = managers.UserStaffManager()
-    drivers = managers.UserDriverManager()
-    escorts = managers.UserEscortManager()
-    customers = managers.UserCustomerManager()
+    admins = managers.AdminUserManager()
+    staffs = managers.StaffUserManager()
+    drivers = managers.DriverUserManager()
+    escorts = managers.EscortUserManager()
+    customers = managers.CustomerUserManager()
+    companymembers = managers.CompanyMemberUserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []

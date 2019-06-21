@@ -59,6 +59,17 @@ class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
         model = m.VehicleMaintenanceRequest
         fields = '__all__'
 
+    def validate(self, data):
+        maintenance_from = data.get('maintenance_from', None)
+        maintenance_to = data.get('maintenance_to', None)
+
+        if maintenance_from > maintenance_to:
+            raise serializers.ValidationError({
+                'maintenance_to': 'Error'
+            })
+
+        return data
+
 
 class VehicleMaintenanceRequestDataViewSerializer(serializers.ModelSerializer):
 

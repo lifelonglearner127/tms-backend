@@ -1,9 +1,10 @@
 from django.db import models
+from django.db.models import Q
 
 from ..core import constants as c
 
 
-class UserAdminManager(models.Manager):
+class AdminUserManager(models.Manager):
     """
     Admin Model Manager
     """
@@ -11,7 +12,7 @@ class UserAdminManager(models.Manager):
         return super().get_queryset().filter(role=c.USER_ROLE_ADMIN)
 
 
-class UserStaffManager(models.Manager):
+class StaffUserManager(models.Manager):
     """
     Staff Model Manager
     """
@@ -21,7 +22,7 @@ class UserStaffManager(models.Manager):
         )
 
 
-class UserDriverManager(models.Manager):
+class DriverUserManager(models.Manager):
     """
     Driver Model Manager
     """
@@ -29,7 +30,7 @@ class UserDriverManager(models.Manager):
         return super().get_queryset().filter(role=c.USER_ROLE_DRIVER)
 
 
-class UserEscortManager(models.Manager):
+class EscortUserManager(models.Manager):
     """
     Escort Model Manager
     """
@@ -37,9 +38,15 @@ class UserEscortManager(models.Manager):
         return super().get_queryset().filter(role=c.USER_ROLE_ESCORT)
 
 
-class UserCustomerManager(models.Manager):
+class CustomerUserManager(models.Manager):
     """
     Customer Model Manager
     """
     def get_queryset(self):
         return super().get_queryset().filter(role=c.USER_ROLE_CUSTOMER)
+
+
+class CompanyMemberUserManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(~Q(role=c.USER_ROLE_CUSTOMER))

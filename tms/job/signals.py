@@ -23,9 +23,9 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
         message=message
     )
 
-    if instance.driver.user.channel_name is not None:
+    if instance.driver.channel_name is not None:
         async_to_sync(channel_layer.send)(
-            instance.driver.user.channel_name,
+            instance.driver.channel_name,
             {
                 'type': 'notify',
                 'msg_type': c.DRIVER_NOTIFICATION_NEW_JOB,

@@ -204,7 +204,7 @@ class CustomerProfileViewSet(TMSViewSet):
         )
 
 
-class RestRequestCategoriesView(ChoicesView):
+class RestRequestCategoriesAPIView(ChoicesView):
     """
     APIView for returning product categories
     """

@@ -1,11 +1,11 @@
 from django.db import models
-from ..hr.models import StaffProfile
+from ..account.models import User
 
 
 class DriverJobNotification(models.Model):
 
     driver = models.ForeignKey(
-        StaffProfile,
+        User,
         on_delete=models.CASCADE,
         related_name='notifications'
     )
@@ -18,5 +18,5 @@ class DriverJobNotification(models.Model):
 
     def __str__(self):
         return 'Meessage to {}'.format(
-            self.driver.user.username
+            self.user.username
         )
