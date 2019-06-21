@@ -145,15 +145,15 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def progress_jobs(self, request):
-        job = request.user.driver_profile.jobs.filter(
+        job = request.user.jobs_as_driver.filter(
             ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
                 Q(progress=c.JOB_PROGRESS_COMPLETE))
         ).first()
 
-        if job is None:
-            job = request.user.driver_profile.jobs.filter(
-                progress=c.JOB_PROGRESS_NOT_STARTED
-            ).first()
+        # if job is None:
+        #     job = request.user.driver_profile.jobs.filter(
+        #         progress=c.JOB_PROGRESS_NOT_STARTED
+        #     ).first()
 
         if job is not None:
             ret = s.JobDataSerializer(job).data

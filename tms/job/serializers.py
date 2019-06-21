@@ -4,13 +4,13 @@ from rest_framework import serializers
 
 from . import models as m
 from ..core.utils import format_datetime
+from ..account.serializers import ShortUserSerializer
 from ..order.models import OrderProductDeliver
 from ..order.serializers import (
     ShortOrderSerializer, ShortOrderProductDeliverSerializer,
     ShortStationSerializer,
 )
 from ..vehicle.serializers import ShortVehicleSerializer
-from ..hr.serializers import ShortStaffProfileSerializer
 from ..road.serializers import RouteDataSerializer, ShortRouteSerializer
 
 
@@ -41,8 +41,8 @@ class MissionSerializer(serializers.ModelSerializer):
 
 class ShortJobSerializer(serializers.ModelSerializer):
 
-    driver = ShortStaffProfileSerializer()
-    escort = ShortStaffProfileSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
     vehicle = ShortVehicleSerializer()
     route = ShortRouteSerializer()
     missions = ShortMissionSerializer(
@@ -82,8 +82,8 @@ class JobSerializer(serializers.ModelSerializer):
 class JobDataSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
-    driver = ShortStaffProfileSerializer()
-    escort = ShortStaffProfileSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
     route = RouteDataSerializer()
     missions = ShortMissionSerializer(
         source='mission_set', many=True, read_only=True
@@ -125,8 +125,8 @@ class JobMileageSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    driver = ShortStaffProfileSerializer()
-    escort = ShortStaffProfileSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
 
     class Meta:
         model = m.Job
@@ -198,8 +198,8 @@ class JobTimeSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    driver = ShortStaffProfileSerializer()
-    escort = ShortStaffProfileSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
     loading_station_time = LoadingStationTimeField(source='*')
     quality_station_time = QualityStationTimeField(source='*')
     unloading_station_time = UnLoadingStationTimeField(source='mission_set')
@@ -284,8 +284,8 @@ class ParkingRequestSerializer(serializers.ModelSerializer):
 class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
-    driver = ShortStaffProfileSerializer()
-    escort = ShortStaffProfileSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
 
     class Meta:
         model = m.ParkingRequest
@@ -305,7 +305,7 @@ class DriverChangeRequestSerializer(serializers.ModelSerializer):
 class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
 
     job = ShortJobSerializer()
-    new_driver = ShortStaffProfileSerializer()
+    new_driver = ShortUserSerializer()
 
     class Meta:
         model = m.DriverChangeRequest
@@ -325,7 +325,7 @@ class EscortChangeRequestSerializer(serializers.ModelSerializer):
 class EscortChangeRequestDataViewSerializer(serializers.ModelSerializer):
 
     job = ShortJobSerializer()
-    new_escort = ShortStaffProfileSerializer()
+    new_escort = ShortUserSerializer()
 
     class Meta:
         model = m.EscortChangeRequest
