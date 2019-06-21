@@ -82,17 +82,39 @@ class JobSerializer(serializers.ModelSerializer):
 
 class JobProgressBarField(serializers.Field):
 
-    def to_representation(self, stations):
+    def to_representation(self, instance):
         ret = []
-        ret.append({'title': '出发'})
-        for station in stations:
-            ret.append({'title': '赶往' + station.name})
-            ret.append({'title': '出发' + station.name})
-            ret.append({'title': '出发' + station.name})
-            ret.append({'title': '出发' + station.name})
+        if instance.route is not None:
+            ret.append({'title': '赶往装货地'})
+            ret.append({'title': '到达等待装货'})
+            ret.append({'title': '开始装货'})
+            ret.append({'title': '录入装货数量'})
+            ret.append({'title': '赶往质检地'})
+            ret.append({'title': '到达等待质检'})
+            ret.append({'title': '开始质检'})
+            ret.append({'title': '录入质检量'})
 
-        ret.append({'title': '完成'})
+            unloading_stations = instance.route.stations[2:]
+            for station in unloading_stations:
+                ret.append({'title': '赶往卸货地'})
+                ret.append({'title': '到达等待卸货'})
+                ret.append({'title': '开始卸货'})
+                ret.append({'title': '录入卸货数量'})
+
+            ret.append({'title': '完成'})
         return ret
+
+
+class StationField(serializers.ListField):
+
+    def to_representation(self, instance):
+        if instance.route is not None:
+            serializer = ShortStationSerializer(
+                instance.route.stations, many=True
+            )
+            return serializer.data
+        else:
+            return []
 
 
 class JobDataViewSerializer(serializers.ModelSerializer):
@@ -100,13 +122,11 @@ class JobDataViewSerializer(serializers.ModelSerializer):
     vehicle = ShortVehicleSerializer()
     driver = ShortUserSerializer()
     escort = ShortUserSerializer()
-    stations = ShortStationSerializer(
-        source='route.stations', many=True
-    )
+    stations = StationField(source='*')
     products = ShortProductSerializer(
         source='order.products', many=True
     )
-    progress_bar = JobProgressBarField(source='route.stations')
+    progress_bar = JobProgressBarField(source='*')
     progress_msg = serializers.CharField(source='get_progress_display')
 
     class Meta:
