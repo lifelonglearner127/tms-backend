@@ -49,7 +49,7 @@ def load_data_from_db(db_url):
 
         dot_query = """
             SELECT id, longitude, latitude, notification_message
-            FROM road_point
+            FROM info_station
             WHERE category='{}'
         """
 
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     channel_layer = get_channel_layer(args.channel_layer)
 
     # load black dots from db into local variables
-    load_data_from_db(db_url)
+    # load_data_from_db(db_url)
 
     asgi_client = ASGIMQTTClient(
         args.host, args.port, args.id, args.username,
