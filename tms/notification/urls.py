@@ -5,9 +5,9 @@ from .import views
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
-    r'driver/job/notifcations',
-    views.DriverJobNotificationViewSet,
-    base_name='driver-job-notifications'
+    r'notifications',
+    views.NotificationViewSet,
+    base_name='notifications'
 )
 
 urlpatterns = [

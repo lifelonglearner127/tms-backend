@@ -7,7 +7,7 @@ from asgiref.sync import async_to_sync
 from . import models as m
 from ..account.models import User
 from ..core import constants as c
-from ..notification.models import DriverJobNotification
+from ..notification.models import Notification
 
 
 channel_layer = get_channel_layer()
@@ -18,9 +18,10 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
     message = "A new mission is assigned to you."\
         "Please use {}".format(instance.vehicle)
 
-    DriverJobNotification.objects.create(
-        driver=instance.driver,
-        message=message
+    Notification.objects.create(
+        user=instance.driver,
+        message=message,
+        msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
     if instance.driver.channel_name is not None:

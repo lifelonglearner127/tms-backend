@@ -21,10 +21,6 @@ class IsDriverOrEscortUser(permissions.BasePermission):
     Permission to only allow admin and staff roles
     """
     def has_permission(self, request, view):
-        return request.user and request.user.role in [
+        return request.user.is_authenticated and request.user.role in [
             c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
         ]
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.driver_profile and\
-            request.user.driver_profile == obj.driver

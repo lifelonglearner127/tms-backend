@@ -2,10 +2,15 @@ from rest_framework import serializers
 from . import models as m
 
 
-class DriverJobNotificationSerializer(serializers.ModelSerializer):
+class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = m.DriverJobNotification
-        fields = (
-            'id', 'message', 'is_read'
-        )
+        model = m.Notification
+        fields = '__all__'
+
+
+class ReadNotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Notification
+        fields = ('is_read', )
