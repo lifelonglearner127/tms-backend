@@ -234,4 +234,5 @@ class RestRequest(ApprovedModel):
     to_date = models.DateField()
 
     class Meta:
+        ordering = ['approved', '-approved_time', '-request_time']
         unique_together = ['staff', 'from_date', 'to_date']
