@@ -224,8 +224,9 @@ class RestRequest(ApprovedModel):
         on_delete=models.CASCADE
     )
 
-    category = models.CharField(
-        max_length=1
+    category = models.PositiveIntegerField(
+        choices=c.REST_REQUEST_CATEGORY,
+        default=c.REST_REQUEST_ILL
     )
 
     from_date = models.DateField()

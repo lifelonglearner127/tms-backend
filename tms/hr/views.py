@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from . import models as m
 from . import serializers as s
 from ..core import constants as c
-from ..core.views import ApproveViewSet, TMSViewSet
+from ..core.views import ApproveViewSet, TMSViewSet, ChoicesView
 
 
 class DepartmentViewSet(TMSViewSet):
@@ -33,7 +33,50 @@ class RestRequestViewSet(ApproveViewSet):
 
     queryset = m.RestRequest.objects.all()
     serializer_class = s.RestRequestSerializer
-    data_view_serializer_class = s.RestRequestDataViewSerializer
+
+    def create(self, request):
+        staff_id = request.data.pop('staff', None)
+
+        if staff_id is None:
+            staff_id = request.user.profile.id
+
+        context = {
+            'staff': staff_id
+        }
+        print(staff_id)
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        staff_id = request.data.pop('staff', None)
+        if staff_id is None:
+            staff_id = request.user.id
+
+        context = {
+            'staff': staff_id
+        }
+
+        serializer = self.serializer_class(
+            instance, data=request.data, context=context, partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class StaffProfileViewSet(TMSViewSet):
@@ -96,6 +139,22 @@ class StaffProfileViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='short-company-member')
+    def short_company_member(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            self.get_queryset().filter(
+                user__role__in=[
+                    c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF,
+                    c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+                ]
+            ),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class CustomerProfileViewSet(TMSViewSet):
 
@@ -143,3 +202,10 @@ class CustomerProfileViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class RestRequestCategoriesView(ChoicesView):
+    """
+    APIView for returning product categories
+    """
+    static_choices = c.REST_REQUEST_CATEGORY

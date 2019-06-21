@@ -281,6 +281,13 @@ PERMISSION_TYPE = (
     (PERMISSION_TYPE_WRITE, 'Write Permission')
 )
 
+REST_REQUEST_ILL = 0
+REST_REQUEST_PERSONAL = 1
+REST_REQUEST_CATEGORY = (
+    (REST_REQUEST_ILL, '病假'),
+    (REST_REQUEST_PERSONAL, '私事'),
+)
+
 
 # notification app
 # ----------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
@@ -277,15 +278,30 @@ class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
 
 class RestRequestSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.RestRequest
-        fields = '__all__'
-
-
-class RestRequestDataViewSerializer(serializers.ModelSerializer):
-
-    staff = ShortStaffProfileSerializer()
+    staff = ShortStaffProfileSerializer(read_only=True)
 
     class Meta:
         model = m.RestRequest
         fields = '__all__'
+
+    def create(self, validated_data):
+        staff_id = self.context.pop('staff')
+        staff = get_object_or_404(m.StaffProfile, pk=staff_id)
+        return m.RestRequest.objects.create(
+            staff=staff,
+            **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        staff_id = self.context.pop('staff')
+        staff = get_object_or_404(m.StaffProfile, pk=staff_id)
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+        instance.staff = staff
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['category_display'] = instance.get_category_display()
+        return ret

@@ -38,4 +38,5 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'options/rest-request-categories', v.RestRequestCategoriesView.as_view())
 ]
