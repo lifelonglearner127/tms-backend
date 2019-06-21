@@ -46,6 +46,14 @@ class Order(TimeStampedModel):
         through_fields=('order', 'loading_station')
     )
 
+    @property
+    def products(self):
+        products = []
+        for order_loading_station in self.orderloadingstation_set.all():
+            products.extend(order_loading_station.products.all())
+
+        return products
+
     objects = models.Manager()
     pendings = managers.PendingOrderManager()
     inprogress = managers.InProgressOrderManager()

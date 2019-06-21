@@ -5,23 +5,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..core import constants as c
-from ..core.views import ApproveViewSet
+from ..core.views import ApproveViewSet, TMSViewSet
 from ..core.permissions import IsDriverOrEscortUser
 from . import models as m
 from . import serializers as s
 
 
-class JobViewSet(viewsets.ModelViewSet):
+class JobViewSet(TMSViewSet):
     """
     """
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
-
-    def get_serializer_class(self):
-        if self.action in ['create', 'update']:
-            return s.JobSerializer
-        else:
-            return s.JobDataSerializer
+    data_view_serializer_class = s.JobDataViewSerializer
 
     def create(self, request):
         jobs = []
@@ -128,7 +123,7 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def previous_jobs(self, request):
-        serializer = s.JobDataSerializer(
+        serializer = s.JobDataViewSerializer(
             request.user.jobs_as_driver.filter(
                 finished_on__lte=datetime.now()
             ),
@@ -156,7 +151,7 @@ class JobViewSet(viewsets.ModelViewSet):
         #     ).first()
 
         if job is not None:
-            ret = s.JobDataSerializer(job).data
+            ret = s.JobDataViewSerializer(job).data
         else:
             ret = {}
 
@@ -170,7 +165,7 @@ class JobViewSet(viewsets.ModelViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def future_jobs(self, request):
-        serializer = s.JobDataSerializer(
+        serializer = s.JobDataViewSerializer(
             request.user.jobs_as_driver.filter(
                 progress=c.JOB_PROGRESS_NOT_STARTED
             ),

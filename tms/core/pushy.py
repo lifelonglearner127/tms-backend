@@ -25,4 +25,5 @@ class PushyAPI:
         except requests.exceptions.HTTPError as e:
             err_str = "Pushy API returned HTTP error " + str(e.code) + \
                 ": " + e.read()
+            print(err_str)
             # TODO logging instead of printing

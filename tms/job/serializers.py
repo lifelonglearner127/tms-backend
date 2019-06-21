@@ -10,8 +10,9 @@ from ..order.serializers import (
     ShortOrderSerializer, ShortOrderProductDeliverSerializer,
     ShortStationSerializer,
 )
+from ..info.serializers import ShortProductSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
-from ..road.serializers import RouteDataSerializer, ShortRouteSerializer
+from ..road.serializers import ShortRouteSerializer
 
 
 class ShortMissionSerializer(serializers.ModelSerializer):
@@ -79,35 +80,42 @@ class JobSerializer(serializers.ModelSerializer):
         return job
 
 
-class JobDataSerializer(serializers.ModelSerializer):
+class JobProgressBarField(serializers.Field):
+
+    def to_representation(self, stations):
+        ret = []
+        ret.append({'title': '出发'})
+        for station in stations:
+            ret.append({'title': '赶往' + station.name})
+            ret.append({'title': '出发' + station.name})
+            ret.append({'title': '出发' + station.name})
+            ret.append({'title': '出发' + station.name})
+
+        ret.append({'title': '完成'})
+        return ret
+
+
+class JobDataViewSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
     driver = ShortUserSerializer()
     escort = ShortUserSerializer()
-    route = RouteDataSerializer()
-    missions = ShortMissionSerializer(
-        source='mission_set', many=True, read_only=True
+    stations = ShortStationSerializer(
+        source='route.stations', many=True
     )
-    loading_station = ShortStationSerializer(
-        source='route.loading_station', read_only=True
+    products = ShortProductSerializer(
+        source='order.products', many=True
     )
-    quality_station = ShortStationSerializer(
-        source='route.quality_station', read_only=True
-    )
+    progress_bar = JobProgressBarField(source='route.stations')
     progress_msg = serializers.CharField(source='get_progress_display')
-    mission_count = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'loading_station',
-            'quality_station', 'route', 'missions', 'progress',
-            'progress_msg', 'total_weight', 'start_due_time',
-            'finish_due_time', 'mission_count', 'is_paid'
+            'id', 'vehicle', 'driver', 'escort', 'stations', 'products',
+            'progress', 'progress_msg', 'total_weight', 'progress_bar',
+            'start_due_time', 'finish_due_time'
         )
-
-    def get_mission_count(self, obj):
-        return obj.missions.all().count()
 
 
 class JobProgressSerializer(serializers.ModelSerializer):
