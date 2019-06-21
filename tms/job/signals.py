@@ -1,3 +1,4 @@
+import json
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -30,7 +31,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
             instance.driver.channel_name,
             {
                 'type': 'notify',
-                'data': NotificationSerializer(notification).data
+                'data': json.dumps(NotificationSerializer(notification).data)
             }
         )
 
