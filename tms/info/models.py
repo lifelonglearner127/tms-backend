@@ -119,11 +119,18 @@ class Station(BasicContactModel):
         default=c.PRICE_VARY_DURATION_UNIT_MONTH
     )
 
+    notification_message = models.TextField(
+        null=True,
+        blank=True
+    )
+
     objects = models.Manager()
-    loading = managers.LoadingStationManager()
-    unloading = managers.UnLoadingStationManager()
-    quality = managers.QualityStationManager()
-    oil = managers.OilStationManager()
+    loading_stations = managers.LoadingStationManager()
+    unloading_stations = managers.UnLoadingStationManager()
+    quality_stations = managers.QualityStationManager()
+    work_stations = managers.WorkStationManager()
+    oil_stations = managers.OilStationManager()
+    black_dots = managers.BlackDotManager()
 
     class Meta:
         unique_together = ('longitude', 'latitude')

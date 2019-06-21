@@ -10,12 +10,6 @@ router.register(
     base_name='route'
 )
 
-router.register(
-    r'points',
-    v.PointViewSet,
-    base_name='path'
-)
-
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]

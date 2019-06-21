@@ -1,25 +1,8 @@
 from rest_framework import serializers
 
 from . import models as m
-
-
-class ShortPointSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Point
-        fields = ('id', 'name')
-
-    def to_representation(self, point):
-        ret = super().to_representation(point)
-        ret['lnglat'] = [point.longitude, point.latitude]
-        return ret
-
-
-class PointSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Point
-        fields = '__all__'
+from ..info.models import Station
+from ..info.serializers import ShortStationSerializer
 
 
 class ShortRouteSerializer(serializers.ModelSerializer):
@@ -41,10 +24,10 @@ class RouteSerializer(serializers.ModelSerializer):
 class PathField(serializers.ListField):
 
     def to_representation(self, value):
-        paths = m.Point.objects.filter(id__in=value)
+        paths = Station.work_stations.filter(id__in=value)
         paths = dict([(point.id, point) for point in paths])
 
-        serializer = ShortPointSerializer(
+        serializer = ShortStationSerializer(
             [paths[id] for id in value],
             many=True
         )

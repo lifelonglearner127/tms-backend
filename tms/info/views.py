@@ -47,7 +47,7 @@ class StationViewSet(StaffViewSet):
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):
         page = self.paginate_queryset(
-            m.Station.loading.all(),
+            m.Station.loading_stations.all(),
         )
 
         serializer = s.WorkStationSerializer(page, many=True)
@@ -57,7 +57,7 @@ class StationViewSet(StaffViewSet):
     @action(detail=False, url_path='unloading-stations')
     def unloading_stations(self, request):
         page = self.paginate_queryset(
-            m.Station.unloading.all(),
+            m.Station.unloading_stations.all(),
         )
 
         serializer = s.WorkStationSerializer(page, many=True)
@@ -67,7 +67,7 @@ class StationViewSet(StaffViewSet):
     @action(detail=False, url_path='quality-stations')
     def quality_stations(self, request):
         page = self.paginate_queryset(
-            m.Station.quality.all(),
+            m.Station.quality_stations.all(),
         )
 
         serializer = s.WorkStationSerializer(page, many=True)
@@ -77,7 +77,7 @@ class StationViewSet(StaffViewSet):
     @action(detail=False, url_path='oil-stations')
     def oil_stations(self, request):
         page = self.paginate_queryset(
-            m.Station.oil.all(),
+            m.Station.oil_stations.all(),
         )
 
         serializer = s.OilStationSerializer(page, many=True)

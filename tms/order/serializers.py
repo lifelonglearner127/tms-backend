@@ -164,7 +164,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                     'loading_station',
                     None
                 )
-                loading_station = Station.loading.get(
+                loading_station = Station.loading_stations.get(
                     pk=loading_station_id
                 )
 
@@ -172,7 +172,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                 quality_station_id = loading_station_data.get(
                     'quality_station', None
                 )
-                quality_station = Station.quality.get(
+                quality_station = Station.quality_stations.get(
                     pk=quality_station_id
                 )
 
@@ -216,7 +216,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                         unloading_station_id = unloading_station_data.get(
                             'unloading_station', None
                         )
-                        unloading_station = Station.unloading.get(
+                        unloading_station = Station.unloading_stations.get(
                             pk=unloading_station_id
                         )
                         weight = unloading_station_data.get('weight', 0)
@@ -243,10 +243,10 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
         for loading_station_data in loading_stations_data:
-            loading_station = Station.loading.get(
+            loading_station = Station.loading_stations.get(
                 pk=loading_station_data.pop('loading_station')
             )
-            quality_station = Station.quality.get(
+            quality_station = Station.quality_stations.get(
                 pk=loading_station_data.pop('quality_station')
             )
             products_data = loading_station_data.pop('products')
@@ -273,7 +273,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                 )
 
                 for unloading_station_data in unloading_stations_data:
-                    unloading_station = Station.unloading.get(
+                    unloading_station = Station.unloading_stations.get(
                         pk=unloading_station_data.pop('unloading_station')
                     )
                     m.OrderProductDeliver.objects.create(
@@ -346,7 +346,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                     'loading_station',
                     None
                 )
-                loading_station = Station.loading.get(
+                loading_station = Station.loading_stations.get(
                     pk=loading_station_id
                 )
 
@@ -354,7 +354,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                 quality_station_id = loading_station_data.get(
                     'quality_station', None
                 )
-                quality_station = Station.quality.get(
+                quality_station = Station.quality_stations.get(
                     pk=quality_station_id
                 )
 
@@ -398,7 +398,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                         unloading_station_id = unloading_station_data.get(
                             'unloading_station', None
                         )
-                        unloading_station = Station.unloading.get(
+                        unloading_station = Station.unloading_stations.get(
                             pk=unloading_station_id
                         )
                         weight = unloading_station_data.get('weight', 0)
@@ -420,10 +420,10 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                     })
 
         for loading_station_data in loading_stations_data:
-            loading_station = Station.loading.get(
+            loading_station = Station.loading_stations.get(
                 pk=loading_station_data.pop('loading_station')
             )
-            quality_station = Station.quality.get(
+            quality_station = Station.quality_stations.get(
                 pk=loading_station_data.pop('quality_station')
             )
             products_data = loading_station_data.pop('products')
@@ -450,7 +450,7 @@ class OrderCreateUpdateSerializer(serializers.ModelSerializer):
                 )
 
                 for unloading_station_data in unloading_stations_data:
-                    unloading_station = Station.unloading.get(
+                    unloading_station = Station.unloading_stations.get(
                         pk=unloading_station_data.pop('unloading_station')
                     )
                     m.OrderProductDeliver.objects.create(
