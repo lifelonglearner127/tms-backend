@@ -8,6 +8,7 @@ from . import models as m
 from ..account.models import User
 from ..core import constants as c
 from ..notification.models import Notification
+from ..notification.serializers import NotificationSerializer
 
 
 channel_layer = get_channel_layer()
@@ -18,7 +19,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
     message = "A new mission is assigned to you."\
         "Please use {}".format(instance.vehicle)
 
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user=instance.driver,
         message=message,
         msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
@@ -29,8 +30,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
             instance.driver.channel_name,
             {
                 'type': 'notify',
-                'msg_type': c.DRIVER_NOTIFICATION_NEW_JOB,
-                'msg': message
+                'data': NotificationSerializer(notification).data
             }
         )
 

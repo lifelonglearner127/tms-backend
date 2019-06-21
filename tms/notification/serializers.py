@@ -6,7 +6,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Notification
-        fields = '__all__'
+        exclude = ('user', )
 
 
 class ReadNotificationSerializer(serializers.ModelSerializer):

@@ -22,8 +22,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
 
     def notify(self, event):
         self.send_json({
-            'content': event['msg_type'],
-            'msg': event['msg']
+            'content': event['data']
         })
 
 
