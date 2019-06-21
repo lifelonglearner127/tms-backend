@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import ShortUserSerializer, MainUserSerializer
 from ..info.models import Product
 from ..info.serializers import ShortProductSerializer
 
@@ -167,6 +167,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.CustomerProfile
         fields = '__all__'
+        read_only_fields = ('user', 'products')
 
     def create(self, validated_data):
         user_data = self.context.get('user', None)
@@ -264,6 +265,7 @@ class CustomerPaymentMethodField(serializers.Field):
 
 class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
 
+    user = MainUserSerializer()
     products = ShortProductSerializer(many=True)
     associated_with = ShortStaffProfileSerializer()
     payment_method = CustomerPaymentMethodField(source='*')

@@ -1,8 +1,10 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import models as m
 from . import serializers as s
+from ..core import constants as c
 from ..core.views import ApproveViewSet, TMSViewSet
 
 
@@ -76,6 +78,19 @@ class StaffProfileViewSet(TMSViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='short-staff')
+    def short_staff(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            self.get_queryset().filter(
+                user__role__in=[c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
+            ),
+            many=True
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK

@@ -45,7 +45,9 @@ class VehiclePositionSerializer(serializers.Serializer):
     speed = serializers.SerializerMethodField()
 
     def get_lnglat(self, obj):
-        return [float(obj['data']['loc']['lng']), float(obj['data']['loc']['lat'])]
+        return [
+            float(obj['data']['loc']['lng']), float(obj['data']['loc']['lat'])
+        ]
 
     def get_speed(self, obj):
         return [int(obj['data']['loc']['speed'])]
