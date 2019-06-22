@@ -22,7 +22,7 @@ router.register(
 )
 router.register(
     r'bill',
-    v.BillDocument,
+    v.BillDocumentViewSet,
     base_name='bill'
 )
 

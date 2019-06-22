@@ -32,7 +32,7 @@ class FuelCardViewSet(TMSViewSet):
     data_view_serializer_class = s.FuelCardDataViewSerializer
 
 
-class BillDocument(TMSViewSet):
+class BillDocumentViewSet(TMSViewSet):
 
     queryset = m.BillDocument.objects.all()
     serializer_class = s.BillDocumentSerializer
