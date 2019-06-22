@@ -26,6 +26,8 @@ djangorestframework-camel-case==1.0.3
 drf-nested-routers==0.91
 entrypoints==0.3
 flake8==3.7.7
+geographiclib==1.49
+geopy==1.20.0
 gunicorn==19.9.0
 hiredis==1.0.0
 hyperlink==19.0.0
@@ -46,6 +48,7 @@ pyflakes==2.1.1
 PyHamcrest==1.9.0
 PyJWT==1.7.1
 pytz==2019.1
+redis==3.2.1
 requests==2.22.0
 simplejson==3.16.0
 six==1.12.0
