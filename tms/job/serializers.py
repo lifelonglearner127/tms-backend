@@ -86,6 +86,7 @@ class JobProgressBarField(serializers.Field):
     def to_representation(self, instance):
         ret = []
         if instance.route is not None:
+            ret.append({'title': '出发'})
             ret.append({'title': '赶往装货地'})
             ret.append({'title': '到达等待装货'})
             ret.append({'title': '开始装货'})
@@ -97,10 +98,10 @@ class JobProgressBarField(serializers.Field):
 
             unloading_stations = instance.route.stations[2:]
             for station in unloading_stations:
-                ret.append({'title': '赶往卸货地'})
-                ret.append({'title': '到达等待卸货'})
-                ret.append({'title': '开始卸货'})
-                ret.append({'title': '录入卸货数量'})
+                ret.append({'title': '赶往卸货地:' + station.name})
+                ret.append({'title': '到达等待卸货:' + station.name})
+                ret.append({'title': '开始卸货:' + station.name})
+                ret.append({'title': '录入卸货数量:' + station.name})
 
             ret.append({'title': '完成'})
         return ret
