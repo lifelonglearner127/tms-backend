@@ -1,6 +1,7 @@
 from django.db import models
 
 from ..core import constants as c
+from ..core.models import CreatedTimeModel
 from ..account.models import User
 from ..hr.models import Department
 from ..job.models import Job
@@ -88,7 +89,7 @@ class OrderPayment(models.Model):
     )
 
 
-class BillDocument(models.Model):
+class BillDocument(CreatedTimeModel):
 
     user = models.ForeignKey(
         User,
@@ -127,6 +128,15 @@ class BillDocument(models.Model):
     category = models.PositiveIntegerField(
         choices=c.BILL_TYPE,
         default=c.BILL_FROM_LOADING_STATION
+    )
+
+    sub_category = models.PositiveIntegerField(
+        default=0
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
     )
 
     def __str__(self):

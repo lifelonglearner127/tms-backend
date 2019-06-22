@@ -1,16 +1,17 @@
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..g7.interfaces import G7Interface
-from ..core.views import StaffViewSet, ChoicesView, ApproveViewSet
+from ..core.views import TMSViewSet, ChoicesView, ApproveViewSet
 from ..core import constants as c
 from . import serializers as s
 from . import models as m
 
 
-class VehicleViewSet(StaffViewSet):
+class VehicleViewSet(TMSViewSet):
     """
     Viewset for Vehicle
     """
@@ -125,6 +126,29 @@ class VehicleViewSet(StaffViewSet):
             'gpsno': data.get('gpsno', ''),
             'location': data['loc']['address'],
             'speed': data['loc']['speed']
+        }
+        return Response(
+            ret,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="current-position")
+    def current_position(self, request):
+        plate_num = self.request.query_params.get('plateNum')
+        get_object_or_404(m.Vehicle, plate_num=plate_num)
+        queries = {
+            'plate_num': plate_num,
+            'fields': 'loc'
+        }
+
+        data = G7Interface.call_g7_http_interface(
+            'VEHICLE_STATUS_INQUIRY',
+            queries=queries
+        )
+
+        ret = {
+            'lnglat': [data['loc']['lng'], data['loc']['lat']],
+            'speed': data['loc']['lng']
         }
         return Response(
             ret,

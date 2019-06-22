@@ -135,7 +135,7 @@ class JobDataViewSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations', 'products',
             'progress', 'progress_msg', 'total_weight', 'progress_bar',
-            'start_due_time', 'finish_due_time'
+            'start_due_time', 'finish_due_time', 'route'
         )
 
 
