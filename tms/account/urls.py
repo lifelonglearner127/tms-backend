@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-from django.urls import path
 
 from rest_framework_nested import routers
 
@@ -12,6 +11,8 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    path('auth/obtain_token', v.ObtainJWTAPIView.as_view()),
-    path('auth/verify_token', v.VerifyJWTAPIView.as_view()),
+    url(r'auth/obtain_token', v.ObtainJWTAPIView.as_view()),
+    url(r'auth/verify_token', v.VerifyJWTAPIView.as_view()),
+    url(r'options/user-role', v.UserRoleAPIView.as_view()),
+    url(r'options/company-member-role', v.CompanyMemberRoleAPIView.as_view())
 ]

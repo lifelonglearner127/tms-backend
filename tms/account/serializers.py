@@ -181,3 +181,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['role'] = {
+            'value': instance.role,
+            'text': instance.get_role_display()
+        }
+
+        return ret

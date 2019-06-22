@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from . import models as m
 from ..account.models import User
-from ..account.serializers import ShortUserSerializer, MainUserSerializer
+from ..account.serializers import (
+    ShortUserSerializer, MainUserSerializer, UserSerializer
+)
 from ..info.models import Product
 from ..info.serializers import ShortProductSerializer
 
@@ -141,7 +143,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
 class StaffProfileDataViewSerializer(serializers.ModelSerializer):
 
-    user = ShortUserSerializer()
+    user = UserSerializer()
     department = ShortDepartmentSerializer()
     position = ShortPositionSerializer()
     driver_license = DriverLicenseSerializer()

@@ -142,12 +142,7 @@ class StaffProfileViewSet(TMSViewSet):
     @action(detail=False, url_path='short-company-member')
     def short_company_member(self, request):
         serializer = s.ShortStaffProfileSerializer(
-            self.get_queryset().filter(
-                user__role__in=[
-                    c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF,
-                    c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
-                ]
-            ),
+            self.get_queryset(),
             many=True
         )
         return Response(

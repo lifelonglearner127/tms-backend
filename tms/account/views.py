@@ -2,7 +2,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from ..core.views import TMSViewSet
+from ..core import constants as c
+from ..core.serializers import ChoiceSerializer
+from ..core.views import TMSViewSet, ChoicesView
 from . import models as m
 from . import serializers as s
 
@@ -50,3 +52,32 @@ class UserViewSet(TMSViewSet):
     """
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
+
+
+class UserRoleAPIView(ChoicesView):
+    static_choices = c.USER_ROLE
+
+
+class CompanyMemberRoleAPIView(ChoicesView):
+
+    def get(self, request):
+        choices = []
+        user_roles = list(c.USER_ROLE)
+        staff_roles = user_roles[:-1]
+        for (slug, name) in staff_roles:
+            choices.append(
+                {
+                    'value': slug,
+                    'text': name
+                }
+            )
+
+        serializer = ChoiceSerializer(
+            choices,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
