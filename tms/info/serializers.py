@@ -44,6 +44,20 @@ class ShortStationSerializer(serializers.ModelSerializer):
         )
 
 
+class StationPointSerializer(serializers.ModelSerializer):
+
+    lnglat = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'lnglat',
+        )
+
+    def get_lnglat(self, obj):
+        return [obj.longitude, obj.latitude]
+
+
 class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from . import models as m
 from ..info.models import Station
-from ..info.serializers import ShortStationSerializer
+from ..info.serializers import ShortStationSerializer, StationPointSerializer
 
 
 class ShortRouteSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class RouteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PathField(serializers.ListField):
+class PathStationNameField(serializers.ListField):
 
     def to_representation(self, value):
         paths = Station.work_stations.filter(id__in=value)
@@ -34,10 +34,34 @@ class PathField(serializers.ListField):
         return serializer.data
 
 
-class RouteDataSerializer(serializers.ModelSerializer):
+class RouteDataViewSerializer(serializers.ModelSerializer):
 
-    path = PathField()
+    path = PathStationNameField()
 
     class Meta:
         model = m.Route
         fields = '__all__'
+
+
+class PathLngLatField(serializers.ListField):
+
+    def to_representation(self, value):
+        paths = Station.objects.filter(id__in=value)
+        paths = dict([(point.id, point) for point in paths])
+
+        serializer = StationPointSerializer(
+            [paths[id] for id in value],
+            many=True
+        )
+        return serializer.data
+
+
+class RoutePointSerializer(serializers.ModelSerializer):
+
+    path = PathLngLatField()
+
+    class Meta:
+        model = m.Route
+        fields = (
+            'id', 'path'
+        )
