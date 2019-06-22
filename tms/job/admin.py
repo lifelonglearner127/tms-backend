@@ -13,11 +13,6 @@ class MissionAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.JobBillDocument)
-class JobBillDocumentAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.ParkingRequest)
 class ParkingRequestAdmin(admin.ModelAdmin):
     pass

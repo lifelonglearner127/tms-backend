@@ -9,6 +9,7 @@ from ..core.views import ApproveViewSet, TMSViewSet
 from ..core.permissions import IsDriverOrEscortUser
 from . import models as m
 from . import serializers as s
+from ..finance.serializers import BillDocumentSerializer
 
 
 class JobViewSet(TMSViewSet):
@@ -279,7 +280,7 @@ class JobViewSet(TMSViewSet):
     def upload_bill_document(self, request, pk=None):
         data = request.data
         data['job'] = pk
-        serializer = s.JobBillDocumentSerializer(
+        serializer = BillDocumentSerializer(
             data=data,
             context={'request': request}
         )
@@ -300,13 +301,13 @@ class JobViewSet(TMSViewSet):
         category = request.query_params.get('category', None)
 
         if category is not None:
-            serializer = s.JobBillDocumentSerializer(
+            serializer = BillDocumentSerializer(
                 job.bills.filter(category=category),
                 many=True,
                 context={'request': request}
             )
         else:
-            serializer = s.JobBillDocumentSerializer(
+            serializer = BillDocumentSerializer(
                 job.bills.all(),
                 many=True,
                 context={'request': request}

@@ -13,6 +13,7 @@ from ..order.serializers import (
 from ..info.serializers import ShortProductSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..road.serializers import ShortRouteSerializer
+from ..finance.serializers import BillDocumentSerializer
 
 
 class ShortMissionSerializer(serializers.ModelSerializer):
@@ -241,59 +242,11 @@ class JobTimeSerializer(serializers.ModelSerializer):
         )
 
 
-class Base64ImageField(serializers.ImageField):
-
-    def to_internal_value(self, data):
-        from django.core.files.base import ContentFile
-        import base64
-        import six
-        import uuid
-
-        if isinstance(data, six.string_types) and\
-           data.startswith('data:image'):
-
-            header, data = data.split(';base64,')
-
-            try:
-                decoded_file = base64.b64decode(data)
-            except TypeError:
-                self.fail('invalid_image')
-
-            file_name = str(uuid.uuid4())[:12]
-            file_extension = self.get_file_extension(file_name, decoded_file)
-            complete_file_name = "%s.%s" % (file_name, file_extension, )
-            data = ContentFile(decoded_file, name=complete_file_name)
-
-        return super(Base64ImageField, self).to_internal_value(data)
-
-    def get_file_extension(self, file_name, decoded_file):
-        import imghdr
-
-        extension = imghdr.what(file_name, decoded_file)
-        extension = "jpg" if extension == "jpeg" else extension
-
-        return extension
-
-
-class JobBillDocumentSerializer(serializers.ModelSerializer):
-
-    bill = Base64ImageField()
-
-    class Meta:
-        model = m.JobBillDocument
-        fields = '__all__'
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['category_display'] = instance.get_category_display()
-        return ret
-
-
 class JobCostSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    bills = JobBillDocumentSerializer(many=True)
+    bills = BillDocumentSerializer(many=True)
 
     class Meta:
         model = m.Job

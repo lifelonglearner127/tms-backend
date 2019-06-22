@@ -208,38 +208,6 @@ class Mission(models.Model):
         ordering = ['step']
 
 
-class JobBillDocument(models.Model):
-
-    job = models.ForeignKey(
-        Job,
-        on_delete=models.CASCADE,
-        related_name='bills'
-    )
-
-    cost = models.DecimalField(
-        max_digits=10,
-        decimal_places=1
-    )
-
-    bill = models.ImageField()
-
-    category = models.PositiveIntegerField(
-        choices=c.BILL_TYPE,
-        default=c.BILL_FROM_LOADING_STATION
-    )
-
-    def __str__(self):
-        return '{} on {} job'.format(
-            self.get_category_display(),
-            self.job.id
-        )
-
-    class Meta:
-        ordering = [
-            'category'
-        ]
-
-
 class ParkingRequest(ApprovedModel):
 
     job = models.ForeignKey(

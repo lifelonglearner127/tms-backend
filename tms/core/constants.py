@@ -225,19 +225,6 @@ JOB_PROGRESS = (
     )
 )
 
-# bill document type
-BILL_FROM_LOADING_STATION = 0
-BILL_FROM_QUALITY_STATION = 1
-BILL_FROM_UNLOADING_STATION = 2
-BILL_FROM_OIL_STATION = 3
-BILL_FROM_TRAFFIC = 4
-BILL_TYPE = (
-    (BILL_FROM_LOADING_STATION, 'Bill from Loading Station'),
-    (BILL_FROM_QUALITY_STATION, 'Bill from Quality Station'),
-    (BILL_FROM_UNLOADING_STATION, 'Bill from UnLoading Station'),
-    (BILL_FROM_OIL_STATION, 'Bill from Oil Station'),
-    (BILL_FROM_TRAFFIC, 'Bill from traffic')
-)
 
 # road app
 # ----------------------------------------------------------------------------
@@ -301,3 +288,20 @@ STAFF_NOTIFICATION_PARKING_REQUEST = 2
 STAFF_NOTIFICATION_DRIVER_CHANGE_REQUEST = 3
 STAFF_NOTIFICATION_ESCORT_CHANGE_REQUEST = 4
 STAFF_NOTIFICATION_TRAFFIC_ACCIDENT = 5
+
+
+# finance app
+# ----------------------------------------------------------------------------
+# bill document type
+BILL_FROM_LOADING_STATION = 0
+BILL_FROM_QUALITY_STATION = 1
+BILL_FROM_UNLOADING_STATION = 2
+BILL_FROM_OIL_STATION = 3
+BILL_FROM_TRAFFIC = 4
+BILL_TYPE = (
+    (BILL_FROM_LOADING_STATION, 'Bill from Loading Station'),
+    (BILL_FROM_QUALITY_STATION, 'Bill from Quality Station'),
+    (BILL_FROM_UNLOADING_STATION, 'Bill from UnLoading Station'),
+    (BILL_FROM_OIL_STATION, 'Bill from Oil Station'),
+    (BILL_FROM_TRAFFIC, 'Bill from traffic')
+)

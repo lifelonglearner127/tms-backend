@@ -20,6 +20,11 @@ router.register(
     v.FuelCardViewSet,
     base_name='fuel-card'
 )
+router.register(
+    r'bill',
+    v.BillDocument,
+    base_name='bill'
+)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
