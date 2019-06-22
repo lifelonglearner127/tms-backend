@@ -81,9 +81,17 @@ class BillDocument(TMSViewSet):
 
     @action(detail=False, url_path='my-bills')
     def get_my_bills(self, request):
-        page = self.paginate_queryset(
-            request.user.bills.all(),
-        )
+        category = request.query_params.get('category', None)
+
+        if category is not None:
+            page = self.paginate_queryset(
+                request.user.bills.filter(category=category),
+            )
+        else:
+            page = self.paginate_queryset(
+                request.user.bills.all(),
+            )
+
         serializer = s.BillDocumentSerializer(
             page,
             context={'request': request},
