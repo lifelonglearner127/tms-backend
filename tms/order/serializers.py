@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import TMSChoiceField
+from ..account.serializers import ShortUserSerializer
 from ..info.models import Station
 from ..info.serializers import ShortStationSerializer, ShortProductSerializer
-from ..account.serializers import (
-    ShortUserSerializer
-)
 
 
 class ShortOrderProductSerializer(serializers.ModelSerializer):
@@ -97,7 +97,7 @@ class ShortOrderLoadingStationSerializer(serializers.ModelSerializer):
         )
 
 
-class OrderCreateUpdateSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     """
     Order Create and Update Serializer
     """
@@ -470,7 +470,7 @@ class ShortOrderSerializer(serializers.ModelSerializer):
         )
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class OrderDataViewSerializer(serializers.ModelSerializer):
     """
     Order serializer
     """
@@ -480,6 +480,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     assignee = ShortUserSerializer(read_only=True)
     customer = ShortUserSerializer(read_only=True)
+    order_source = TMSChoiceField(choices=c.ORDER_SOURCE)
+    products = ShortProductSerializer(many=True)
+    loading_stations_data = ShortStationSerializer(many=True)
+    quality_stations_data = ShortStationSerializer(many=True)
+    unloading_stations_data = ShortStationSerializer(many=True)
+    status = TMSChoiceField(choices=c.ORDER_STATUS)
 
     class Meta:
         model = m.Order

@@ -4,20 +4,17 @@ from rest_framework.response import Response
 
 from . import models as m
 from . import serializers as s
+from ..core.views import TMSViewSet
 from ..job.serializers import ShortJobSerializer
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(TMSViewSet):
     """
     Order Viewset
     """
     queryset = m.Order.objects.all()
-
-    def get_serializer_class(self):
-        if self.action in ['update', 'create']:
-            return s.OrderCreateUpdateSerializer
-        else:
-            return s.OrderSerializer
+    serializer_class = s.OrderSerializer
+    data_view_serializer_class = s.OrderDataViewSerializer
 
     def create(self, request):
         context = {

@@ -54,6 +54,27 @@ class Order(TimeStampedModel):
 
         return products
 
+    @property
+    def loading_stations_data(self):
+        return self.loading_stations.all()
+
+    @property
+    def quality_stations_data(self):
+        stations = []
+        for order_loading_station in self.orderloadingstation_set.all():
+            stations.append(order_loading_station.quality_station)
+
+        return stations
+
+    @property
+    def unloading_stations_data(self):
+        stations = []
+        for order_loading_station in self.orderloadingstation_set.all():
+            for order_product in order_loading_station.orderproduct_set.all():
+                stations.extend(order_product.unloading_stations.all())
+
+        return stations
+
     objects = models.Manager()
     pendings = managers.PendingOrderManager()
     inprogress = managers.InProgressOrderManager()
