@@ -45,7 +45,6 @@ class Job(models.Model):
     )
 
     progress = models.PositiveIntegerField(
-        choices=c.JOB_PROGRESS,
         default=c.JOB_PROGRESS_NOT_STARTED
     )
 

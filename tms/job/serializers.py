@@ -104,6 +104,13 @@ class JobProgressBarField(serializers.Field):
                 ret.append({'title': '录入卸货数量:' + station.name})
 
             ret.append({'title': '完成'})
+
+            progress = 1
+            for item in ret:
+                item['progress'] = progress
+                item['active'] = progress == instance.progress
+                progress = progress + 1
+
         return ret
 
 
@@ -129,25 +136,24 @@ class JobDataViewSerializer(serializers.ModelSerializer):
         source='order.products', many=True
     )
     progress_bar = JobProgressBarField(source='*')
-    progress_msg = serializers.CharField(source='get_progress_display')
 
     class Meta:
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'stations', 'products',
-            'progress', 'progress_msg', 'total_weight', 'progress_bar',
+            'progress', 'progress_bar', 'total_weight',
             'start_due_time', 'finish_due_time', 'route'
         )
 
 
 class JobProgressSerializer(serializers.ModelSerializer):
 
-    progress_msg = serializers.CharField(source='get_progress_display')
+    progress_bar = JobProgressBarField(source='*')
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'progress', 'progress_msg'
+            'id', 'progress_bar'
         )
 
 

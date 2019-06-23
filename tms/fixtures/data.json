@@ -914,7 +914,7 @@
         "escort": 4,
         "route": 2,
         "total_weight": 1,
-        "progress": 1,
+        "progress": 0,
         "total_mileage": "10",
         "highway_mileage": "7",
         "normalway_mileage": "3",
