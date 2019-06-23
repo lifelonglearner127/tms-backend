@@ -34,6 +34,17 @@ class VehicleSerializer(serializers.ModelSerializer):
             })
         return data
 
+    def to_internal_value(self, data):
+        """
+        Exclude date, datetimefield if its string is empty
+        """
+        for key, value in self.fields.items():
+            if isinstance(value, serializers.DateField) and data[key] == '':
+                data.pop(key)
+
+        ret = super().to_internal_value(data)
+        return ret
+
 
 class VehiclePositionSerializer(serializers.Serializer):
     """

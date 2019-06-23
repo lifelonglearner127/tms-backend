@@ -145,6 +145,17 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def to_internal_value(self, data):
+        """
+        Exclude date, datetimefield if its string is empty
+        """
+        for key, value in self.fields.items():
+            if isinstance(value, serializers.DateField) and data[key] == '':
+                data.pop(key)
+
+        ret = super().to_internal_value(data)
+        return ret
+
 
 class StaffProfileDataViewSerializer(serializers.ModelSerializer):
 
