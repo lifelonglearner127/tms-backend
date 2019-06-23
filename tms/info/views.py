@@ -2,8 +2,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..core.views import StaffViewSet, ChoicesView
 from ..core import constants as c
+from ..core.serializers import ChoiceSerializer
+from ..core.views import StaffViewSet
 from . import models as m
 from . import serializers as s
 
@@ -15,6 +16,19 @@ class ProductViewSet(StaffViewSet):
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
+
+    @action(detail=False, url_path="categories")
+    def get_rest_request_cateogires(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in c.PRODUCT_CATEGORY
+            ],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class StationViewSet(StaffViewSet):
@@ -83,10 +97,3 @@ class StationViewSet(StaffViewSet):
         serializer = s.OilStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
-
-
-class ProductCategoriesView(ChoicesView):
-    """
-    APIView for returning product categories
-    """
-    static_choices = c.PRODUCT_CATEGORY

@@ -1,10 +1,11 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from ..core import constants as c
 from ..core.serializers import ChoiceSerializer
-from ..core.views import TMSViewSet, ChoicesView
+from ..core.views import TMSViewSet
 from . import models as m
 from . import serializers as s
 
@@ -53,30 +54,26 @@ class UserViewSet(TMSViewSet):
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
 
-
-class UserRoleAPIView(ChoicesView):
-    static_choices = c.USER_ROLE
-
-
-class CompanyMemberRoleAPIView(ChoicesView):
-
-    def get(self, request):
-        choices = []
-        user_roles = list(c.USER_ROLE)
-        staff_roles = user_roles[:-1]
-        for (slug, name) in staff_roles:
-            choices.append(
-                {
-                    'value': slug,
-                    'text': name
-                }
-            )
-
+    @action(detail=False, url_path="roles")
+    def get_user_roles(self, request):
         serializer = ChoiceSerializer(
-            choices,
+            [{'value': x, 'text': y} for (x, y) in c.USER_ROLE],
             many=True
         )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
+    @action(detail=False, url_path="member-roles")
+    def get_member_roles(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in c.USER_ROLE
+                if x != c.USER_ROLE_CUSTOMER
+            ],
+            many=True
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK

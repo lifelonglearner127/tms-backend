@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-from django.urls import path
 
 from rest_framework.routers import DefaultRouter
 from .import views
@@ -18,5 +17,4 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    path('options/product-categories', views.ProductCategoriesView.as_view()),
 ]

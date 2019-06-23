@@ -13,6 +13,4 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'auth/obtain_token', v.ObtainJWTAPIView.as_view()),
     url(r'auth/verify_token', v.VerifyJWTAPIView.as_view()),
-    url(r'options/user-role', v.UserRoleAPIView.as_view()),
-    url(r'options/company-member-role', v.CompanyMemberRoleAPIView.as_view())
 ]

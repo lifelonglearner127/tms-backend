@@ -17,16 +17,4 @@ router.register(
 )
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(
-        r'options/vehicle-brand',
-        v.VehicleBrandAPIView.as_view()
-    ),
-    url(
-        r'options/vehicle-model',
-        v.VehicleModelAPIView.as_view()
-    ),
-    url(
-        r'options/vehicle-maintenance-categories',
-        v.VehicleMaintenanceRequestCategoriesAPIView.as_view()
-    )
 ]

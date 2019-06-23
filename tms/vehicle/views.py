@@ -4,11 +4,12 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..g7.interfaces import G7Interface
-from ..core.views import TMSViewSet, ChoicesView, ApproveViewSet
-from ..core import constants as c
 from . import serializers as s
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import ChoiceSerializer
+from ..core.views import TMSViewSet, ApproveViewSet
+from ..g7.interfaces import G7Interface
 
 
 class VehicleViewSet(TMSViewSet):
@@ -155,6 +156,28 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="brands")
+    def get_vehicle_brands(self, request):
+        serializer = ChoiceSerializer(
+            [{'value': x, 'text': y} for (x, y) in c.VEHICLE_BRAND],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="models")
+    def get_vehicle_models(self, request):
+        serializer = ChoiceSerializer(
+            [{'value': x, 'text': y} for (x, y) in c.VEHICLE_MODEL_TYPE],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class VehicleMaintenanceRequestViewSet(ApproveViewSet):
 
@@ -177,21 +200,13 @@ class VehicleMaintenanceRequestViewSet(ApproveViewSet):
             status=status.HTTP_201_CREATED
         )
 
-
-class VehicleModelAPIView(ChoicesView):
-    """
-    APIView for returning vehicle models
-    """
-    static_choices = c.VEHICLE_MODEL_TYPE
-
-
-class VehicleBrandAPIView(ChoicesView):
-    """
-    APIView for returning vehicle brand
-    """
-    static_choices = c.VEHICLE_BRAND
-
-
-class VehicleMaintenanceRequestCategoriesAPIView(ChoicesView):
-
-    static_choices = c.VEHICLE_MAINTENANCE
+    @action(detail=False, url_path="categories")
+    def get_vehicle_models(self, request):
+        serializer = ChoiceSerializer(
+            [{'value': x, 'text': y} for (x, y) in c.VEHICLE_MAINTENANCE],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

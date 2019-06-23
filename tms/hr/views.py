@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from . import models as m
 from . import serializers as s
 from ..core import constants as c
-from ..core.views import ApproveViewSet, TMSViewSet, ChoicesView
+from ..core.serializers import ChoiceSerializer
+from ..core.views import ApproveViewSet, TMSViewSet
 
 
 class DepartmentViewSet(TMSViewSet):
@@ -73,6 +74,19 @@ class RestRequestViewSet(ApproveViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="categories")
+    def get_rest_request_cateogires(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in c.REST_REQUEST_CATEGORY
+            ],
+            many=True
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -197,10 +211,3 @@ class CustomerProfileViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
-
-
-class RestRequestCategoriesAPIView(ChoicesView):
-    """
-    APIView for returning product categories
-    """
-    static_choices = c.REST_REQUEST_CATEGORY
