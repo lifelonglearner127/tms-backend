@@ -23,14 +23,14 @@ class Route(models.Model):
     @property
     def loading_station(self):
         try:
-            return Station.loading_stations.get(pk=self.path[0])
+            return Station.loadingstations.get(pk=self.path[0])
         except Station.DoesNotExist:
             return None
 
     @property
     def quality_station(self):
         try:
-            return Station.quality_stations.get(pk=self.path[1])
+            return Station.qualitystations.get(pk=self.path[1])
         except Station.DoesNotExist:
             return None
 

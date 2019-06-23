@@ -178,7 +178,7 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'name', 'mobile'
+            'id', 'user_id', 'name', 'mobile'
         )
 
 

@@ -22,8 +22,7 @@ class Product(TimeStampedModel):
     category = models.CharField(
         max_length=10,
         choices=c.PRODUCT_CATEGORY,
-        default=c.PRODUCT_CATEGORY_GASOLINE,
-        db_index=True
+        default=c.PRODUCT_CATEGORY_GASOLINE
     )
 
     price = models.DecimalField(
@@ -60,7 +59,6 @@ class Station(BasicContactModel):
     station_type = models.CharField(
         max_length=1,
         choices=c.STATION_TYPE,
-        db_index=True
     )
 
     longitude = models.FloatField()
@@ -75,8 +73,7 @@ class Station(BasicContactModel):
     product_category = models.CharField(
         max_length=10,
         choices=c.PRODUCT_CATEGORY,
-        default=c.PRODUCT_CATEGORY_GASOLINE,
-        db_index=True
+        default=c.PRODUCT_CATEGORY_GASOLINE
     )
 
     price = models.DecimalField(
@@ -125,12 +122,12 @@ class Station(BasicContactModel):
     )
 
     objects = models.Manager()
-    loading_stations = managers.LoadingStationManager()
-    unloading_stations = managers.UnLoadingStationManager()
-    quality_stations = managers.QualityStationManager()
-    work_stations = managers.WorkStationManager()
-    oil_stations = managers.OilStationManager()
-    black_dots = managers.BlackDotManager()
+    loadingstations = managers.LoadingStationManager()
+    unloadingstations = managers.UnLoadingStationManager()
+    qualitystations = managers.QualityStationManager()
+    workstations = managers.WorkStationManager()
+    oilstations = managers.OilStationManager()
+    blackdots = managers.BlackDotManager()
 
     class Meta:
         unique_together = ('longitude', 'latitude')
