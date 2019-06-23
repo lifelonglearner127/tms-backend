@@ -89,4 +89,4 @@ class ProductCategoriesView(ChoicesView):
     """
     APIView for returning product categories
     """
-    static_choices = c.PRODUCT_TYPE
+    static_choices = c.PRODUCT_CATEGORY

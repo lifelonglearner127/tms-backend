@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..core.serializers import Base64ImageField
+from ..core import constants as c
+from ..core.serializers import Base64ImageField, TMSChoiceField
 from ..hr.serializers import ShortDepartmentSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 
@@ -86,6 +87,7 @@ class FuelCardDataViewSerializer(serializers.ModelSerializer):
 class BillDocumentSerializer(serializers.ModelSerializer):
 
     bill = Base64ImageField()
+    category = TMSChoiceField(choices=c.BILL_CATEGORY)
 
     class Meta:
         model = m.BillDocument
@@ -105,8 +107,3 @@ class BillDocumentSerializer(serializers.ModelSerializer):
         instance.user = self.context('user')
         instance.save()
         return instance
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['category_display'] = instance.get_category_display()
-        return ret

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import TMSChoiceField
 
 
 class ShortVehicleSerializer(serializers.ModelSerializer):
@@ -18,15 +20,12 @@ class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer
     """
+    model = TMSChoiceField(choices=c.VEHICLE_MODEL_TYPE)
+    brand = TMSChoiceField(choices=c.VEHICLE_BRAND)
+
     class Meta:
         model = m.Vehicle
         fields = '__all__'
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['model_display'] = instance.get_model_display()
-        ret['brand_display'] = instance.get_brand_display()
-        return ret
 
     def validate(self, data):
         if data['load'] != sum(data['branches']):

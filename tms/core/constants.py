@@ -1,11 +1,11 @@
 # Info app
 # ----------------------------------------------------------------------------
 # product type choices
-PRODUCT_TYPE_GASOLINE = 'G'
-PRODUCT_TYPE_OIL = 'O'
-PRODUCT_TYPE = (
-    (PRODUCT_TYPE_GASOLINE, '汽油'),
-    (PRODUCT_TYPE_OIL, '油')
+PRODUCT_CATEGORY_GASOLINE = 'G'
+PRODUCT_CATEGORY_OIL = 'O'
+PRODUCT_CATEGORY = (
+    (PRODUCT_CATEGORY_GASOLINE, '汽油'),
+    (PRODUCT_CATEGORY_OIL, '油')
 )
 
 # station type
@@ -298,7 +298,7 @@ BILL_FROM_QUALITY_STATION = 1
 BILL_FROM_UNLOADING_STATION = 2
 BILL_FROM_OIL_STATION = 3
 BILL_FROM_TRAFFIC = 4
-BILL_TYPE = (
+BILL_CATEGORY = (
     (BILL_FROM_LOADING_STATION, 'Bill from Loading Station'),
     (BILL_FROM_QUALITY_STATION, 'Bill from Quality Station'),
     (BILL_FROM_UNLOADING_STATION, 'Bill from UnLoading Station'),

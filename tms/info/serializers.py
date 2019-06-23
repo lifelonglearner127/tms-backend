@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import TMSChoiceField
 
 
 class ShortProductSerializer(serializers.ModelSerializer):
@@ -17,14 +19,15 @@ class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product
     """
+    category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
+    measure_unit = TMSChoiceField(choices=c.PRODUCT_MEASURE_UNIT)
+
     class Meta:
         model = m.Product
         fields = '__all__'
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['category_display'] = instance.get_category_display()
-        ret['measure_unit_display'] = instance.get_measure_unit_display()
         ret['price_display'] =\
             str(instance.price) + '元 / ' +\
             str(instance.unit_weight) +\
@@ -71,14 +74,14 @@ class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
     """
+    product_category = TMSChoiceField(c.PRODUCT_CATEGORY)
+
     class Meta:
         model = m.Station
         fields = '__all__'
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['product_category_display'] =\
-            instance.get_product_category_display()
 
         ret['working_time_display'] =\
             str(instance.price) + '元/' +\

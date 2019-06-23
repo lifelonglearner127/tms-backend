@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import TMSChoiceField
 from ..account.models import User
 from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer
@@ -251,28 +253,12 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CustomerPaymentMethodField(serializers.Field):
-
-    def to_representation(self, value):
-        ret = {
-            'value': value.payment_method,
-            'text': value.get_payment_method_display()
-        }
-        return ret
-
-    def to_internal_value(self, data):
-        ret = {
-            'payment_method': data['value']
-        }
-        return ret
-
-
 class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
 
     user = MainUserSerializer()
     products = ShortProductSerializer(many=True)
     associated_with = ShortStaffProfileSerializer()
-    payment_method = CustomerPaymentMethodField(source='*')
+    payment_method = TMSChoiceField(choices=c.PAYMENT_METHOD)
 
     class Meta:
         model = m.CustomerProfile
@@ -282,6 +268,7 @@ class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
 class RestRequestSerializer(serializers.ModelSerializer):
 
     user = ShortUserSerializer(read_only=True)
+    category = TMSChoiceField(choices=c.REST_REQUEST_CATEGORY)
 
     class Meta:
         model = m.RestRequest
@@ -327,8 +314,3 @@ class RestRequestSerializer(serializers.ModelSerializer):
             })
 
         return data
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['category_display'] = instance.get_category_display()
-        return ret

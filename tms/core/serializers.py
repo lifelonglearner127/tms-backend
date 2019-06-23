@@ -41,3 +41,23 @@ class Base64ImageField(serializers.ImageField):
         extension = "jpg" if extension == "jpeg" else extension
 
         return extension
+
+
+class TMSChoiceField(serializers.Field):
+
+    def __init__(self, choices, **kwargs):
+        self.choices = dict((x, y) for x, y in choices)
+        super().__init__(**kwargs)
+
+    def to_representation(self, value):
+        ret = {
+            'value': value,
+            'text': self.choices[value]
+        }
+        return ret
+
+    def to_internal_value(self, data):
+        ret = {
+            'role': data['value']
+        }
+        return ret

@@ -126,7 +126,7 @@ class BillDocument(CreatedTimeModel):
     bill = models.ImageField()
 
     category = models.PositiveIntegerField(
-        choices=c.BILL_TYPE,
+        choices=c.BILL_CATEGORY,
         default=c.BILL_FROM_LOADING_STATION
     )
 

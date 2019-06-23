@@ -21,8 +21,8 @@ class Product(TimeStampedModel):
 
     category = models.CharField(
         max_length=10,
-        choices=c.PRODUCT_TYPE,
-        default=c.PRODUCT_TYPE_GASOLINE,
+        choices=c.PRODUCT_CATEGORY,
+        default=c.PRODUCT_CATEGORY_GASOLINE,
         db_index=True
     )
 
@@ -74,8 +74,8 @@ class Station(BasicContactModel):
 
     product_category = models.CharField(
         max_length=10,
-        choices=c.PRODUCT_TYPE,
-        default=c.PRODUCT_TYPE_GASOLINE,
+        choices=c.PRODUCT_CATEGORY,
+        default=c.PRODUCT_CATEGORY_GASOLINE,
         db_index=True
     )
 
