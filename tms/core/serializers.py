@@ -57,7 +57,4 @@ class TMSChoiceField(serializers.Field):
         return ret
 
     def to_internal_value(self, data):
-        ret = {
-            'role': data['value']
-        }
-        return ret
+        return data['value']

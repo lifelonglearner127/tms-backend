@@ -99,6 +99,8 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'username': 'Such user already exists'
             })
 
+        # check user role
+        user_data['role'] = user_data['role']['value']
         user = m.User.objects.create_user(**user_data)
 
         driver_license = self.context.get('driver_license', None)
