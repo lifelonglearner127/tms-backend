@@ -20,7 +20,7 @@ class ProductSerializer(serializers.ModelSerializer):
     Serializer for Product
     """
     category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
-    measure_unit = TMSChoiceField(choices=c.PRODUCT_MEASURE_UNIT)
+    weight_measure_unit = TMSChoiceField(choices=c.PRODUCT_WEIGHT_MEASURE_UNIT)
 
     class Meta:
         model = m.Product

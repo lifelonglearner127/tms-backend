@@ -26,18 +26,18 @@ class Product(TimeStampedModel):
     )
 
     price = models.DecimalField(
-        max_digits=5,
-        decimal_places=1
+        max_digits=c.PRICE_MAX_DIGITS,
+        decimal_places=c.PRICE_DECIMAL_PLACES
     )
 
     unit_weight = models.PositiveIntegerField(
         default=1
     )
 
-    measure_unit = models.CharField(
+    weight_measure_unit = models.CharField(
         max_length=1,
-        choices=c.PRODUCT_MEASURE_UNIT,
-        default=c.PRODUCT_MEASURE_UNIT_TON
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
+        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
     description = models.TextField(

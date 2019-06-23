@@ -93,10 +93,7 @@ class OrderLoadingStation(models.Model):
         blank=True
     )
 
-    due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
+    due_time = models.DateTimeField()
 
     products = models.ManyToManyField(
         Product,
@@ -123,28 +120,45 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE
     )
 
-    total_weight = models.PositiveIntegerField()
-
-    weight_unit = models.CharField(
-        max_length=2,
-        choices=c.UNIT_WEIGHT,
-        default=c.UNIT_WEIGHT_TON
+    total_weight = models.DecimalField(
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES,
     )
 
-    loss = models.PositiveIntegerField(
+    total_weight_measure_unit = models.CharField(
+        max_length=1,
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
+        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
+    )
+
+    price = models.DecimalField(
+        max_digits=c.PRICE_MAX_DIGITS,
+        decimal_places=c.PRICE_DECIMAL_PLACES,
+        default=0
+    )
+
+    price_weight_measure_unit = models.CharField(
+        max_length=1,
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
+        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
+    )
+
+    loss = models.DecimalField(
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES,
         default=0
     )
 
     loss_unit = models.CharField(
         max_length=2,
-        choices=c.UNIT_WEIGHT,
-        default=c.UNIT_WEIGHT_TON
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
+        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
-    payment_unit = models.CharField(
-        max_length=2,
-        choices=c.UNIT_WEIGHT,
-        default=c.UNIT_WEIGHT_TON
+    payment_method = models.CharField(
+        max_length=1,
+        choices=c.PAYMENT_METHOD,
+        default=c.PAYMENT_METHOD_TON
     )
 
     is_split = models.BooleanField(
@@ -180,6 +194,8 @@ class OrderProductDeliver(models.Model):
         Station,
         on_delete=models.CASCADE
     )
+
+    due_time = models.DateTimeField()
 
     weight = models.PositiveIntegerField()
 

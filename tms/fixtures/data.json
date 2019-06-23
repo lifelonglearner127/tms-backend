@@ -838,6 +838,7 @@
     "fields": {
         "order_product": 1,
         "unloading_station": 7,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },
@@ -847,6 +848,7 @@
     "fields": {
         "order_product": 1,
         "unloading_station": 8,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },
@@ -856,6 +858,7 @@
     "fields": {
         "order_product": 2,
         "unloading_station": 9,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },
@@ -865,6 +868,7 @@
     "fields": {
         "order_product": 3,
         "unloading_station": 7,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },
@@ -874,6 +878,7 @@
     "fields": {
         "order_product": 4,
         "unloading_station": 7,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },
@@ -883,6 +888,7 @@
     "fields": {
         "order_product": 5,
         "unloading_station": 7,
+        "due_time": "2019-05-21T00:00:00+00:00",
         "weight": 1
     }
   },

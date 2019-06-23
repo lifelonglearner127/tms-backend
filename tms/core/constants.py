@@ -1,3 +1,12 @@
+# General
+# ----------------------------------------------------------------------------
+PRICE_MAX_DIGITS = 5
+PRICE_DECIMAL_PLACES = 2
+
+WEIGHT_MAX_DIGITS = 7
+WEIGHT_DECIMAL_PLACES = 3
+
+
 # Info app
 # ----------------------------------------------------------------------------
 # product type choices
@@ -40,11 +49,11 @@ PRICE_VARY_DURATION_UNIT = (
 )
 
 # product unit measure choices
-PRODUCT_MEASURE_UNIT_LITRE = 'L'
-PRODUCT_MEASURE_UNIT_TON = 'T'
-PRODUCT_MEASURE_UNIT = (
-    (PRODUCT_MEASURE_UNIT_LITRE, '公升'),
-    (PRODUCT_MEASURE_UNIT_TON, '吨')
+PRODUCT_WEIGHT_MEASURE_UNIT_LITRE = 'L'
+PRODUCT_WEIGHT_MEASURE_UNIT_TON = 'T'
+PRODUCT_WEIGHT_MEASURE_UNIT = (
+    (PRODUCT_WEIGHT_MEASURE_UNIT_LITRE, '公升'),
+    (PRODUCT_WEIGHT_MEASURE_UNIT_TON, '吨')
 )
 
 
@@ -228,16 +237,6 @@ JOB_PROGRESS = (
 
 # road app
 # ----------------------------------------------------------------------------
-
-
-# Metric Units constants
-# ----------------------------------------------------------------------------
-UNIT_WEIGHT_TON = 'T'
-UNIT_WEIGHT_KILOGRAM = 'K'
-UNIT_WEIGHT = (
-    (UNIT_WEIGHT_TON, 't'),
-    (UNIT_WEIGHT_KILOGRAM, 'Kg')
-)
 
 
 # hr app
