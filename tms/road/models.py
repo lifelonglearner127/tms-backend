@@ -36,7 +36,7 @@ class Route(models.Model):
 
     @property
     def stations(self):
-        points = Station.work_stations.filter(id__in=self.path)
+        points = Station.workstations.filter(id__in=self.path)
         points = dict([(point.id, point) for point in points])
         return [points[id] for id in self.path]
 
