@@ -40,5 +40,9 @@ class Route(models.Model):
         points = dict([(point.id, point) for point in points])
         return [points[id] for id in self.path]
 
+    @property
+    def stations_count(self):
+        return Station.workstations.filter(id__in=self.path).count()
+
     def __str__(self):
         return self.name

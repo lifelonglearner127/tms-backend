@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants as c
 from ..core.utils import format_datetime
 from ..account.serializers import ShortUserSerializer
 from ..order.models import OrderProductDeliver
@@ -103,14 +104,16 @@ class JobProgressBarField(serializers.Field):
                 ret.append({'title': '开始卸货:' + station.name})
                 ret.append({'title': '录入卸货数量:' + station.name})
 
-            ret.append({'title': '完成'})
-
             progress = 1
             for item in ret:
                 item['progress'] = progress
                 item['active'] = progress == instance.progress
                 progress = progress + 1
 
+            ret.append({
+                'title': '完成', 'progress': c.JOB_PROGRESS_COMPLETE,
+                'active': instance.progress == c.JOB_PROGRESS_COMPLETE
+            })
         return ret
 
 
