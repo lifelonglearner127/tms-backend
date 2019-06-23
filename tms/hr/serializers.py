@@ -134,6 +134,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         if password is not None:
             instance.user.set_password(password)
 
+        user_data['role'] = user_data['role']['value']
         for (key, value) in user_data.items():
             setattr(instance.user, key, value)
         instance.user.save()
