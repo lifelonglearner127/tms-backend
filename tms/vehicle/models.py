@@ -40,13 +40,13 @@ class Vehicle(TimeStampedModel):
     )
 
     total_load = models.DecimalField(
-        max_digits=5,
-        decimal_places=1
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES
     )
 
     actual_load = models.DecimalField(
-        max_digits=5,
-        decimal_places=1
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_MAX_DIGITS
     )
 
     affiliation_unit = models.CharField(

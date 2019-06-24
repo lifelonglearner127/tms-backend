@@ -80,8 +80,8 @@ class OrderPayment(models.Model):
     )
 
     amount = models.DecimalField(
-        max_digits=5,
-        decimal_places=1
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES
     )
 
     is_complete = models.BooleanField(
@@ -105,22 +105,22 @@ class BillDocument(CreatedTimeModel):
     )
 
     amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=1,
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES,
         null=True,
         blank=True
     )
 
     unit_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=1,
+        max_digits=c.PRICE_MAX_DIGITS,
+        decimal_places=c.PRICE_DECIMAL_PLACES,
         null=True,
         blank=True
     )
 
     cost = models.DecimalField(
-        max_digits=10,
-        decimal_places=1
+        max_digits=c.PRICE_MAX_DIGITS,
+        decimal_places=c.PRICE_DECIMAL_PLACES
     )
 
     bill = models.ImageField()
