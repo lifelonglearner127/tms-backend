@@ -13,7 +13,7 @@ class Notification(models.Model):
     )
 
     msg_type = models.PositiveIntegerField(
-        choices=c.DRIVER_NOTIFICATION_TYPE,
+        choices=c.NOTIFICATION_TYPE,
         default=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
