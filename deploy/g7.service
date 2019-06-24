@@ -1,0 +1,20 @@
+[Unit]
+Description=G7 Vehicle MQTT Client
+After=network.target
+
+
+[Service]
+PIDFile=/run/g7/vehicle_location.pid
+User=root
+Group=root
+WorkingDirectory=/root/Projects/tms-backend
+Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
+ExecStart=/root/.virtualenvs/tms-backend/bin/python mqtt/asgimqtt.py -H openapi.huoyunren.com -p 1883 -u username -P password -t topic -i clientid -q 0 config.asgi:channel_layer
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+PrivateTmp=true
+
+
+[Install]
+WantedBy=multi-user.target

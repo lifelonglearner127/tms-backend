@@ -100,7 +100,7 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-3. Configure wsgi & nginx
+3. Configure wsgi & asgi & nginx
 ```
 cp deploy/tms_backend.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
@@ -109,12 +109,8 @@ systemctl restart nginx
 cp deploy/daphne.service /lib/systemd/system/
 cp deploy/uwsgi.service /lib/systemd/system/
 cp deploy/tms_backend.ini /etc/uwsgi/sites/
-```
-
-4. Run redis & ASGI-MQTT Interface
-```
-docker run -p 6379:6379 -d redis:2.8
-python mqtt/asgimqtt.py -H openapi.huoyunren.com -p 1883 -u tj68yz -P WLJuAPk4zem6Ud2KsuA2D9gpyRb3oEkr -t tj68yz/location -i 2028LY/tj68yz/location -q 0 config.asgi:channel_layer
+cp deploy/g7.service /lib/systemd/system/
+docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
 ```
 
 5. Explanation
