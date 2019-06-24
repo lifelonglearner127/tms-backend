@@ -101,6 +101,14 @@ VEHICLE_MAINTENANCE = (
     (VEHICLE_MAINTENANCE_REPAIR, 'Repair'),
 )
 
+VEHICLE_USER_BIND_METHOD_BY_ADMIN = 'A'
+VEHICLE_USER_BIND_METHOD_BY_JOB = 'J'
+VEHICLE_USER_BIND_METHOD = (
+    (VEHICLE_USER_BIND_METHOD_BY_ADMIN, 'By Admin'),
+    (VEHICLE_USER_BIND_METHOD_BY_JOB, 'By Job')
+)
+
+
 # Account app - Account constants
 # ----------------------------------------------------------------------------
 # user role choices

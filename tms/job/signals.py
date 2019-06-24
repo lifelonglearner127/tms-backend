@@ -6,10 +6,11 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from . import models as m
-from ..account.models import User
 from ..core import constants as c
+from ..account.models import User
 from ..notification.models import Notification
 from ..notification.serializers import NotificationSerializer
+from ..vehicle.models import VehicleUserBind
 
 
 channel_layer = get_channel_layer()
@@ -17,6 +18,39 @@ channel_layer = get_channel_layer()
 
 @receiver(post_save, sender=m.Job)
 def notify_driver_of_new_job(sender, instance, **kwargs):
+
+    # bind & unbind (vehicle, driver, escort)
+    if instance.progress == c.JOB_PROGRESS_NOT_STARTED:
+        if not VehicleUserBind.binds_by_admin.filter(
+            vehicle=instance.vehicle,
+            driver=instance.driver,
+            escort=instance.escort
+        ).exists():
+            VehicleUserBind.objects.get_or_create(
+                vehicle=instance.vehicle,
+                driver=instance.driver,
+                escort=instance.escort,
+                bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+            )
+
+    elif instance.progress == c.JOB_PROGRESS_COMPLETE:
+        if not VehicleUserBind.binds_by_admin.filter(
+            vehicle=instance.vehicle,
+            driver=instance.driver,
+            escort=instance.escort
+        ).exists():
+            try:
+                vehicle_bind = VehicleUserBind.objects.get(
+                    vehicle=instance.vehicle,
+                    driver=instance.driver,
+                    escort=instance.escort,
+                    bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+                )
+                vehicle_bind.delete()
+            except VehicleUserBind.DoesNotExists:
+                pass
+
+    # send notfication to driver
     message = "A new mission is assigned to you."\
         "Please use {}".format(instance.vehicle)
 

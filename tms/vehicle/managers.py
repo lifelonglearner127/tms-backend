@@ -31,3 +31,23 @@ class RepairVehicleManager(models.Manager):
         return super().get_queryset().filter(
             status=c.VEHICLE_STATUS_REPAIR
         )
+
+
+class AdminVehicleUserBindManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_ADMIN
+        )
+
+
+class JobVehicleUserBindManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+        )
