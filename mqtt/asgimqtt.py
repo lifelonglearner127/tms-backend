@@ -5,7 +5,7 @@
 
 """
 import argparse
-import os
+import redis
 import sys
 import importlib
 import json
@@ -15,79 +15,69 @@ from asgiref.sync import async_to_sync
 from geopy import distance
 
 
-db_url = ''
-black_dots = []
-loading_stations = []
-unloading_stations = []
-quality_stations = []
+r = redis.StrictRedis(host='localhost', port=6379, db=15)
+# p = r.pubsub()
+# p.subscribe('station')
 
 
-def get_db_url():
-    pwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    env_file_name = os.path.join(pwd, '.env')
-    if not os.path.exists(env_file_name):
-        raise Exception('Not Found .env file')
+class Config:
+    stations = []
+    db_url = ''
+    host = ''
+    port = ''
+    topic = ''
+    client_id = ''
+    username = ''
+    password = ''
+    qos = ''
 
-    with open(env_file_name, 'r') as fd:
-        line = fd.readline()
-        while line:
-            key_value = line.split('=')
-            if key_value[0] == 'DATABASE_URL':
-                global db_url
-                db_url = key_value[1]
-                break
-
+    @classmethod
+    def read_env(cls, filename):
+        with open(filename, 'r') as fd:
             line = fd.readline()
+            while line:
+                key_value = line.split('=')
+                if key_value[0] == 'DATABASE_URL':
+                    cls.db_url = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_HOST':
+                    cls.host = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_PORT':
+                    cls.port = int(key_value[1][:-1])
+                elif key_value[0] == 'G7_MQTT_POSITION_TOPIC':
+                    cls.topic = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_POSITION_CLIENT_ID':
+                    cls.client_id = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_POSITION_ACCESS_ID':
+                    cls.username = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_POSITION_SECRET':
+                    cls.password = key_value[1][:-1]
+                elif key_value[0] == 'G7_MQTT_QOS':
+                    cls.qos = int(key_value[1][:-1])
 
+                line = fd.readline()
 
-def load_data_from_db(db_url):
-    try:
-        connection = psycopg2.connect(
-            'postgres://dev:gibupjo127@localhost:5432/tms'
-        )
-        cursor = connection.cursor()
+    @classmethod
+    def load_station_data_from_db(cls):
+        try:
+            connection = psycopg2.connect(cls.db_url)
+            cursor = connection.cursor()
 
-        dot_query = """
-            SELECT id, longitude, latitude, notification_message
-            FROM info_station
-            WHERE category='{}'
-        """
-
-        # select balck dots
-        global black_dots
-        cursor.execute(dot_query.format('B'))
-        results = cursor.fetchall()
-        for row in results:
-            black_dots.append(row)
-
-        # select loading station dots
-        global loading_stations
-        cursor.execute(dot_query.format('L'))
-        results = cursor.fetchall()
-        for row in results:
-            loading_stations.append(row)
-
-        # select unloading station dots
-        global unloading_stations
-        cursor.execute(dot_query.format('U'))
-        results = cursor.fetchall()
-        for row in results:
-            unloading_stations.append(row)
-
-        # select quality station dots
-        global quality_stations
-        cursor.execute(dot_query.format('Q'))
-        results = cursor.fetchall()
-        for row in results:
-            quality_stations.append(row)
-
-        cursor.close()
-    except psycopg2.DatabaseError:
-        pass
-    finally:
-        if connection is not None:
-            connection.close()
-            print('Database connection closed.')
+            cursor.execute("""
+                SELECT longitude, latitude, radius
+                FROM info_station
+            """)
+            results = cursor.fetchall()
+            for row in results:
+                cls.stations.append([row[0], row[1], row[2]])
+            print(cls.stations)
+            r.set('station', 'read')
+            cursor.close()
+        except psycopg2.DatabaseError:
+            pass
+        finally:
+            if connection is not None:
+                connection.close()
+                print('Database connection closed.')
 
 
 def get_channel_layer(channel_name):
@@ -101,10 +91,12 @@ def get_channel_layer(channel_name):
 
 
 def _on_connect(client, userdata, flags, rc):
+    print('connected')
     client.subscribe(userdata['topic'], userdata['qos'])
 
 
 def _on_message(client, userdata, message):
+    print('message_received')
     response = json.loads(message.payload.decode('utf-8'))
     vehicles = response.get('data', None)
 
@@ -129,20 +121,20 @@ def _on_message(client, userdata, message):
         }
     )
 
-    # area enter & exit event
-    # plate_num = data[0]['plateNum']
+    if r.get('station') == b'updated':
+        Config.load_station_data_from_db()
 
-    # global black_dots
+    # area enter & exit event
     for vehicle in vehicles:
-        current_position = (vehicle['lat'], vehicle['lng'])
-        for dot in black_dots:
-            dot_position = (dot[2], dot[1])
-            if distance.distance(current_position, dot_position).m < 100:
+        vehicle_pos = (vehicle['lat'], vehicle['lng'])
+        for station in Config.stations:
+            station_pos = (station[0], station[1])
+            if distance.distance(vehicle_pos, station_pos).m < station[2]:
                 pass
 
 
 def _on_disconnect(client, userdata, rc):
-    pass
+    print('disconnected')
 
 
 class ASGIMQTTClient(object):
@@ -177,40 +169,19 @@ if __name__ == '__main__':
 
     ap = argparse.ArgumentParser(description='MQTT bridge for our ASGI')
     ap.add_argument(
-        '-H', '--host', help='MQTT broker host', default='localhost'
+        '-s', '--settings', help='MQTT broker host', default='localhost'
     )
-    ap.add_argument(
-        '-p', '--port', help='MQTT broker port', type=int, default=1883
-    )
-    ap.add_argument(
-        '-i', '--id', help='MQTT Client Id', default=''
-    )
-    ap.add_argument(
-        '-u', '--username', help='MQTT Username', default=''
-    )
-    ap.add_argument(
-        '-P', '--password', help='MQTT password', default=''
-    )
-    ap.add_argument(
-        '-t', '--topic', help='MQTT Topic', default=''
-    )
-    ap.add_argument(
-        '-q', '--qos', help='Quality of Service', type=int, default=0
-    )
-
     ap.add_argument(
         'channel_layer', help='ASGI channel layer instance'
     )
-
     args = ap.parse_args()
 
     channel_layer = get_channel_layer(args.channel_layer)
 
-    # load black dots from db into local variables
-    # load_data_from_db(db_url)
+    Config.read_env(args.settings)
 
     asgi_client = ASGIMQTTClient(
-        args.host, args.port, args.id, args.username,
-        args.password, args.topic, args.qos, channel_layer
+        Config.host, Config.port, Config.client_id, Config.username,
+        Config.password, Config.topic, Config.qos, channel_layer
     )
     asgi_client.run()
