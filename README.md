@@ -1,7 +1,14 @@
 # tms-backend
 Vehicle Management System
+- [Development](#development)
+- [Deployment](#deployment)
+  - [Deploy to Heroku](#deploy-to-heroku)
+  - [Deploy to Alibaba](#deploy-to-alibaba)
+- [About Project](#about-project)
+  - [asgimqtt.py](#asgimqtt.py)
 
-## Prequisites
+## Development
+### Prequisites
  - Postgresql
  - Python3.6
  - virtualenv
@@ -18,7 +25,7 @@ CREATE USER my_username WITH PASSWORD 'my_password';
 GRANT ALL PRIVILEGES ON DATABASE "database_name" to my_username;
 ```
 
-## Clone and installing project into local
+### Clone and installing project into local
 ```
 git clone git@github.com:lifelonglearner127/tms-backend.git
 cd tms-backend
@@ -42,26 +49,15 @@ python manage.py runserver
 
 
 ## Deployment
-### Deploying to Heroku
+### Deploy to Heroku
 ```
 heroku create tms-backend
-heroku config:set G7_HTTP_HOST=''
-heroku config:set G7_HTTP_BASEURL=''
-heroku config:set G7_HTTP_VEHICLE_BASIC_ACCESS_ID=''
-heroku config:set G7_HTTP_VEHICLE_BASIC_SECRET=''
-heroku config:set G7_HTTP_VEHICLE_DATA_ACCESS_ID=''
-heroku config:set G7_HTTP_VEHICLE_DATA_SECRET=''
-
-heroku config:set G7_MQTT_HOST=''
-heroku config:set G7_MQTT_POSITION_TOPIC=''
-heroku config:set G7_MQTT_POSITION_CLIENT_ID=''
-heroku config:set G7_MQTT_POSITION_ACCESS_ID=''
-heroku config:set G7_MQTT_POSITION_SECRET=''
+heroku config:set DJANGO_SETTINGS_MODULE='config.settings.staging_heroku'
 git push heroku master
 ```
 
 
-### Deploying to Alibaba Cloud
+### Deploy to Alibaba Cloud
 1. In order to deploy django app to Alibaba Cloud, we need to intall Prerequisites.
  - Python & Pip & Virtualenv
 ```
@@ -116,3 +112,18 @@ docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
 5. Explanation
 Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.
 Check the `deploy` folder
+
+
+## About Project
+### asgimqtt.py
+asgimqtt.py is a MQTT interface from ASGI. It connects to G7 MQTT Server and receives real-time vehicle positioning data published by G7.
+
+- `Functionalities`:
+  - Send vehicle positioning data to Django Channel Layres
+  - Monitor the entry enter & exit by calculating longitude and latitude between vehicle and stations
+  - At first, I tried to query station position data from db when mqtt client receive poition data. But G7 server publish the data every seconds(of course, it can be adjusted on our side). Querying db every second was redundant and useless. So in order to improve the performance, I load station position data into our variables at the first beginning of the process startup or when the station data are updated.
+ 
+- `Why I don't use Redis?`
+  - This is because redis is `key-value` in-memory database, (de)serializing the station data might be time-consuming. When we have large data, (de)serializing might be longer than db query time.
+
+> `TODO`: Try to import arguments from .env file
