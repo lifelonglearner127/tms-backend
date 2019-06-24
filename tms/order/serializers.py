@@ -47,7 +47,7 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderProductDeliver
         fields = (
-            'id', 'weight', 'unloading_station'
+            'id', 'weight', 'due_time', 'unloading_station'
         )
 
 
@@ -81,7 +81,7 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderLoadingStation
         fields = (
-            'id', 'loading_station', 'quality_station', 'due_time', 'products'
+            'id', 'loading_station', 'quality_station', 'products'
         )
 
 
@@ -113,11 +113,11 @@ class OrderSerializer(serializers.ModelSerializer):
             alias: alias,
             assignee: assignee_id,
             customer: customer_id,
+            due_time: due_time,
             loading_stations:[
                 {
                     loading_station: station_id,
                     quality_station: station_id,
-                    due_time: due_time,
                     products: [
                         product: product_id,
                         total_weight: total_weight
@@ -204,7 +204,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     })
 
                 total_weight = product_data.get('total_weight', 0)
-                total_weight = int(total_weight)
+                total_weight = float(total_weight)
                 if total_weight == 0:
                     raise serializers.ValidationError({
                         'total_weight': 'Improperly weight set'
@@ -220,7 +220,7 @@ class OrderSerializer(serializers.ModelSerializer):
                             pk=unloading_station_id
                         )
                         weight = unloading_station_data.get('weight', 0)
-                        weight = int(weight)
+                        weight = float(weight)
                         if weight == 0:
                             raise serializers.ValidationError({
                                 'weight': 'Improperly weight set'
@@ -291,11 +291,11 @@ class OrderSerializer(serializers.ModelSerializer):
             alias: alias,
             assignee: assignee_id,
             customer: customer_id,
+            due_time: due_time,
             loading_stations:[
                 {
                     loading_station: station_id,
                     quality_station: station_id,
-                    due_time: due_time,
                     products: [
                         product: product_id,
                         total_weight: total_weight
@@ -386,7 +386,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     })
 
                 total_weight = product_data.get('total_weight', 0)
-                total_weight = int(total_weight)
+                total_weight = float(total_weight)
                 if total_weight == 0:
                     raise serializers.ValidationError({
                         'total_weight': 'Improperly weight set'
@@ -402,7 +402,7 @@ class OrderSerializer(serializers.ModelSerializer):
                             pk=unloading_station_id
                         )
                         weight = unloading_station_data.get('weight', 0)
-                        weight = int(weight)
+                        weight = float(weight)
                         if weight == 0:
                             raise serializers.ValidationError({
                                 'weight': 'Improperly weight set'

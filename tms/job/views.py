@@ -42,7 +42,7 @@ class JobViewSet(TMSViewSet):
                 ):
                     job['mission_ids'].append(deliver_id)
                     job['mission_weights'].append(mission_weight)
-                    job['total_weight'] += int(mission_weight)
+                    job['total_weight'] += float(mission_weight)
                     new_job = False
                     continue
 
@@ -55,7 +55,7 @@ class JobViewSet(TMSViewSet):
                     'route': route_id,
                     'mission_ids': [deliver_id],
                     'mission_weights': [mission_weight],
-                    'total_weight': int(mission_weight)
+                    'total_weight': float(mission_weight)
                 })
 
         for job in jobs:

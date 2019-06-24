@@ -703,6 +703,7 @@
         "assignee": 2,
         "customer": 5,
         "order_source": "I",
+        "due_time": "2019-05-19T00:00:00+00:00",
         "status": "P",
         "created": "2019-05-19T00:00:00+00:00",
         "updated": "2019-05-19T00:00:00+00:00"
@@ -717,6 +718,7 @@
         "customer": 5,
         "order_source": "I",
         "status": "C",
+        "due_time": "2019-05-19T00:00:00+00:00",
         "created": "2019-05-16T00:00:00+00:00",
         "updated": "2019-05-16T00:00:00+00:00"
     }
@@ -730,6 +732,7 @@
         "customer": 5,
         "order_source": "I",
         "status": "C",
+        "due_time": "2019-05-19T00:00:00+00:00",
         "created": "2019-05-16T00:00:00+00:00",
         "updated": "2019-05-16T00:00:00+00:00"
     }
@@ -743,6 +746,7 @@
         "customer": 5,
         "order_source": "I",
         "status": "C",
+        "due_time": "2019-05-19T00:00:00+00:00",
         "created": "2019-05-16T00:00:00+00:00",
         "updated": "2019-05-16T00:00:00+00:00"
     }
@@ -753,8 +757,7 @@
     "fields": {
         "order": 1,
         "loading_station": 1,
-        "quality_station": 19,
-        "due_time": "2019-05-21T00:00:00+00:00"
+        "quality_station": 19
     }
   },
   {
@@ -763,8 +766,7 @@
     "fields": {
         "order": 2,
         "loading_station": 1,
-        "quality_station": 19,
-        "due_time": "2019-05-18T00:00:00+00:00"
+        "quality_station": 19
     }
   },
   {
@@ -773,8 +775,7 @@
     "fields": {
         "order": 3,
         "loading_station": 1,
-        "quality_station": 19,
-        "due_time": "2019-05-18T00:00:00+00:00"
+        "quality_station": 19
     }
   },
   {
@@ -783,8 +784,7 @@
     "fields": {
         "order": 4,
         "loading_station": 1,
-        "quality_station": 19,
-        "due_time": "2019-05-18T00:00:00+00:00"
+        "quality_station": 19
     }
   },
   {

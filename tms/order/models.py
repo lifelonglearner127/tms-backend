@@ -40,6 +40,8 @@ class Order(TimeStampedModel):
         default=c.ORDER_STATUS_PENDING
     )
 
+    due_time = models.DateTimeField()
+
     loading_stations = models.ManyToManyField(
         Station,
         through='OrderLoadingStation',
@@ -114,16 +116,14 @@ class OrderLoadingStation(models.Model):
         blank=True
     )
 
-    due_time = models.DateTimeField()
-
     products = models.ManyToManyField(
         Product,
         through='OrderProduct'
     )
 
     def __str__(self):
-        return '{} - Load from {} at {}'.format(
-            self.order.alias, self.loading_station.name, self.due_time
+        return '{} - Load from {}'.format(
+            self.order.alias, self.loading_station.name
         )
 
 
