@@ -1,5 +1,9 @@
+import json
 from channels.generic.websocket import JsonWebsocketConsumer
 from asgiref.sync import async_to_sync
+
+from . import models as m
+from . import serializers as s
 from ..account.models import User
 
 
@@ -21,9 +25,26 @@ class NotificationConsumer(JsonWebsocketConsumer):
         pass
 
     def notify(self, event):
-        self.send_json({
-            'content': event['data']
-        })
+        data = json.loads(event['data'])
+        plate_num = data['plate_num']
+        msg_type = int(data['msg_type'])
+        try:
+            message = "A new mission is assigned to you."\
+                "Please use {}".format(plate_num)
+
+            user = User.drivers.get(pk=data['user_id'])
+            notification = m.Notification.objects.create(
+                user=user,
+                message=message,
+                msg_type=msg_type
+            )
+
+            self.send_json({
+                'content':
+                json.dumps(s.NotificationSerializer(notification).data)
+            })
+        except User.DoesNotExists:
+            pass
 
 
 class PositionConsumer(JsonWebsocketConsumer):

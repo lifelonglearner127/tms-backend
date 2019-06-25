@@ -50,24 +50,20 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
             except VehicleUserBind.DoesNotExists:
                 pass
 
-    # send notfication to driver
-    message = "A new mission is assigned to you."\
-        "Please use {}".format(instance.vehicle)
-
-    notification = Notification.objects.create(
-        user=instance.driver,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
-    )
-
-    if instance.driver.channel_name is not None:
-        async_to_sync(channel_layer.send)(
-            instance.driver.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(NotificationSerializer(notification).data)
-            }
-        )
+    if instance.progress == c.JOB_PROGRESS_NOT_STARTED:
+        # send notfication to driver
+        if instance.driver.channel_name is not None:
+            async_to_sync(channel_layer.send)(
+                instance.driver.channel_name,
+                {
+                    'type': 'notify',
+                    'data': json.dumps({
+                        'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
+                        'plate_num': instance.vehicle.plate_num,
+                        'user_id': instance.driver.id
+                    })
+                }
+            )
 
 
 @receiver(post_save, sender=m.ParkingRequest)
