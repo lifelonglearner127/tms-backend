@@ -296,14 +296,13 @@ NOTIFICATION_TYPE = (
     (DRIVER_NOTIFICATION_TYPE_EXIT_AREA, 'Exit Area Notification'),
     (DRIVER_NOTIFICATION_TYPE_BLACK_DOT, 'Black Dot Notification'),
     (STAFF_NOTIFICATION_REST_REQUEST, 'Rest Request Notification'),
-    (STAFF_NOTIFICATION_VEHICLE_REPAIR_REQUEST, 'Vehicle Maintenance Notification'),
+    (STAFF_NOTIFICATION_VEHICLE_REPAIR_REQUEST,
+        'Vehicle Maintenance Notification'),
     (STAFF_NOTIFICATION_PARKING_REQUEST, 'Parking Request Notification'),
     (STAFF_NOTIFICATION_DRIVER_CHANGE_REQUEST, 'Driver Change Notification'),
     (STAFF_NOTIFICATION_ESCORT_CHANGE_REQUEST, 'Escort Change Notification'),
     (STAFF_NOTIFICATION_TRAFFIC_ACCIDENT, 'Traffic Accident Notification')
 )
-
-
 
 
 # finance app
