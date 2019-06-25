@@ -9,7 +9,7 @@ User=root
 Group=root
 WorkingDirectory=/root/Projects/tms-backend
 Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
-ExecStart=/root/.virtualenvs/tms-backend/bin/python mqtt/asgimqtt.py --settings /root/.virtualenvs/tms-backend/.env config.asgi:channel_layer
+ExecStart=/root/.virtualenvs/tms-backend/bin/python mqtt/asgimqtt.py --settings .env config.asgi:channel_layer
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 Restart=always
