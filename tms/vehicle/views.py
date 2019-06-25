@@ -217,4 +217,4 @@ class VehicleUserBindViewSet(TMSViewSet):
     serializer_class = s.VehicleUserBindSerializer
 
     def get_queryset(self):
-        return m.VehicleUserBind.binds_by_admin.all()        
+        return m.VehicleUserBind.binds_by_admin.all()

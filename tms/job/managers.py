@@ -9,7 +9,7 @@ class PendingJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.JOB_STATUS_PENDING
+            progress=c.JOB_PROGRESS_NOT_STARTED
         )
 
 
@@ -19,7 +19,7 @@ class InProgressJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.JOB_STATUS_INPROGRESS
+            progress__gt=c.JOB_PROGRESS_NOT_STARTED
         )
 
 
@@ -29,5 +29,5 @@ class CompleteJobManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.JOB_STATUS_COMPLETE
+            progress=c.JOB_PROGRESS_COMPLETE
         )

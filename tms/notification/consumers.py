@@ -4,7 +4,10 @@ from asgiref.sync import async_to_sync
 
 from . import models as m
 from . import serializers as s
+from ..core import constants as c
 from ..account.models import User
+from ..info.models import Station
+from ..job.models import Job
 
 
 class NotificationConsumer(JsonWebsocketConsumer):
@@ -19,22 +22,55 @@ class NotificationConsumer(JsonWebsocketConsumer):
             self.close()
 
     def disconnect(self, close_code):
-        pass
+        self.user.channel_name = ''
+        self.user.save()
 
     def receive(self, text_data):
         pass
 
     def notify(self, event):
         data = json.loads(event['data'])
-        plate_num = data['plate_num']
         msg_type = int(data['msg_type'])
-        try:
+        plate_num = data['plate_num']
+        message = ''
+
+        if msg_type == c.DRIVER_NOTIFICATION_TYPE_JOB:
             message = "A new mission is assigned to you."\
                 "Please use {}".format(plate_num)
+        elif msg_type in [
+            c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA,
+            c.DRIVER_NOTIFICATION_TYPE_EXIT_AREA
+        ]:
+            try:
+                station = Station.objects.get(
+                    latitude=data['station_pos'][0],
+                    longitude=data['station_pos'][1]
+                )
+                if station.station_type == c.STATION_TYPE_BLACK_DOT:
+                    if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA:
+                        message = station.notification_message
+                    else:
+                        message = "Out of this black dot"
 
-            user = User.drivers.get(pk=data['user_id'])
+                else:
+                    job = Job.inprogress.filter(
+                        vehicle__plate_num=plate_num,
+                        driver=self.user
+                    ).first()
+                    if job is None or job.route is None:
+                        return
+
+                    if station in job.route.stations:
+                        if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA:
+                            message = "In {}".format(station.name)
+                        else:
+                            message = "Out of {}".format(station.name)
+            except Station.objects.DoesNotExists:
+                return
+
+        if message:
             notification = m.Notification.objects.create(
-                user=user,
+                user=self.user,
                 message=message,
                 msg_type=msg_type
             )
@@ -43,8 +79,6 @@ class NotificationConsumer(JsonWebsocketConsumer):
                 'content':
                 json.dumps(s.NotificationSerializer(notification).data)
             })
-        except User.DoesNotExists:
-            pass
 
 
 class PositionConsumer(JsonWebsocketConsumer):

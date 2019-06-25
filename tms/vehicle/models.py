@@ -286,5 +286,5 @@ class VehicleUserBind(models.Model):
 
     class Meta:
         unique_together = (
-            'vehicle', 'driver'
+            'vehicle', 'driver', 'escort'
         )

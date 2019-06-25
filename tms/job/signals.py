@@ -59,8 +59,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                     'type': 'notify',
                     'data': json.dumps({
                         'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
-                        'plate_num': instance.vehicle.plate_num,
-                        'user_id': instance.driver.id
+                        'plate_num': instance.vehicle.plate_num
                     })
                 }
             )

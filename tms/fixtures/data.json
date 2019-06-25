@@ -631,6 +631,20 @@
     }
   },
   {
+    "model": "info.Station",
+    "pk": 21,
+    "fields": {
+        "name": "Black dot",
+        "station_type": "B",
+        "longitude": 106.357428,
+        "latitude": 49.90923,
+        "radius": 100,
+        "notification_message": "Do not run at high speed",
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
       "model": "vehicle.Vehicle",
       "pk": 1,
       "fields": {

@@ -22,14 +22,33 @@ r = redis.StrictRedis(host='localhost', port=6379, db=15)
 
 class Config:
     stations = []
-    db_url = ''
-    host = ''
-    port = ''
-    topic = ''
-    client_id = ''
-    username = ''
-    password = ''
-    qos = ''
+    vehicles = []
+    DB_URL = ''
+    HOST = ''
+    PORT = ''
+    TOPIC = ''
+    CLIENT_ID = ''
+    USERNAME = ''
+    PASSWORD = ''
+    QOS = ''
+    DEBUG = False
+    VEHICLE_OUT_AREA = 0
+    VEHICLE_IN_AREA = 1
+    VEHICLE_ENTER_EVENT = 1
+    VEHICLE_EXIT_EVENT = 2
+
+    CHANNEL_NAME_QUERY = """
+        SELECT id, channel_name
+        FROM account_user
+        RIGHT JOIN(
+            SELECT bind.driver_id as driver_id
+            FROM vehicle_vehicleuserbind AS bind
+            LEFT JOIN vehicle_vehicle AS vehicle
+            ON bind.vehicle_id = vehicle.id
+            WHERE vehicle.plate_num='{}'
+        ) AS vehiclebind
+        ON account_user.id = vehiclebind.driver_id;
+        """
 
     @classmethod
     def read_env(cls, filename):
@@ -38,39 +57,56 @@ class Config:
             while line:
                 key_value = line.split('=')
                 if key_value[0] == 'DATABASE_URL':
-                    cls.db_url = key_value[1][:-1]
+                    cls.DB_URL = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_HOST':
-                    cls.host = key_value[1][:-1]
+                    cls.HOST = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_PORT':
-                    cls.port = int(key_value[1][:-1])
+                    cls.PORT = int(key_value[1][:-1])
                 elif key_value[0] == 'G7_MQTT_POSITION_TOPIC':
-                    cls.topic = key_value[1][:-1]
+                    cls.TOPIC = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_POSITION_CLIENT_ID':
-                    cls.client_id = key_value[1][:-1]
+                    cls.CLIENT_ID = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_POSITION_ACCESS_ID':
-                    cls.username = key_value[1][:-1]
+                    cls.USERNAME = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_POSITION_SECRET':
-                    cls.password = key_value[1][:-1]
+                    cls.PASSWORD = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_QOS':
-                    cls.qos = int(key_value[1][:-1])
+                    cls.QOS = int(key_value[1][:-1])
 
                 line = fd.readline()
 
     @classmethod
-    def load_station_data_from_db(cls):
-        try:
-            connection = psycopg2.connect(cls.db_url)
-            cursor = connection.cursor()
+    def load_data_from_db(cls,
+                          updated_stations=True,
+                          updated_vehicles=True):
+        if not updated_stations and not updated_vehicles:
+            return
 
-            cursor.execute("""
-                SELECT longitude, latitude, radius
-                FROM info_station
-            """)
-            results = cursor.fetchall()
-            for row in results:
-                cls.stations.append([row[0], row[1], row[2]])
-            print(cls.stations)
-            r.set('station', 'read')
+        try:
+            connection = psycopg2.connect(cls.DB_URL)
+            cursor = connection.cursor()
+            if updated_stations:
+                print('Loading updated station...')
+                cursor.execute("""
+                    SELECT latitude, longitude, radius
+                    FROM info_station
+                """)
+                results = cursor.fetchall()
+                for row in results:
+                    cls.stations.append([row[0], row[1], row[2]])
+                r.set('station', 'read')
+
+            if updated_vehicles:
+                print('Loading updated vehicles...')
+                cursor.execute("""
+                    SELECT plate_num
+                    FROM vehicle_vehicle
+                """)
+                results = cursor.fetchall()
+                for row in results:
+                    cls.vehicles.append({row[0]: cls.VEHICLE_OUT_AREA})
+                r.set('vehicle', 'read')
+
             cursor.close()
         except psycopg2.DatabaseError:
             pass
@@ -121,16 +157,120 @@ def _on_message(client, userdata, message):
         }
     )
 
-    if r.get('station') == b'updated':
-        Config.load_station_data_from_db()
+    Config.load_data_from_db(
+        r.get('station') == b'updated',
+        r.get('vehicle') == b'updated',
+    )
+
+    if Config.DEBUG:
+        try:
+            connection = psycopg2.connect(Config.DB_URL)
+            cursor = connection.cursor()
+            cursor.execute(
+                Config.CHANNEL_NAME_QUERY.format('鲁UG2802')
+            )
+            result = cursor.fetchone()
+            if result is not None and result[1] is not None:
+                async_to_sync(channel_layer.send)(
+                    result[1],
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': Config.VEHICLE_ENTER_EVENT,
+                            'plate_num': '鲁UG2802',
+                            'station_pos': (39.90923, 117.397428)
+                        })
+                    }
+                )
+                async_to_sync(channel_layer.send)(
+                    result[1],
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': Config.VEHICLE_EXIT_EVENT,
+                            'plate_num': '鲁UG2802',
+                            'station_pos': (39.90923, 117.397428)
+                        })
+                    }
+                )
+
+                # black dot
+                async_to_sync(channel_layer.send)(
+                    result[1],
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': Config.VEHICLE_ENTER_EVENT,
+                            'plate_num': '鲁UG2802',
+                            'station_pos': (49.90923, 106.357428)
+                        })
+                    }
+                )
+                async_to_sync(channel_layer.send)(
+                    result[1],
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': Config.VEHICLE_EXIT_EVENT,
+                            'plate_num': '鲁UG2802',
+                            'station_pos': (49.90923, 106.357428)
+                        })
+                    }
+                )
+
+            cursor.close()
+        except psycopg2.DatabaseError:
+            pass
+        finally:
+            if connection is not None:
+                connection.close()
+                print('Database connection closed.')
 
     # area enter & exit event
     for vehicle in vehicles:
+        plate_num = vehicle['plateNum']
         vehicle_pos = (vehicle['lat'], vehicle['lng'])
         for station in Config.stations:
             station_pos = (station[0], station[1])
-            if distance.distance(vehicle_pos, station_pos).m < station[2]:
-                pass
+            enter_exit_event = 0
+            delta_distance = distance.distance(vehicle_pos, station_pos).m
+            if delta_distance < station[2] and\
+               Config.vehicles[plate_num] == Config.VEHICLE_OUT_AREA:
+                Config.vehicles[plate_num] = Config.VEHICLE_IN_AREA
+                enter_exit_event = Config.VEHICLE_ENTER_EVENT
+
+            if delta_distance > station[2] and\
+               Config.vehicles[plate_num] == Config.VEHICLE_IN_AREA:
+                Config.vehicles[plate_num] = Config.VEHICLE_OUT_AREA
+                enter_exit_event = Config.VEHICLE_EXIT_EVENT
+
+            if enter_exit_event:
+                try:
+                    connection = psycopg2.connect(Config.DB_URL)
+                    cursor = connection.cursor()
+                    cursor.execute(
+                        Config.CHANNEL_NAME_QUERY.format(plate_num)
+                    )
+                    result = cursor.fetchone()
+                    if result is not None:
+                        async_to_sync(channel_layer.send)(
+                            result[1],
+                            {
+                                'type': 'notify',
+                                'data': json.dumps({
+                                    'msg_type': enter_exit_event,
+                                    'plate_num': plate_num,
+                                    'station_pos': station_pos
+                                })
+                            }
+                        )
+                    cursor.close()
+                except psycopg2.DatabaseError:
+                    pass
+                finally:
+                    if connection is not None:
+                        connection.close()
+                        print('Database connection closed.')
 
 
 def _on_disconnect(client, userdata, rc):
@@ -169,7 +309,10 @@ if __name__ == '__main__':
 
     ap = argparse.ArgumentParser(description='MQTT bridge for our ASGI')
     ap.add_argument(
-        '-s', '--settings', help='MQTT broker host', default='localhost'
+        '-s', '--settings', help='Location to django env file, .env'
+    )
+    ap.add_argument(
+        '-d', '--debug', help='Set debug mode', action='store_true'
     )
     ap.add_argument(
         'channel_layer', help='ASGI channel layer instance'
@@ -179,9 +322,11 @@ if __name__ == '__main__':
     channel_layer = get_channel_layer(args.channel_layer)
 
     Config.read_env(args.settings)
+    Config.DEBUG = args.debug
+    Config.load_data_from_db()
 
     asgi_client = ASGIMQTTClient(
-        Config.host, Config.port, Config.client_id, Config.username,
-        Config.password, Config.topic, Config.qos, channel_layer
+        Config.HOST, Config.PORT, Config.CLIENT_ID, Config.USERNAME,
+        Config.PASSWORD, Config.TOPIC, Config.QOS, channel_layer
     )
     asgi_client.run()

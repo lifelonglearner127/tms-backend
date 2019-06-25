@@ -1,11 +1,8 @@
-import redis
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 
 from . import models as m
-
-
-r = redis.StrictRedis(host='localhost', port=6379, db=15)
+from ..core.redis import r
 
 
 @receiver([post_save, post_delete], sender=m.Station)
