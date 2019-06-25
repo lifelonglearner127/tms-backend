@@ -22,7 +22,7 @@ r = redis.StrictRedis(host='localhost', port=6379, db=15)
 
 class Config:
     stations = []
-    vehicles = []
+    vehicles = {}
     DB_URL = ''
     HOST = ''
     PORT = ''
@@ -86,7 +86,8 @@ class Config:
             connection = psycopg2.connect(cls.DB_URL)
             cursor = connection.cursor()
             if updated_stations:
-                print('Loading updated station...')
+                if Config.DEBUG:
+                    print('[Load Data]: Loading updated station...')
                 cursor.execute("""
                     SELECT latitude, longitude, radius
                     FROM info_station
@@ -94,17 +95,26 @@ class Config:
                 results = cursor.fetchall()
                 for row in results:
                     cls.stations.append([row[0], row[1], row[2]])
+
+                if Config.DEBUG:
+                    print('[Load Data]: ', cls.stations)
+
                 r.set('station', 'read')
 
             if updated_vehicles:
-                print('Loading updated vehicles...')
+                if Config.DEBUG:
+                    print('[Load Data]: Loading updated vehicles...')
                 cursor.execute("""
                     SELECT plate_num
                     FROM vehicle_vehicle
                 """)
                 results = cursor.fetchall()
                 for row in results:
-                    cls.vehicles.append({row[0]: cls.VEHICLE_OUT_AREA})
+                    cls.vehicles[row[0]] = cls.VEHICLE_OUT_AREA
+
+                if Config.DEBUG:
+                    print('[Load Data]: ', cls.vehicles)
+
                 r.set('vehicle', 'read')
 
             cursor.close()
@@ -113,7 +123,8 @@ class Config:
         finally:
             if connection is not None:
                 connection.close()
-                print('Database connection closed.')
+                if Config.DEBUG:
+                    print('[Load Data]: Database connection closed.')
 
 
 def get_channel_layer(channel_name):
@@ -127,20 +138,29 @@ def get_channel_layer(channel_name):
 
 
 def _on_connect(client, userdata, flags, rc):
-    print('connected')
+    if Config.DEBUG:
+        print('[G7]: Connected to MQTT Server')
     client.subscribe(userdata['topic'], userdata['qos'])
 
 
 def _on_message(client, userdata, message):
-    print('message_received')
+    if Config.DEBUG:
+        print('[G7]: Received message')
+
     response = json.loads(message.payload.decode('utf-8'))
     vehicles = response.get('data', None)
+
+    if Config.DEBUG:
+        print('[G7]: ', vehicles)
 
     if vehicles is None:
         return
 
     positions = []
     for vehicle in vehicles:
+        if int(vehicle['speed']) == 0:
+            continue
+
         positions.append({
             'plateNum': vehicle['plateNum'],
             'lnglat': [vehicle['lng'], vehicle['lat']],
@@ -170,6 +190,8 @@ def _on_message(client, userdata, message):
                 Config.CHANNEL_NAME_QUERY.format('鲁UG2802')
             )
             result = cursor.fetchone()
+            print('[Enter & Exit]: User ', result)
+
             if result is not None and result[1] is not None:
                 async_to_sync(channel_layer.send)(
                     result[1],
@@ -224,25 +246,44 @@ def _on_message(client, userdata, message):
         finally:
             if connection is not None:
                 connection.close()
-                print('Database connection closed.')
+                print('[Enter & Exit]: Database connection closed.')
 
     # area enter & exit event
     for vehicle in vehicles:
+        if int(vehicle['speed']) == 0:
+            continue
         plate_num = vehicle['plateNum']
         vehicle_pos = (vehicle['lat'], vehicle['lng'])
+        if Config.DEBUG:
+            print('[GeoPy]: Current {} Position - ({}, {})'.format(
+                plate_num, vehicle['lat'], vehicle['lng']
+            ))
         for station in Config.stations:
             station_pos = (station[0], station[1])
             enter_exit_event = 0
             delta_distance = distance.distance(vehicle_pos, station_pos).m
+
+            if Config.DEBUG:
+                print('[GeoPy]: Distance with ({}, {}) is {}'.format(
+                    station[0], station[1], delta_distance
+                ))
             if delta_distance < station[2] and\
                Config.vehicles[plate_num] == Config.VEHICLE_OUT_AREA:
                 Config.vehicles[plate_num] = Config.VEHICLE_IN_AREA
                 enter_exit_event = Config.VEHICLE_ENTER_EVENT
+                if Config.DEBUG:
+                    print('[GeoPy]: {} enter into ({}, {})'.format(
+                        plate_num, station[0], station[1]
+                    ))
 
             if delta_distance > station[2] and\
                Config.vehicles[plate_num] == Config.VEHICLE_IN_AREA:
                 Config.vehicles[plate_num] = Config.VEHICLE_OUT_AREA
                 enter_exit_event = Config.VEHICLE_EXIT_EVENT
+                if Config.DEBUG:
+                    print('[G7]: {} exit from ({}, {})'.format(
+                        plate_num, station[0], station[1]
+                    ))
 
             if enter_exit_event:
                 try:
@@ -270,11 +311,14 @@ def _on_message(client, userdata, message):
                 finally:
                     if connection is not None:
                         connection.close()
-                        print('Database connection closed.')
+                        if Config.DEBUG:
+                            print(
+                                '[Enter & Exit]: Database connection closed.'
+                            )
 
 
 def _on_disconnect(client, userdata, rc):
-    print('disconnected')
+    print('[G7]: Disconnected')
 
 
 class ASGIMQTTClient(object):
