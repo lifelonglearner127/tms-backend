@@ -227,44 +227,32 @@ class JobViewSet(TMSViewSet):
 
         elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
             us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
-            if us_progress == 0:
-                current_mission = job.mission_set.filter(
-                    is_completed=False
-                ).first()
-                current_mission.arrived_station_on = datetime.now()
-                current_mission.save()
+            current_mission = job.mission_set.filter(
+                is_completed=False
+            ).first()
+            if current_mission is not None:
+                if us_progress == 0:
+                    current_mission.arrived_station_on = datetime.now()
 
-            elif us_progress == 1:
-                current_mission = job.mission_set.filter(
-                    is_completed=False
-                ).first()
-                current_mission.started_unloading_on = datetime.now()
-                current_mission.save()
+                elif us_progress == 1:
+                    current_mission.started_unloading_on = datetime.now()
 
-            elif us_progress == 2:
-                current_mission = job.mission_set.filter(
-                    is_completed=False
-                ).first()
-                current_mission.finished_unloading_on = datetime.now()
-                current_mission.save()
+                elif us_progress == 2:
+                    current_mission.finished_unloading_on = datetime.now()
 
-            elif us_progress == 3:
-                current_mission = job.mission_set.filter(
-                    is_completed=False
-                ).first()
-                current_mission.is_completed = True
-                current_mission.departure_station_on = datetime.now()
-                current_mission.save()
+                elif us_progress == 3:
+                    current_mission.is_completed = True
+                    current_mission.departure_station_on = datetime.now()
+                    current_mission.save()
 
-                if not job.mission_set.filter(is_completed=False).exists():
-                    job.progress = c.JOB_PROGRESS_COMPLETE
-                    job.finished_on = datetime.now()
-                    job.save()
-                    return Response(
-                        s.JobProgressSerializer(job).data,
-                        status=status.HTTP_200_OK
-                    )
-
+                    if not job.mission_set.filter(is_completed=False).exists():
+                        job.progress = c.JOB_PROGRESS_COMPLETE
+                        job.finished_on = datetime.now()
+                        job.save()
+                        return Response(
+                            s.JobProgressSerializer(job).data,
+                            status=status.HTTP_200_OK
+                        )
         job.progress = progress + 1
         job.save()
 
