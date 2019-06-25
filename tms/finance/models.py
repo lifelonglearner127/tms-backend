@@ -120,17 +120,22 @@ class BillDocument(CreatedTimeModel):
 
     cost = models.DecimalField(
         max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES
+        decimal_places=c.PRICE_DECIMAL_PLACES,
+        null=True,
+        blank=True
     )
 
     bill = models.ImageField()
 
     category = models.PositiveIntegerField(
-        choices=c.BILL_CATEGORY,
-        default=c.BILL_FROM_LOADING_STATION
+        choices=c.BILL_CATEGORY
     )
 
     sub_category = models.PositiveIntegerField(
+        default=0
+    )
+
+    detail_category = models.PositiveIntegerField(
         default=0
     )
 

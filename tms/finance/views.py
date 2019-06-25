@@ -42,7 +42,7 @@ class BillDocumentViewSet(TMSViewSet):
         if user_id is None:
             user = request.user
         else:
-            user = get_object_or_404(User, pk=user)
+            user = get_object_or_404(User, pk=user_id)
 
         serializer = s.BillDocumentSerializer(
             data=request.data,
@@ -59,11 +59,11 @@ class BillDocumentViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        user = request.data.pop('user', None)
-        if user is None:
+        user_id = request.data.pop('user', None)
+        if user_id is None:
             user = request.user
         else:
-            user = User.objects.get(pk=user)
+            user = User.objects.get(pk=user_id)
 
         serializer = s.BillDocumentSerializer(
             instance,

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from django.db.models import Q
 from django.utils import timezone as datetime
 from rest_framework import viewsets, status
@@ -286,23 +287,56 @@ class JobViewSet(TMSViewSet):
     )
     def bill_documents(self, request, pk=None):
         job = self.get_object()
-        category = request.query_params.get('category', None)
+        bills = job.bills.all()
 
+        category = request.query_params.get('category', None)
         if category is not None:
-            serializer = BillDocumentSerializer(
-                job.bills.filter(category=category),
-                many=True,
-                context={'request': request}
-            )
-        else:
-            serializer = BillDocumentSerializer(
-                job.bills.all(),
-                many=True,
-                context={'request': request}
-            )
+            bills = job.bills.filter(category=category)
+
+        bills_by_categories = defaultdict(lambda: defaultdict(list))
+
+        for bill in bills:
+            bills_by_categories[bill.category][bill.sub_category].append(bill)
+
+        new_bills = []
+        category_choices = dict((x, y) for x, y in c.BILL_CATEGORY)
+
+        for category, group_by_category in bills_by_categories.items():
+            bills_by_subcategories = []
+            if category == c.BILL_FROM_LOADING_STATION:
+                sub_categories = c.LOADING_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_QUALITY_STATION:
+                sub_categories = c.QUALITY_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_UNLOADING_STATION:
+                sub_categories = c.UNLOADING_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_OIL_STATION:
+                sub_categories = c.OIL_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_TRAFFIC:
+                sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_OTHER:
+                sub_categories = c.OTHER_BILL_SUB_CATEGORY
+            sub_category_choices = dict((x, y) for x, y in sub_categories)
+
+            for sub_category, group_by_sub_category in group_by_category.items():
+                bills_by_subcategories.append({
+                    'sub_category': {
+                        'value': sub_category,
+                        'text': sub_category_choices[sub_category]
+                    },
+                    'data': BillDocumentSerializer(
+                        group_by_sub_category, many=True
+                    ).data
+                })
+            new_bills.append({
+                'category': {
+                    'value': category,
+                    'text': category_choices[category]
+                },
+                'data': bills_by_subcategories
+            })
 
         return Response(
-            serializer.data,
+            new_bills,
             status=status.HTTP_200_OK
         )
 
