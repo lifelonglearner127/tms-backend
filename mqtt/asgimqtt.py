@@ -193,6 +193,7 @@ def _on_message(client, userdata, message):
             print('[Enter & Exit]: User ', result)
 
             if result is not None and result[1] is not None:
+                print('[Enter & Exit]: Websocket exists')
                 async_to_sync(channel_layer.send)(
                     result[1],
                     {
@@ -204,6 +205,7 @@ def _on_message(client, userdata, message):
                         })
                     }
                 )
+                print('[Enter & Exit]: Sent Vehicle Enter event')
                 async_to_sync(channel_layer.send)(
                     result[1],
                     {
@@ -215,7 +217,7 @@ def _on_message(client, userdata, message):
                         })
                     }
                 )
-
+                print('[Enter & Exit]: Sent Vehicle Exit event')
                 # black dot
                 async_to_sync(channel_layer.send)(
                     result[1],
@@ -228,6 +230,7 @@ def _on_message(client, userdata, message):
                         })
                     }
                 )
+                print('[Enter & Exit]: Sent Vehicle Enter event')
                 async_to_sync(channel_layer.send)(
                     result[1],
                     {
@@ -239,6 +242,7 @@ def _on_message(client, userdata, message):
                         })
                     }
                 )
+                print('[Enter & Exit]: Sent Vehicle Exit event')
 
             cursor.close()
         except psycopg2.DatabaseError:
