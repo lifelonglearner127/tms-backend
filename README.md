@@ -112,6 +112,10 @@ docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
 5. Explanation
 Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.
 Check the `deploy` folder
+ - Debugging Enter & Exit Area
+```
+python mqtt/asgimqtt.py --settings .env --debug config.asgi:channel_layer
+```
 
 
 ## About Project
