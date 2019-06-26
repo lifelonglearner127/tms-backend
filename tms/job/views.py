@@ -183,17 +183,18 @@ class JobViewSet(TMSViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def future_jobs(self, request):
-        serializer = s.JobDataViewSerializer(
+        page = self.paginate_queryset(
             request.user.jobs_as_driver.filter(
                 progress=c.JOB_PROGRESS_NOT_STARTED
-            ),
+            )
+        )
+
+        serializer = s.JobDataViewSerializer(
+            page,
             many=True
         )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=True, url_path='update-progress',
