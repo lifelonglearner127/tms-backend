@@ -324,7 +324,9 @@ class JobViewSet(TMSViewSet):
                         'text': sub_category_choices[sub_category]
                     },
                     'data': BillDocumentSerializer(
-                        group_by_sub_category, many=True
+                        group_by_sub_category,
+                        context={'request': request},
+                        many=True
                     ).data
                 })
             new_bills.append({
