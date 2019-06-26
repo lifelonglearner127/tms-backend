@@ -4,6 +4,15 @@ from ..core import constants as c
 from ..core.serializers import TMSChoiceField
 
 
+class ShortProductDisplaySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Product
+        fields = (
+            'name',
+        )
+
+
 class ShortProductSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Product

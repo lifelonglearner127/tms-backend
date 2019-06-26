@@ -332,6 +332,22 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(
+        detail=False, url_path="overview"
+    )
+    def get_jobs_overview(self, request):
+        page = self.paginate_queryset(
+            request.user.jobs_as_driver.filter(
+                progress=c.JOB_PROGRESS_COMPLETE
+            )
+        )
+
+        serializer = s.JobOverViewSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
 
 class MissionViewSet(viewsets.ModelViewSet):
     """

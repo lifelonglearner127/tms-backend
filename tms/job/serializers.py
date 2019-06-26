@@ -6,16 +6,22 @@ from rest_framework import serializers
 from . import models as m
 from ..core import constants as c
 from ..core.utils import format_datetime
-from ..account.serializers import ShortUserSerializer
+
+# model
 from ..order.models import OrderProductDeliver
+
+# serializers
+from ..account.serializers import ShortUserSerializer
+from ..finance.serializers import (
+    BillDocumentSerializer, ShortBillDocumentSerializer
+)
+from ..info.serializers import ShortProductDisplaySerializer
 from ..order.serializers import (
     ShortOrderSerializer, ShortOrderProductDeliverSerializer,
     ShortStationSerializer,
 )
-from ..info.serializers import ShortProductSerializer
-from ..vehicle.serializers import ShortVehicleSerializer
 from ..road.serializers import ShortRouteSerializer
-from ..finance.serializers import BillDocumentSerializer
+from ..vehicle.serializers import ShortVehicleSerializer
 
 
 class ShortMissionSerializer(serializers.ModelSerializer):
@@ -136,7 +142,7 @@ class JobDataViewSerializer(serializers.ModelSerializer):
     driver = ShortUserSerializer()
     escort = ShortUserSerializer()
     stations = StationField(source='*')
-    products = ShortProductSerializer(
+    products = ShortProductDisplaySerializer(
         source='order.products', many=True
     )
     progress_bar = JobProgressBarField(source='*')
@@ -150,8 +156,118 @@ class JobDataViewSerializer(serializers.ModelSerializer):
         )
 
 
-class JobBillViewSerializer(serializers.ModelSerializer):
+class JobMileageField(serializers.Field):
 
+    def to_representation(self, instance):
+        return {
+            'total_mileage': instance.total_mileage,
+            'highway_mileage': instance.highway_mileage,
+            'empty_mileage': instance.empty_mileage,
+            'heavy_mileage':  instance.heavy_mileage
+        }
+
+
+class JobDeliverField(serializers.Field):
+
+    def to_representation(self, instance):
+        ret = []
+        for mission in instance.mission_set.all():
+            ret.append({
+                'mission_weight': mission.mission_weight,
+                'loading_weight': mission.loading_weight,
+                'unloading_weight': mission.unloading_weight
+            })
+        return ret
+
+
+class JobOverViewSerializer(serializers.ModelSerializer):
+    """
+    Job overview serializer for driver app
+    """
+    products = ShortProductDisplaySerializer(
+        source='order.products',
+        many=True
+    )
+
+    mileage = JobMileageField(source='*')
+    delivers = JobDeliverField(source='*')
+    bills = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'started_on', 'finished_on', 'products', 'total_weight',
+            'mileage', 'delivers', 'bills'
+        )
+
+    def get_bills(self, job):
+        bill_type = self.context.get('bill_type', 'all')
+
+        bills = job.bills.all()
+        if bill_type == 'station':
+            bills = bills.filter(
+                category__in=[
+                    c.BILL_FROM_LOADING_STATION, c.BILL_FROM_QUALITY_STATION,
+                    c.BILL_FROM_UNLOADING_STATION
+                ]
+            )
+        elif bill_type == 'other':
+            bills = bills.filter(
+                category__in=[
+                    c.BILL_FROM_OIL_STATION, c.BILL_FROM_TRAFFIC,
+                    c.BILL_FROM_OTHER
+                ]
+            )
+
+        bills_by_categories = defaultdict(lambda: defaultdict(list))
+
+        for bill in bills:
+            bills_by_categories[bill.category][bill.sub_category].append(bill)
+
+        new_bills = []
+        category_choices = dict((x, y) for x, y in c.BILL_CATEGORY)
+
+        for category, group_by_category in bills_by_categories.items():
+            bills_by_subcategories = []
+            if category == c.BILL_FROM_LOADING_STATION:
+                sub_categories = c.LOADING_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_QUALITY_STATION:
+                sub_categories = c.QUALITY_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_UNLOADING_STATION:
+                sub_categories = c.UNLOADING_STATION_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_OIL_STATION:
+                sub_categories = c.OIL_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_TRAFFIC:
+                sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
+            elif category == c.BILL_FROM_OTHER:
+                sub_categories = c.OTHER_BILL_SUB_CATEGORY
+            sub_category_choices = dict((x, y) for x, y in sub_categories)
+
+            for sub_category, group_by_sub_category in group_by_category.items():
+                bills_by_subcategories.append({
+                    'sub_category': {
+                        'value': sub_category,
+                        'text': sub_category_choices[sub_category]
+                    },
+                    'data': ShortBillDocumentSerializer(
+                        group_by_sub_category,
+                        many=True
+                    ).data
+                })
+            new_bills.append({
+                'category': {
+                    'value': category,
+                    'text': category_choices[category]
+                },
+                'data': bills_by_subcategories
+            })
+        return new_bills
+
+
+class JobBillViewSerializer(serializers.ModelSerializer):
+    """
+    job bill view serializer for driver app
+    """
     bills = serializers.SerializerMethodField()
     stations = StationField(source='*')
 

@@ -108,11 +108,6 @@ class Job(models.Model):
         blank=True
     )
 
-    missions = models.ManyToManyField(
-        OrderProductDeliver,
-        through='Mission'
-    )
-
     total_weight = models.PositiveIntegerField()
 
     total_mileage = models.PositiveIntegerField(
@@ -142,6 +137,11 @@ class Job(models.Model):
 
     is_paid = models.BooleanField(
         default=False
+    )
+
+    missions = models.ManyToManyField(
+        OrderProductDeliver,
+        through='Mission'
     )
 
     objects = models.Manager()

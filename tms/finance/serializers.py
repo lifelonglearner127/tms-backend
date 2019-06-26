@@ -138,6 +138,15 @@ class BillDetailCategoyChoiceField(serializers.Field):
         }
 
 
+class ShortBillDocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.BillDocument
+        fields = (
+            'amount', 'unit_price', 'cost',
+        )
+
+
 class BillDocumentSerializer(serializers.ModelSerializer):
 
     bill = Base64ImageField()
