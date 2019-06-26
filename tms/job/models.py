@@ -149,6 +149,11 @@ class Job(models.Model):
     inprogress = managers.InProgressJobManager()
     completeds = managers.CompleteJobManager()
 
+    class Meta:
+        ordering = (
+            'start_due_time',
+        )
+
 
 class Mission(models.Model):
 

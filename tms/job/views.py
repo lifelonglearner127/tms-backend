@@ -145,7 +145,7 @@ class JobViewSet(TMSViewSet):
         serializer = s.JobDataViewSerializer(
             request.user.jobs_as_driver.filter(
                 progress=c.JOB_PROGRESS_COMPLETE
-            ),
+            ).order_by('-finished_on'),
             many=True
         )
 
