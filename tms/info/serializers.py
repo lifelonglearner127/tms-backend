@@ -8,10 +8,12 @@ class ShortProductSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Product
     """
+    weight_measure_unit = TMSChoiceField(choices=c.PRODUCT_WEIGHT_MEASURE_UNIT)
+
     class Meta:
         model = m.Product
         fields = (
-            'id', 'name', 'price'
+            'id', 'name', 'price', 'weight_measure_unit'
         )
 
 
