@@ -153,11 +153,12 @@ class JobDataViewSerializer(serializers.ModelSerializer):
 class JobBillViewSerializer(serializers.ModelSerializer):
 
     bills = serializers.SerializerMethodField()
+    stations = StationField(source='*')
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'bills'
+            'id', 'bills', 'stations', 'finished_on'
         )
 
     def get_bills(self, job):
