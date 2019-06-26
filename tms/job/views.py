@@ -121,7 +121,7 @@ class JobViewSet(TMSViewSet):
         pass
 
     @action(
-        detail=False, url_path='done',
+        detail=False, url_path='previous',
         permission_classes=[IsDriverOrEscortUser]
     )
     def previous_jobs(self, request):
@@ -129,6 +129,21 @@ class JobViewSet(TMSViewSet):
             request.user.jobs_as_driver.filter(
                 finished_on__lte=datetime.now()
             ),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(
+        detail=False, url_path='done',
+        permission_classes=[IsDriverOrEscortUser]
+    )
+    def done_jobs(self, request):
+        serializer = s.JobDataViewSerializer(
+            request.user.jobs_as_driver.completeds.all(),
             many=True
         )
 
