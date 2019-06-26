@@ -1,13 +1,18 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
 from ..core import constants as c
-from ..core.serializers import TMSChoiceField
+
+# models
 from ..account.models import User
+from ..info.models import Product
+
+# serializers
+from ..core.serializers import TMSChoiceField
 from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer
 )
-from ..info.models import Product
 from ..info.serializers import ShortProductSerializer
 
 
@@ -184,6 +189,11 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
 
+    user = MainUserSerializer(read_only=True)
+    associated_with = ShortUserSerializer()
+    products = ShortProductSerializer(many=True, read_only=True)
+    payment_method = TMSChoiceField(choices=c.PAYMENT_METHOD)
+
     class Meta:
         model = m.CustomerProfile
         fields = '__all__'
@@ -266,17 +276,11 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-class CustomerProfileDataViewSerializer(serializers.ModelSerializer):
-
-    user = MainUserSerializer()
-    products = ShortProductSerializer(many=True)
-    associated_with = ShortStaffProfileSerializer()
-    payment_method = TMSChoiceField(choices=c.PAYMENT_METHOD)
-
-    class Meta:
-        model = m.CustomerProfile
-        fields = '__all__'
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        print(ret)
+        ret['associated_with'] = get_object_or_404(m.User, id=data['associated_with']['id'])
+        return ret
 
 
 class RestRequestSerializer(serializers.ModelSerializer):

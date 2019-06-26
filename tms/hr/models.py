@@ -202,7 +202,7 @@ class CustomerProfile(BasicContactModel):
     )
 
     associated_with = models.ForeignKey(
-        StaffProfile,
+        User,
         related_name='customers',
         on_delete=models.SET_NULL,
         null=True

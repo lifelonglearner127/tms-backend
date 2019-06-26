@@ -170,7 +170,6 @@ class CustomerProfileViewSet(TMSViewSet):
     queryset = m.CustomerProfile.objects.all()
     serializer_class = s.CustomerProfileSerializer
     short_serializer_class = s.ShortCustomerProfileSerializer
-    data_view_serializer_class = s.CustomerProfileDataViewSerializer
 
     def create(self, request):
         context = {
