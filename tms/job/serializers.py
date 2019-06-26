@@ -1,4 +1,5 @@
 from collections import defaultdict
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
@@ -281,22 +282,27 @@ class JobBillViewSerializer(serializers.ModelSerializer):
 
     def get_bills(self, job):
         bill_type = self.context.get('bill_type', 'all')
+        bill_type = bill_type.lower()
+        bill_types = bill_type.split(',')
+        category_filter = Q()
+
+        if 'oil' in bill_types:
+            category_filter |= Q(category=c.BILL_FROM_OIL_STATION)
+
+        if 'traffic' in bill_type:
+            category_filter |= Q(category=c.BILL_FROM_TRAFFIC)
+
+        if 'other' in bill_type:
+            category_filter |= Q(category=c.BILL_FROM_OIL_STATION) |\
+                               Q(category=c.BILL_FROM_TRAFFIC) |\
+                               Q(category=c.BILL_FROM_OTHER)
+
+        if 'station' in bill_types:
+            pass
 
         bills = job.bills.all()
-        if bill_type == 'station':
-            bills = bills.filter(
-                category__in=[
-                    c.BILL_FROM_LOADING_STATION, c.BILL_FROM_QUALITY_STATION,
-                    c.BILL_FROM_UNLOADING_STATION
-                ]
-            )
-        elif bill_type == 'other':
-            bills = bills.filter(
-                category__in=[
-                    c.BILL_FROM_OIL_STATION, c.BILL_FROM_TRAFFIC,
-                    c.BILL_FROM_OTHER
-                ]
-            )
+        if category_filter:
+            bills = bills.filter(category_filter)
 
         bills_by_categories = defaultdict(lambda: defaultdict(list))
 
