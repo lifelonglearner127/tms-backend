@@ -161,7 +161,23 @@ class JobBillViewSerializer(serializers.ModelSerializer):
         )
 
     def get_bills(self, job):
+        bill_type = self.context.get('bill_type', 'all')
+
         bills = job.bills.all()
+        if bill_type == 'station':
+            bills = bills.filter(
+                category__in=[
+                    c.BILL_FROM_LOADING_STATION, c.BILL_FROM_QUALITY_STATION,
+                    c.BILL_FROM_UNLOADING_STATION
+                ]
+            )
+        elif bill_type == 'other':
+            bills = bills.filter(
+                category__in=[
+                    c.BILL_FROM_OIL_STATION, c.BILL_FROM_TRAFFIC,
+                    c.BILL_FROM_OTHER
+                ]
+            )
 
         bills_by_categories = defaultdict(lambda: defaultdict(list))
 
@@ -195,6 +211,7 @@ class JobBillViewSerializer(serializers.ModelSerializer):
                     },
                     'data': BillDocumentSerializer(
                         group_by_sub_category,
+                        context={'request': self.context.get('request')},
                         many=True
                     ).data
                 })

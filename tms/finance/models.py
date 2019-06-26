@@ -1,5 +1,6 @@
 from django.db import models
 
+from . import managers
 from ..core import constants as c
 from ..core.models import CreatedTimeModel
 from ..account.models import User
@@ -143,6 +144,10 @@ class BillDocument(CreatedTimeModel):
         null=True,
         blank=True
     )
+
+    objects = models.Manager()
+    stationbills = managers.StationBillDocumentManager()
+    otherbills = managers.OtherBillDocumentManager()
 
     def __str__(self):
         return '{} bill from {}'.format(

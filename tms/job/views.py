@@ -302,11 +302,17 @@ class JobViewSet(TMSViewSet):
         detail=False, url_path='bill-documents'
     )
     def get_all_job_documents(self, request, pk=None):
+        bill_type = request.query_params.get('type', 'all')
+
         page = self.paginate_queryset(
-            request.user.jobs_as_driver.all()
+            request.user.jobs_as_driver.filter(
+                ~Q(progress=c.JOB_PROGRESS_NOT_STARTED)
+            )
         )
+
         serializer = s.JobBillViewSerializer(
             page,
+            context={'request': request, 'bill_type': bill_type},
             many=True
         )
         return self.get_paginated_response(serializer.data)
@@ -315,10 +321,14 @@ class JobViewSet(TMSViewSet):
         detail=True, url_path='bill-documents'
     )
     def bill_documents(self, request, pk=None):
+        bill_type = request.query_params.get('type', 'all')
         job = self.get_object()
 
         return Response(
-            s.JobBillViewSerializer(job).data,
+            s.JobBillViewSerializer(
+                job,
+                context={'request': request, 'bill_type': bill_type}
+            ).data,
             status=status.HTTP_200_OK
         )
 
