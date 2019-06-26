@@ -143,7 +143,9 @@ class JobViewSet(TMSViewSet):
     )
     def done_jobs(self, request):
         serializer = s.JobDataViewSerializer(
-            request.user.jobs_as_driver.completeds.all(),
+            request.user.jobs_as_driver.filter(
+                progress=c.JOB_PROGRESS_COMPLETE
+            ),
             many=True
         )
 
