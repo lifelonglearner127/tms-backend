@@ -181,7 +181,7 @@ class JobDeliverField(serializers.Field):
         return ret
 
 
-class JobOverViewSerializer(serializers.ModelSerializer):
+class JobDoneSerializer(serializers.ModelSerializer):
     """
     Job overview serializer for driver app
     """
@@ -189,7 +189,8 @@ class JobOverViewSerializer(serializers.ModelSerializer):
         source='order.products',
         many=True
     )
-
+    escort = ShortUserSerializer()
+    stations = StationField(source='*')
     mileage = JobMileageField(source='*')
     delivers = JobDeliverField(source='*')
     bills = serializers.SerializerMethodField()
@@ -198,7 +199,7 @@ class JobOverViewSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'started_on', 'finished_on', 'products', 'total_weight',
-            'mileage', 'delivers', 'bills'
+            'escort', 'stations', 'mileage', 'delivers', 'bills'
         )
 
     def get_bills(self, job):

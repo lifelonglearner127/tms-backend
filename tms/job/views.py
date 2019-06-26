@@ -141,17 +141,17 @@ class JobViewSet(TMSViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def done_jobs(self, request):
-        serializer = s.JobDataViewSerializer(
+        page = self.paginate_queryset(
             request.user.jobs_as_driver.filter(
                 progress=c.JOB_PROGRESS_COMPLETE
-            ).order_by('-finished_on'),
-            many=True
+            ).order_by('-finished_on')
         )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
+        serializer = s.JobDoneSerializer(
+            page,
+            many=True
         )
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False, url_path='current',
@@ -325,28 +325,12 @@ class JobViewSet(TMSViewSet):
         job = self.get_object()
 
         return Response(
-            s.JobBillViewSerializer(
+            s.JobDoneSerializer(
                 job,
                 context={'request': request, 'bill_type': bill_type}
             ).data,
             status=status.HTTP_200_OK
         )
-
-    @action(
-        detail=False, url_path="overview"
-    )
-    def get_jobs_overview(self, request):
-        page = self.paginate_queryset(
-            request.user.jobs_as_driver.filter(
-                progress=c.JOB_PROGRESS_COMPLETE
-            )
-        )
-
-        serializer = s.JobOverViewSerializer(
-            page,
-            many=True
-        )
-        return self.get_paginated_response(serializer.data)
 
 
 class MissionViewSet(viewsets.ModelViewSet):
