@@ -162,6 +162,7 @@ class JobMileageField(serializers.Field):
         return {
             'total_mileage': instance.total_mileage,
             'highway_mileage': instance.highway_mileage,
+            'normalway_mileage': instance.normalway_mileage,
             'empty_mileage': instance.empty_mileage,
             'heavy_mileage':  instance.heavy_mileage
         }
