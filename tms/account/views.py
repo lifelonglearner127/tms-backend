@@ -111,3 +111,14 @@ class UserViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, url_path='customers/short')
+    def get_short_customer_users(self, request):
+        serializer = s.ShortUserSerializer(
+            m.User.customers.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
