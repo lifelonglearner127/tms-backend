@@ -320,7 +320,7 @@ BILL_CATEGORY = (
     (BILL_FROM_UNLOADING_STATION, 'Bill from UnLoading Station'),
     (BILL_FROM_OIL_STATION, '加油'),
     (BILL_FROM_TRAFFIC, '路票'),
-    (BILL_FROM_TRAFFIC, '其他')
+    (BILL_FROM_OTHER, '其他')
 )
 
 LOADING_STATION_BILL = 0
