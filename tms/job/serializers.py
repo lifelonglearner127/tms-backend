@@ -468,9 +468,15 @@ class JobCostSerializer(serializers.ModelSerializer):
 
 class DriverJobReportSerializer(serializers.ModelSerializer):
 
+    year = serializers.CharField(source='month.year')
+    month = serializers.CharField(source='month.month')
+
     class Meta:
         model = m.JobReport
-        exclude = ('driver', )
+        fields = (
+            'year', 'month', 'total_mileage', 'empty_mileage',
+            'heavy_mileage', 'highway_mileage', 'normalway_mileage'
+        )
 
 
 class JobReportSerializer(serializers.ModelSerializer):
