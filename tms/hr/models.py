@@ -203,7 +203,7 @@ class CustomerProfile(BasicContactModel):
 
     associated_with = models.ForeignKey(
         User,
-        related_name='customers',
+        related_name='incharges_customers',
         on_delete=models.SET_NULL,
         null=True
     )
