@@ -174,6 +174,7 @@ class CustomerProfileViewSet(TMSViewSet):
     def create(self, request):
         context = {
             'user': request.data.pop('user'),
+            'associated_with': request.data.pop('associated_with'),
             'products': request.data.pop('products')
         }
 
@@ -193,6 +194,7 @@ class CustomerProfileViewSet(TMSViewSet):
         serializer_instance = self.get_object()
         context = {
             'user': request.data.pop('user'),
+            'associated_with': request.data.pop('associated_with'),
             'products': request.data.pop('products')
         }
 

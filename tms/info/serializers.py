@@ -42,7 +42,7 @@ class ProductSerializer(serializers.ModelSerializer):
         ret['price_display'] =\
             str(instance.price) + '元 / ' +\
             str(instance.unit_weight) +\
-            str(instance.get_measure_unit_display())
+            str(instance.get_weight_measure_unit_display())
 
         return ret
 
@@ -76,6 +76,8 @@ class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
     """
+    product_category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
+
     class Meta:
         model = m.Station
         fields = '__all__'
@@ -85,7 +87,7 @@ class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
     """
-    product_category = TMSChoiceField(c.PRODUCT_CATEGORY)
+    product_category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
 
     class Meta:
         model = m.Station

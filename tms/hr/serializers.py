@@ -190,7 +190,7 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 class CustomerProfileSerializer(serializers.ModelSerializer):
 
     user = MainUserSerializer(read_only=True)
-    associated_with = ShortUserSerializer()
+    associated_with = ShortUserSerializer(read_only=True)
     products = ShortProductSerializer(many=True, read_only=True)
     payment_method = TMSChoiceField(choices=c.PAYMENT_METHOD)
 
@@ -212,6 +212,20 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'username': 'Such user already exists'
             })
 
+        associated_with = self.context.get('associated_with', None)
+        if associated_with is None:
+            raise serializers.ValidationError({
+                'associated_with': 'Associated data are missing'
+            })
+
+        associated_id = associated_with.get('id', None)
+        try:
+            associated_with = m.User.objects.get(id=associated_id)
+        except m.User.objects.DoesNotExist:
+            raise serializers.ValidationError({
+                'associated_with': 'Such user does not exist'
+            })
+
         products_data = self.context.get('products', None)
         if products_data is None:
             raise serializers.ValidationError({
@@ -221,6 +235,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         user = m.User.objects.create_user(**user_data)
         customer = m.CustomerProfile.objects.create(
             user=user,
+            associated_with=associated_with,
             **validated_data
         )
 
@@ -255,6 +270,21 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
         user.set_password(user_data.get('password', user.password))
         user.save()
 
+        associated_with = self.context.get('associated_with', None)
+        if associated_with is None:
+            raise serializers.ValidationError({
+                'associated_with': 'Associated data are missing'
+            })
+
+        associated_id = associated_with.get('id', None)
+        try:
+            associated_with = m.User.objects.get(id=associated_id)
+        except m.User.objects.DoesNotExist:
+            raise serializers.ValidationError({
+                'associated_with': 'Such user does not exist'
+            })
+
+        instance.associated_with = associated_with
         products_data = self.context.get('products', None)
         if products_data is None:
             raise serializers.ValidationError({
@@ -275,12 +305,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
-    def to_internal_value(self, data):
-        ret = super().to_internal_value(data)
-        print(ret)
-        ret['associated_with'] = get_object_or_404(m.User, id=data['associated_with']['id'])
-        return ret
 
 
 class RestRequestSerializer(serializers.ModelSerializer):
