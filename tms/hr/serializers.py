@@ -85,6 +85,9 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
 
 class StaffProfileSerializer(serializers.ModelSerializer):
 
+    department = ShortDepartmentSerializer(read_only=True)
+    position = ShortPositionSerializer(read_only=True)
+
     class Meta:
         model = m.StaffProfile
         fields = '__all__'
@@ -104,9 +107,26 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'username': 'Such user already exists'
             })
 
+        if m.User.objects.filter(mobile=user_data['mobile']).exists():
+            raise serializers.ValidationError({
+                'mobile': 'Such mobile already exisits'
+            })
+
         # check user role
         user_data['role'] = user_data['role']['value']
         user = m.User.objects.create_user(**user_data)
+
+        department_data = self.context.get('department', None)
+        department = get_object_or_404(
+            m.Department,
+            id=department_data.get('id', None)
+        )
+
+        position_data = self.context.get('position', None)
+        position = get_object_or_404(
+            m.Position,
+            id=position_data.get('id', None)
+        )
 
         driver_license = self.context.get('driver_license', None)
         if driver_license is not None:
@@ -116,6 +136,8 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
         profile = m.StaffProfile.objects.create(
             user=user,
+            department=department,
+            position=position,
             **validated_data
         )
         return profile
@@ -135,6 +157,13 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'username': 'Such user already exists'
             })
 
+        if m.User.objects.exclude(pk=instance.user.id).filter(
+            mobile=user_data['mobile']
+        ).exists():
+            raise serializers.ValidationError({
+                'mobile': 'Such mobile already exisits'
+            })
+
         password = user_data.pop('password', None)
         if password is not None:
             instance.user.set_password(password)
@@ -144,8 +173,23 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             setattr(instance.user, key, value)
         instance.user.save()
 
+        department_data = self.context.get('department', None)
+        department = get_object_or_404(
+            m.Department,
+            id=department_data.get('id', None)
+        )
+
+        position_data = self.context.get('position', None)
+        position = get_object_or_404(
+            m.Position,
+            id=position_data.get('id', None)
+        )
+
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+
+        instance.department = department
+        instance.position = position
         instance.save()
 
         return instance
