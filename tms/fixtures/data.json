@@ -1044,5 +1044,122 @@
         "mission": 6,
         "mission_weight": 1
     }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 1,
+    "fields": {
+      "driver": 3,
+      "month": "2018-6",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 2,
+    "fields": {
+      "driver": 3,
+      "month": "2018-7",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 3,
+    "fields": {
+      "driver": 3,
+      "month": "2018-8",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 4,
+    "fields": {
+      "driver": 3,
+      "month": "2018-9",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 5,
+    "fields": {
+      "driver": 3,
+      "month": "2018-10",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 6,
+    "fields": {
+      "driver": 3,
+      "month": "2018-11",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 7,
+    "fields": {
+      "driver": 3,
+      "month": "2018-12",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 8,
+    "fields": {
+      "driver": 3,
+      "month": "2019-1",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
+  },
+  {
+    "model": "job.JobReport",
+    "pk": 9,
+    "fields": {
+      "driver": 3,
+      "month": "2019-2",
+      "total_mileage": "3",
+      "empty_mileage": "1",
+      "heavy_mileage": "2",
+      "highway_mileage": "2",
+      "normalway_mileage": "1"
+    }
   }
 ]
