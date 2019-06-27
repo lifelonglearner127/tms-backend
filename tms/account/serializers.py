@@ -176,6 +176,15 @@ class MainUserSerializer(serializers.ModelSerializer):
         )
 
 
+class DriverAppUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'username', 'mobile', 'name'
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User

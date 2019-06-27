@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from . import models as m
 from . import serializers as s
 from ..core import constants as c
+from ..core.permissions import IsDriverOrEscortUser
 from ..core.serializers import ChoiceSerializer
 from ..core.views import ApproveViewSet, TMSViewSet
 
@@ -139,6 +140,19 @@ class StaffProfileViewSet(TMSViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(
+        detail=False, url_path='me', permission_classes=[IsDriverOrEscortUser]
+    )
+    def me(self, request):
+
+        serializer = s.DriverAppStaffProfileSerializer(
+            request.user.profile
+        )
         return Response(
             serializer.data,
             status=status.HTTP_200_OK

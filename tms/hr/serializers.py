@@ -11,7 +11,8 @@ from ..info.models import Product
 # serializers
 from ..core.serializers import TMSChoiceField
 from ..account.serializers import (
-    ShortUserSerializer, MainUserSerializer, UserSerializer
+    ShortUserSerializer, MainUserSerializer, UserSerializer,
+    DriverAppUserSerializer
 )
 from ..info.serializers import ShortProductSerializer
 
@@ -80,6 +81,19 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
         model = m.StaffProfile
         fields = (
             'id', 'name'
+        )
+
+
+class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
+
+    department = ShortDepartmentSerializer(read_only=True)
+    position = ShortPositionSerializer(read_only=True)
+    user = DriverAppUserSerializer(read_only=True)
+
+    class Meta:
+        model = m.StaffProfile
+        fields = (
+            'id', 'user', 'department', 'position'
         )
 
 
