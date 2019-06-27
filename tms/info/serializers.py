@@ -76,7 +76,18 @@ class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
     """
-    product_category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
+    product_category = TMSChoiceField(
+        choices=c.PRODUCT_CATEGORY, required=False
+    )
+    working_time_measure_unit = TMSChoiceField(
+        choices=c.TIME_MEASURE_UNIT, required=False
+    )
+    average_time_measure_unit = TMSChoiceField(
+        choices=c.TIME_MEASURE_UNIT, required=False
+    )
+    price_vary_duration_unit = TMSChoiceField(
+        choices=c.PRICE_VARY_DURATION_UNIT, required=False
+    )
 
     class Meta:
         model = m.Station
