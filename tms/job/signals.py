@@ -1,4 +1,5 @@
 import json
+import month
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -19,8 +20,8 @@ channel_layer = get_channel_layer()
 @receiver(post_save, sender=m.Job)
 def notify_driver_of_new_job(sender, instance, **kwargs):
 
-    # bind & unbind (vehicle, driver, escort)
     if instance.progress == c.JOB_PROGRESS_NOT_STARTED:
+        # bind vehicle, driver, escort
         if not VehicleUserBind.binds_by_admin.filter(
             vehicle=instance.vehicle,
             driver=instance.driver,
@@ -33,7 +34,21 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                 bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
             )
 
+        # send notfication to driver
+        if instance.driver.channel_name is not None:
+            async_to_sync(channel_layer.send)(
+                instance.driver.channel_name,
+                {
+                    'type': 'notify',
+                    'data': json.dumps({
+                        'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
+                        'plate_num': instance.vehicle.plate_num
+                    })
+                }
+            )
+
     elif instance.progress == c.JOB_PROGRESS_COMPLETE:
+        # unbind vehicle, driver, escort
         if not VehicleUserBind.binds_by_admin.filter(
             vehicle=instance.vehicle,
             driver=instance.driver,
@@ -47,21 +62,38 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                     bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
                 )
                 vehicle_bind.delete()
-            except VehicleUserBind.DoesNotExists:
+            except VehicleUserBind.DoesNotExist:
                 pass
 
-    if instance.progress == c.JOB_PROGRESS_NOT_STARTED:
-        # send notfication to driver
-        if instance.driver.channel_name is not None:
-            async_to_sync(channel_layer.send)(
-                instance.driver.channel_name,
-                {
-                    'type': 'notify',
-                    'data': json.dumps({
-                        'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
-                        'plate_num': instance.vehicle.plate_num
-                    })
-                }
+        # update job report
+        job_year = instance.finished_on.year
+        job_month = instance.finished_on.month
+        try:
+            job_report = m.JobReport.objects.get(
+                driver=instance.driver,
+                month=month.Month(job_year, job_month)
+            )
+            job_report.total_mileage = \
+                job_report.total_mileage + instance.total_mileage
+            job_report.empty_mileage = \
+                job_report.empty_mileage + instance.empty_mileage
+            job_report.heavy_mileage = \
+                job_report.heavy_mileage + instance.heavy_mileage
+            job_report.highway_mileage = \
+                job_report.highway_mileage + instance.highway_mileage
+            job_report.normalway_mileage = \
+                job_report.normalway_mileage + instance.normalway_mileage
+
+            job_report.save()
+        except m.JobReport.DoesNotExist:
+            job_report = m.JobReport.objects.create(
+                driver=instance.driver,
+                month=month.Month(job_year, job_month),
+                total_mileage=instance.total_mileage,
+                empty_mileage=instance.empty_mileage,
+                heavy_mileage=instance.heavy_mileage,
+                highway_mileage=instance.highway_mileage,
+                normalway_mileage=instance.normalway_mileage
             )
 
 

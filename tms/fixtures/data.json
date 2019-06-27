@@ -84,7 +84,9 @@
     "fields": {
       "user": 2,
       "department": 1,
-      "position": 1
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
@@ -93,7 +95,9 @@
     "fields": {
       "user": 3,
       "department": 1,
-      "position": 1
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
@@ -102,7 +106,9 @@
     "fields": {
       "user": 4,
       "department": 1,
-      "position": 1
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {

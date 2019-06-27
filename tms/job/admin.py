@@ -26,3 +26,8 @@ class DriverChangeRequestAdmin(admin.ModelAdmin):
 @admin.register(m.EscortChangeRequest)
 class EscortChangeRequestAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.JobReport)
+class JobReportAdmin(admin.ModelAdmin):
+    pass

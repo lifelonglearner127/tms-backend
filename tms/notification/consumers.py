@@ -18,7 +18,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
             self.user.channel_name = self.channel_name
             self.user.save()
             self.accept()
-        except User.objects.DoesNotExists:
+        except User.DoesNotExist:
             self.close()
 
     def disconnect(self, close_code):
@@ -65,7 +65,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
                             message = "In {}".format(station.name)
                         else:
                             message = "Out of {}".format(station.name)
-            except Station.objects.DoesNotExists:
+            except Station.DoesNotExist:
                 return
 
         if message:
@@ -92,7 +92,7 @@ class PositionConsumer(JsonWebsocketConsumer):
             )
 
             self.accept()
-        except User.objects.DoesNotExists:
+        except User.DoesNotExist:
             self.close()
 
     def disconnect(self, close_code):

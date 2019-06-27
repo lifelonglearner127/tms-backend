@@ -195,7 +195,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 loading_station = Station.loadingstations.get(
                     pk=loading_station_data.pop('loading_station')
                 )
-            except Station.objects.DoesNotExist:
+            except Station.DoesNotExist:
                 raise serializers.ValidationError({
                     'loading_station': 'Loading Station does not exists'
                 })
@@ -204,7 +204,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 quality_station = Station.qualitystations.get(
                     pk=loading_station_data.pop('quality_station')
                 )
-            except Station.objects.DoesNotExist:
+            except Station.DoesNotExist:
                 raise serializers.ValidationError({
                     'quality_station': 'Quality Station does not exists'
                 })
@@ -223,7 +223,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     product = m.Product.objects.get(
                         pk=product_data.pop('product')
                     )
-                except m.Product.objects.DoesNotExist:
+                except m.Product.DoesNotExist:
                     raise serializers.ValidationError({
                         'product': 'Product does not exist'
                     })

@@ -1,4 +1,5 @@
 from django.db import models
+from month.models import MonthField
 
 from . import managers
 from ..core import constants as c
@@ -275,3 +276,45 @@ class EscortChangeRequest(ApprovedModel):
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
         unique_together = ['job', 'new_escort']
+
+
+class JobReport(models.Model):
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='report'
+    )
+
+    month = MonthField()
+
+    total_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    empty_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    heavy_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    highway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    normalway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return '{}\'s {} report'.format(self.driver, self.month)
+
+    class Meta:
+        ordering = ('month', )

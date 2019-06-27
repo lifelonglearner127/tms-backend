@@ -466,6 +466,20 @@ class JobCostSerializer(serializers.ModelSerializer):
         )
 
 
+class DriverJobReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.JobReport
+        exclude = ('driver', )
+
+
+class JobReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.JobReport
+        fields = '__all__'
+
+
 class ParkingRequestSerializer(serializers.ModelSerializer):
 
     class Meta:

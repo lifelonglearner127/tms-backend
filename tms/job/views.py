@@ -345,6 +345,29 @@ class MissionViewSet(viewsets.ModelViewSet):
         )
 
 
+class JobReportViewSet(viewsets.ModelViewSet):
+
+    queryset = m.JobReport.objects.all()
+    serializer_class = s.DriverJobReportSerializer
+
+    @action(detail=False, url_path='me')
+    def me(self, request):
+        page = self.paginate_queryset(
+            request.user.report.all()
+        )
+        serializer = s.JobReportSEr(
+            page,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+        return Response(
+            request.user.report.all()
+        )
+        return request.user
+
+
 class ParkingRequestViewSet(ApproveViewSet):
 
     queryset = m.ParkingRequest.objects.all()

@@ -11,6 +11,9 @@ router.register(
     r'jobs', v.JobViewSet, base_name='job'
 )
 router.register(
+    r'job-report', v.JobReportViewSet, base_name='job-report'
+)
+router.register(
     r'parking-request',
     v.ParkingRequestViewSet,
     base_name='parking-request'
