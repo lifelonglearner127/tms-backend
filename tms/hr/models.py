@@ -2,7 +2,7 @@ from django.db import models
 
 from . import managers
 from ..core import constants as c
-from ..core.models import ApprovedModel, BasicContactModel
+from ..core.models import ApprovedModel, BasicContactModel, TimeStampedModel
 from ..account.models import User
 from ..info.models import Product
 
@@ -85,7 +85,7 @@ class DriverLicense(models.Model):
     )
 
 
-class StaffProfile(models.Model):
+class StaffProfile(TimeStampedModel):
     """
     Staff Profile Model
     """
