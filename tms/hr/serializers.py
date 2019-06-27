@@ -290,6 +290,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'product': 'Product data is not provided'
             })
 
+        user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
         user = m.User.objects.create_user(**user_data)
         customer = m.CustomerProfile.objects.create(
             user=user,
