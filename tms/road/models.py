@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from ..core import constants as c
+from ..core.models import TimeStampedModel
 from ..info.models import Station
 
 
-class Route(models.Model):
+class Route(TimeStampedModel):
 
     name = models.CharField(
         max_length=100,
@@ -16,7 +18,10 @@ class Route(models.Model):
         size=18
     )
 
-    policy = models.PositiveIntegerField()
+    policy = models.PositiveIntegerField(
+        choices=c.ROUTE_PLANNING_POLICY,
+        default=c.ROUTE_PLANNING_POLICY_LEAST_TIME
+    )
 
     distance = models.PositiveIntegerField()
 

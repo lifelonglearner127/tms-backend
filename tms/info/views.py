@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -97,3 +98,29 @@ class StationViewSet(StaffViewSet):
         serializer = s.OilStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='points')
+    def get_station_points(self, request):
+        queryset = m.Station.workstations.all()
+        station_types = self.request.query_params.get('type', None)
+
+        if station_types is not None:
+            station_type_filter = Q()
+            station_types = station_types.split(',')
+            for station_type in station_types:
+                if station_type in [
+                    c.STATION_TYPE_LOADING_STATION,
+                    c.STATION_TYPE_UNLOADING_STATION,
+                    c.STATION_TYPE_QUALITY_STATION,
+                    c.STATION_TYPE_OIL_STATION
+                ]:
+                    station_type_filter |= Q(station_type=station_type)
+            queryset = queryset.filter(station_type_filter)
+
+        serializer = s.StationPointSerializer(
+            queryset, many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

@@ -28,6 +28,9 @@ class TimeStampedModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = (
+            '-updated', 
+        )
 
 
 class ApprovedModel(models.Model):

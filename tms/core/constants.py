@@ -245,7 +245,14 @@ JOB_PROGRESS = (
 
 # road app
 # ----------------------------------------------------------------------------
-
+ROUTE_PLANNING_POLICY_LEAST_TIME = 0
+ROUTE_PLANNING_POLICY_LEAST_FEE = 1
+ROUTE_PLANNING_POLICY_LEAST_DISTANCE = 2
+ROUTE_PLANNING_POLICY = (
+    (ROUTE_PLANNING_POLICY_LEAST_TIME, '最快捷模式'),
+    (ROUTE_PLANNING_POLICY_LEAST_FEE, '最经济模式'),
+    (ROUTE_PLANNING_POLICY_LEAST_DISTANCE, '最短距离模式')
+)
 
 # hr app
 # ----------------------------------------------------------------------------

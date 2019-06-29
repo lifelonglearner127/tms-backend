@@ -131,4 +131,4 @@ class Station(BasicContactModel):
 
     class Meta:
         unique_together = ('longitude', 'latitude')
-        ordering = ['-updated']
+        ordering = ['station_type', '-updated']

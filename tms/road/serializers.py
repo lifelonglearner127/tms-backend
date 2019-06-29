@@ -1,8 +1,10 @@
 from rest_framework import serializers
 
 from . import models as m
+from ..core import constants as c
+from ..core.serializers import TMSChoiceField
 from ..info.models import Station
-from ..info.serializers import ShortStationSerializer, StationPointSerializer
+from ..info.serializers import ShortStationSerializer, ShortStationPointSerializer
 
 
 class ShortRouteSerializer(serializers.ModelSerializer):
@@ -15,6 +17,8 @@ class ShortRouteSerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
+
+    policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
 
     class Meta:
         model = m.Route
@@ -49,7 +53,7 @@ class PathLngLatField(serializers.ListField):
         paths = Station.objects.filter(id__in=value)
         paths = dict([(point.id, point) for point in paths])
 
-        serializer = StationPointSerializer(
+        serializer = ShortStationPointSerializer(
             [paths[id] for id in value],
             many=True
         )
