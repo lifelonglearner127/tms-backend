@@ -147,3 +147,12 @@ class OilStationSerializer(serializers.ModelSerializer):
             '个' + str(instance.get_price_vary_duration_unit_display())
 
         return ret
+
+
+class BlackDotSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id', 'name', 'longitude', 'latitude', 'radius'
+        )

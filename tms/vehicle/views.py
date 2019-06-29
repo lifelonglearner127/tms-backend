@@ -92,7 +92,6 @@ class VehicleViewSet(TMSViewSet):
             'plate_nums': list(plate_nums),
             'fields': ['loc']
         }
-        print(body)
         data = G7Interface.call_g7_http_interface(
             'BULK_VEHICLE_STATUS_INQUIRY',
             body=body

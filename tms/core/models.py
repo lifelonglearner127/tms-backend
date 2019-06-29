@@ -71,11 +71,15 @@ class BasicContactModel(TimeStampedModel):
     )
 
     contact = models.CharField(
-        max_length=100
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     mobile = models.CharField(
-        max_length=30
+        max_length=30,
+        null=True,
+        blank=True
     )
 
     address = models.CharField(

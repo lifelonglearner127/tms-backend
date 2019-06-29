@@ -99,6 +99,16 @@ class StationViewSet(StaffViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='black-dots')
+    def black_dots(self, request):
+        page = self.paginate_queryset(
+            m.Station.blackdots.all(),
+        )
+
+        serializer = s.BlackDotSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='points')
     def get_station_points(self, request):
         queryset = m.Station.workstations.all()
