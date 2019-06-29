@@ -46,8 +46,8 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.OrderProductDeliver
-        fields = (
-            'id', 'weight', 'due_time', 'unloading_station'
+        exclude = (
+            'order_product',
         )
 
 
@@ -60,11 +60,23 @@ class OrderProductSerializer(serializers.ModelSerializer):
     )
 
     product = ShortProductSerializer(read_only=True)
+    total_weight_measure_unit = TMSChoiceField(
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
+    )
+    price_weight_measure_unit = TMSChoiceField(
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
+    )
+    loss_unit = TMSChoiceField(
+        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
+    )
+    payment_method = TMSChoiceField(
+        choices=c.PAYMENT_METHOD
+    )
 
     class Meta:
         model = m.OrderProduct
-        fields = (
-            'id', 'product', 'total_weight', 'unloading_stations'
+        exclude = (
+            'order_loading_station',
         )
 
 
@@ -80,8 +92,8 @@ class OrderLoadingStationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.OrderLoadingStation
-        fields = (
-            'id', 'loading_station', 'quality_station', 'products'
+        exclude = (
+            'order',
         )
 
 
@@ -101,6 +113,13 @@ class OrderSerializer(serializers.ModelSerializer):
     """
     Order Create and Update Serializer
     """
+    assignee = ShortUserSerializer(read_only=True)
+    customer = ShortUserSerializer(read_only=True)
+    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
+    status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    loading_stations = OrderLoadingStationSerializer(
+        source='orderloadingstation_set', many=True, read_only=True
+    )
 
     class Meta:
         model = m.Order
@@ -141,6 +160,32 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         # 1. Validate the data
         # get loading stations data
+        assignee_data = self.context.pop('assignee', None)
+        if assignee_data is None:
+            raise serializers.ValidationError({
+                'assignee': 'Assignee data are missing'
+            })
+
+        try:
+            assignee = m.User.objects.get(id=assignee_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'assignee': 'Such user does not exist'
+            })
+
+        customer_data = self.context.pop('customer', None)
+        if customer_data is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data are missing'
+            })
+
+        try:
+            customer = m.User.objects.get(id=customer_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'customer': 'Such customer does not exist'
+            })
+
         loading_stations_data = self.context.pop('loading_stations', None)
         weight_errors = []
         if loading_stations_data is None:
@@ -187,22 +232,35 @@ class OrderSerializer(serializers.ModelSerializer):
             })
         # 2. save models
         order = m.Order.objects.create(
+            assignee=assignee,
+            customer=customer,
             **validated_data
         )
 
         for loading_station_data in loading_stations_data:
+            station_data = loading_station_data.pop('loading_station')
+            if station_data is None:
+                raise serializers.ValidationError({
+                    'loading_station': 'Loading Station data are missing'
+                })
+
             try:
                 loading_station = Station.loadingstations.get(
-                    pk=loading_station_data.pop('loading_station')
+                    id=station_data.get('id', None)
                 )
             except Station.DoesNotExist:
                 raise serializers.ValidationError({
                     'loading_station': 'Loading Station does not exists'
                 })
 
+            station_data = loading_station_data.pop('quality_station')
+            if station_data is None:
+                raise serializers.ValidationError({
+                    'quality_station': 'Quality Station data are missing'
+                })
             try:
                 quality_station = Station.qualitystations.get(
-                    pk=loading_station_data.pop('quality_station')
+                    pk=station_data.get('id')
                 )
             except Station.DoesNotExist:
                 raise serializers.ValidationError({
@@ -219,9 +277,15 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
             for product_data in products_data:
+                product = product_data.pop('product', None)
+                if product is None:
+                    raise serializers.ValidationError({
+                        'product': 'Product data are missing'
+                    })
+
                 try:
                     product = m.Product.objects.get(
-                        pk=product_data.pop('product')
+                        id=product.get('id')
                     )
                 except m.Product.DoesNotExist:
                     raise serializers.ValidationError({
@@ -232,14 +296,29 @@ class OrderSerializer(serializers.ModelSerializer):
                     'unloading_stations'
                 )
 
+                product_data['total_weight_measure_unit'] =\
+                    product_data['total_weight_measure_unit']['value']
+                product_data['price_weight_measure_unit'] =\
+                    product_data['price_weight_measure_unit']['value']
+                product_data['loss_unit'] =\
+                    product_data['loss_unit']['value']
+                product_data['payment_method'] =\
+                    product_data['payment_method']['value']
                 order_product = m.OrderProduct.objects.create(
                     order_loading_station=order_loading_station,
-                    product=product, **product_data
+                    product=product,
+                    **product_data
                 )
 
                 for unloading_station_data in unloading_stations_data:
+                    station_data = unloading_station_data.pop('unloading_station')
+                    if station_data is None:
+                        raise serializers.ValidationError({
+                            'unloading_station': 'Unloading Station data are missing'
+                        })
+
                     unloading_station = Station.unloadingstations.get(
-                        pk=unloading_station_data.pop('unloading_station')
+                        pk=station_data.get('id')
                     )
                     m.OrderProductDeliver.objects.create(
                         order_product=order_product,
@@ -282,16 +361,39 @@ class OrderSerializer(serializers.ModelSerializer):
 
         todo: remove twice db get; one for validation, other for saving models
         """
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
+        # 1. Validate the data
+        # get loading stations data
+        assignee_data = self.context.pop('assignee', None)
+        if assignee_data is None:
+            raise serializers.ValidationError({
+                'assignee': 'Assignee data are missing'
+            })
 
-        instance.save()
-        instance.loading_stations.clear()
+        try:
+            assignee = m.User.objects.get(id=assignee_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'assignee': 'Such user does not exist'
+            })
+
+        customer_data = self.context.pop('customer', None)
+        if customer_data is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data are missing'
+            })
+
+        try:
+            customer = m.User.objects.get(id=customer_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'customer': 'Such customer does not exist'
+            })
 
         loading_stations_data = self.context.pop('loading_stations', None)
+        weight_errors = []
         if loading_stations_data is None:
             raise serializers.ValidationError({
-                'loading_station': 'Loading station data are not provided'
+                'order': 'Order data are missing'
             })
 
         for loading_station_data in loading_stations_data:
@@ -300,37 +402,12 @@ class OrderSerializer(serializers.ModelSerializer):
             )
             if products_data is None:
                 raise serializers.ValidationError({
-                    'product': 'Products data are not provided'
+                    'products': 'Order Product data are missing'
                 })
 
-            # select_object_or_404 can be used but I use try/catch for
-            # rich error msg
-            try:
-                # check loading station existence
-                loading_station_id = loading_station_data.get(
-                    'loading_station',
-                    None
-                )
-                loading_station = Station.loadingstations.get(
-                    pk=loading_station_id
-                )
-
-                # check quality station existence
-                quality_station_id = loading_station_data.get(
-                    'quality_station', None
-                )
-                quality_station = Station.qualitystations.get(
-                    pk=quality_station_id
-                )
-
-            except Station.DoesNotExist:
-                raise serializers.ValidationError({
-                    'station': 'Such station does not exist'
-                })
-
-            # get ordred products
+            # validate product weights
+            product_index = 0
             for product_data in products_data:
-                # get ordered details of each products
                 unloading_stations_data = product_data.get(
                     'unloading_stations', None
                 )
@@ -339,58 +416,62 @@ class OrderSerializer(serializers.ModelSerializer):
                         'unloading_station':
                         'Unloading stations are not provided'
                     })
-
-                try:
-                    # check product existence
-                    product_id = product_data.get('product', None)
-                    product = m.Product.objects.get(pk=product_id)
-
-                except m.Product.DoesNotExist:
-                    raise serializers.ValidationError({
-                        'product': 'Such product does not exist'
-                    })
-
-                total_weight = product_data.get('total_weight', 0)
+                total_weight = float(product_data.get('total_weight', 0))
                 total_weight = float(total_weight)
-                if total_weight == 0:
-                    raise serializers.ValidationError({
-                        'total_weight': 'Improperly weight set'
-                    })
+                # TODO: check total weight validation
 
                 for unloading_station_data in unloading_stations_data:
-                    # get unlaoding station
-                    try:
-                        unloading_station_id = unloading_station_data.get(
-                            'unloading_station', None
-                        )
-                        unloading_station = Station.unloadingstations.get(
-                            pk=unloading_station_id
-                        )
-                        weight = unloading_station_data.get('weight', 0)
-                        weight = float(weight)
-                        if weight == 0:
-                            raise serializers.ValidationError({
-                                'weight': 'Improperly weight set'
-                            })
-                        total_weight = total_weight - weight
-                    except Station.DoesNotExist:
-                        raise serializers.ValidationError({
-                            'unloading_station':
-                            'Such unloading station does not exist'
-                        })
+                    # TODO: check unloading station weight validation
+                    weight = float(unloading_station_data.get('weight', 0))
+                    total_weight = total_weight - weight
 
                 if total_weight != 0:
-                    raise serializers.ValidationError({
-                        'total_weight': 'Error occured while setting weights'
-                    })
+                    weight_errors.append(product_index)
+                product_index = product_index + 1
 
+        if weight_errors:
+            raise serializers.ValidationError({
+                'weight': weight_errors
+            })
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.assignee = assignee
+        instance.customer = customer
+        instance.save()
+        instance.loading_stations.clear()
+        # 2. save models
         for loading_station_data in loading_stations_data:
-            loading_station = Station.loadingstations.get(
-                pk=loading_station_data.pop('loading_station')
-            )
-            quality_station = Station.qualitystations.get(
-                pk=loading_station_data.pop('quality_station')
-            )
+            station_data = loading_station_data.pop('loading_station')
+            if station_data is None:
+                raise serializers.ValidationError({
+                    'loading_station': 'Loading Station data are missing'
+                })
+
+            try:
+                loading_station = Station.loadingstations.get(
+                    id=station_data.get('id', None)
+                )
+            except Station.DoesNotExist:
+                raise serializers.ValidationError({
+                    'loading_station': 'Loading Station does not exists'
+                })
+
+            station_data = loading_station_data.pop('quality_station')
+            if station_data is None:
+                raise serializers.ValidationError({
+                    'quality_station': 'Quality Station data are missing'
+                })
+            try:
+                quality_station = Station.qualitystations.get(
+                    pk=station_data.get('id')
+                )
+            except Station.DoesNotExist:
+                raise serializers.ValidationError({
+                    'quality_station': 'Quality Station does not exists'
+                })
+
             products_data = loading_station_data.pop('products')
 
             order_loading_station = m.OrderLoadingStation.objects.create(
@@ -401,22 +482,48 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
             for product_data in products_data:
-                product = m.Product.objects.get(
-                    pk=product_data.pop('product')
-                )
+                product = product_data.pop('product', None)
+                if product is None:
+                    raise serializers.ValidationError({
+                        'product': 'Product data are missing'
+                    })
+
+                try:
+                    product = m.Product.objects.get(
+                        id=product.get('id')
+                    )
+                except m.Product.DoesNotExist:
+                    raise serializers.ValidationError({
+                        'product': 'Product does not exist'
+                    })
 
                 unloading_stations_data = product_data.pop(
                     'unloading_stations'
                 )
 
+                product_data['total_weight_measure_unit'] =\
+                    product_data['total_weight_measure_unit']['value']
+                product_data['price_weight_measure_unit'] =\
+                    product_data['price_weight_measure_unit']['value']
+                product_data['loss_unit'] =\
+                    product_data['loss_unit']['value']
+                product_data['payment_method'] =\
+                    product_data['payment_method']['value']
                 order_product = m.OrderProduct.objects.create(
                     order_loading_station=order_loading_station,
-                    product=product, **product_data
+                    product=product,
+                    **product_data
                 )
 
                 for unloading_station_data in unloading_stations_data:
+                    station_data = unloading_station_data.pop('unloading_station')
+                    if station_data is None:
+                        raise serializers.ValidationError({
+                            'unloading_station': 'Unloading Station data are missing'
+                        })
+
                     unloading_station = Station.unloadingstations.get(
-                        pk=unloading_station_data.pop('unloading_station')
+                        pk=station_data.get('id')
                     )
                     m.OrderProductDeliver.objects.create(
                         order_product=order_product,

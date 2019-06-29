@@ -14,14 +14,16 @@ class OrderViewSet(TMSViewSet):
     """
     queryset = m.Order.objects.all()
     serializer_class = s.OrderSerializer
-    data_view_serializer_class = s.OrderDataViewSerializer
+    # data_view_serializer_class = s.OrderDataViewSerializer
 
     def create(self, request):
         context = {
-            'loading_stations': request.data.pop('loading_stations')
+            'loading_stations': request.data.pop('loading_stations'),
+            'assignee': request.data.pop('assignee'),
+            'customer': request.data.pop('customer')
         }
 
-        serializer = self.get_serializer_class()(
+        serializer = s.OrderSerializer(
             data=request.data, context=context
         )
 
@@ -37,10 +39,12 @@ class OrderViewSet(TMSViewSet):
         serializer_instance = self.get_object()
 
         context = {
-            'loading_stations': request.data.pop('loading_stations')
+            'loading_stations': request.data.pop('loading_stations'),
+            'assignee': request.data.pop('assignee'),
+            'customer': request.data.pop('customer')
         }
 
-        serializer = self.get_serializer_class()(
+        serializer = s.OrderSerializer(
             serializer_instance,
             data=request.data,
             context=context,
@@ -54,6 +58,18 @@ class OrderViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    def list(self, request):
+        page = self.paginate_queryset(
+            self.get_queryset().all()
+        )
+
+        serializer = s.OrderDataViewSerializer(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, url_path='jobs')
     def get_jobs(self, request, pk=None):
