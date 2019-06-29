@@ -97,8 +97,9 @@ class VehicleViewSet(TMSViewSet):
             body=body
         )
         ret = []
-        if data is not None:
-            ret = list(data.values())
+        for key, value in data.items():
+            if value['code'] == 0:
+                ret.append(value)
 
         serializer = s.VehiclePositionSerializer(
             ret, many=True
