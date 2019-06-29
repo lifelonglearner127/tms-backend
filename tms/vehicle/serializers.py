@@ -29,12 +29,12 @@ class VehicleSerializer(serializers.ModelSerializer):
         model = m.Vehicle
         fields = '__all__'
 
-    def validate(self, data):
-        if data['load'] != sum(data['branches']):
-            raise serializers.ValidationError({
-                'branches': 'Sum of branches weight exceed total weight'
-            })
-        return data
+    # def validate(self, data):
+    #     if data['actual_load'] != sum(data['branches']):
+    #         raise serializers.ValidationError({
+    #             'branches': 'Sum of branches weight exceed total weight'
+    #         })
+    #     return data
 
     def to_internal_value(self, data):
         """

@@ -66,7 +66,9 @@ class Vehicle(TimeStampedModel):
     )
 
     service_area = models.CharField(
-        max_length=100
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     obtain_method = models.CharField(
