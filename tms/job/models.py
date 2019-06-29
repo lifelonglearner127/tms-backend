@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
 
 from . import managers
@@ -203,6 +204,10 @@ class Mission(models.Model):
     departure_station_on = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    branches = ArrayField(
+        models.PositiveIntegerField()
     )
 
     is_completed = models.BooleanField(
