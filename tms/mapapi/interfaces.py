@@ -1,4 +1,3 @@
-from itertools import groupby
 import requests
 
 from django.conf import settings
@@ -6,37 +5,17 @@ from django.conf import settings
 from .endpoints import MAPAPI_ENDPOINTS
 
 
-class RoutePlanInterface:
+class GaodeoMapAPI:
 
     @staticmethod
-    def call_map_api_interface(origin, destination, way_points=None):
-        queries = {
-            'key': settings.MAP_WEB_SERVICE_API_KEY,
-            'origin': ','.join(map(str, origin)),
-            'destination': ','.join(map(str, destination)),
-            'size': 2
-        }
-
-        for point in way_points:
-            waypoint = ','.join(map(str, point))
-            queries['waypoints'] = '|'.join(waypoint)
+    def call_map_api_interface(api_name, queries):
+        queries['key'] = settings.MAP_WEB_SERVICE_API_KEY
 
         r = requests.get(
-            MAPAPI_ENDPOINTS['RoutePlan']['URL'], params=queries
+            MAPAPI_ENDPOINTS[api_name]['URL'], params=queries
         )
 
         response = r.json()
         if response['errcode'] != 0:
             return None
-
-        paths = []
-        for path in response['data']['route']['paths']:
-            polylines = []
-            for step in path['steps']:
-                polylines.extend([
-                    [float(p) for p in point.split(',')]
-                    for point in step['polyline'].split(';')
-                ])
-            paths.append([x[0] for x in groupby(polylines)])
-
-        return paths
+        return response

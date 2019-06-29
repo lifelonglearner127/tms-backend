@@ -84,6 +84,9 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='position')
     def vehicle_position(self, request):
+        """
+        Get the current location of all registered vehicles
+        """
         plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
         body = {
             'plate_nums': list(plate_nums),
@@ -104,8 +107,11 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="current_info")
+    @action(detail=False, url_path="current-info")
     def current_info(self, request):
+        """
+        get the vehicle status of selected vehicle
+        """
         # todo: get bound of vehicle with driver and escort
 
         plate_num = self.request.query_params.get('plate_num', None)
@@ -134,27 +140,11 @@ class VehicleViewSet(TMSViewSet):
         )
 
     @action(detail=False, url_path="current-position")
-    def current_position(self, request):
-        plate_num = self.request.query_params.get('plateNum')
-        get_object_or_404(m.Vehicle, plate_num=plate_num)
-        queries = {
-            'plate_num': plate_num,
-            'fields': 'loc'
-        }
-
-        data = G7Interface.call_g7_http_interface(
-            'VEHICLE_STATUS_INQUIRY',
-            queries=queries
-        )
-
-        ret = {
-            'lnglat': [data['loc']['lng'], data['loc']['lat']],
-            'speed': data['loc']['lng']
-        }
-        return Response(
-            ret,
-            status=status.HTTP_200_OK
-        )
+    def vehicle_position_by_order(self, request):
+        """
+        Get the vehicle status for order
+        """
+        pass
 
     @action(detail=False, url_path="brands")
     def get_vehicle_brands(self, request):
