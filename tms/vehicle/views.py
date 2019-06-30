@@ -1,13 +1,21 @@
+import requests
 from datetime import datetime
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from . import serializers as s
-from . import models as m
 from ..core import constants as c
+
+# models
+from . import models as m
+from ..order.models import Order
+
+# serializer
+from . import serializers as s
 from ..core.serializers import ChoiceSerializer
+
 from ..core.views import TMSViewSet, ApproveViewSet
 from ..g7.interfaces import G7Interface
 
@@ -142,12 +150,71 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="current-position")
+    @action(detail=False, methods=['post'], url_path="current-position")
     def vehicle_position_by_order(self, request):
         """
         Get the vehicle status for order
+        TODO: various error handling
         """
-        pass
+        # get the current vehicle location
+        page = self.paginate_queryset(
+            m.Vehicle.objects.values('plate_num', 'total_load', 'branches')
+        )
+        body = {
+            'plate_nums': [vehicle['plate_num'] for vehicle in page],
+            'fields': ['loc']
+        }
+        data = G7Interface.call_g7_http_interface(
+            'BULK_VEHICLE_STATUS_INQUIRY',
+            body=body
+        )
+
+        origin = []
+        index = 0
+        for key, value in data.items():
+            if value['code'] == 0:
+                page[index]['g7_error'] = False
+                origin.append(','.join([
+                    str(value['data']['loc']['lng']),
+                    str(value['data']['loc']['lat'])
+                ]))
+            else:
+                page[index]['g7_error'] = True
+
+            index = index + 1
+
+        # calculate the distance between new order loading and current
+        order = get_object_or_404(Order, id=request.data.get('order', None))
+        loading_station = order.loading_stations.all()[0]
+        destination = [
+            str(loading_station.longitude),
+            str(loading_station.latitude)
+        ]
+        queries = {
+            'key': settings.MAP_WEB_SERVICE_API_KEY,
+            'origins': ('|').join(origin),
+            'destination': (',').join(destination)
+        }
+        r = requests.get(
+            'https://restapi.amap.com/v3/distance', params=queries
+        )
+        response = r.json()
+        results = response['results']
+        index = 0
+        for vehicle in page:
+            if vehicle['g7_error']:
+                vehicle['distance'] = None
+                vehicle['duration'] = None
+            else:
+                vehicle['distance'] = results[index]['distance']
+                vehicle['duration'] = results[index]['duration']
+                index = index + 1
+
+        serializer = s.VehiclePositionByOrderSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="brands")
     def get_vehicle_brands(self, request):

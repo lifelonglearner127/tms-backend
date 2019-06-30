@@ -65,6 +65,16 @@ class VehiclePositionSerializer(serializers.Serializer):
         return [int(obj['data']['loc']['speed'])]
 
 
+class VehiclePositionByOrderSerializer(serializers.Serializer):
+
+    plate_num = serializers.CharField()
+    distance = serializers.CharField()
+    duration = serializers.CharField()
+    total_load = serializers.CharField()
+    branches = serializers.ListField()
+    g7_error = serializers.BooleanField()
+
+
 class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:

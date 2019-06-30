@@ -207,7 +207,8 @@ class Mission(models.Model):
     )
 
     branches = ArrayField(
-        models.PositiveIntegerField()
+        models.PositiveIntegerField(),
+        default=list
     )
 
     is_completed = models.BooleanField(
