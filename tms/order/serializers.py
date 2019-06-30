@@ -63,7 +63,7 @@ class MissionWeightSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Mission
         fields = (
-            'mission_weight', 'vehicle', 'driver', 'escort', 'route'
+            'id', 'mission_weight', 'vehicle', 'driver', 'escort', 'route'
         )
 
 
@@ -556,6 +556,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
                 for unloading_station_data in unloading_stations_data:
                     station_data = unloading_station_data.pop('unloading_station')
+                    unloading_station_data.pop('jobs')
                     if station_data is None:
                         raise serializers.ValidationError({
                             'unloading_station': 'Unloading Station data are missing'
@@ -658,7 +659,7 @@ class JobSerializer(serializers.ModelSerializer):
         stations = job.route.stations[2:]
 
         for i, mission_id in enumerate(mission_ids):
-            mission = get_object_or_404(OrderProductDeliver, pk=mission_id)
+            mission = get_object_or_404(m.OrderProductDeliver, pk=mission_id)
             m.Mission.objects.create(
                 mission=mission,
                 job=job,

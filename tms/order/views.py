@@ -96,15 +96,73 @@ class OrderViewSet(TMSViewSet):
     #         status=status.HTTP_200_OK
     #     )
 
-    # @action(detail=True, url_path='jobs')
-    # def get_job(self, request, pk=None):
-    #     order = self.get_object()
-    #     serializer = s.OrderJobSerializer(order)
+    @action(detail=True, methods=['post'], url_path='jobs')
+    def create_job(self, request, pk=None):
+        order = self.get_object()
 
-    #     return Response(
-    #         serializer.data,
-    #         status=status.HTTP_200_OK
-    #     )
+        jobs = []
+
+        # if vehicle & driver & escort is mulitple selected for delivers
+        # we assume that this is one job
+        for deliver in request.data:
+            new_job = True
+            order_id = order.id
+
+            driver_data = deliver.get('driver', None)
+            driver_id = driver_data.get('id', None)
+
+            escort_data = deliver.get('escort', None)
+            escort_id = escort_data.get('id', None)
+
+            vehicle_data = deliver.get('vehicle', None)
+            vehicle_id = vehicle_data.get('id', None)
+
+            route_data = deliver.get('route', None)
+            route_id = route_data.get('id', None)
+
+            deliver_id = deliver.get('mission', None)
+            mission_weight = deliver.get('mission_weight', 0)
+
+            for job in jobs:
+                if (
+                    job['driver'] == driver_id and
+                    job['escort'] == escort_id and
+                    job['vehicle'] == vehicle_id
+                ):
+                    job['mission_ids'].append(deliver_id)
+                    job['mission_weights'].append(mission_weight)
+                    job['total_weight'] += float(mission_weight)
+                    new_job = False
+                    continue
+
+            if new_job:
+                jobs.append({
+                    'order': order_id,
+                    'driver': driver_id,
+                    'escort': escort_id,
+                    'vehicle': vehicle_id,
+                    'route': route_id,
+                    'mission_ids': [deliver_id],
+                    'mission_weights': [mission_weight],
+                    'total_weight': float(mission_weight)
+                })
+
+        for job in jobs:
+            context = {
+                'mission_ids': job.pop('mission_ids', []),
+                'mission_weights': job.pop('mission_weights', [])
+            }
+
+            serializer = s.JobSerializer(
+                data=job, context=context
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return Response(
+            {'msg': 'Success'},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class OrderLoadingStationViewSet(viewsets.ModelViewSet):
@@ -157,12 +215,22 @@ class JobViewSet(TMSViewSet):
         # we assume that this is one job
         for deliver in request.data:
             new_job = True
-            order_id = deliver.get('order', None)
-            driver_id = deliver.get('driver', None)
-            escort_id = deliver.get('escort', None)
-            vehicle_id = deliver.get('vehicle', None)
+            order_data = deliver.get('order', None)
+            order_id = order_data.get('id', None)
+
+            driver_data = deliver.get('driver', None)
+            driver_id = driver_data.get('id', None)
+
+            escort_data = deliver.get('escort', None)
+            escort_id = escort_data.get('id', None)
+
+            vehicle_data = deliver.get('vehicle', None)
+            vehicle_id = vehicle_data.get('id', None)
+
+            route_data = deliver.get('route', None)
+            route_id = route_data.get('id', None)
+
             deliver_id = deliver.get('mission', None)
-            route_id = deliver.get('route', None)
             mission_weight = deliver.get('mission_weight', 0)
 
             for job in jobs:
