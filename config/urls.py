@@ -60,8 +60,8 @@ urlpatterns = [
     path(
         'api/',
         include(
-            ('tms.job.urls', 'job'),
-            namespace='job'
+            ('tms.business.urls', 'business'),
+            namespace='business'
         )
     ),
     path(

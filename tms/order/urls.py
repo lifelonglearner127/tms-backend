@@ -10,6 +10,12 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.register(
     r'orders', v.OrderViewSet, base_name='order'
 )
+router.register(
+    r'jobs', v.JobViewSet, base_name='job'
+)
+router.register(
+    r'job-report', v.JobReportViewSet, base_name='job-report'
+)
 
 # /orders/{order_pk}/loading-stations
 # /orders/{order_pk}/loading-stations/{pk}

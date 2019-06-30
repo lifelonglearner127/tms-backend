@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class JobConfig(AppConfig):
-    name = 'tms.job'
+class BusinessConfig(AppConfig):
+    name = 'tms.business'
 
     def ready(self):
         from . import signals # noqa

@@ -5,14 +5,6 @@ from .import views as v
 
 router = routers.SimpleRouter(trailing_slash=False)
 
-# /jobs
-# /jobs/{pk}
-router.register(
-    r'jobs', v.JobViewSet, base_name='job'
-)
-router.register(
-    r'job-report', v.JobReportViewSet, base_name='job-report'
-)
 router.register(
     r'parking-request',
     v.ParkingRequestViewSet,
@@ -29,20 +21,20 @@ router.register(
     base_name='escort-change'
 )
 
-# /jobs/{job_pk}/missions
-# /jobs/{job_pk}/missions/{pk}
-job_router = routers.NestedSimpleRouter(
-    router,
-    r'jobs',
-    lookup='job'
-)
-job_router.register(
-    r'missions',
-    v.MissionViewSet,
-    base_name='missions'
-)
+# # /jobs/{job_pk}/missions
+# # /jobs/{job_pk}/missions/{pk}
+# job_router = routers.NestedSimpleRouter(
+#     router,
+#     r'jobs',
+#     lookup='job'
+# )
+# job_router.register(
+#     r'missions',
+#     v.MissionViewSet,
+#     base_name='missions'
+# )
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^', include(job_router.urls)),
+    # url(r'^', include(job_router.urls)),
 ]

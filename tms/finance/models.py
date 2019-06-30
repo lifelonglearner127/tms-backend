@@ -5,7 +5,7 @@ from ..core import constants as c
 from ..core.models import CreatedTimeModel
 from ..account.models import User
 from ..hr.models import Department
-from ..job.models import Job
+from ..order.models import Job
 from ..order.models import Order
 from ..vehicle.models import Vehicle
 

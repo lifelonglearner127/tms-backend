@@ -7,7 +7,7 @@ from . import serializers as s
 from ..core import constants as c
 from ..account.models import User
 from ..info.models import Station
-from ..job.models import Job
+from ..order.models import Job
 
 
 class NotificationConsumer(JsonWebsocketConsumer):

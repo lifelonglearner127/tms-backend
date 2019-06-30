@@ -1,10 +1,16 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from month.models import MonthField
 
 from . import managers
 from ..core import constants as c
+
+# models
 from ..core.models import TimeStampedModel
-from ..info.models import Station, Product
 from ..account.models import User
+from ..info.models import Station, Product
+from ..road.models import Route
+from ..vehicle.models import Vehicle
 
 
 class Order(TimeStampedModel):
@@ -227,3 +233,254 @@ class OrderProductDeliver(models.Model):
             self.unloading_station.name,
             self.weight, self.order_product.total_weight
         )
+
+
+class Job(models.Model):
+    """
+    Job model
+    """
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='jobs'
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='jobs'
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='jobs_as_driver'
+    )
+
+    escort = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='jobs_as_escort',
+    )
+
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    progress = models.PositiveIntegerField(
+        default=c.JOB_PROGRESS_NOT_STARTED
+    )
+
+    start_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finish_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    arrived_loading_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_loading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_loading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    departure_loading_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    arrived_quality_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_checking_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_checking_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    departure_quality_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    total_weight = models.PositiveIntegerField()
+
+    total_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    empty_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    heavy_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    highway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    normalway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    is_paid = models.BooleanField(
+        default=False
+    )
+
+    missions = models.ManyToManyField(
+        OrderProductDeliver,
+        through='Mission'
+    )
+
+    objects = models.Manager()
+    pendings = managers.PendingJobManager()
+    inprogress = managers.InProgressJobManager()
+    completeds = managers.CompleteJobManager()
+
+    class Meta:
+        ordering = (
+            'start_due_time',
+        )
+
+
+class Mission(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    mission = models.ForeignKey(
+        OrderProductDeliver,
+        on_delete=models.CASCADE,
+        related_name='missions'
+    )
+
+    step = models.PositiveIntegerField()
+
+    mission_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    loading_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    unloading_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    arrived_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    started_unloading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finished_unloading_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    departure_station_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    branches = ArrayField(
+        models.PositiveIntegerField(),
+        default=list
+    )
+
+    is_completed = models.BooleanField(
+        default=False
+    )
+
+    class Meta:
+        ordering = ['step']
+
+
+class JobReport(models.Model):
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='report'
+    )
+
+    month = MonthField()
+
+    total_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    empty_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    heavy_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    highway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    normalway_mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return '{}\'s {} report'.format(self.driver, self.month)
+
+    class Meta:
+        ordering = ('month', )
