@@ -4,7 +4,9 @@ from . import models as m
 from ..core import constants as c
 from ..core.serializers import TMSChoiceField
 from ..info.models import Station
-from ..info.serializers import ShortStationSerializer, ShortStationPointSerializer
+from ..info.serializers import (
+    StationPointSerializer, ShortStationPointSerializer
+)
 
 
 class ShortRouteSerializer(serializers.ModelSerializer):
@@ -31,7 +33,7 @@ class PathStationNameField(serializers.ListField):
         paths = Station.workstations.filter(id__in=value)
         paths = dict([(point.id, point) for point in paths])
 
-        serializer = ShortStationSerializer(
+        serializer = StationPointSerializer(
             [paths[id] for id in value],
             many=True
         )
@@ -41,6 +43,7 @@ class PathStationNameField(serializers.ListField):
 class RouteDataViewSerializer(serializers.ModelSerializer):
 
     path = PathStationNameField()
+    policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
 
     class Meta:
         model = m.Route
