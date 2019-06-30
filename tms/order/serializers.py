@@ -53,6 +53,20 @@ class ShortOrderProductDeliverSerializer(serializers.ModelSerializer):
         )
 
 
+class MissionWeightSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer(source='job.vehicle')
+    driver = ShortUserSerializer(source='job.driver')
+    escort = ShortUserSerializer(source='job.escort')
+    route = ShortUserSerializer(source='job.route')
+
+    class Meta:
+        model = m.Mission
+        fields = (
+            'mission_weight', 'vehicle', 'driver', 'escort', 'route'
+        )
+
+
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
     """
     Serializer for unloading stations selected for product delivery
@@ -60,12 +74,20 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
     unloading_station = ShortStationSerializer(
         read_only=True
     )
+    jobs = serializers.SerializerMethodField()
 
     class Meta:
         model = m.OrderProductDeliver
-        exclude = (
-            'order_product',
+        fields = (
+            'id', 'unloading_station', 'due_time', 'weight',
+            'jobs'
         )
+
+    def get_jobs(self, instance):
+        return MissionWeightSerializer(
+            instance.missions.all(),
+            many=True
+        ).data
 
 
 class OrderProductSerializer(serializers.ModelSerializer):

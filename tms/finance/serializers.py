@@ -151,7 +151,7 @@ class BillDocumentSerializer(serializers.ModelSerializer):
 
     bill = Base64ImageField()
     category = TMSChoiceField(choices=c.BILL_CATEGORY)
-    sub_category = BillSubCategoyChoiceField(source='*')
+    sub_category = BillSubCategoyChoiceField(source='*', required=False)
     detail_category = BillDetailCategoyChoiceField(source='*', required=False)
 
     class Meta:

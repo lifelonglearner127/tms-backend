@@ -1,6 +1,11 @@
+from django.db.models import Q
+from django.utils import timezone as datetime
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+# constants
+from ..core import constants as c
 
 # permissions
 from ..core.permissions import IsDriverOrEscortUser
@@ -91,10 +96,15 @@ class OrderViewSet(TMSViewSet):
     #         status=status.HTTP_200_OK
     #     )
 
-    # @action(detail=True, url_path=jobs)
+    # @action(detail=True, url_path='jobs')
     # def get_job(self, request, pk=None):
     #     order = self.get_object()
     #     serializer = s.OrderJobSerializer(order)
+
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
 
 
 class OrderLoadingStationViewSet(viewsets.ModelViewSet):
