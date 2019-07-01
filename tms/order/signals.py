@@ -12,13 +12,8 @@ from ..core import constants as c
 
 # models
 from . import models as m
-from ..account.models import User
 from ..order.models import Job
-from ..notification.models import Notification
 from ..vehicle.models import VehicleUserBind
-
-# serializers
-from ..notification.serializers import NotificationSerializer
 
 
 channel_layer = get_channel_layer()
@@ -121,5 +116,3 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                 highway_mileage=instance.highway_mileage,
                 normalway_mileage=instance.normalway_mileage
             )
-
-
