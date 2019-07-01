@@ -655,6 +655,45 @@ class JobSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         mission_ids = self.context.get('mission_ids')
         mission_weights = self.context.get('mission_weights')
+
+        # validate
+        order = validated_data['order']
+        route = validated_data['route']
+        stations = route.stations
+
+        loading_station = order.loading_stations_data[0]
+        quality_station = order.quality_stations_data[0]
+        unloading_stations = order.unloading_stations_data
+
+        station_index = -1
+        station_before_index = -1
+        for i in range(len(stations)):
+            if loading_station == stations[i]:
+                station_index = i + 1
+                break
+
+        if station_index == station_before_index:
+            raise serializers.ValidationError({
+                'route': ','.join(str(x) for x in mission_ids)
+            })
+
+        station_before_index = station_index
+        for i in range(station_index, len(stations)):
+            if quality_station == stations[i]:
+                station_index = i + 1
+                break
+
+        if station_index == station_before_index:
+            raise serializers.ValidationError({
+                'route': ','.join(str(x) for x in mission_ids)
+            })
+
+        stations = stations[station_index:]
+        if not set(unloading_stations).issubset(set(stations)):
+            raise serializers.ValidationError({
+                'route': ','.join(str(x) for x in mission_ids)
+            })
+
         job = m.Job.objects.create(**validated_data)
         stations = job.route.stations[2:]
 
