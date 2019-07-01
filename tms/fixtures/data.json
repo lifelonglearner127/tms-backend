@@ -925,7 +925,8 @@
         "driver": 3,
         "escort": 4,
         "route": 1,
-        "total_weight": 3
+        "total_weight": 3,
+        "start_due_time": "2019-07-11T00:00:00+00:00"
     }
   },
   {
@@ -938,7 +939,7 @@
         "escort": 4,
         "route": 2,
         "total_weight": 1,
-        "progress": 0,
+        "progress": 2,
         "total_mileage": "10",
         "highway_mileage": "7",
         "normalway_mileage": "3",
@@ -967,7 +968,8 @@
         "driver": 3,
         "escort": 4,
         "route": 1,
-        "total_weight": 1
+        "total_weight": 1,
+        "start_due_time": "2019-05-17T00:00:00+00:00"
     }
   },
   {
@@ -979,7 +981,8 @@
         "driver": 3,
         "escort": 4,
         "route": 1,
-        "total_weight": 1
+        "total_weight": 1,
+        "start_due_time": "2019-07-12T00:00:00+00:00"
     }
   },
   {
