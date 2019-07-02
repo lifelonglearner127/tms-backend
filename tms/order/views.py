@@ -201,6 +201,7 @@ class OrderViewSet(TMSViewSet):
                 })
 
             for mission_data in missions_data:
+                mission_data['deliver'] = unloading_station_data.get('id', None)
                 mission_weight = float(mission_data.get('mission_weight', 0))
                 weight = weight - mission_weight
 
@@ -235,7 +236,7 @@ class OrderViewSet(TMSViewSet):
 
             deliver_id = mission.get('deliver', None)
 
-            mission_id = mission.get('mission', None)
+            mission_id = mission.get('id', None)
             mission_weight = mission.get('mission_weight', 0)
 
             for job in jobs:
@@ -308,7 +309,7 @@ class OrderViewSet(TMSViewSet):
                     total_weight=job['total_weight']
                 )
             else:
-                job_obj = get_object_or_404(m.Job, job['id'])
+                job_obj = get_object_or_404(m.Job, id=job['id'])
 
             for (deliver_id, mission_id, mission_weight) in zip(job['deliver_ids'], job['mission_ids'], job['mission_weights']):
                 product_deliver = get_object_or_404(m.OrderProductDeliver, id=deliver_id)
