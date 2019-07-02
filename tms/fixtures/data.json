@@ -660,7 +660,7 @@
           "brand": "T",
           "total_load": 100,
           "actual_load": 100,
-          "branches": [100],
+          "branches": [50, 50],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }

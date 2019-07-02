@@ -1126,3 +1126,18 @@ class JobReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobReport
         fields = '__all__'
+
+
+class VehicleStatusOrderSerializer(serializers.Serializer):
+
+    id = serializers.CharField()
+    plate_num = serializers.CharField()
+    # progress = serializers.CharField()
+    # client_name = serializers.CharField()
+    distance = serializers.DecimalField(max_digits=8, decimal_places=2)
+    duration = serializers.DecimalField(max_digits=5, decimal_places=1)
+    total_load = serializers.CharField()
+    branch1 = serializers.CharField()
+    branch2 = serializers.CharField()
+    branch3 = serializers.CharField()
+    g7_error = serializers.BooleanField()

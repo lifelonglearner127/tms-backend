@@ -1,3 +1,6 @@
+import requests
+from django.conf import settings
+from django.db import connection
 from django.db.models import Q
 from django.utils import timezone as datetime
 from rest_framework import viewsets, status
@@ -18,6 +21,9 @@ from . import serializers as s
 
 # views
 from ..core.views import TMSViewSet
+
+# other
+from ..g7.interfaces import G7Interface
 
 
 class OrderViewSet(TMSViewSet):
@@ -95,6 +101,84 @@ class OrderViewSet(TMSViewSet):
     #         serializer.data,
     #         status=status.HTTP_200_OK
     #     )
+
+    @action(detail=True, url_path='vehicle-status')
+    def get_vehicle_status(self, request, pk=None):
+        """
+        Get the vehicle status like job progress, next job client, branches
+        when admin make arrangement
+        """
+        order = self.get_object()
+        query_str = """
+            select id, plate_num, total_load, branches[1] as branch1,
+            branches[2] as branch2, branches[3] as branch3
+            from vehicle_vehicle
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query_str)
+            columns = [col[0] for col in cursor.description]
+            vehicles = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+            # get the current location of all registered vehicles
+            body = {
+                'plate_nums': [vehicle['plate_num'] for vehicle in vehicles],
+                'fields': ['loc']
+            }
+            data = G7Interface.call_g7_http_interface(
+                'BULK_VEHICLE_STATUS_INQUIRY',
+                body=body
+            )
+
+            origins = []
+            index = 0
+            for key, value in data.items():
+                if value['code'] == 0:
+                    vehicles[index]['g7_error'] = False
+                    origins.append(','.join([
+                        str(value['data']['loc']['lng']),
+                        str(value['data']['loc']['lat'])
+                    ]))
+                else:
+                    vehicles[index]['g7_error'] = True
+
+                index = index + 1
+
+            # calculate the distance between new order loading and current
+            loading_station = order.loading_stations.all()[0]
+            destination = [
+                str(loading_station.longitude),
+                str(loading_station.latitude)
+            ]
+            queries = {
+                'key': settings.MAP_WEB_SERVICE_API_KEY,
+                'origins': ('|').join(origins),
+                'destination': (',').join(destination)
+            }
+            r = requests.get(
+                'https://restapi.amap.com/v3/distance', params=queries
+            )
+            response = r.json()
+            results = response['results']
+            index = 0
+            for vehicle in vehicles:
+                if vehicle['g7_error']:
+                    vehicle['distance'] = None
+                    vehicle['duration'] = None
+                else:
+                    vehicle['distance'] =\
+                        int(results[index]['distance']) / 1000
+                    vehicle['duration'] =\
+                        int(results[index]['duration']) / 3600
+                    index = index + 1
+
+            serializer = s.VehicleStatusOrderSerializer(
+                vehicles,
+                many=True
+            )
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
 
     @action(detail=True, methods=['post'], url_path='jobs')
     def create_job(self, request, pk=None):

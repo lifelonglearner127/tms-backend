@@ -73,7 +73,7 @@ class Response(Request):
             )
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
-        except Exception as e:
+        except Exception:
             return None, None, None
         finally:
             self.__close_connection()
@@ -94,7 +94,7 @@ class Response(Request):
             )
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
-        except Exception as e:
+        except Exception:
             return None, None, None
         finally:
             self.__close_connection()
@@ -122,7 +122,7 @@ class Response(Request):
             )
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
-        except Exception as e:
+        except Exception:
             return None, None, None
         finally:
             self.__close_connection()
@@ -145,7 +145,7 @@ class Response(Request):
             )
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
-        except Exception as e:
+        except Exception:
             return None, None, None
         finally:
             self.__close_connection()
@@ -154,5 +154,5 @@ class Response(Request):
         try:
             if self.__connection is not None:
                 self.__connection.close()
-        except Exception as e:
+        except Exception:
             pass
