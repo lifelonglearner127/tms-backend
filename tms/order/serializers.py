@@ -53,8 +53,9 @@ class ShortOrderProductDeliverSerializer(serializers.ModelSerializer):
         )
 
 
-class MissionWeightSerializer(serializers.ModelSerializer):
+class OrderProductDeliverMissionSerializer(serializers.ModelSerializer):
 
+    job_id = serializers.CharField(source='job.id')
     vehicle = ShortVehicleSerializer(source='job.vehicle')
     driver = ShortUserSerializer(source='job.driver')
     escort = ShortUserSerializer(source='job.escort')
@@ -63,7 +64,8 @@ class MissionWeightSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Mission
         fields = (
-            'id', 'mission_weight', 'vehicle', 'driver', 'escort', 'route'
+            'id', 'job_id', 'mission_weight', 'vehicle', 'driver', 'escort',
+            'route'
         )
 
 
@@ -74,17 +76,17 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
     unloading_station = ShortStationSerializer(
         read_only=True
     )
-    jobs = serializers.SerializerMethodField()
+    missions = serializers.SerializerMethodField()
 
     class Meta:
         model = m.OrderProductDeliver
         fields = (
             'id', 'unloading_station', 'due_time', 'weight',
-            'jobs'
+            'missions'
         )
 
-    def get_jobs(self, instance):
-        return MissionWeightSerializer(
+    def get_missions(self, instance):
+        return OrderProductDeliverMissionSerializer(
             instance.missions.all(),
             many=True
         ).data
@@ -608,7 +610,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     station_data = unloading_station_data.pop(
                         'unloading_station'
                     )
-                    unloading_station_data.pop('jobs', None)
+                    unloading_station_data.pop('missions', None)
                     if station_data is None:
                         raise serializers.ValidationError({
                             'unloading_station':
