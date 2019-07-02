@@ -500,7 +500,7 @@ class OrderSerializer(serializers.ModelSerializer):
         instance.assignee = assignee
         instance.customer = customer
         instance.save()
-        instance.loading_stations.clear()
+        # instance.loading_stations.clear()
         # 2. save models
         for loading_station_data in loading_stations_data:
             station_data = loading_station_data.pop('loading_station')
@@ -534,12 +534,28 @@ class OrderSerializer(serializers.ModelSerializer):
 
             products_data = loading_station_data.pop('products')
 
-            order_loading_station = m.OrderLoadingStation.objects.create(
-                order=instance,
-                loading_station=loading_station,
-                quality_station=quality_station,
-                **loading_station_data
+            order_loading_station_id = loading_station_data.get(
+                'id', None
             )
+
+            if order_loading_station_id is None:
+                order_loading_station = m.OrderLoadingStation.objects.create(
+                    order=instance,
+                    loading_station=loading_station,
+                    quality_station=quality_station,
+                    **loading_station_data
+                )
+            else:
+                order_loading_station = get_object_or_404(
+                    m.OrderLoadingStation,
+                    id=loading_station_data.get('id', None)
+                )
+                order_loading_station.loading_station = loading_station
+                order_loading_station.quality_station = quality_station
+                for (key, value) in loading_station_data.items():
+                    setattr(order_loading_station, key, value)
+
+                order_loading_station.save()
 
             for product_data in products_data:
                 product = product_data.pop('product', None)
@@ -569,17 +585,30 @@ class OrderSerializer(serializers.ModelSerializer):
                     product_data['loss_unit']['value']
                 product_data['payment_method'] =\
                     product_data['payment_method']['value']
-                order_product = m.OrderProduct.objects.create(
-                    order_loading_station=order_loading_station,
-                    product=product,
-                    **product_data
-                )
+
+                order_product_id = product_data.get('id', None)
+                if order_product_id is None:
+                    order_product = m.OrderProduct.objects.create(
+                        order_loading_station=order_loading_station,
+                        product=product,
+                        **product_data
+                    )
+                else:
+                    order_product = get_object_or_404(
+                        m.OrderProduct,
+                        id=product_data.get('id', None)
+                    )
+                    order_product.order_loading_station = order_loading_station
+                    order_product.product = product
+                    for (key, value) in product_data.items():
+                        setattr(order_product, key, value)
+                    order_product.save()
 
                 for unloading_station_data in unloading_stations_data:
                     station_data = unloading_station_data.pop(
                         'unloading_station'
                     )
-                    unloading_station_data.pop('jobs')
+                    unloading_station_data.pop('jobs', None)
                     if station_data is None:
                         raise serializers.ValidationError({
                             'unloading_station':
@@ -589,11 +618,28 @@ class OrderSerializer(serializers.ModelSerializer):
                     unloading_station = Station.unloadingstations.get(
                         pk=station_data.get('id')
                     )
-                    m.OrderProductDeliver.objects.create(
-                        order_product=order_product,
-                        unloading_station=unloading_station,
-                        **unloading_station_data
+
+                    order_product_deliver_id = unloading_station_data.get(
+                        'id', None
                     )
+                    if order_product_deliver_id is None:
+                        m.OrderProductDeliver.objects.create(
+                            order_product=order_product,
+                            unloading_station=unloading_station,
+                            **unloading_station_data
+                        )
+                    else:
+                        order_product_deliver = get_object_or_404(
+                            m.OrderProductDeliver,
+                            id=unloading_station_data.get('id', None)
+                        )
+                        order_product_deliver.order_product = order_product
+                        order_product_deliver.unloading_station = unloading_station
+                        for (key, value) in unloading_station_data.items():
+                            setattr(order_product_deliver, key, value)
+
+                        order_product_deliver.save()
+
         return instance
 
 

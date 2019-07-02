@@ -127,10 +127,10 @@ class OrderLoadingStation(models.Model):
         through='OrderProduct'
     )
 
-    def __str__(self):
-        return '{} - Load from {}'.format(
-            self.order.alias, self.loading_station.name
-        )
+    # def __str__(self):
+    #     return '{} - Load from {}'.format(
+    #         self.order.alias, self.loading_station.name
+    #     )
 
 
 class OrderProduct(models.Model):
@@ -201,11 +201,11 @@ class OrderProduct(models.Model):
         through='OrderProductDeliver'
     )
 
-    def __str__(self):
-        return 'Order from {}- {} of {}'.format(
-            self.order_loading_station.loading_station,
-            self.total_weight, self.product.name
-        )
+    # def __str__(self):
+    #     return 'Order from {}- {} of {}'.format(
+    #         self.order_loading_station.loading_station,
+    #         self.total_weight, self.product.name
+    #     )
 
 
 class OrderProductDeliver(models.Model):
@@ -226,13 +226,13 @@ class OrderProductDeliver(models.Model):
 
     weight = models.PositiveIntegerField()
 
-    def __str__(self):
-        return 'Order {}: from {} to {}: {} of {}'.format(
-            self.order_product.order_loading_station.order,
-            self.order_product.order_loading_station.loading_station.name,
-            self.unloading_station.name,
-            self.weight, self.order_product.total_weight
-        )
+    # def __str__(self):
+    #     return 'Order {}: from {} to {}: {} of {}'.format(
+    #         self.order_product.order_loading_station.order,
+    #         self.order_product.order_loading_station.loading_station.name,
+    #         self.unloading_station.name,
+    #         self.weight, self.order_product.total_weight
+    #     )
 
 
 class Job(models.Model):
