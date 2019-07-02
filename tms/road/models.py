@@ -40,6 +40,17 @@ class Route(TimeStampedModel):
             return None
 
     @property
+    def unloading_stations(self):
+        stations = Station.unloadingstations.filter(id__in=self.path)
+        stations = dict([(station.id, station) for station in stations])
+        unloading_stations = []
+        for id in self.path:
+            if id in stations:
+                unloading_stations.append(stations[id])
+
+        return unloading_stations
+
+    @property
     def stations(self):
         points = Station.workstations.filter(id__in=self.path)
         points = dict([(point.id, point) for point in points])

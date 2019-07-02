@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import connection
 from django.db.models import Q
 from django.utils import timezone as datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,6 +16,9 @@ from ..core.permissions import IsDriverOrEscortUser
 
 # models
 from . import models as m
+from ..account.models import User
+from ..road.models import Route
+from ..vehicle.models import Vehicle
 
 # serializers
 from . import serializers as s
@@ -181,31 +185,58 @@ class OrderViewSet(TMSViewSet):
             )
 
     @action(detail=True, methods=['post'], url_path='jobs')
-    def create_job(self, request, pk=None):
+    def create_or_update_job(self, request, pk=None):
         order = self.get_object()
-
         jobs = []
+        weight_errors = []
+        missions = []
+        # validate weights by missions
+        unloading_station_index = 0
+        for unloading_station_data in request.data:
+            weight = float(unloading_station_data.get('weight', 0))
+            missions_data = unloading_station_data.get('missions', None)
+            if missions_data is None:
+                raise s.serializers.ValidationError({
+                    'missions': 'Mission data are missing'
+                })
+
+            for mission_data in missions_data:
+                mission_weight = float(mission_data.get('mission_weight', 0))
+                weight = weight - mission_weight
+
+            if weight != 0:
+                weight_errors.append(unloading_station_index)
+            unloading_station_index = unloading_station_index + 1
+            missions.extend(missions_data)
+
+        if weight_errors:
+            raise s.serializers.ValidationError({
+                'weight': weight_errors
+            })
 
         # if vehicle & driver & escort is mulitple selected for delivers
         # we assume that this is one job
-        for deliver in request.data:
+        for mission in missions:
             new_job = True
-            order_id = order.id
 
-            driver_data = deliver.get('driver', None)
+            job_id = mission.get('job_id', None)
+
+            driver_data = mission.get('driver', None)
             driver_id = driver_data.get('id', None)
 
-            escort_data = deliver.get('escort', None)
+            escort_data = mission.get('escort', None)
             escort_id = escort_data.get('id', None)
 
-            vehicle_data = deliver.get('vehicle', None)
+            vehicle_data = mission.get('vehicle', None)
             vehicle_id = vehicle_data.get('id', None)
 
-            route_data = deliver.get('route', None)
+            route_data = mission.get('route', None)
             route_id = route_data.get('id', None)
 
-            deliver_id = deliver.get('mission', None)
-            mission_weight = deliver.get('mission_weight', 0)
+            deliver_id = mission.get('deliver', None)
+
+            mission_id = mission.get('mission', None)
+            mission_weight = mission.get('mission_weight', 0)
 
             for job in jobs:
                 if (
@@ -213,35 +244,83 @@ class OrderViewSet(TMSViewSet):
                     job['escort'] == escort_id and
                     job['vehicle'] == vehicle_id
                 ):
-                    job['mission_ids'].append(deliver_id)
+                    job['deliver_ids'].append(deliver_id)
+                    job['mission_ids'].append(mission_id)
                     job['mission_weights'].append(mission_weight)
                     job['total_weight'] += float(mission_weight)
+                    if job['id'] is None and job_id is not None:
+                        job['id'] = job_id
+
                     new_job = False
-                    continue
+                    break
 
             if new_job:
                 jobs.append({
-                    'order': order_id,
+                    'id': job_id,
                     'driver': driver_id,
                     'escort': escort_id,
                     'vehicle': vehicle_id,
                     'route': route_id,
-                    'mission_ids': [deliver_id],
+                    'deliver_ids': [deliver_id],
+                    'mission_ids': [mission_id],
                     'mission_weights': [mission_weight],
                     'total_weight': float(mission_weight)
                 })
 
+        # 1. validate job payload
         for job in jobs:
-            context = {
-                'mission_ids': job.pop('mission_ids', []),
-                'mission_weights': job.pop('mission_weights', [])
-            }
+            # validate weight
+            vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
+            total_weight = job.get('total_weight', 0)
+            if total_weight > vehicle.total_load:
+                raise s.serializers.ValidationError({
+                    'weight': 'Overweight'
+                })
 
-            serializer = s.JobSerializer(
-                data=job, context=context
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            # validate route
+            route = get_object_or_404(Route, id=job['route'])
+            if route.loading_station != order.loading_stations_data[0]:
+                raise s.serializers.ValidationError({
+                    'route': 'Missing loading station'
+                })
+
+            if route.quality_station != order.quality_stations_data[0]:
+                raise s.serializers.ValidationError({
+                    'route': 'Missing quality station'
+                })
+
+            for (order_unloading_station, route_unloading_station) in zip(order.unloading_stations_data, route.unloading_stations):
+                if order_unloading_station != route_unloading_station:
+                    raise s.serializers.ValidationError({
+                        'route': 'Unmatching unloading stations'
+                    })
+
+        # 3. create or update job payload
+        for job in jobs:
+            vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
+            driver = get_object_or_404(User, id=job['driver'])
+            escort = get_object_or_404(User, id=job['escort'])
+            route = get_object_or_404(Route, id=job['route'])
+            if job['id'] is None:
+                job_obj = m.Job.objects.create(
+                    order=order, vehicle=vehicle, driver=driver,
+                    escort=escort, route=route,
+                    total_weight=job['total_weight']
+                )
+            else:
+                job_obj = get_object_or_404(m.Job, job['id'])
+
+            for (deliver_id, mission_id, mission_weight) in zip(job['deliver_ids'], job['mission_ids'], job['mission_weights']):
+                product_deliver = get_object_or_404(m.OrderProductDeliver, id=deliver_id)
+                if mission_id is not None:
+                    mission = get_object_or_404(m.Mission, id=mission_id)
+                    mission.mission_weight = mission_weight
+                    mission.save()
+                else:
+                    m.Mission.objects.create(
+                        job=job_obj, mission=product_deliver, mission_weight=mission_weight,
+                        step=route.unloading_stations.index(product_deliver.unloading_station)
+                    )
 
         return Response(
             {'msg': 'Success'},
