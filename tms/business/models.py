@@ -33,6 +33,10 @@ class ParkingRequest(ApprovedModel):
         related_name='parking_requests_as_escort'
     )
 
+    place = models.CharField(
+        max_length=100
+    )
+
 
 class DriverChangeRequest(ApprovedModel):
 
@@ -41,16 +45,33 @@ class DriverChangeRequest(ApprovedModel):
         on_delete=models.CASCADE
     )
 
-    new_driver = models.ForeignKey(
+    old_driver = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='driver_change_requests'
     )
 
-    change_time = models.DateTimeField()
+    new_driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='driver_change_assigned'
+    )
+
+    change_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    change_place = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
 
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['job', 'new_driver']
+        unique_together = ['job', 'old_driver']
 
 
 class EscortChangeRequest(ApprovedModel):
@@ -60,16 +81,33 @@ class EscortChangeRequest(ApprovedModel):
         on_delete=models.CASCADE
     )
 
-    new_escort = models.ForeignKey(
+    old_escort = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='escort_change_requests'
     )
 
-    change_time = models.DateTimeField()
+    new_escort = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='escort_change_assigned'
+    )
+
+    change_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    change_place = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
 
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['job', 'new_escort']
+        unique_together = ['job', 'old_escort']
 
 
 class RestRequest(ApprovedModel):

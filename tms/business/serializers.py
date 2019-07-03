@@ -32,18 +32,17 @@ class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
 
 
 class DriverChangeRequestSerializer(serializers.ModelSerializer):
-    """
-    TODO:
-        1) Validation - new driver should be different from job's driver
-    """
+
     class Meta:
         model = m.DriverChangeRequest
         fields = '__all__'
+        read_only_fields = ('new_driver', )
 
 
 class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
 
     job = ShortJobSerializer()
+    old_driver = ShortUserSerializer()
     new_driver = ShortUserSerializer()
 
     class Meta:
@@ -52,10 +51,7 @@ class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
 
 
 class EscortChangeRequestSerializer(serializers.ModelSerializer):
-    """
-    TODO:
-        1) Validation - new escort should be different from job's escort
-    """
+
     class Meta:
         model = m.EscortChangeRequest
         fields = '__all__'

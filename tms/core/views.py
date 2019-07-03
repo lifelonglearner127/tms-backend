@@ -48,10 +48,11 @@ class StaffViewSet(TMSViewSet):
 
 class ApproveViewSet(TMSViewSet):
 
-    @action(detail=True, url_path='approve')
+    @action(detail=True, methods=['post'], url_path='approve')
     def approve(self, request, pk=None):
+        approved = request.data.get('approve', False)
         instance = self.get_object()
-        instance.approved = True
+        instance.approved = approved
         instance.approved_time = datetime.now()
         instance.save()
 

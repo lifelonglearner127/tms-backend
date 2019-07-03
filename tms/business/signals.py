@@ -24,7 +24,7 @@ def notify_staff_of_parking_request(sender, instance, **kwargs):
     message = "{} created {} parking request."\
         "Please approve it".format(instance.driver, instance.vehicle)
 
-    admin = User.objects.get(role=c.USER_ROLE_ADMIN)[0]
+    admin = User.objects.filter(role=c.USER_ROLE_ADMIN)[0]
     notification = Notification.objects.create(
         user=admin,
         message=message,
