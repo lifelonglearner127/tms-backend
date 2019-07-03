@@ -3,7 +3,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from . import managers
 from ..core import constants as c
-from ..core.validations import validate_mobile
+from ..core.validations import validate_mobile, validate_username
 
 
 class UserManager(BaseUserManager):
@@ -41,7 +41,8 @@ class User(AbstractBaseUser):
     """
     username = models.CharField(
         max_length=100,
-        unique=True
+        unique=True,
+        validators=[validate_username]
     )
 
     email = models.EmailField(
