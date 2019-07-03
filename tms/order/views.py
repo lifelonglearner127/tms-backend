@@ -486,7 +486,8 @@ class JobViewSet(TMSViewSet):
             m.Job.objects.all(),
         )
 
-        serializer = s.JobTimeSerializer(page, many=True)
+        # serializer = s.JobTimeSerializer(page, many=True)
+        serializer = s.JobTimeDurationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 

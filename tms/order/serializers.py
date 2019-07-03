@@ -1089,6 +1089,41 @@ class JobTimeSerializer(serializers.ModelSerializer):
         )
 
 
+class MissionTimeDurationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Mission
+        fields = (
+            'rushing_time_to_unloading_station',
+            'waiting_time_on_unloading_station',
+            'unloading_time_on_unloading_station',
+        )
+
+
+class JobTimeDurationSerializer(serializers.ModelSerializer):
+    """
+    This serializer is used for displaying time duration
+    """
+    order = ShortOrderSerializer()
+    vehicle = ShortVehicleSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
+    missions = MissionTimeDurationSerializer(many=True)
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order', 'vehicle', 'driver', 'escort',
+            'total_time', 'rushing_time_to_loading_station',
+            'waiting_time_on_loading_station',
+            'loading_time_on_loading_station',
+            'rushing_time_to_quality_station',
+            'waiting_time_on_quality_station',
+            'checking_time_on_quality_station',
+            'missions'
+        )
+
+
 class JobCostSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()

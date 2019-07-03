@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone as datetime
 from month.models import MonthField
 
 from . import managers
@@ -370,6 +371,76 @@ class Job(models.Model):
         through='Mission'
     )
 
+    @property
+    def total_time(self):
+        if self.started_on is None:
+            return None
+
+        if self.finished_on is None:
+            return datetime.now() - self.started_on
+
+        return self.finished_on - self.started_on
+
+    @property
+    def rushing_time_to_loading_station(self):
+        if self.started_on is None:
+            return None
+
+        if self.arrived_loading_station_on is None:
+            return datetime.now() - self.started_on
+
+        return self.arrived_loading_station_on - self.started_on
+
+    @property
+    def waiting_time_on_loading_station(self):
+        if self.arrived_loading_station_on is None:
+            return None
+
+        if self.started_loading_on is None:
+            return datetime.now() - self.arrived_loading_station_on
+
+        return self.started_loading_on - self.arrived_loading_station_on
+
+    @property
+    def loading_time_on_loading_station(self):
+        if self.started_loading_on is None:
+            return None
+
+        if self.finished_loading_on is None:
+            return datetime.now() - self.started_on
+
+        return self.finished_loading_on - self.started_loading_on
+
+    @property
+    def rushing_time_to_quality_station(self):
+        if self.finished_loading_on is None:
+            return None
+
+        if self.arrived_quality_station_on is None:
+            return datetime.now() - self.started_on
+
+        return self.arrived_quality_station_on - self.finished_loading_on
+
+    @property
+    def waiting_time_on_quality_station(self):
+        if self.arrived_quality_station_on is None:
+            return None
+
+        if self.started_checking_on is None:
+            return datetime.now() - self.arrived_quality_station_on
+
+        return self.started_checking_on - self.arrived_quality_station_on
+
+    @property
+    def checking_time_on_quality_station(self):
+        if self.started_checking_on is None:
+            return None
+
+        if self.finished_loading_on is None:
+            return datetime.now() - self.started_checking_on
+
+        return self.finished_checking_on - self.started_checking_on
+
     objects = models.Manager()
     pendings = managers.PendingJobManager()
     inprogress = managers.InProgressJobManager()
@@ -439,6 +510,55 @@ class Mission(models.Model):
     is_completed = models.BooleanField(
         default=False
     )
+
+    @property
+    def next_mission(self):
+        try:
+            return self.job.mission_set.get(step=self.step + 1)
+        except Exception:
+            return None
+
+    @property
+    def previous_mission(self):
+        if self.step == 0:
+            return None
+
+        return self.job.mission_set.get(step=self.step - 1)
+
+    @property
+    def rushing_time_to_unloading_station(self):
+        if self.step == 0:
+            last_event_time = self.job.departure_quality_station_on
+        else:
+            last_event_time = self.previous_mission.departure_station_on
+
+        if last_event_time is None:
+            return None
+
+        if self.arrived_station_on is None:
+            return datetime.now() - last_event_time
+
+        return self.arrived_station_on - last_event_time
+
+    @property
+    def waiting_time_on_unloading_station(self):
+        if self.arrived_station_on is None:
+            return None
+
+        if self.started_unloading_on is None:
+            return datetime.now() - self.arrived_station_on
+
+        return self.started_unloading_on - self.arrived_station_on
+
+    @property
+    def unloading_time_on_unloading_station(self):
+        if self.started_unloading_on is None:
+            return None
+
+        if self.finished_unloading_on is None:
+            return datetime.now() - self.started_unloading_on
+
+        return self.finished_unloading_on - self.started_unloading_on
 
     class Meta:
         ordering = ['step']
