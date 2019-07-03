@@ -5,7 +5,6 @@ from ..core import constants as c
 
 # model
 from . import models as m
-from ..account.models import User
 
 # serializers
 from ..core.serializers import TMSChoiceField
@@ -82,28 +81,14 @@ class RestRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        try:
-            user_id = self.context.pop('user')
-            user = User.companymembers.get(pk=user_id)
-        except User.DoesNotExist:
-            raise serializers.ValidationError({
-                'user': 'User does not exist'
-            })
-
+        user = self.context.pop('user')
         return m.RestRequest.objects.create(
             user=user,
             **validated_data
         )
 
     def update(self, instance, validated_data):
-        user_id = self.context.pop('user')
-        try:
-            user_id = self.context.pop('user')
-            user = User.companymembers.get(pk=user_id)
-        except User.DoesNotExist:
-            raise serializers.ValidationError({
-                'user': 'User does not exist'
-            })
+        user = self.context.pop('user')
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)

@@ -43,17 +43,11 @@ class RestRequestViewSet(ApproveViewSet):
     serializer_class = s.RestRequestSerializer
 
     def create(self, request):
-        staff_id = request.data.pop('staff', None)
-
-        if staff_id is None:
-            staff_id = request.user.profile.id
-
-        context = {
-            'staff': staff_id
-        }
-        print(staff_id)
         serializer = self.serializer_class(
-            data=request.data, context=context
+            data=request.data,
+            context={
+                'user': request.user
+            }
         )
 
         serializer.is_valid(raise_exception=True)
@@ -66,16 +60,12 @@ class RestRequestViewSet(ApproveViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        staff_id = request.data.pop('staff', None)
-        if staff_id is None:
-            staff_id = request.user.id
-
-        context = {
-            'staff': staff_id
-        }
-
         serializer = self.serializer_class(
-            instance, data=request.data, context=context, partial=True
+            instance, data=request.data,
+            context={
+                'user': request.user
+            },
+            partial=True
         )
 
         serializer.is_valid(raise_exception=True)

@@ -31,16 +31,21 @@ class NotificationConsumer(JsonWebsocketConsumer):
     def notify(self, event):
         data = json.loads(event['data'])
         msg_type = int(data['msg_type'])
-        plate_num = data['plate_num']
         message = ''
 
-        if msg_type == c.DRIVER_NOTIFICATION_TYPE_JOB:
+        if msg_type == c.STAFF_NOTIFICATION_REST_REQUEST:
+            requester = data['requester']
+            message = "{} make an rest request."\
+                "Please check and approve.".format(requester)
+        elif msg_type == c.DRIVER_NOTIFICATION_TYPE_JOB:
+            plate_num = data['plate_num']
             message = "A new mission is assigned to you."\
                 "Please use {}".format(plate_num)
         elif msg_type in [
             c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA,
             c.DRIVER_NOTIFICATION_TYPE_EXIT_AREA
         ]:
+            plate_num = data['plate_num']
             try:
                 station = Station.objects.get(
                     latitude=data['station_pos'][0],

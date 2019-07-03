@@ -636,7 +636,8 @@ class OrderSerializer(serializers.ModelSerializer):
                             id=unloading_station_data.get('id', None)
                         )
                         order_product_deliver.order_product = order_product
-                        order_product_deliver.unloading_station = unloading_station
+                        order_product_deliver.unloading_station =\
+                            unloading_station
                         for (key, value) in unloading_station_data.items():
                             setattr(order_product_deliver, key, value)
 
