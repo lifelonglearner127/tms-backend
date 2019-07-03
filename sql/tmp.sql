@@ -1,24 +1,53 @@
-select *, 'df'
-from 
-(select plate_num, id as vehicle_id, 
-	(select oj.order_id
-	from order_job as oj
-	where oj.vehicle_id = vv.id and oj.progress = 1 and oj.start_due_time >now()
-	order by oj.start_due_time
-	limit 1) as order_id
-from vehicle_vehicle as vv ) tmp1
-left outer join (select oo.id, oo.customer_id, ac."name" as customer_name from order_order oo, account_user ac where oo.customer_id = ac.id ) tmp on tmp.id = tmp1.order_id 
-left outer join order_job oj on tmp1.vehicle_id = oj.vehicle_id
- 
+-- [mine] select vehicle plate number and its current job progress
+select vv.plate_num, oj.progress, vv.branches
+from vehicle_vehicle vv
+left outer join (
+	select vehicle_id, progress
+	from order_job
+	where progress > 1
+) oj on vv.id = oj.vehicle_id;
 
+-- [mine] select vehicle having next job along with order client name
+select oj.vehicle_id, au.name
+from vehicle_vehicle vv, order_job oj, order_order oo, account_user au
+where vv.id = oj.vehicle_id and oj.order_id = oo.id and au.id=oo.customer_id and oj.progress = 1
+group by oj.vehicle_id, au.name;
 
+-- [mine] select vehicle status depending on order
 select *
-from order_order oo
-where oo.id = (select oj.order_id
-				from order_job as oj 
-				where oj.progress = 1 and oj.start_due_time >now()
-				order by oj.start_due_time
-				limit 1)
+from (
+	select vv.id, vv.plate_num, oj.progress, vv.branches
+	from vehicle_vehicle vv
+	left outer join
+	(
+		select vehicle_id, progress
+		from order_job
+		where progress > 1
+	) oj
+	on vv.id = oj.vehicle_id
+) tmp1
+left outer join 
+(
+	select oj.vehicle_id, au.name
+	from vehicle_vehicle vv, order_job oj, order_order oo, account_user au
+	where vv.id = oj.vehicle_id and oj.order_id = oo.id and au.id=oo.customer_id and oj.progress = 1
+	group by oj.vehicle_id, au.name
+) tmp2
+on tmp1.id = tmp2.vehicle_id;
 
 
-select oo.id, oo.customer_id, ac."name" as customer_name from order_order oo, account_user ac where oo.customer_id = ac.id 
+-- [reference] select vehicle status depending on order
+select  *
+from  ( 
+	select vv.id, vv.plate_num, oj.progress, vv.branches
+	from vehicle_vehicle vv left outer join (select * from order_job where progress > 1) oj on vv.id = oj.vehicle_id) tmp1 
+	left outer join
+	  (
+		select oj.vehicle_id, min(oj.start_due_time), au.name
+		from vehicle_vehicle vv, order_order oo, order_job oj, account_user au
+		where vv.id = oj.vehicle_id and oj.order_id = oo.id and au.id=oo.customer_id 
+		and oj.progress = 1 and oj.start_due_time > now()
+		group by oj.vehicle_id, au.name
+		) tmp2
+	on tmp1.id = tmp2.vehicle_id
+
