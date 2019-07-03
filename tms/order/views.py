@@ -201,7 +201,9 @@ class OrderViewSet(TMSViewSet):
                 })
 
             for mission_data in missions_data:
-                mission_data['deliver'] = unloading_station_data.get('id', None)
+                mission_data['deliver'] = unloading_station_data.get(
+                    'id', None
+                )
                 mission_weight = float(mission_data.get('mission_weight', 0))
                 weight = weight - mission_weight
 
@@ -290,7 +292,10 @@ class OrderViewSet(TMSViewSet):
                     'route': 'Missing quality station'
                 })
 
-            for (order_unloading_station, route_unloading_station) in zip(order.unloading_stations_data, route.unloading_stations):
+            for (order_unloading_station, route_unloading_station)\
+                in zip(
+                    order.unloading_stations_data, route.unloading_stations
+                    ):
                 if order_unloading_station != route_unloading_station:
                     raise s.serializers.ValidationError({
                         'route': 'Unmatching unloading stations'
@@ -311,16 +316,25 @@ class OrderViewSet(TMSViewSet):
             else:
                 job_obj = get_object_or_404(m.Job, id=job['id'])
 
-            for (deliver_id, mission_id, mission_weight) in zip(job['deliver_ids'], job['mission_ids'], job['mission_weights']):
-                product_deliver = get_object_or_404(m.OrderProductDeliver, id=deliver_id)
+            for (deliver_id, mission_id, mission_weight)\
+                in zip(
+                    job['deliver_ids'], job['mission_ids'],
+                    job['mission_weights']
+                    ):
+                product_deliver = get_object_or_404(
+                    m.OrderProductDeliver, id=deliver_id
+                )
                 if mission_id is not None:
                     mission = get_object_or_404(m.Mission, id=mission_id)
                     mission.mission_weight = mission_weight
                     mission.save()
                 else:
                     m.Mission.objects.create(
-                        job=job_obj, mission=product_deliver, mission_weight=mission_weight,
-                        step=route.unloading_stations.index(product_deliver.unloading_station)
+                        job=job_obj, mission=product_deliver,
+                        mission_weight=mission_weight,
+                        step=route.unloading_stations.index(
+                            product_deliver.unloading_station
+                        )
                     )
 
         return Response(

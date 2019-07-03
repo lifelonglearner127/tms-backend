@@ -2,7 +2,7 @@ from django.db import models
 
 from . import managers
 from ..core import constants as c
-from ..core.models import ApprovedModel, BasicContactModel, TimeStampedModel
+from ..core.models import BasicContactModel, TimeStampedModel
 from ..account.models import User
 from ..info.models import Product
 
@@ -215,24 +215,3 @@ class CustomerProfile(BasicContactModel):
 
     class Meta:
         ordering = ['-updated']
-
-
-class RestRequest(ApprovedModel):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    category = models.PositiveIntegerField(
-        choices=c.REST_REQUEST_CATEGORY,
-        default=c.REST_REQUEST_ILL
-    )
-
-    from_date = models.DateField()
-
-    to_date = models.DateField()
-
-    class Meta:
-        ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['user', 'from_date', 'to_date']

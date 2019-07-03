@@ -30,11 +30,7 @@ router.register(
     v.CustomerProfileViewSet,
     base_name='customer-profile'
 )
-router.register(
-    r'rest-request',
-    v.RestRequestViewSet,
-    base_name='rest-request'
-)
+
 
 urlpatterns = [
     url(r'^', include(router.urls)),

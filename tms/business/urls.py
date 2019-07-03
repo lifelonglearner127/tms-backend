@@ -20,6 +20,11 @@ router.register(
     v.EscortChangeRequestViewSet,
     base_name='escort-change'
 )
+router.register(
+    r'rest-request',
+    v.RestRequestViewSet,
+    base_name='rest-request'
+)
 
 # # /jobs/{job_pk}/missions
 # # /jobs/{job_pk}/missions/{pk}
