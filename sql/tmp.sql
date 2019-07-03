@@ -16,7 +16,7 @@ group by oj.vehicle_id, au.name;
 -- [mine] select vehicle status depending on order
 select *
 from (
-	select vv.id, vv.plate_num, oj.progress, vv.branches
+	select vv.id, vv.plate_num, vv.branches[1] branch1, vv.branches[2] branch2, vv.branches[3] branch3, oj.progress
 	from vehicle_vehicle vv
 	left outer join
 	(
@@ -28,7 +28,7 @@ from (
 ) tmp1
 left outer join 
 (
-	select oj.vehicle_id, au.name
+	select oj.vehicle_id, min(oj.start_due_time) due_time, au.name customer
 	from vehicle_vehicle vv, order_job oj, order_order oo, account_user au
 	where vv.id = oj.vehicle_id and oj.order_id = oo.id and au.id=oo.customer_id and oj.progress = 1
 	group by oj.vehicle_id, au.name
