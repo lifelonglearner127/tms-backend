@@ -33,15 +33,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
         msg_type = int(data['msg_type'])
         message = ''
 
-        if msg_type == c.STAFF_NOTIFICATION_REST_REQUEST:
-            requester = data['requester']
-            message = "{} make an rest request."\
-                "Please check and approve.".format(requester)
-        elif msg_type == c.DRIVER_NOTIFICATION_TYPE_JOB:
-            plate_num = data['plate_num']
-            message = "A new mission is assigned to you."\
-                "Please use {}".format(plate_num)
-        elif msg_type in [
+        if msg_type in [
             c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA,
             c.DRIVER_NOTIFICATION_TYPE_EXIT_AREA
         ]:
@@ -72,6 +64,8 @@ class NotificationConsumer(JsonWebsocketConsumer):
                             message = "Out of {}".format(station.name)
             except Station.DoesNotExist:
                 return
+        else:
+            message = data['message']
 
         if message:
             notification = m.Notification.objects.create(

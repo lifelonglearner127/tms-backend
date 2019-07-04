@@ -45,7 +45,8 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'corsheaders',
-    'channels'
+    'channels',
+    'fieldsignals'
 ]
 LOCAL_APPS = [
     'tms.account.apps.AccountConfig',

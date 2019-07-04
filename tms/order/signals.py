@@ -56,6 +56,8 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
             )
 
         # send notfication to driver
+        message = "A new mission is assigned to you."\
+            "Please use {}".format(instance.vehicle.plate_num)
         if instance.driver.channel_name is not None:
             async_to_sync(channel_layer.send)(
                 instance.driver.channel_name,
@@ -63,7 +65,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                     'type': 'notify',
                     'data': json.dumps({
                         'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
-                        'plate_num': instance.vehicle.plate_num
+                        'plate_num': message
                     })
                 }
             )
