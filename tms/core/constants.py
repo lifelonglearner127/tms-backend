@@ -356,9 +356,9 @@ NOTIFICATION_TYPE = (
     (NOTIFICATION_ESCORT_CHANGE_REQUEST_DECLINED,
         'Escort Change Notification Declined'),
     (NOTIFICATION_ESCORT_CHANGE_REQUEST_NEW_ESCORT,
-        'Escort Change Notification New Escort')
+        'Escort Change Notification New Escort'),
     (NOTIFICATION_TRAFFIC_ACCIDENT,
-        'Traffic Accident Notification')
+        'Traffic Accident Notification'),
 )
 
 
