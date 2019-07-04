@@ -22,6 +22,35 @@ class ParkingRequestViewSet(ApproveViewSet):
     serializer_class = s.ParkingRequestSerializer
     data_view_serializer = s.ParkingRequestDataViewSerializer
 
+    def create(self, request):
+        data = request.data
+        data['driver'] = request.user.id
+        serializer = self.serializer_class(
+            data=data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        data = request.data
+        data['driver'] = request.user.id
+        serializer = self.serializer_class(
+            instance, data=data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class DriverChangeRequestViewSet(ApproveViewSet):
 
