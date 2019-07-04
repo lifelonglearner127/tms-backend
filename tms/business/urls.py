@@ -11,12 +11,12 @@ router.register(
     base_name='parking-request'
 )
 router.register(
-    r'driver-change',
+    r'driver-change-request',
     v.DriverChangeRequestViewSet,
     base_name='driver-change'
 )
 router.register(
-    r'escort-change',
+    r'escort-change-request',
     v.EscortChangeRequestViewSet,
     base_name='escort-change'
 )
