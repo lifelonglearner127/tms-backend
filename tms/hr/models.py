@@ -7,7 +7,7 @@ from ..account.models import User
 from ..info.models import Product
 
 
-class Department(models.Model):
+class Department(TimeStampedModel):
 
     name = models.CharField(
         max_length=100,
@@ -20,10 +20,10 @@ class Department(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-updated', 'name']
 
 
-class Position(models.Model):
+class Position(TimeStampedModel):
     name = models.CharField(
         max_length=100,
         unique=True
@@ -35,7 +35,7 @@ class Position(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-updated', 'name']
 
 
 class RoleManagement(models.Model):

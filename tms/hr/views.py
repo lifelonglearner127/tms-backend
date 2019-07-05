@@ -37,6 +37,15 @@ class StaffProfileViewSet(TMSViewSet):
     short_serializer_class = s.ShortStaffProfileSerializer
     data_view_serializer_class = s.StaffProfileDataViewSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+
+        department = self.request.query_params.get('department', None)
+        if department is not None:
+            queryset = queryset.filter(department__id=department)
+
+        return queryset
+
     def create(self, request):
         context = {
             'user': request.data.pop('user', None),

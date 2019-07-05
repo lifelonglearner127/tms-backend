@@ -68,14 +68,18 @@
     "model": "hr.Department",
     "pk": 1,
     "fields": {
-      "name": "Finance"
+      "name": "Finance",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
     "model": "hr.Position",
     "pk": 1,
     "fields": {
-      "name": "Manager"
+      "name": "Manager",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
