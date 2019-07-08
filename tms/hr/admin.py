@@ -20,3 +20,8 @@ class RoleManagementAdmin(admin.ModelAdmin):
 @admin.register(m.StaffProfile)
 class StaffProfileAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.CustomerProfile)
+class CustomerProfileAdmin(admin.ModelAdmin):
+    pass

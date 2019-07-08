@@ -88,7 +88,7 @@ class VehicleViewSet(TMSViewSet):
         )
 
     @action(detail=False, url_path='position')
-    def vehicle_position(self, request):
+    def get_all_vehicle_positions(self, request):
         """
         Get the current location of all registered vehicles
         """
@@ -112,6 +112,32 @@ class VehicleViewSet(TMSViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='current-position')
+    def get_vehicle_position(self, request):
+        """
+        Get the current location of vehicle; for mobile
+        """
+        plate_num = self.request.query_params.get('plate_num', None)
+        queries = {
+            'plate_num': plate_num,
+            'fields': 'loc',
+            'addr_required': True,
+        }
+
+        data = G7Interface.call_g7_http_interface(
+            'VEHICLE_STATUS_INQUIRY',
+            queries=queries
+        )
+        ret = {
+            'plate_num': plate_num,
+            'lnglat': [data['loc']['lng'], data['loc']['lat']],
+            'speed': data['loc']['speed']
+        }
+        return Response(
+            ret,
             status=status.HTTP_200_OK
         )
 
