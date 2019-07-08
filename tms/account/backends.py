@@ -17,7 +17,6 @@ class TMSAuthenticationBackend:
         else:
             kwargs = {'username': username}
         try:
-            device_token = kwargs.pop('device_token', None)
             user = UserModel.objects.get(**kwargs)
             if user.check_password(password):
                 if device_token is not None:

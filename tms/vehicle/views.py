@@ -131,6 +131,12 @@ class VehicleViewSet(TMSViewSet):
             'VEHICLE_STATUS_INQUIRY',
             queries=queries
         )
+
+        if data is None:
+            raise s.serializers.ValidationError({
+                'vehicle': 'Error occured while getting position'
+            })
+
         ret = {
             'plate_num': plate_num,
             'lnglat': [data['loc']['lng'], data['loc']['lat']],
