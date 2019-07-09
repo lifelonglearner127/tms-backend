@@ -474,10 +474,8 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         # jobs = m.Job.objects.filter(
-        #     Q(vehicle__plate_num=plate_num) & Q(started_on__gte=from_date) & (
-        #         Q(finished_on__lte=to_date) | Q(finished_on=None)
-        #     )
-
+        #     Q(vehicle__plate_num=plate_num) & Q(started_on__gte=from_date) &
+        #     (Q(finished_on__lte=to_date) | Q(finished_on=None))
         # ).order_by('started_on')
 
         jobs = m.Job.objects.filter(

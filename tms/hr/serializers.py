@@ -8,7 +8,6 @@ from ..core import constants as c
 from ..info.models import Product
 
 # serializers
-from ..core.serializers import TMSChoiceField
 from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer,
     DriverAppUserSerializer

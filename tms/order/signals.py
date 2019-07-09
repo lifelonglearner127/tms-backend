@@ -12,36 +12,16 @@ from ..core import constants as c
 
 # models
 from . import models as m
-from ..order.models import Job
 from ..vehicle.models import VehicleUserBind
 
 
 channel_layer = get_channel_layer()
 
 
-@receiver(post_save, sender=Job)
-def job_created(sender, instance, created, **kwargs):
-    if instance.driver.device_token is None:
-        return
-
-    to = [instance.driver.device_token]
-    data = {'message': 'New job is assgiend to you'}
-    options = {
-        'notification': {
-            'badge': 1,
-            'sound': 'ping.aiff',
-            'body': u'New job is assigned to you'
-        }
-    }
-
-    # Send the push notification with Pushy
-    PushyAPI.sendPushNotification(data, to, options)
-
-
 @receiver(post_save, sender=m.Job)
-def notify_driver_of_new_job(sender, instance, **kwargs):
+def notify_driver_of_new_job(sender, instance, created, **kwargs):
 
-    if instance.progress == c.JOB_PROGRESS_NOT_STARTED:
+    if created:
         # bind vehicle, driver, escort
         if not VehicleUserBind.binds_by_admin.filter(
             vehicle=instance.vehicle,
@@ -55,7 +35,7 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                 bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
             )
 
-        # send notfication to driver
+        # send in-app notfication to driver
         message = "A new mission is assigned to you."\
             "Please use {}".format(instance.vehicle.plate_num)
         if instance.driver.channel_name is not None:
@@ -69,6 +49,20 @@ def notify_driver_of_new_job(sender, instance, **kwargs):
                     })
                 }
             )
+
+        # send push notification to driver
+        if instance.driver.device_token:
+            to = [instance.driver.device_token]
+            options = {
+                'notification': {
+                    'badge': 1,
+                    'sound': 'ping.aiff',
+                    'body': u'New job is assigned to you'
+                }
+            }
+
+            # Send the push notification with Pushy
+            PushyAPI.sendPushNotification(message, to, options)
 
     elif instance.progress == c.JOB_PROGRESS_COMPLETE:
         # unbind vehicle, driver, escort
