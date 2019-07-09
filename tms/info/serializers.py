@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 from . import models as m
 from ..core import constants as c
@@ -90,9 +92,7 @@ class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
     """
-    product_category = TMSChoiceField(
-        choices=c.PRODUCT_CATEGORY, required=False
-    )
+    products = ShortProductSerializer(many=True, read_only=True)
     working_time_measure_unit = TMSChoiceField(
         choices=c.TIME_MEASURE_UNIT, required=False
     )
@@ -107,12 +107,50 @@ class StationSerializer(serializers.ModelSerializer):
         model = m.Station
         fields = '__all__'
 
+    def create(self, validated_data):
+        products = self.context.get('products', None)
+        if products is None:
+            raise serializers.ValidationError({
+                'product': 'Product is missing'
+            })
+
+        station = m.Station.objects.create(
+            **validated_data
+        )
+
+        for product in products:
+            product = get_object_or_404(m.Product, id=product.get('id', None))
+            station.products.add(product)
+
+        return station
+
+    def update(self, instance, validated_data):
+        products = self.context.get('products', None)
+        if products is None:
+            raise serializers.ValidationError({
+                'product': 'Product is missing'
+            })
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.products.clear()
+        for product in products:
+            product = get_object_or_404(m.Product, id=product.get('id', None))
+            instance.products.add(product)
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
+
 
 class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
     """
-    product_category = TMSChoiceField(choices=c.PRODUCT_CATEGORY)
+    products = ShortProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = m.Station

@@ -19,7 +19,7 @@ class ProductViewSet(StaffViewSet):
     short_serializer_class = s.ShortProductSerializer
 
     @action(detail=False, url_path="categories")
-    def get_rest_request_cateogires(self, request):
+    def get_product_cateogires(self, request):
         serializer = ChoiceSerializer(
             [
                 {'value': x, 'text': y} for (x, y) in c.PRODUCT_CATEGORY
@@ -38,6 +38,41 @@ class StationViewSet(StaffViewSet):
     """
     queryset = m.Station.objects.all()
     serializer_class = s.StationSerializer
+
+    def create(self, request):
+        products = request.data.pop('products', None)
+        serializer = s.StationSerializer(
+            data=request.data,
+            context={
+                'products': products
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        products = request.data.pop('products', None)
+        serializer = s.StationSerializer(
+            instance,
+            data=request.data,
+            context={
+                'products': products
+            },
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False)
     def short(self, request):

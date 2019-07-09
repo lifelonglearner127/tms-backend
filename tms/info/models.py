@@ -70,10 +70,8 @@ class Station(BasicContactModel):
         blank=True
     )
 
-    product_category = models.CharField(
-        max_length=10,
-        choices=c.PRODUCT_CATEGORY,
-        default=c.PRODUCT_CATEGORY_GASOLINE
+    products = models.ManyToManyField(
+        Product
     )
 
     price = models.DecimalField(

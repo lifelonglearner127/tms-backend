@@ -249,7 +249,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     user = MainUserSerializer(read_only=True)
     associated_with = ShortUserSerializer(read_only=True)
     products = ShortProductSerializer(many=True, read_only=True)
-    payment_method = TMSChoiceField(choices=c.PAYMENT_METHOD)
 
     class Meta:
         model = m.CustomerProfile

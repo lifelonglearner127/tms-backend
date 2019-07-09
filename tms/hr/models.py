@@ -189,18 +189,6 @@ class CustomerProfile(BasicContactModel):
         Product
     )
 
-    product_characteristics = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
-    )
-
-    payment_method = models.CharField(
-        max_length=1,
-        choices=c.PAYMENT_METHOD,
-        default=c.PAYMENT_METHOD_TON
-    )
-
     associated_with = models.ForeignKey(
         User,
         related_name='incharges_customers',
