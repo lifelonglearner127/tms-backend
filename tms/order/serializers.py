@@ -1170,3 +1170,17 @@ class VehicleStatusOrderSerializer(serializers.Serializer):
     branch2 = serializers.CharField()
     branch3 = serializers.CharField()
     g7_error = serializers.BooleanField()
+
+
+class JobByVehicleSerializer(serializers.ModelSerializer):
+    """
+    Serialize the query result of jobs by plate number and time period
+    Used for truck playback response
+    """
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'plate_num', 'started_on', 'finished_on'
+        )

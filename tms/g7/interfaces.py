@@ -69,6 +69,6 @@ class G7Interface:
                 raise Exception(body)
 
             return body['data']
-        except Exception as e:
-            print(e)
+        except Exception:
+            raise
             # TODO: logging

@@ -1,8 +1,10 @@
+from datetime import datetime
 import requests
+
 from django.conf import settings
 from django.db import connection
 from django.db.models import Q
-from django.utils import timezone as datetime
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -380,8 +382,7 @@ class OrderProductDeliverViewSet(viewsets.ModelViewSet):
 
 
 class JobViewSet(TMSViewSet):
-    """
-    """
+
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
     data_view_serializer_class = s.JobDataViewSerializer
@@ -452,6 +453,95 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    @action(detail=False, url_path='vehicles')
+    def get_vehicle_jobs_by_time(self, request):
+        """
+        Query the job list depending on vehicle plate number and time
+        This api endpoint is used in playback in frontend
+        """
+        plate_num = request.query_params.get('plate_num', None)
+        from_date = request.query_params.get('from', None)
+        to_date = request.query_params.get('to', None)
+
+        if plate_num is None or from_date is None or to_date is None:
+            return Response(
+                {
+                    'result': {
+                        'code': '1',
+                        'msg': 'Improperly configured parameters'
+                    }
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        # jobs = m.Job.objects.filter(
+        #     Q(vehicle__plate_num=plate_num) & Q(started_on__gte=from_date) & (
+        #         Q(finished_on__lte=to_date) | Q(finished_on=None)
+        #     )
+
+        # ).order_by('started_on')
+
+        jobs = m.Job.objects.filter(
+            Q(vehicle__plate_num=plate_num) & Q(started_on__gte=from_date) &
+            Q(finished_on__lte=to_date)
+        ).order_by('started_on')
+
+        serializer = s.JobByVehicleSerializer(
+            jobs, many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='playback')
+    def get_vehicle_playback_by_job(self, request, pk=None):
+        job = self.get_object()
+
+        queries = {
+            'plate_num': job.vehicle.plate_num,
+            'from': job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+            'to': job.finished_on.strftime('%Y-%m-%d %H:%M:%S'),
+            'timeInterval': 10
+        }
+
+        try:
+            data = G7Interface.call_g7_http_interface(
+                'VEHICLE_HISTORY_TRACK_QUERY',
+                queries=queries
+            )
+            if data is None:
+                results = []
+            else:
+                paths = []
+
+                index = 0
+                for x in data:
+                    paths.append([x.pop('lng'), x.pop('lat')])
+                    x['no'] = index
+                    x['time'] = datetime.utcfromtimestamp(
+                        int(x['time'])/1000
+                    ).strftime('%Y-%m-%d %H:%M:%S')
+                    index = index + 1
+
+                results = {
+                    'paths': paths,
+                    'meta': data
+                }
+
+            return Response(
+                results,
+                status=status.HTTP_200_OK
+            )
+        except Exception:
+            return Response(
+                {
+                    'result': {
+                        'code': '1',
+                        'msg': 'g7 error'
+                    }
+                }
+            )
+
     @action(
         detail=False, url_path='mileage'
     )
@@ -504,7 +594,7 @@ class JobViewSet(TMSViewSet):
     def previous_jobs(self, request):
         serializer = s.JobDataViewSerializer(
             request.user.jobs_as_driver.filter(
-                finished_on__lte=datetime.now()
+                finished_on__lte=timezone.now()
             ),
             many=True
         )
@@ -595,31 +685,31 @@ class JobViewSet(TMSViewSet):
             )
 
         if progress == c.JOB_PROGRESS_NOT_STARTED:
-            job.started_on = datetime.now()
+            job.started_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_TO_LOADING_STATION:
-            job.arrived_loading_station_on = datetime.now()
+            job.arrived_loading_station_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
-            job.started_loading_on = datetime.now()
+            job.started_loading_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
-            job.finished_loading_on = datetime.now()
+            job.finished_loading_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
-            job.departure_loading_station_on = datetime.now()
+            job.departure_loading_station_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
-            job.arrived_quality_station_on = datetime.now()
+            job.arrived_quality_station_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
-            job.started_checking_on = datetime.now()
+            job.started_checking_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
-            job.finished_checking_on = datetime.now()
+            job.finished_checking_on = timezone.now()
 
         elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
-            job.departure_quality_station_on = datetime.now()
+            job.departure_quality_station_on = timezone.now()
 
         elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
             us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
@@ -628,22 +718,22 @@ class JobViewSet(TMSViewSet):
             ).first()
             if current_mission is not None:
                 if us_progress == 0:
-                    current_mission.arrived_station_on = datetime.now()
+                    current_mission.arrived_station_on = timezone.now()
 
                 elif us_progress == 1:
-                    current_mission.started_unloading_on = datetime.now()
+                    current_mission.started_unloading_on = timezone.now()
 
                 elif us_progress == 2:
-                    current_mission.finished_unloading_on = datetime.now()
+                    current_mission.finished_unloading_on = timezone.now()
 
                 elif us_progress == 3:
                     current_mission.is_completed = True
-                    current_mission.departure_station_on = datetime.now()
+                    current_mission.departure_station_on = timezone.now()
                     current_mission.save()
 
                     if not job.mission_set.filter(is_completed=False).exists():
                         job.progress = c.JOB_PROGRESS_COMPLETE
-                        job.finished_on = datetime.now()
+                        job.finished_on = timezone.now()
                         job.save()
                         return Response(
                             s.JobProgressSerializer(job).data,
