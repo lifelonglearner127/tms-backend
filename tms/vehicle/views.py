@@ -139,8 +139,8 @@ class VehicleViewSet(TMSViewSet):
 
         ret = {
             'plate_num': plate_num,
-            'lnglat': [data['loc']['lng'], data['loc']['lat']],
-            'speed': data['loc']['speed']
+            'lnglat': [float(data['loc']['lng']), float(data['loc']['lat'])],
+            'speed': float(data['loc']['speed'])
         }
         return Response(
             ret,
