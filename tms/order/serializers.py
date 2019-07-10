@@ -222,7 +222,9 @@ class OrderSerializer(serializers.ModelSerializer):
             })
 
         try:
-            customer = m.User.objects.get(id=customer_data.get('id', None))
+            customer = m.User.objects.get(
+                id=customer_data.get('user_id', None)
+            )
         except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'customer': 'Such customer does not exist'
@@ -439,7 +441,9 @@ class OrderSerializer(serializers.ModelSerializer):
             })
 
         try:
-            customer = m.User.objects.get(id=customer_data.get('id', None))
+            customer = m.User.objects.get(
+                id=customer_data.get('user_id', None)
+            )
         except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'customer': 'Such customer does not exist'
