@@ -53,6 +53,10 @@ def notify_driver_of_new_job(sender, instance, created, **kwargs):
         # send push notification to driver
         if instance.driver.device_token:
             to = [instance.driver.device_token]
+            data = {
+                'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
+                'message': message
+            }
             options = {
                 'notification': {
                     'badge': 1,
@@ -62,7 +66,7 @@ def notify_driver_of_new_job(sender, instance, created, **kwargs):
             }
 
             # Send the push notification with Pushy
-            PushyAPI.sendPushNotification(message, to, options)
+            PushyAPI.sendPushNotification(data, to, options)
 
     elif instance.progress == c.JOB_PROGRESS_COMPLETE:
         # unbind vehicle, driver, escort

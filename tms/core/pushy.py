@@ -18,9 +18,12 @@ class PushyAPI:
         postData['data'] = data
 
         try:
-            requests.post(
+            r = requests.post(
                 'https://api.pushy.me/push?api_key=' + apiKey,
-                data=json.dumps(postData)
+                data=json.dumps(postData),
+                headers={
+                    'Content-Type': 'application/json'
+                }
             )
         except requests.exceptions.HTTPError as e:
             err_str = "Pushy API returned HTTP error " + str(e.code) + \
