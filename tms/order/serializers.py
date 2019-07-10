@@ -847,6 +847,115 @@ class JobDataViewSerializer(serializers.ModelSerializer):
         }
 
 
+class JobProductSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    mission_weight = serializers.FloatField()
+    loading_weight = serializers.FloatField()
+    unloading_weight = serializers.FloatField()
+
+
+class JobCurrentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for current job for driver app
+    """
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+    driver = serializers.CharField(source='driver.name')
+    escort = serializers.CharField(source='escort.name')
+    stations = serializers.SerializerMethodField()
+    products = JobProductSerializer(many=True)
+    progress_bar = JobProgressBarField(source='*')
+    progress = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'plate_num', 'driver', 'escort', 'stations',
+            'products', 'total_weight',
+            'progress', 'progress_bar', 'route'
+        )
+
+    def get_progress(self, instance):
+        progress = instance.progress
+        if progress == c.JOB_PROGRESS_NOT_STARTED:
+            last_progress_finished_on = None
+
+        if progress == c.JOB_PROGRESS_TO_LOADING_STATION:
+            last_progress_finished_on = instance.started_on
+
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+            last_progress_finished_on = instance.arrived_loading_station_on
+
+        elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
+            last_progress_finished_on = instance.started_loading_on
+
+        elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
+            last_progress_finished_on = instance.finished_loading_on
+
+        elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
+            last_progress_finished_on = instance.departure_loading_station_on
+
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.arrived_quality_station_on
+
+        elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.started_checking_on
+
+        elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.finished_checking_on
+
+        elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
+            mission_step = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) / 4
+            us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
+            mission = instance.mission_set.get(step=mission_step)
+            if us_progress == 0:
+                last_progress_finished_on = mission.arrived_station_on
+            elif us_progress == 1:
+                last_progress_finished_on = mission.started_unloading_on
+            elif us_progress == 2:
+                last_progress_finished_on = mission.finished_unloading_on
+            elif us_progress == 3:
+                last_progress_finished_on = mission.departure_station_on
+
+        return {
+            'progress': progress,
+            'last_progress_finished_on': last_progress_finished_on
+        }
+
+    def get_stations(self, job):
+        ret = []
+        for station in job.stations:
+            ret.append({
+                'name': station.name
+            })
+
+        return ret
+
+
+class JobFutureSerializer(serializers.ModelSerializer):
+    """
+    Serializer for future jobs in driver app
+    """
+    order_id = serializers.CharField(source='order.id')
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+    stations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order_id', 'plate_num', 'stations'
+        )
+
+    def get_stations(self, job):
+        ret = []
+        for station in job.stations:
+            ret.append({
+                'name': station.name
+            })
+
+        return ret
+
+
 class JobMileageField(serializers.Field):
 
     def to_representation(self, instance):
@@ -872,23 +981,16 @@ class JobDeliverField(serializers.Field):
         return ret
 
 
-class JobProductSerializer(serializers.Serializer):
-
-    name = serializers.CharField()
-    mission_weight = serializers.FloatField()
-    loading_weight = serializers.FloatField()
-    unloading_weight = serializers.FloatField()
-
-
 class JobDoneSerializer(serializers.ModelSerializer):
     """
-    Job overview serializer for driver app
+    Serializer for completed jobs in driver app
     """
     order_id = serializers.CharField(source='order.id')
     plate_num = serializers.CharField(source='vehicle.plate_num')
     stations = serializers.SerializerMethodField()
     products = JobProductSerializer(many=True)
-    escort = ShortUserSerializer()
+    driver = serializers.CharField(source='driver.name')
+    escort = serializers.CharField(source='escort.name')
     mileage = JobMileageField(source='*')
     bills = serializers.SerializerMethodField()
 
@@ -897,7 +999,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'order_id', 'plate_num', 'stations',
             'started_on', 'finished_on',
-            'products', 'total_weight', 'escort',
+            'products', 'total_weight', 'driver', 'escort',
             'mileage', 'bills'
         )
 

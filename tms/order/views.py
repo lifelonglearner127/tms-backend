@@ -590,7 +590,7 @@ class JobViewSet(TMSViewSet):
         permission_classes=[IsDriverOrEscortUser]
     )
     def previous_jobs(self, request):
-        serializer = s.JobDataViewSerializer(
+        serializer = s.JobDoneSerializer(
             request.user.jobs_as_driver.filter(
                 finished_on__lte=timezone.now()
             ),
@@ -635,7 +635,7 @@ class JobViewSet(TMSViewSet):
         #     ).first()
 
         if job is not None:
-            ret = s.JobDataViewSerializer(job).data
+            ret = s.JobCurrentSerializer(job).data
         else:
             ret = {}
 
@@ -655,11 +655,7 @@ class JobViewSet(TMSViewSet):
             )
         )
 
-        serializer = s.JobDataViewSerializer(
-            page,
-            many=True
-        )
-
+        serializer = s.JobCurrentSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(
@@ -717,12 +713,15 @@ class JobViewSet(TMSViewSet):
             if current_mission is not None:
                 if us_progress == 0:
                     current_mission.arrived_station_on = timezone.now()
+                    current_mission.save()
 
                 elif us_progress == 1:
                     current_mission.started_unloading_on = timezone.now()
+                    current_mission.save()
 
                 elif us_progress == 2:
                     current_mission.finished_unloading_on = timezone.now()
+                    current_mission.save()
 
                 elif us_progress == 3:
                     current_mission.is_completed = True

@@ -468,6 +468,14 @@ class Job(models.Model):
         return stations
 
     @property
+    def stations(self):
+        stations = []
+        stations.append(self.loading_station)
+        stations.append(self.quality_station)
+        stations.extend(self.unloading_stations)
+        return stations
+
+    @property
     def products(self):
         """
         products
