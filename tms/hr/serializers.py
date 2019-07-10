@@ -233,13 +233,11 @@ class StaffProfileDataViewSerializer(serializers.ModelSerializer):
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 
     user_id = serializers.CharField(source='user.id')
-    name = serializers.CharField(source='user.name')
-    mobile = serializers.CharField(source='user.mobile')
 
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'user_id', 'name', 'mobile'
+            'id', 'user_id', 'name', 'contact', 'mobile'
         )
 
 

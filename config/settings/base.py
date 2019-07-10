@@ -214,6 +214,11 @@ G7_MQTT_POSITION_SECRET = env.str('G7_MQTT_POSITION_SECRET')
 MAP_WEB_SERVICE_API_KEY = env.str('MAP_WEB_SERVICE_API_KEY')
 
 
+# MapAPI Settings
+# ----------------------------------------------------------------------------
+PUSHY_SECRET_KEY = env.str('PUSHY_SECRET_KEY')
+
+
 # Django Channels Settings
 # ----------------------------------------------------------------------------
 ASGI_APPLICATION = 'config.routing.application'
