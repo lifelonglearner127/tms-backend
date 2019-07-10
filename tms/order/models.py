@@ -442,6 +442,46 @@ class Job(models.Model):
 
         return self.finished_checking_on - self.started_checking_on
 
+    @property
+    def loading_station(self):
+        """
+        loading station of this job
+        """
+        return self.order.loading_stations_data[0]
+
+    @property
+    def quality_station(self):
+        """
+        quality station of this job
+        """
+        return self.order.quality_stations_data[0]
+
+    @property
+    def unloading_stations(self):
+        """
+        unloading stations of this job
+        """
+        stations = []
+        for mission in self.mission_set.all():
+            stations.append(mission.mission.unloading_station)
+
+        return stations
+
+    @property
+    def products(self):
+        """
+        products
+        """
+        products = []
+        for mission in self.mission_set.all():
+            products.append({
+                'name': mission.mission.order_product.product.name,
+                'mission_weight': mission.mission_weight,
+                'loading_weight': mission.loading_weight,
+                'unloading_weight': mission.unloading_weight
+            })
+        return products
+
     objects = models.Manager()
     pendings = managers.PendingJobManager()
     inprogress = managers.InProgressJobManager()

@@ -872,26 +872,52 @@ class JobDeliverField(serializers.Field):
         return ret
 
 
+class JobProductSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    mission_weight = serializers.FloatField()
+    loading_weight = serializers.FloatField()
+    unloading_weight = serializers.FloatField()
+
+
 class JobDoneSerializer(serializers.ModelSerializer):
     """
     Job overview serializer for driver app
     """
-    products = ShortProductDisplaySerializer(
-        source='order.products',
-        many=True
-    )
+    order_id = serializers.CharField(source='order.id')
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+    stations = serializers.SerializerMethodField()
+    products = JobProductSerializer(many=True)
     escort = ShortUserSerializer()
-    stations = StationField(source='*')
     mileage = JobMileageField(source='*')
-    delivers = JobDeliverField(source='*')
     bills = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'started_on', 'finished_on', 'products', 'total_weight',
-            'escort', 'stations', 'mileage', 'delivers', 'bills'
+            'id', 'order_id', 'plate_num', 'stations',
+            'started_on', 'finished_on',
+            'products', 'total_weight', 'escort',
+            'mileage', 'bills'
         )
+
+    def get_stations(self, job):
+        ret = []
+        ret.append({
+            'name': job.loading_station.name,
+            'arrived_on': job.arrived_loading_station_on
+        })
+        ret.append({
+            'name': job.quality_station.name,
+            'arrived_on': job.arrived_quality_station_on
+        })
+        for mission in job.mission_set.all():
+            ret.append({
+                'name': mission.mission.unloading_station.name,
+                'arrived_on': mission.arrived_station_on
+            })
+
+        return ret
 
     def get_bills(self, job):
         bill_type = self.context.get('bill_type', 'all')
