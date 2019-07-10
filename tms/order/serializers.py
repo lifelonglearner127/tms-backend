@@ -1177,10 +1177,14 @@ class JobByVehicleSerializer(serializers.ModelSerializer):
     Serialize the query result of jobs by plate number and time period
     Used for truck playback response
     """
-    plate_num = serializers.CharField(source='vehicle.plate_num')
+    alias = serializers.CharField(source='order.alias')
+    products = ShortProductSerializer(source='order.products', many=True)
+    driver = ShortUserSerializer(read_only=True)
+    escort = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'plate_num', 'started_on', 'finished_on'
+            'id', 'alias', 'products', 'driver', 'escort', 'started_on',
+            'finished_on'
         )
