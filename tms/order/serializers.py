@@ -9,11 +9,13 @@ from ..core import constants as c
 from ..core.utils import format_datetime
 
 # models
+from ..hr.models import CustomerProfile
 from ..info.models import Station
 
 # serializers
 from ..core.serializers import TMSChoiceField
 from ..account.serializers import ShortUserSerializer
+from ..hr.serializers import ShortCustomerProfileSerializer
 from ..info.serializers import (
     ShortStationSerializer, ShortProductSerializer,
     ShortProductDisplaySerializer
@@ -155,7 +157,7 @@ class OrderSerializer(serializers.ModelSerializer):
     Order Create and Update Serializer
     """
     assignee = ShortUserSerializer(read_only=True)
-    customer = ShortUserSerializer(read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     loading_stations = OrderLoadingStationSerializer(
@@ -222,10 +224,10 @@ class OrderSerializer(serializers.ModelSerializer):
             })
 
         try:
-            customer = m.User.objects.get(
-                id=customer_data.get('user_id', None)
+            customer = CustomerProfile.objects.get(
+                id=customer_data.get('id', None)
             )
-        except m.User.DoesNotExist:
+        except CustomerProfile.DoesNotExist:
             raise serializers.ValidationError({
                 'customer': 'Such customer does not exist'
             })
@@ -441,10 +443,10 @@ class OrderSerializer(serializers.ModelSerializer):
             })
 
         try:
-            customer = m.User.objects.get(
-                id=customer_data.get('user_id', None)
+            customer = CustomerProfile.objects.get(
+                id=customer_data.get('id', None)
             )
-        except m.User.DoesNotExist:
+        except CustomerProfile.DoesNotExist:
             raise serializers.ValidationError({
                 'customer': 'Such customer does not exist'
             })
@@ -668,7 +670,7 @@ class OrderDataViewSerializer(serializers.ModelSerializer):
     )
 
     assignee = ShortUserSerializer(read_only=True)
-    customer = ShortUserSerializer(read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE)
     products = ShortProductSerializer(many=True)
     loading_stations_data = ShortStationSerializer(many=True)
@@ -787,6 +789,7 @@ class JobDataViewSerializer(serializers.ModelSerializer):
         source='order.products', many=True
     )
     progress_bar = JobProgressBarField(source='*')
+    progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
@@ -795,6 +798,53 @@ class JobDataViewSerializer(serializers.ModelSerializer):
             'progress', 'progress_bar', 'total_weight',
             'start_due_time', 'finish_due_time', 'route'
         )
+
+    def get_progress(self, instance):
+        progress = instance.progress
+        if progress == c.JOB_PROGRESS_NOT_STARTED:
+            last_progress_finished_on = None
+
+        if progress == c.JOB_PROGRESS_TO_LOADING_STATION:
+            last_progress_finished_on = instance.started_on
+
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+            last_progress_finished_on = instance.arrived_loading_station_on
+
+        elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
+            last_progress_finished_on = instance.started_loading_on
+
+        elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
+            last_progress_finished_on = instance.finished_loading_on
+
+        elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
+            last_progress_finished_on = instance.departure_loading_station_on
+
+        elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.arrived_quality_station_on
+
+        elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.started_checking_on
+
+        elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
+            last_progress_finished_on = instance.finished_checking_on
+
+        elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
+            mission_step = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) / 4
+            us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
+            mission = instance.mission_set.get(step=mission_step)
+            if us_progress == 0:
+                last_progress_finished_on = mission.arrived_station_on
+            elif us_progress == 1:
+                last_progress_finished_on = mission.started_unloading_on
+            elif us_progress == 2:
+                last_progress_finished_on = mission.finished_unloading_on
+            elif us_progress == 3:
+                last_progress_finished_on = mission.departure_station_on
+
+        return {
+            'progress': progress,
+            'last_progress_finished_on': last_progress_finished_on
+        }
 
 
 class JobMileageField(serializers.Field):

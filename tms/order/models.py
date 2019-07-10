@@ -9,6 +9,7 @@ from ..core import constants as c
 # models
 from ..core.models import TimeStampedModel
 from ..account.models import User
+from ..hr.models import CustomerProfile
 from ..info.models import Station, Product
 from ..road.models import Route
 from ..vehicle.models import Vehicle
@@ -30,7 +31,7 @@ class Order(TimeStampedModel):
     )
 
     customer = models.ForeignKey(
-        User,
+        CustomerProfile,
         on_delete=models.CASCADE,
         related_name='orders'
     )
