@@ -24,6 +24,7 @@ from ..vehicle.models import Vehicle
 
 # serializers
 from . import serializers as s
+from ..finance.serializers import BillDocumentSerializer
 
 # views
 from ..core.views import TMSViewSet
@@ -385,7 +386,6 @@ class JobViewSet(TMSViewSet):
 
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
-    data_view_serializer_class = s.JobDataViewSerializer
 
     def create(self, request):
         jobs = []
@@ -789,7 +789,10 @@ class JobViewSet(TMSViewSet):
         data['job'] = pk
         serializer = BillDocumentSerializer(
             data=data,
-            context={'request': request}
+            context={
+                'request': request,
+                'user': request.user
+            }
         )
 
         serializer.is_valid(raise_exception=True)

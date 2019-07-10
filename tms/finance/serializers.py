@@ -161,7 +161,6 @@ class BillDocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get('user')
-        print(validated_data)
         return m.BillDocument.objects.create(
             user=user,
             **validated_data

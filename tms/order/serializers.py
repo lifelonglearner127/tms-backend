@@ -708,6 +708,18 @@ class MissionSerializer(serializers.ModelSerializer):
         )
 
 
+class JobMileageField(serializers.Field):
+
+    def to_representation(self, instance):
+        return {
+            'total_mileage': instance.total_mileage,
+            'highway_mileage': instance.highway_mileage,
+            'normalway_mileage': instance.normalway_mileage,
+            'empty_mileage': instance.empty_mileage,
+            'heavy_mileage':  instance.heavy_mileage
+        }
+
+
 class ShortJobSerializer(serializers.ModelSerializer):
 
     driver = ShortUserSerializer()
@@ -718,18 +730,40 @@ class ShortJobSerializer(serializers.ModelSerializer):
         source='mission_set', many=True, read_only=True
     )
 
+    mileage = JobMileageField(source='*')
+
     class Meta:
         model = m.Job
         fields = (
-            'driver', 'escort', 'vehicle', 'missions', 'route'
+            'driver', 'escort', 'vehicle', 'missions', 'route', 'mileage'
         )
 
 
 class JobSerializer(serializers.ModelSerializer):
 
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    driver = serializers.CharField(source='driver.name')
+    escort = serializers.CharField(source='escort.name')
+    loading_station = serializers.CharField(source='loading_station.name')
+    quality_station = serializers.CharField(source='quality_station.name')
+    unloading_stations = serializers.SerializerMethodField()
+    mileage = JobMileageField(source='*')
+
     class Meta:
         model = m.Job
-        fields = '__all__'
+        fields = (
+            'id', 'vehicle', 'driver', 'escort', 'loading_station',
+            'quality_station', 'unloading_stations', 'mileage'
+        )
+
+    def get_unloading_stations(self, job):
+        ret = []
+        for station in job.unloading_stations:
+            ret.append({
+                'name': station.name
+            })
+
+        return ret
 
 
 class JobProgressBarField(serializers.Field):
@@ -788,8 +822,6 @@ class JobDataViewSerializer(serializers.ModelSerializer):
     products = ShortProductDisplaySerializer(
         source='order.products', many=True
     )
-    progress_bar = JobProgressBarField(source='*')
-    progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
@@ -798,53 +830,6 @@ class JobDataViewSerializer(serializers.ModelSerializer):
             'progress', 'progress_bar', 'total_weight',
             'start_due_time', 'finish_due_time', 'route'
         )
-
-    def get_progress(self, instance):
-        progress = instance.progress
-        if progress == c.JOB_PROGRESS_NOT_STARTED:
-            last_progress_finished_on = None
-
-        if progress == c.JOB_PROGRESS_TO_LOADING_STATION:
-            last_progress_finished_on = instance.started_on
-
-        elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
-            last_progress_finished_on = instance.arrived_loading_station_on
-
-        elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
-            last_progress_finished_on = instance.started_loading_on
-
-        elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
-            last_progress_finished_on = instance.finished_loading_on
-
-        elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
-            last_progress_finished_on = instance.departure_loading_station_on
-
-        elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
-            last_progress_finished_on = instance.arrived_quality_station_on
-
-        elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
-            last_progress_finished_on = instance.started_checking_on
-
-        elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
-            last_progress_finished_on = instance.finished_checking_on
-
-        elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
-            mission_step = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) / 4
-            us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
-            mission = instance.mission_set.get(step=mission_step)
-            if us_progress == 0:
-                last_progress_finished_on = mission.arrived_station_on
-            elif us_progress == 1:
-                last_progress_finished_on = mission.started_unloading_on
-            elif us_progress == 2:
-                last_progress_finished_on = mission.finished_unloading_on
-            elif us_progress == 3:
-                last_progress_finished_on = mission.departure_station_on
-
-        return {
-            'progress': progress,
-            'last_progress_finished_on': last_progress_finished_on
-        }
 
 
 class JobProductSerializer(serializers.Serializer):
@@ -968,18 +953,6 @@ class JobFutureSerializer(serializers.ModelSerializer):
             })
 
         return ret
-
-
-class JobMileageField(serializers.Field):
-
-    def to_representation(self, instance):
-        return {
-            'total_mileage': instance.total_mileage,
-            'highway_mileage': instance.highway_mileage,
-            'normalway_mileage': instance.normalway_mileage,
-            'empty_mileage': instance.empty_mileage,
-            'heavy_mileage':  instance.heavy_mileage
-        }
 
 
 class JobDeliverField(serializers.Field):
