@@ -924,9 +924,23 @@ class JobCurrentSerializer(serializers.ModelSerializer):
 
     def get_stations(self, job):
         ret = []
-        for station in job.stations:
+        ret.append({
+            'name': job.loading_station.name,
+            'products': job.products
+        })
+        ret.append({
+            'name': job.quality_station.name,
+            'products': job.products
+        })
+        for mission in job.mission_set.all():
             ret.append({
-                'name': station.name
+                'name': mission.mission.unloading_station.name,
+                'products': [{
+                    'name': mission.mission.order_product.product.name,
+                    'mission_weight': mission.mission_weight,
+                    'loading_weight': mission.loading_weight,
+                    'unloading_weight': mission.unloading_weight
+                }]
             })
 
         return ret
