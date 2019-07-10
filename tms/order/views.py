@@ -732,6 +732,42 @@ class JobViewSet(TMSViewSet):
                     if not job.mission_set.filter(is_completed=False).exists():
                         job.progress = c.JOB_PROGRESS_COMPLETE
                         job.finished_on = timezone.now()
+
+                        # update job empty mileage
+                        queries = {
+                            'plate_num':
+                                job.vehicle.plate_num,
+                            'from':
+                                job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+                            'to':
+                                job.departure_loading_station_on.strftime(
+                                    '%Y-%m-%d %H:%M:%S'
+                                )
+                        }
+                        data = G7Interface.call_g7_http_interface(
+                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                            queries=queries
+                        )
+                        job.empty_mileage = data['total_mileage']
+
+                        # update job heavy mileage
+                        queries = {
+                            'plate_num':
+                                job.vehicle.plate_num,
+                            'from':
+                                job.departure_loading_station_on.strftime(
+                                    '%Y-%m-%d %H:%M:%S'
+                                ),
+                            'to':
+                                job.finished_on.strftime(
+                                    '%Y-%m-%d %H:%M:%S'
+                                )
+                        }
+                        job.heavy_mileage = data['total_mileage']
+                        job.total_mileage =\
+                            job.empty_mileage + job.heavy_mileage
+                        job.highway_mileage = 0
+                        job.normalway_mileage = 0
                         job.save()
                         return Response(
                             s.JobProgressSerializer(job).data,
