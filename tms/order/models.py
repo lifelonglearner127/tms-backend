@@ -129,6 +129,10 @@ class OrderLoadingStation(models.Model):
         through='OrderProduct'
     )
 
+    is_same_station = models.BooleanField(
+        default=False
+    )
+
     # def __str__(self):
     #     return '{} - Load from {}'.format(
     #         self.order.alias, self.loading_station.name

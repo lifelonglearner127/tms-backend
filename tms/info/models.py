@@ -130,6 +130,7 @@ class Station(BasicContactModel):
     loadingstations = managers.LoadingStationManager()
     unloadingstations = managers.UnLoadingStationManager()
     qualitystations = managers.QualityStationManager()
+    loadingqualitystations = managers.LoadingQualityStationManager()
     workstations = managers.WorkStationManager()
     oilstations = managers.OilStationManager()
     blackdots = managers.BlackDotManager()

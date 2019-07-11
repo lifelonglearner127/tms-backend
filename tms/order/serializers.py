@@ -314,7 +314,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     'quality_station': 'Quality Station data are missing'
                 })
             try:
-                quality_station = Station.qualitystations.get(
+                quality_station = Station.loadingqualitystations.get(
                     pk=station_data.get('id')
                 )
             except Station.DoesNotExist:
@@ -532,7 +532,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     'quality_station': 'Quality Station data are missing'
                 })
             try:
-                quality_station = Station.qualitystations.get(
+                quality_station = Station.loadingqualitystations.get(
                     pk=station_data.get('id')
                 )
             except Station.DoesNotExist:
