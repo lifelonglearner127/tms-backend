@@ -908,23 +908,28 @@ class JobCurrentSerializer(serializers.ModelSerializer):
         }
 
     def get_stations(self, job):
+        # todo: this code is redundant and not optimized. added products
+        # for mobile support
         ret = []
         ret.append({
             'name': job.loading_station.name,
             'address': job.loading_station.address,
             'mobile': job.loading_station.mobile,
+            'contact': job.loading_station.contact,
             'products': job.products
         })
         ret.append({
             'name': job.quality_station.name,
             'address': job.quality_station.address,
             'mobile': job.quality_station.mobile,
+            'contact': job.quality_station.contact,
             'products': job.products
         })
         for mission in job.mission_set.all():
             ret.append({
                 'name': mission.mission.unloading_station.name,
                 'address': mission.mission.unloading_station.address,
+                'contact': mission.mission.unloading_station.contact,
                 'mobile': mission.mission.unloading_station.mobile,
                 'products': [{
                     'name': mission.mission.order_product.product.name,
