@@ -67,9 +67,8 @@ class Order(TimeStampedModel):
     @property
     def loading_stations_data(self):
         return self.loading_stations.all()
-
     @property
-    def quality_stations_data(self):
+    def quality_stations(self):
         stations = []
         for order_loading_station in self.orderloadingstation_set.all():
             stations.append(order_loading_station.quality_station)
@@ -77,7 +76,7 @@ class Order(TimeStampedModel):
         return stations
 
     @property
-    def unloading_stations_data(self):
+    def unloading_stations(self):
         stations = []
         for order_loading_station in self.orderloadingstation_set.all():
             for order_product in order_loading_station.orderproduct_set.all():
@@ -451,14 +450,14 @@ class Job(models.Model):
         """
         loading station of this job
         """
-        return self.order.loading_stations_data[0]
+        return self.order.loading_stations.all()[0]
 
     @property
     def quality_station(self):
         """
         quality station of this job
         """
-        return self.order.quality_stations_data[0]
+        return self.order.quality_stations[0]
 
     @property
     def unloading_stations(self):

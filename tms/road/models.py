@@ -33,13 +33,6 @@ class Route(TimeStampedModel):
             return None
 
     @property
-    def quality_station(self):
-        try:
-            return Station.qualitystations.get(pk=self.path[1])
-        except Station.DoesNotExist:
-            return None
-
-    @property
     def unloading_stations(self):
         stations = Station.unloadingstations.filter(id__in=self.path)
         stations = dict([(station.id, station) for station in stations])

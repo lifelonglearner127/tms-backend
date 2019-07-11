@@ -674,8 +674,8 @@ class OrderDataViewSerializer(serializers.ModelSerializer):
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE)
     products = ShortProductSerializer(many=True)
     loading_stations_data = ShortStationSerializer(many=True)
-    quality_stations_data = ShortStationSerializer(many=True)
-    unloading_stations_data = ShortStationSerializer(many=True)
+    quality_stations = ShortStationSerializer(many=True)
+    unloading_stations = ShortStationSerializer(many=True)
     status = TMSChoiceField(choices=c.ORDER_STATUS)
 
     class Meta:

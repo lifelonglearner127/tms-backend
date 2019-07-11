@@ -189,11 +189,35 @@ class OrderViewSet(TMSViewSet):
 
     @action(detail=True, methods=['post'], url_path='jobs')
     def create_or_update_job(self, request, pk=None):
+        """
+        Request format
+        [
+            {
+                id: ,   // orderproductdeliver id
+                due_time: , // due time to be delivered to unloading station
+                weight: ,   // product weight to be delivered to unloading
+                unloading_station: {},
+                missions: [
+                    {
+                        id: ''  // mission id [optional]
+                        mission_weight: 1,
+                        vehicle: { id: '', plate_nume: '' },
+                        driver: { id: '', name: '' },
+                        escort: { id: '', name: '' },
+                        route: { id: '', name: '' }
+                    }
+                ]
+            }
+        ]
+        """
         order = self.get_object()
         jobs = []
-        weight_errors = []
+        weight_errors = {}
         missions = []
+
         # validate weights by missions
+        product = None
+        product_index = -1
         unloading_station_index = 0
         for unloading_station_data in request.data:
             weight = float(unloading_station_data.get('weight', 0))
@@ -204,14 +228,26 @@ class OrderViewSet(TMSViewSet):
                 })
 
             for mission_data in missions_data:
-                mission_data['deliver'] = unloading_station_data.get(
-                    'id', None
+                mission_data['orderproductdeliver'] =\
+                    unloading_station_data.get('id', None)
+
+                orderproductdeliver = get_object_or_404(
+                    m.OrderProductDeliver,
+                    id=mission_data['orderproductdeliver']
                 )
+
+                if product != orderproductdeliver.order_product.product:
+                    product = orderproductdeliver.order_product.product
+                    product_index = product_index + 1
+                    unloading_station_index = 0
+
                 mission_weight = float(mission_data.get('mission_weight', 0))
                 weight = weight - mission_weight
 
             if weight != 0:
-                weight_errors.append(unloading_station_index)
+                if product_index not in weight_errors:
+                    weight_errors[product_index] = []
+                weight_errors[product_index].append(unloading_station_index)
             unloading_station_index = unloading_station_index + 1
             missions.extend(missions_data)
 
@@ -239,7 +275,7 @@ class OrderViewSet(TMSViewSet):
             route_data = mission.get('route', None)
             route_id = route_data.get('id', None)
 
-            deliver_id = mission.get('deliver', None)
+            orderproductdeliver_id = mission.get('orderproductdeliver', None)
 
             mission_id = mission.get('id', None)
             mission_weight = mission.get('mission_weight', 0)
@@ -250,7 +286,9 @@ class OrderViewSet(TMSViewSet):
                     job['escort'] == escort_id and
                     job['vehicle'] == vehicle_id
                 ):
-                    job['deliver_ids'].append(deliver_id)
+                    job['orderproductdeliver_ids'].append(
+                        orderproductdeliver_id
+                    )
                     job['mission_ids'].append(mission_id)
                     job['mission_weights'].append(mission_weight)
                     job['total_weight'] += float(mission_weight)
@@ -267,7 +305,7 @@ class OrderViewSet(TMSViewSet):
                     'escort': escort_id,
                     'vehicle': vehicle_id,
                     'route': route_id,
-                    'deliver_ids': [deliver_id],
+                    'orderproductdeliver_ids': [orderproductdeliver_id],
                     'mission_ids': [mission_id],
                     'mission_weights': [mission_weight],
                     'total_weight': float(mission_weight)
@@ -285,21 +323,19 @@ class OrderViewSet(TMSViewSet):
 
             # validate route
             route = get_object_or_404(Route, id=job['route'])
-            if route.loading_station != order.loading_stations_data[0]:
+            if route.loading_station != order.loading_stations.all()[0]:
                 raise s.serializers.ValidationError({
                     'route': 'Missing loading station'
                 })
 
-            if route.quality_station != order.quality_stations_data[0]:
-                raise s.serializers.ValidationError({
-                    'route': 'Missing quality station'
-                })
+            if not order.orderloadingstation_set.first().is_same_station:
+                if route.stations[1] != order.quality_stations[0]:
+                    raise s.serializers.ValidationError({
+                        'route': 'Missing quality station'
+                    })
 
-            for (order_unloading_station, route_unloading_station)\
-                in zip(
-                    order.unloading_stations_data, route.unloading_stations
-                    ):
-                if order_unloading_station != route_unloading_station:
+            for order_unloading_station in order.unloading_stations:
+                if order_unloading_station not in route.unloading_stations:
                     raise s.serializers.ValidationError({
                         'route': 'Unmatching unloading stations'
                     })
@@ -319,13 +355,13 @@ class OrderViewSet(TMSViewSet):
             else:
                 job_obj = get_object_or_404(m.Job, id=job['id'])
 
-            for (deliver_id, mission_id, mission_weight)\
+            for (orderproductdeliver_id, mission_id, mission_weight)\
                 in zip(
-                    job['deliver_ids'], job['mission_ids'],
+                    job['orderproductdeliver_ids'], job['mission_ids'],
                     job['mission_weights']
                     ):
                 product_deliver = get_object_or_404(
-                    m.OrderProductDeliver, id=deliver_id
+                    m.OrderProductDeliver, id=orderproductdeliver_id
                 )
                 if mission_id is not None:
                     mission = get_object_or_404(m.Mission, id=mission_id)
@@ -386,72 +422,6 @@ class JobViewSet(TMSViewSet):
 
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
-
-    def create(self, request):
-        jobs = []
-
-        # if vehicle & driver & escort is mulitple selected for delivers
-        # we assume that this is one job
-        for deliver in request.data:
-            new_job = True
-            order_data = deliver.get('order', None)
-            order_id = order_data.get('id', None)
-
-            driver_data = deliver.get('driver', None)
-            driver_id = driver_data.get('id', None)
-
-            escort_data = deliver.get('escort', None)
-            escort_id = escort_data.get('id', None)
-
-            vehicle_data = deliver.get('vehicle', None)
-            vehicle_id = vehicle_data.get('id', None)
-
-            route_data = deliver.get('route', None)
-            route_id = route_data.get('id', None)
-
-            deliver_id = deliver.get('mission', None)
-            mission_weight = deliver.get('mission_weight', 0)
-
-            for job in jobs:
-                if (
-                    job['driver'] == driver_id and
-                    job['escort'] == escort_id and
-                    job['vehicle'] == vehicle_id
-                ):
-                    job['mission_ids'].append(deliver_id)
-                    job['mission_weights'].append(mission_weight)
-                    job['total_weight'] += float(mission_weight)
-                    new_job = False
-                    continue
-
-            if new_job:
-                jobs.append({
-                    'order': order_id,
-                    'driver': driver_id,
-                    'escort': escort_id,
-                    'vehicle': vehicle_id,
-                    'route': route_id,
-                    'mission_ids': [deliver_id],
-                    'mission_weights': [mission_weight],
-                    'total_weight': float(mission_weight)
-                })
-
-        for job in jobs:
-            context = {
-                'mission_ids': job.pop('mission_ids', []),
-                'mission_weights': job.pop('mission_weights', [])
-            }
-
-            serializer = self.serializer_class(
-                data=job, context=context
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        return Response(
-            {'msg': 'Success'},
-            status=status.HTTP_201_CREATED
-        )
 
     @action(detail=False, url_path='vehicles')
     def get_vehicle_jobs_by_time(self, request):
