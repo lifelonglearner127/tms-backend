@@ -911,15 +911,21 @@ class JobCurrentSerializer(serializers.ModelSerializer):
         ret = []
         ret.append({
             'name': job.loading_station.name,
+            'address': job.loading_station.address,
+            'mobile': job.loading_station.mobile,
             'products': job.products
         })
         ret.append({
             'name': job.quality_station.name,
+            'address': job.quality_station.address,
+            'mobile': job.quality_station.mobile,
             'products': job.products
         })
         for mission in job.mission_set.all():
             ret.append({
                 'name': mission.mission.unloading_station.name,
+                'address': mission.mission.unloading_station.address,
+                'mobile': mission.mission.unloading_station.mobile,
                 'products': [{
                     'name': mission.mission.order_product.product.name,
                     'mission_weight': mission.mission_weight,
