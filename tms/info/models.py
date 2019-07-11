@@ -137,3 +137,6 @@ class Station(BasicContactModel):
 
     class Meta:
         ordering = ['station_type', '-updated']
+
+    def __str__(self):
+        return self.name

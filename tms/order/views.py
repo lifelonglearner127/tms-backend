@@ -334,8 +334,11 @@ class OrderViewSet(TMSViewSet):
                         'route': 'Missing quality station'
                     })
 
-            for order_unloading_station in order.unloading_stations:
-                if order_unloading_station not in route.unloading_stations:
+            for orderproductdeliver_id in job['orderproductdeliver_ids']:
+                orderproductdeliver = get_object_or_404(
+                    m.OrderProductDeliver, id=orderproductdeliver_id
+                )
+                if orderproductdeliver.unloading_station not in route.unloading_stations:
                     raise s.serializers.ValidationError({
                         'route': 'Unmatching unloading stations'
                     })

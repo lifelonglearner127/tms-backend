@@ -231,13 +231,11 @@ class OrderProductDeliver(models.Model):
 
     weight = models.PositiveIntegerField()
 
-    # def __str__(self):
-    #     return 'Order {}: from {} to {}: {} of {}'.format(
-    #         self.order_product.order_loading_station.order,
-    #         self.order_product.order_loading_station.loading_station.name,
-    #         self.unloading_station.name,
-    #         self.weight, self.order_product.total_weight
-    #     )
+    def __str__(self):
+        return '{} - {}'.format(
+            self.order_product.order_loading_station.loading_station,
+            self.unloading_station.name
+        )
 
 
 class Job(models.Model):
@@ -614,6 +612,11 @@ class Mission(models.Model):
 
     class Meta:
         ordering = ['step']
+
+    def __str__(self):
+        return '{}. {} - {}'.format(
+            self.id, self.step, self.mission
+        )
 
 
 class JobReport(models.Model):
