@@ -1083,6 +1083,17 @@ class JobDoneSerializer(serializers.ModelSerializer):
         return new_bills
 
 
+class NewJobBillViewSerializer(serializers.ModelSerializer):
+
+    bills = BillDocumentSerializer(many=True)
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'bills'
+        )
+
+
 class JobBillViewSerializer(serializers.ModelSerializer):
     """
     job bill view serializer for driver app

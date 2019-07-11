@@ -803,7 +803,7 @@ class JobViewSet(TMSViewSet):
         job = self.get_object()
 
         return Response(
-            s.JobDoneSerializer(
+            s.NewJobBillViewSerializer(
                 job,
                 context={'request': request, 'bill_type': bill_type}
             ).data,
