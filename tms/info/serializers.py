@@ -109,7 +109,10 @@ class StationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         products = self.context.get('products', None)
-        if products is None:
+        station_type = validated_data.get('station_type', None)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
+        ] and products is None:
             raise serializers.ValidationError({
                 'product': 'Product is missing'
             })
@@ -118,15 +121,23 @@ class StationSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
-        for product in products:
-            product = get_object_or_404(m.Product, id=product.get('id', None))
-            station.products.add(product)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
+        ]:
+            for product in products:
+                product = get_object_or_404(
+                    m.Product, id=product.get('id', None)
+                )
+                station.products.add(product)
 
         return station
 
     def update(self, instance, validated_data):
         products = self.context.get('products', None)
-        if products is None:
+        station_type = validated_data.get('station_type', None)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
+        ] and products is None:
             raise serializers.ValidationError({
                 'product': 'Product is missing'
             })
@@ -134,13 +145,15 @@ class StationSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        instance.products.clear()
-        for product in products:
-            product = get_object_or_404(m.Product, id=product.get('id', None))
-            instance.products.add(product)
-
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
+        ]:
+            instance.products.clear()
+            for product in products:
+                product = get_object_or_404(
+                    m.Product, id=product.get('id', None)
+                )
+                instance.products.add(product)
 
         instance.save()
         return instance
