@@ -4,7 +4,6 @@ from . import managers
 from ..core import constants as c
 from ..core.models import BasicContactModel, TimeStampedModel
 from ..account.models import User
-from ..info.models import Product
 
 
 class Department(TimeStampedModel):
@@ -183,10 +182,6 @@ class CustomerProfile(BasicContactModel):
         User,
         related_name='customer_profile',
         on_delete=models.CASCADE
-    )
-
-    products = models.ManyToManyField(
-        Product
     )
 
     associated_with = models.ForeignKey(

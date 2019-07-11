@@ -41,10 +41,12 @@ class StationViewSet(StaffViewSet):
 
     def create(self, request):
         products = request.data.pop('products', None)
+        customer = request.data.pop('customer', None)
         serializer = s.StationSerializer(
             data=request.data,
             context={
-                'products': products
+                'products': products,
+                'customer': customer
             }
         )
         serializer.is_valid(raise_exception=True)
@@ -58,11 +60,13 @@ class StationViewSet(StaffViewSet):
     def update(self, request, pk=None):
         instance = self.get_object()
         products = request.data.pop('products', None)
+        customer = request.data.pop('customer', None)
         serializer = s.StationSerializer(
             instance,
             data=request.data,
             context={
-                'products': products
+                'products': products,
+                'customer': customer
             },
             partial=True
         )

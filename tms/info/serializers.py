@@ -1,9 +1,15 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
-from . import models as m
 from ..core import constants as c
+
+# models
+from . import models as m
+from ..hr.models import CustomerProfile
+
+# serializers
 from ..core.serializers import TMSChoiceField
+from ..hr.serializers import ShortCustomerProfileSerializer
 
 
 class ShortProductDisplaySerializer(serializers.ModelSerializer):
@@ -93,6 +99,7 @@ class StationSerializer(serializers.ModelSerializer):
     Serializer for Station
     """
     products = ShortProductSerializer(many=True, read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
     working_time_measure_unit = TMSChoiceField(
         choices=c.TIME_MEASURE_UNIT, required=False
     )
@@ -109,21 +116,40 @@ class StationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         products = self.context.get('products', None)
+        customer = self.context.get('customer', None)
         station_type = validated_data.get('station_type', None)
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
-        ] and products is None:
+
+        # validation if the station name exists already
+        name = validated_data.get('name', None)
+        if m.Station.objects.filter(
+            station_type=station_type, name=name
+        ).exists():
             raise serializers.ValidationError({
-                'product': 'Product is missing'
+                'name': 'Already existts'
+            })
+
+        if station_type == c.STATION_TYPE_LOADING_STATION and products is None:
+            raise serializers.ValidationError({
+                'product': 'Product data is missing'
+            })
+
+        if station_type == c.STATION_TYPE_UNLOADING_STATION and customer is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data is missing'
             })
 
         station = m.Station.objects.create(
             **validated_data
         )
 
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
-        ]:
+        if station_type == c.STATION_TYPE_UNLOADING_STATION:
+            customer = get_object_or_404(
+                CustomerProfile, id=customer.get('id', None)
+            )
+            station.customer = customer
+            station.save()
+
+        if station_type == c.STATION_TYPE_LOADING_STATION:
             for product in products:
                 product = get_object_or_404(
                     m.Product, id=product.get('id', None)
@@ -134,20 +160,38 @@ class StationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         products = self.context.get('products', None)
+        customer = self.context.get('customer', None)
         station_type = validated_data.get('station_type', None)
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
-        ] and products is None:
+
+        # validation if the station name exists already
+        name = validated_data.get('name', None)
+        if m.Station.objects.exclude(id=instance.id).filter(
+            station_type=station_type, name=name
+        ).exists():
             raise serializers.ValidationError({
-                'product': 'Product is missing'
+                'name': 'Already existts'
+            })
+
+        if station_type == c.STATION_TYPE_LOADING_STATION and products is None:
+            raise serializers.ValidationError({
+                'product': 'Product data is missing'
+            })
+
+        if station_type == c.STATION_TYPE_UNLOADING_STATION and customer is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data is missing'
             })
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION
-        ]:
+        if station_type == c.STATION_TYPE_UNLOADING_STATION:
+            customer = get_object_or_404(
+                CustomerProfile, id=customer.get('id', None)
+            )
+            instance.customer = customer
+
+        if station_type == c.STATION_TYPE_LOADING_STATION:
             instance.products.clear()
             for product in products:
                 product = get_object_or_404(
@@ -164,6 +208,7 @@ class WorkStationSerializer(serializers.ModelSerializer):
     Serializer for Loading Station, Unloading Station, Quality Station
     """
     products = ShortProductSerializer(many=True, read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
 
     class Meta:
         model = m.Station

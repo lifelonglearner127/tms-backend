@@ -4,15 +4,11 @@ from rest_framework import serializers
 from . import models as m
 from ..core import constants as c
 
-# models
-from ..info.models import Product
-
 # serializers
 from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer,
     DriverAppUserSerializer
 )
-from ..info.serializers import ShortProductSerializer
 
 
 class ShortDepartmentSerializer(serializers.ModelSerializer):
@@ -245,7 +241,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
     user = MainUserSerializer(read_only=True)
     associated_with = ShortUserSerializer(read_only=True)
-    products = ShortProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = m.CustomerProfile
@@ -279,12 +274,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'associated_with': 'Such user does not exist'
             })
 
-        products_data = self.context.get('products', None)
-        if products_data is None:
-            raise serializers.ValidationError({
-                'product': 'Product data is not provided'
-            })
-
         user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
         user = m.User.objects.create_user(**user_data)
         customer = m.CustomerProfile.objects.create(
@@ -292,14 +281,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             associated_with=associated_with,
             **validated_data
         )
-
-        for product_data in products_data:
-            product_id = product_data.get('id', None)
-            try:
-                product = Product.objects.get(pk=product_id)
-                customer.products.add(product)
-            except Product.DoesNotExist:
-                pass
 
         return customer
 
@@ -339,21 +320,6 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             })
 
         instance.associated_with = associated_with
-        products_data = self.context.get('products', None)
-        if products_data is None:
-            raise serializers.ValidationError({
-                'product': 'Product data is not provided'
-            })
-
-        instance.products.clear()
-        for product_data in products_data:
-            product_id = product_data.get('id', None)
-            try:
-                product = Product.objects.get(pk=product_id)
-                instance.products.add(product)
-            except Product.DoesNotExist:
-                pass
-
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 

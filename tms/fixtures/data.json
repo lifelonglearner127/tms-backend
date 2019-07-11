@@ -126,7 +126,6 @@
       "contact": "Customer Contact 1",
       "mobile": "0123456789",
       "address": "Address 1",
-      "products": [1,2],
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -141,7 +140,6 @@
       "contact": "Customer Contact 2",
       "mobile": "0123456789",
       "address": "Address 2",
-      "products": [1,2],
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }

@@ -3,6 +3,7 @@ from django.db import models
 from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel, BasicContactModel
+from ..hr.models import CustomerProfile
 
 
 class Product(TimeStampedModel):
@@ -74,6 +75,12 @@ class Station(BasicContactModel):
         Product
     )
 
+    customer = models.ForeignKey(
+        CustomerProfile,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
     price = models.DecimalField(
         max_digits=5,
         decimal_places=1,
@@ -128,5 +135,4 @@ class Station(BasicContactModel):
     blackdots = managers.BlackDotManager()
 
     class Meta:
-        unique_together = ('longitude', 'latitude')
         ordering = ['station_type', '-updated']
