@@ -338,7 +338,8 @@ class OrderViewSet(TMSViewSet):
                 orderproductdeliver = get_object_or_404(
                     m.OrderProductDeliver, id=orderproductdeliver_id
                 )
-                if orderproductdeliver.unloading_station not in route.unloading_stations:
+                if orderproductdeliver.unloading_station\
+                   not in route.unloading_stations:
                     raise s.serializers.ValidationError({
                         'route': 'Unmatching unloading stations'
                     })

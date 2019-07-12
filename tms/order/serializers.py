@@ -314,7 +314,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     'quality_station': 'Quality Station data are missing'
                 })
             try:
-                quality_station = Station.loadingqualitystations.get(
+                quality_station = Station.qualitystations.get(
                     pk=station_data.get('id')
                 )
             except Station.DoesNotExist:
@@ -532,7 +532,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     'quality_station': 'Quality Station data are missing'
                 })
             try:
-                quality_station = Station.loadingqualitystations.get(
+                quality_station = Station.qualitystations.get(
                     pk=station_data.get('id')
                 )
             except Station.DoesNotExist:
@@ -1062,7 +1062,8 @@ class JobDoneSerializer(serializers.ModelSerializer):
                 sub_categories = c.OTHER_BILL_SUB_CATEGORY
             sub_category_choices = dict((x, y) for x, y in sub_categories)
 
-            for sub_category, group_by_sub_category in group_by_category.items():
+            for sub_category, group_by_sub_category\
+                    in group_by_category.items():
                 bills_by_subcategories.append({
                     'sub_category': {
                         'value': sub_category,
@@ -1155,7 +1156,8 @@ class JobBillViewSerializer(serializers.ModelSerializer):
                 sub_categories = c.OTHER_BILL_SUB_CATEGORY
             sub_category_choices = dict((x, y) for x, y in sub_categories)
 
-            for sub_category, group_by_sub_category in group_by_category.items():
+            for sub_category, group_by_sub_category\
+                    in group_by_category.items():
                 bills_by_subcategories.append({
                     'sub_category': {
                         'value': sub_category,

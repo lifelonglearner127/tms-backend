@@ -133,7 +133,8 @@ class StationSerializer(serializers.ModelSerializer):
                 'product': 'Product data is missing'
             })
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION and customer is None:
+        if station_type == c.STATION_TYPE_UNLOADING_STATION\
+           and customer is None:
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
             })
@@ -177,7 +178,8 @@ class StationSerializer(serializers.ModelSerializer):
                 'product': 'Product data is missing'
             })
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION and customer is None:
+        if station_type == c.STATION_TYPE_UNLOADING_STATION\
+           and customer is None:
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
             })

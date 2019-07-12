@@ -18,7 +18,7 @@ class PushyAPI:
         postData['data'] = data
 
         try:
-            r = requests.post(
+            requests.post(
                 'https://api.pushy.me/push?api_key=' + apiKey,
                 data=json.dumps(postData),
                 headers={
