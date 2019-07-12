@@ -167,6 +167,10 @@ class StaffProfile(TimeStampedModel):
     objects = models.Manager()
     availables = managers.AvailableStaffManager()
     notavailables = managers.NotAvailableStaffManager()
+    inwork_drivers = managers.InWorkDrivers()
+    available_drivers = managers.AvailableDrivers()
+    inwork_escorts = managers.InWorkEscorts()
+    available_escorts = managers.AvailableEscorts()
 
     def __str__(self):
         return '{}-{}\'s profile'.format(

@@ -277,9 +277,11 @@ REST_REQUEST_CATEGORY = (
 # ----------------------------------------------------------------------------
 # driver status
 WORK_STATUS_AVAILABLE = 'A'
+WORK_STATUS_DRIVING = 'D'
 WORK_STATUS_NOT_AVAILABLE = 'N'
 WORK_STATUS = (
     (WORK_STATUS_AVAILABLE, 'Available'),
+    (WORK_STATUS_DRIVING, 'Driving'),
     (WORK_STATUS_NOT_AVAILABLE, 'Not Available')
 )
 

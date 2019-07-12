@@ -127,6 +127,50 @@ class StaffProfileViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='in-work-drivers')
+    def get_in_work_drivers(self, request):
+        """
+        get in-work drivers
+        """
+        page = self.paginate_queryset(
+            m.StaffProfile.inwork_drivers.all()
+        )
+        serializer = s.ShortStaffProfileSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='available-drivers')
+    def get_available_drivers(self, request):
+        """
+        get available drivers
+        """
+        page = self.paginate_queryset(
+            m.StaffProfile.available_drivers.all()
+        )
+        serializer = s.ShortStaffProfileSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='in-work-escorts')
+    def get_in_work_escorts(self, request):
+        """
+        get in-work escorts
+        """
+        page = self.paginate_queryset(
+            m.StaffProfile.inwork_escorts.all()
+        )
+        serializer = s.ShortStaffProfileSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='available-escorts')
+    def get_available_escorts(self, request):
+        """
+        get available escorts
+        """
+        page = self.paginate_queryset(
+            m.StaffProfile.available_escorts.all()
+        )
+        serializer = s.ShortStaffProfileSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class CustomerProfileViewSet(TMSViewSet):
 

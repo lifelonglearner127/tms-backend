@@ -35,6 +35,17 @@ def notify_driver_of_new_job(sender, instance, created, **kwargs):
                 bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
             )
 
+        # set the vehicle status to in-work
+        instance.vehicle.status = c.VEHICLE_STATUS_INWORK
+        instance.vehicle.save()
+
+        # set the driver & escrot to in-work
+        # set the driver & escrot to in-work
+        instance.driver.profile.status = c.WORK_STATUS_DRIVING
+        instance.escort.profile.status = c.WORK_STATUS_DRIVING
+        instance.driver.profile.save()
+        instance.escort.profile.save()
+
         # send in-app notfication to driver
         message = "A new mission is assigned to you."\
             "Please use {}".format(instance.vehicle.plate_num)
@@ -85,6 +96,16 @@ def notify_driver_of_new_job(sender, instance, created, **kwargs):
                 vehicle_bind.delete()
             except VehicleUserBind.DoesNotExist:
                 pass
+
+        # set the vehicle status to available
+        instance.vehicle.status = c.VEHICLE_STATUS_AVAILABLE
+        instance.vehicle.save()
+
+        # set the driver & escrot to in-work
+        instance.driver.profile.status = c.WORK_STATUS_AVAILABLE
+        instance.escort.profile.status = c.WORK_STATUS_AVAILABLE
+        instance.driver.profile.save()
+        instance.escort.profile.save()
 
         # update job report
         job_year = instance.finished_on.year

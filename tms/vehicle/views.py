@@ -44,6 +44,10 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=True, methods=['get'], url_path='playback')
     def vehicle_history_track_query(self, request, pk=None):
+        """
+        Retrive the vehicle history track from G7 and return the response
+        Not used for now
+        """
         vehicle = self.get_object()
         from_datetime = self.request.query_params.get('from', None)
         to_datetime = self.request.query_params.get('to', None)
@@ -91,6 +95,9 @@ class VehicleViewSet(TMSViewSet):
     def get_all_vehicle_positions(self, request):
         """
         Get the current location of all registered vehicles
+        This api will be called when dashboard component is mounted
+        After dashboard component mounted, vehicle positions will be notified
+        vai web sockets, so this api is called only once.
         """
         plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
         body = {
@@ -119,6 +126,7 @@ class VehicleViewSet(TMSViewSet):
     def get_vehicle_position(self, request):
         """
         Get the current location of vehicle; for mobile
+        This api will be called when the driver want to see the job route
         """
         plate_num = self.request.query_params.get('plate_num', None)
         queries = {
@@ -151,6 +159,7 @@ class VehicleViewSet(TMSViewSet):
     def current_info(self, request):
         """
         get the vehicle status of selected vehicle
+        this api will be called when admin hit on the truck icon on dashbaord
         """
         # todo: get bound of vehicle with driver and escort
 
@@ -181,6 +190,9 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path="brands")
     def get_vehicle_brands(self, request):
+        """
+        Get the vehicle brands
+        """
         serializer = ChoiceSerializer(
             [{'value': x, 'text': y} for (x, y) in c.VEHICLE_BRAND],
             many=True
@@ -192,6 +204,9 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path="models")
     def get_vehicle_models(self, request):
+        """
+        Get the vehicle models
+        """
         serializer = ChoiceSerializer(
             [{'value': x, 'text': y} for (x, y) in c.VEHICLE_MODEL_TYPE],
             many=True
@@ -200,6 +215,28 @@ class VehicleViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, url_path="in-works")
+    def get_in_work_vehicles(self, request):
+        """
+        get in-work vehicles
+        """
+        page = self.paginate_queryset(
+            m.Vehicle.inworks.all()
+        )
+        serializer = s.ShortVehicleSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path="availables")
+    def get_available_vehicles(self, request):
+        """
+        get availables vehicles
+        """
+        page = self.paginate_queryset(
+            m.Vehicle.availables.all()
+        )
+        serializer = s.ShortVehicleSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class VehicleMaintenanceRequestViewSet(ApproveViewSet):
