@@ -781,12 +781,12 @@ class JobProgressBarField(serializers.Field):
             ret.append({'title': '开始质检'})
             ret.append({'title': '录入质检量'})
 
-            unloading_stations = instance.route.stations[2:]
-            for station in unloading_stations:
-                ret.append({'title': '赶往卸货地:' + station.name})
-                ret.append({'title': '到达等待卸货:' + station.name})
-                ret.append({'title': '开始卸货:' + station.name})
-                ret.append({'title': '录入卸货数量:' + station.name})
+            for mission in instance.mission_set.all():
+                station_name = mission.mission.unloading_station.name
+                ret.append({'title': '赶往卸货地:' + station_name})
+                ret.append({'title': '到达等待卸货:' + station_name})
+                ret.append({'title': '开始卸货:' + station_name})
+                ret.append({'title': '录入卸货数量:' + station_name})
 
             progress = 1
             for item in ret:

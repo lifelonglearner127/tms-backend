@@ -67,6 +67,7 @@ class Order(TimeStampedModel):
     @property
     def loading_stations_data(self):
         return self.loading_stations.all()
+
     @property
     def quality_stations(self):
         stations = []
