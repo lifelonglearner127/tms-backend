@@ -62,6 +62,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
                             message = "In {}".format(station.name)
                         else:
                             message = "Out of {}".format(station.name)
+
             except Station.DoesNotExist:
                 return
         else:

@@ -152,10 +152,7 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE
     )
 
-    total_weight = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES,
-    )
+    total_weight = models.FloatField()
 
     total_weight_measure_unit = models.CharField(
         max_length=1,
@@ -175,11 +172,7 @@ class OrderProduct(models.Model):
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
-    loss = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES,
-        default=0
-    )
+    loss = models.FloatField()
 
     loss_unit = models.CharField(
         max_length=2,
@@ -229,7 +222,7 @@ class OrderProductDeliver(models.Model):
 
     due_time = models.DateTimeField()
 
-    weight = models.PositiveIntegerField()
+    weight = models.FloatField()
 
     def __str__(self):
         return '{} - {}'.format(
@@ -337,7 +330,7 @@ class Job(models.Model):
         blank=True
     )
 
-    total_weight = models.PositiveIntegerField()
+    total_weight = models.FloatField()
 
     total_mileage = models.PositiveIntegerField(
         null=True,
@@ -517,17 +510,17 @@ class Mission(models.Model):
 
     step = models.PositiveIntegerField()
 
-    mission_weight = models.PositiveIntegerField(
+    mission_weight = models.FloatField(
         null=True,
         blank=True
     )
 
-    loading_weight = models.PositiveIntegerField(
+    loading_weight = models.FloatField(
         null=True,
         blank=True
     )
 
-    unloading_weight = models.PositiveIntegerField(
+    unloading_weight = models.FloatField(
         null=True,
         blank=True
     )

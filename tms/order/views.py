@@ -318,7 +318,7 @@ class OrderViewSet(TMSViewSet):
             total_weight = job.get('total_weight', 0)
             if total_weight > vehicle.total_load:
                 raise s.serializers.ValidationError({
-                    'weight': 'Overweight'
+                    'overweight': vehicle.plate_num
                 })
 
             # validate route
