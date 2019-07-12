@@ -20,7 +20,7 @@ class ShortRouteSerializer(serializers.ModelSerializer):
 
 class RouteSerializer(serializers.ModelSerializer):
 
-    policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
+    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
 
     class Meta:
         model = m.Route
@@ -43,7 +43,7 @@ class PathStationNameField(serializers.ListField):
 class RouteDataViewSerializer(serializers.ModelSerializer):
 
     path = PathStationNameField()
-    policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
+    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
 
     class Meta:
         model = m.Route
