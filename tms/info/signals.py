@@ -9,3 +9,8 @@ from ..core.redis import r
 def notify_asgimqtt_of_station_changes(sender, instance, **kwargs):
     if r.get('station') != b'updated':
         r.set('station', 'updated')
+
+
+@receiver(post_delete, sender=m.Station)
+def delete_paths(sender, instance, **kwargs):
+    m.Route.objects.filter(path__contains=[instance.id]).delete()

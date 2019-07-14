@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants as c
@@ -137,6 +138,57 @@ class Station(BasicContactModel):
 
     class Meta:
         ordering = ['station_type', '-updated']
+
+    def __str__(self):
+        return self.name
+
+
+class Route(TimeStampedModel):
+
+    name = models.CharField(
+        max_length=100,
+    )
+
+    # current map api allow only 16 waypoints
+    path = ArrayField(
+        models.PositiveIntegerField(),
+        size=18
+    )
+
+    policy = models.PositiveIntegerField(
+        choices=c.ROUTE_PLANNING_POLICY,
+        default=c.ROUTE_PLANNING_POLICY_LEAST_TIME
+    )
+
+    distance = models.PositiveIntegerField()
+
+    @property
+    def loading_station(self):
+        try:
+            return Station.loadingstations.get(pk=self.path[0])
+        except Station.DoesNotExist:
+            return None
+
+    @property
+    def unloading_stations(self):
+        stations = Station.unloadingstations.filter(id__in=self.path)
+        stations = dict([(station.id, station) for station in stations])
+        unloading_stations = []
+        for id in self.path:
+            if id in stations:
+                unloading_stations.append(stations[id])
+
+        return unloading_stations
+
+    @property
+    def stations(self):
+        points = Station.workstations.filter(id__in=self.path)
+        points = dict([(point.id, point) for point in points])
+        return [points[id] for id in self.path]
+
+    @property
+    def stations_count(self):
+        return Station.workstations.filter(id__in=self.path).count()
 
     def __str__(self):
         return self.name

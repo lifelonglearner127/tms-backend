@@ -23,7 +23,7 @@ from ..info.serializers import (
 from ..finance.serializers import (
     BillDocumentSerializer, ShortBillDocumentSerializer
 )
-from ..road.serializers import ShortRouteSerializer
+from ..info.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 
 

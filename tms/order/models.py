@@ -11,7 +11,7 @@ from ..core.models import TimeStampedModel
 from ..account.models import User
 from ..hr.models import CustomerProfile
 from ..info.models import Station, Product
-from ..road.models import Route
+from ..info.models import Route
 from ..vehicle.models import Vehicle
 
 

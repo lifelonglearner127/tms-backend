@@ -55,7 +55,6 @@ LOCAL_APPS = [
     'tms.order.apps.OrderConfig',
     'tms.vehicle.apps.VehicleConfig',
     'tms.business.apps.BusinessConfig',
-    'tms.road.apps.RoadConfig',
     'tms.g7.apps.G7Config',
     'tms.notification.apps.NotificationConfig',
     'tms.hr.apps.HrConfig',

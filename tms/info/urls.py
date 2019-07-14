@@ -1,18 +1,24 @@
 from django.conf.urls import url, include
 
 from rest_framework.routers import DefaultRouter
-from .import views
+from .import views as v
 
 router = DefaultRouter(trailing_slash=False)
 router.register(
     r'products',
-    views.ProductViewSet,
+    v.ProductViewSet,
     base_name='products'
 )
 router.register(
     r'stations',
-    views.StationViewSet,
+    v.StationViewSet,
     base_name='stations'
+)
+
+router.register(
+    r'routes',
+    v.RouteViewSet,
+    base_name='route'
 )
 
 urlpatterns = [

@@ -254,3 +254,68 @@ class BlackDotSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'longitude', 'latitude', 'radius'
         )
+
+
+class ShortRouteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Route
+        fields = (
+            'id', 'name'
+        )
+
+
+class RouteSerializer(serializers.ModelSerializer):
+
+    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
+
+    class Meta:
+        model = m.Route
+        fields = '__all__'
+
+
+class PathStationNameField(serializers.ListField):
+
+    def to_representation(self, value):
+        paths = m.Station.workstations.filter(id__in=value)
+        paths = dict([(point.id, point) for point in paths])
+
+        serializer = StationPointSerializer(
+            [paths[id] for id in value],
+            many=True
+        )
+        return serializer.data
+
+
+class RouteDataViewSerializer(serializers.ModelSerializer):
+
+    path = PathStationNameField()
+    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
+
+    class Meta:
+        model = m.Route
+        fields = '__all__'
+
+
+class PathLngLatField(serializers.ListField):
+
+    def to_representation(self, value):
+        paths = m.Station.objects.filter(id__in=value)
+        paths = dict([(point.id, point) for point in paths])
+
+        serializer = ShortStationPointSerializer(
+            [paths[id] for id in value],
+            many=True
+        )
+        return serializer.data
+
+
+class RoutePointSerializer(serializers.ModelSerializer):
+
+    path = PathLngLatField()
+
+    class Meta:
+        model = m.Route
+        fields = (
+            'id', 'path'
+        )

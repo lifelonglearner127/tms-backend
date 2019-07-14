@@ -19,7 +19,7 @@ from ..core.permissions import IsDriverOrEscortUser
 # models
 from . import models as m
 from ..account.models import User
-from ..road.models import Route
+from ..info.models import Route
 from ..vehicle.models import Vehicle
 
 # serializers

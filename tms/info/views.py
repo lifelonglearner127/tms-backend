@@ -4,10 +4,16 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..core import constants as c
-from ..core.serializers import ChoiceSerializer
-from ..core.views import StaffViewSet
+
+# models
 from . import models as m
+
+# serializers
 from . import serializers as s
+from ..core.serializers import ChoiceSerializer
+
+# views
+from ..core.views import StaffViewSet, TMSViewSet
 
 
 class ProductViewSet(StaffViewSet):
@@ -171,5 +177,21 @@ class StationViewSet(StaffViewSet):
         )
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class RouteViewSet(TMSViewSet):
+
+    queryset = m.Route.objects.all()
+    serializer_class = s.RouteSerializer
+    short_serializer_class = s.ShortRouteSerializer
+    data_view_serializer_class = s.RouteDataViewSerializer
+
+    @action(detail=True, url_path='points', methods=['get'])
+    def get_route_point(self, request, pk=None):
+        instance = self.get_object()
+        return Response(
+            s.RoutePointSerializer(instance).data,
             status=status.HTTP_200_OK
         )
