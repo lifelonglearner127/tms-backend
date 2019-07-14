@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
 from . import models as m
-from ..core import constants as c
-from ..core.serializers import TMSChoiceField
 from ..info.models import Station
 from ..info.serializers import (
     StationPointSerializer, ShortStationPointSerializer
