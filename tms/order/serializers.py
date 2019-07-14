@@ -844,6 +844,7 @@ class JobCurrentSerializer(serializers.ModelSerializer):
     """
     Serializer for current job for driver app
     """
+    order_id = serializers.CharField(source='order.id')
     plate_num = serializers.CharField(source='vehicle.plate_num')
     driver = serializers.CharField(source='driver.name')
     escort = serializers.CharField(source='escort.name')
@@ -855,7 +856,7 @@ class JobCurrentSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Job
         fields = (
-            'id', 'plate_num', 'driver', 'escort', 'stations',
+            'id', 'order_id', 'plate_num', 'driver', 'escort', 'stations',
             'products', 'total_weight',
             'progress', 'progress_bar', 'route'
         )
