@@ -35,7 +35,8 @@ class NotificationViewSet(mixins.RetrieveModelMixin,
     def unread_notification_count(self, request):
         return Response(
             {
-                'count': m.Notification.unreads.count()
+                'count':
+                request.user.notifications.filter(is_read=False).count()
             },
             status=status.HTTP_200_OK
         )
@@ -44,7 +45,8 @@ class NotificationViewSet(mixins.RetrieveModelMixin,
     def read_notification_count(self, request):
         return Response(
             {
-                'count': m.Notification.reads.count()
+                'count':
+                request.user.notifications.filter(is_read=True).count()
             },
             status=status.HTTP_200_OK
         )
