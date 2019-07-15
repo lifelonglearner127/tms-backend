@@ -80,6 +80,11 @@ CREATE DATABASE tms;
 CREATE USER dev WITH PASSWORD 'admin123';
 GRANT ALL PRIVILEGES ON DATABASE "tms" to dev;
 ```
+
+ - [Install RabbitMQ]
+ ```
+ sudo apt-get install rabbitmq-server
+ ```
 > Important! This part can be skipped if these prerequisites are already installed.
 
 2. Clone and setup db
@@ -97,16 +102,33 @@ python manage.py createsuperuser
 ```
 
 3. Configure wsgi & asgi & nginx
+ - Configure Nginx
 ```
 cp deploy/tms_backend.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
 systemctl restart nginx
+```
 
+ - Configure Daphne service unit
+```
 cp deploy/daphne.service /lib/systemd/system/
-cp deploy/uwsgi.service /lib/systemd/system/
-cp deploy/tms_backend.ini /etc/uwsgi/sites/
-cp deploy/g7.service /lib/systemd/system/
 docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
+```
+
+ - Configure Uwsgi service unit
+ ```
+cp deploy/tms_backend.ini /etc/uwsgi/sites/
+cp deploy/uwsgi.service /lib/systemd/system/
+ ```
+
+ - Configure G7 service unit
+```
+cp deploy/g7.service /lib/systemd/system/
+```
+
+ - Configure Celery Worker
+```
+cp deploy/tms_celery.service /lib/systemd/system/
 ```
 
 5. Explanation

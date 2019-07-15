@@ -1,0 +1,20 @@
+[Unit]
+Description=Vehicle Management Celery Worker Client
+After=network.target
+
+
+[Service]
+PIDFile=/run/tms_celery/tms_celery.pid
+User=root
+Group=root
+WorkingDirectory=/root/Projects/tms-backend
+Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
+ExecStart=/root/.virtualenvs/tms-backend/bin/celery worker -A config
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+PrivateTmp=true
+
+
+[Install]
+WantedBy=multi-user.target

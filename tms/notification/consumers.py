@@ -1,6 +1,5 @@
 import json
-from channels.generic.websocket import JsonWebsocketConsumer
-from asgiref.sync import async_to_sync
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from . import models as m
 from . import serializers as s
@@ -10,28 +9,27 @@ from ..info.models import Station
 from ..order.models import Job
 
 
-class NotificationConsumer(JsonWebsocketConsumer):
-    def connect(self):
+class NotificationConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
         try:
             user_pk = self.scope['url_route']['kwargs']['user_pk']
             self.user = User.objects.get(pk=user_pk)
             self.user.channel_name = self.channel_name
             self.user.save()
-            self.accept()
+            await self.accept()
         except User.DoesNotExist:
-            self.close()
+            await self.close()
 
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         self.user.channel_name = ''
         self.user.save()
 
     def receive(self, text_data):
         pass
 
-    def notify(self, event):
+    async def notify(self, event):
         data = json.loads(event['data'])
         msg_type = int(data['msg_type'])
-        message = ''
 
         if msg_type in [
             c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA,
@@ -62,49 +60,47 @@ class NotificationConsumer(JsonWebsocketConsumer):
                             message = "In {}".format(station.name)
                         else:
                             message = "Out of {}".format(station.name)
-
+                notification = m.Notification.objects.create(
+                    user=self.user,
+                    message=message,
+                    msg_type=msg_type
+                )
+                await self.send_json({
+                    'content':
+                    json.dumps(s.NotificationSerializer(notification).data)
+                })
             except Station.DoesNotExist:
                 return
         else:
-            message = data['message']
-
-        if message:
-            notification = m.Notification.objects.create(
-                user=self.user,
-                message=message,
-                msg_type=msg_type
-            )
-
-            self.send_json({
-                'content':
-                json.dumps(s.NotificationSerializer(notification).data)
+            await self.send_json({
+                'content': data
             })
 
 
-class PositionConsumer(JsonWebsocketConsumer):
-    def connect(self):
+class PositionConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
         try:
             user_pk = self.scope['url_route']['kwargs']['user_pk']
             self.user = User.objects.get(pk=user_pk)
-            async_to_sync(self.channel_layer.group_add)(
+            await self.channel_layer.group_add(
                 'position',
                 self.channel_name
             )
 
-            self.accept()
+            await self.accept()
         except User.DoesNotExist:
-            self.close()
+            await self.close()
 
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
             'position',
             self.channel_name
         )
 
-    def receive(self, text_data):
+    async def receive(self, text_data):
         pass
 
-    def notify_position(self, event):
-        self.send_json({
+    async def notify_position(self, event):
+        await self.send_json({
             'content': event['data']
         })
