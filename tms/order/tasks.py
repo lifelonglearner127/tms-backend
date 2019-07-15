@@ -1,3 +1,4 @@
+import json
 import month
 from django.shortcuts import get_object_or_404
 from config.celery import app
@@ -73,7 +74,9 @@ def notify_new_job(context):
             driver.channel_name,
             {
                 'type': 'notify',
-                'data': NotificationSerializer(driver_notification).data
+                'data': json.dumps(
+                    NotificationSerializer(driver_notification).data
+                )
             }
         )
 
@@ -82,7 +85,9 @@ def notify_new_job(context):
             driver.channel_name,
             {
                 'type': 'notify',
-                'data': NotificationSerializer(escort_notification).data
+                'data': json.dumps(
+                    NotificationSerializer(escort_notification).data
+                )
             }
         )
 
