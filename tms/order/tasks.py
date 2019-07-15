@@ -65,7 +65,7 @@ def notify_new_job(context):
     escort_notification = Notification.objects.create(
         user=escort,
         message=message,
-        msg_type=c.DRIVER_NOTIFICATION_TYPE_EXIT_AREA
+        msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
     if driver.channel_name:
