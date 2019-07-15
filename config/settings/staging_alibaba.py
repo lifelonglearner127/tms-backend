@@ -8,7 +8,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 # ----------------------------------------------------------------------------
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = [
-    '*'
+    '47.98.111.251'
 ]
 
 CORS_ORIGIN_WHITELIST = [
