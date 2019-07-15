@@ -73,7 +73,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
                 return
         else:
             await self.send_json({
-                'content': data
+                'content': event['data']
             })
 
 
