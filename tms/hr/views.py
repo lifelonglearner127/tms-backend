@@ -182,7 +182,7 @@ class CustomerProfileViewSet(TMSViewSet):
         context = {
             'user': request.data.pop('user'),
             'associated_with': request.data.pop('associated_with'),
-            'products': request.data.pop('products')
+            # 'products': request.data.pop('products')
         }
 
         serializer = self.serializer_class(
@@ -202,7 +202,7 @@ class CustomerProfileViewSet(TMSViewSet):
         context = {
             'user': request.data.pop('user'),
             'associated_with': request.data.pop('associated_with'),
-            'products': request.data.pop('products')
+            # 'products': request.data.pop('products')
         }
 
         serializer = self.serializer_class(

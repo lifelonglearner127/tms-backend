@@ -245,7 +245,8 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.CustomerProfile
         fields = '__all__'
-        read_only_fields = ('user', 'products')
+        # read_only_fields = ('user', 'products')
+        read_only_fields = ('user', )
 
     def create(self, validated_data):
         user_data = self.context.get('user', None)
