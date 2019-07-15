@@ -471,9 +471,9 @@ class Job(models.Model):
         return stations
 
     @property
-    def products(self):
+    def delivers(self):
         """
-        products
+        delivers
         """
         products = []
         for mission in self.mission_set.all():
@@ -483,6 +483,28 @@ class Job(models.Model):
                 'loading_weight': mission.loading_weight,
                 'unloading_weight': mission.unloading_weight
             })
+        return products
+
+    @property
+    def products(self):
+        products = []
+        for mission in self.mission_set.all():
+            for product in products:
+                if product['name'] ==\
+                   mission.mission.order_product.product.name:
+                    product['mission_weight'] += float(mission.mission_weight)
+                    product['loading_weight'] += float(mission.loading_weight)
+                    product['unloading_weight'] +=\
+                        float(mission.unloading_weight)
+                    break
+            else:
+                products.append({
+                    'name': mission.mission.order_product.product.name,
+                    'mission_weight': mission.mission_weight,
+                    'loading_weight': mission.loading_weight,
+                    'unloading_weight': mission.unloading_weight
+                })
+
         return products
 
     objects = models.Manager()
@@ -512,18 +534,15 @@ class Mission(models.Model):
     step = models.PositiveIntegerField()
 
     mission_weight = models.FloatField(
-        null=True,
-        blank=True
+        default=0
     )
 
     loading_weight = models.FloatField(
-        null=True,
-        blank=True
+        default=0
     )
 
     unloading_weight = models.FloatField(
-        null=True,
-        blank=True
+        default=0
     )
 
     arrived_station_on = models.DateTimeField(
