@@ -848,6 +848,7 @@ class JobCurrentSerializer(serializers.ModelSerializer):
     plate_num = serializers.CharField(source='vehicle.plate_num')
     driver = serializers.CharField(source='driver.name')
     escort = serializers.CharField(source='escort.name')
+    total_distance = serializers.IntegerField(source='route.distance')
     stations = serializers.SerializerMethodField()
     products = JobProductSerializer(many=True)
     progress_bar = JobProgressBarField(source='*')
@@ -856,8 +857,8 @@ class JobCurrentSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order_id', 'plate_num', 'driver', 'escort', 'stations',
-            'products', 'total_weight',
+            'id', 'order_id', 'plate_num', 'driver', 'escort',
+            'total_distance', 'stations', 'products', 'total_weight',
             'progress', 'progress_bar', 'route'
         )
 
@@ -986,6 +987,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
     """
     order_id = serializers.CharField(source='order.id')
     plate_num = serializers.CharField(source='vehicle.plate_num')
+    total_distance = serializers.IntegerField(source='route.distance')
     stations = serializers.SerializerMethodField()
     products = JobProductSerializer(many=True)
     driver = serializers.CharField(source='driver.name')
@@ -996,7 +998,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order_id', 'plate_num', 'stations',
+            'id', 'order_id', 'plate_num', 'total_distance', 'stations',
             'started_on', 'finished_on',
             'products', 'total_weight', 'driver', 'escort',
             'mileage', 'bills'
