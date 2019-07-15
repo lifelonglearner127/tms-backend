@@ -701,7 +701,7 @@ class MissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Mission
         fields = (
-            'mission_weight', 'loading_weight', 'unloading_weight',
+            'mission_weight', 'unloading_weight',
             'arrived_station_on', 'started_unloading_on',
             'finished_unloading_on', 'departure_station_on',
             'is_completed', 'mission'
@@ -836,7 +836,6 @@ class JobProductSerializer(serializers.Serializer):
 
     name = serializers.CharField()
     mission_weight = serializers.FloatField()
-    loading_weight = serializers.FloatField()
     unloading_weight = serializers.FloatField()
 
 
@@ -936,7 +935,6 @@ class JobCurrentSerializer(serializers.ModelSerializer):
                 'products': [{
                     'name': mission.mission.order_product.product.name,
                     'mission_weight': mission.mission_weight,
-                    'loading_weight': mission.loading_weight,
                     'unloading_weight': mission.unloading_weight
                 }]
             })
@@ -975,7 +973,6 @@ class JobDeliverField(serializers.Field):
         for mission in instance.mission_set.all():
             ret.append({
                 'mission_weight': mission.mission_weight,
-                'loading_weight': mission.loading_weight,
                 'unloading_weight': mission.unloading_weight
             })
         return ret

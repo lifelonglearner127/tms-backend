@@ -480,7 +480,6 @@ class Job(models.Model):
             products.append({
                 'name': mission.mission.order_product.product.name,
                 'mission_weight': mission.mission_weight,
-                'loading_weight': mission.loading_weight,
                 'unloading_weight': mission.unloading_weight
             })
         return products
@@ -493,7 +492,6 @@ class Job(models.Model):
                 if product['name'] ==\
                    mission.mission.order_product.product.name:
                     product['mission_weight'] += float(mission.mission_weight)
-                    product['loading_weight'] += float(mission.loading_weight)
                     product['unloading_weight'] +=\
                         float(mission.unloading_weight)
                     break
@@ -501,7 +499,6 @@ class Job(models.Model):
                 products.append({
                     'name': mission.mission.order_product.product.name,
                     'mission_weight': mission.mission_weight,
-                    'loading_weight': mission.loading_weight,
                     'unloading_weight': mission.unloading_weight
                 })
 
@@ -534,10 +531,6 @@ class Mission(models.Model):
     step = models.PositiveIntegerField()
 
     mission_weight = models.FloatField(
-        default=0
-    )
-
-    loading_weight = models.FloatField(
         default=0
     )
 
