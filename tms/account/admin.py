@@ -60,7 +60,9 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('role',)
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),
-        ('Personal info', {'fields': ('name', 'mobile',)}),
+        ('Personal info', {
+            'fields': ('name', 'mobile', 'device_token', 'channel_name')
+        }),
         ('Permissions', {'fields': ('role',)}),
     )
 
