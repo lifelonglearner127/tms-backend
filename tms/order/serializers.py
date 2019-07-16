@@ -891,7 +891,9 @@ class JobCurrentSerializer(serializers.ModelSerializer):
             last_progress_finished_on = instance.finished_checking_on
 
         elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
-            mission_step = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) / 4
+            mission_step = int(
+                (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) / 4
+            )
             us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
             mission = instance.mission_set.get(step=mission_step)
             if us_progress == 0:
