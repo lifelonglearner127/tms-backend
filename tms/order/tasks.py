@@ -112,7 +112,7 @@ def notify_new_job(context):
 
 @app.task
 def calculate_job_report(context):
-    job = get_object_or_404(m.Job, id=context['id'])
+    job = get_object_or_404(m.Job, id=context['job'])
     vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
     driver = get_object_or_404(User, id=context['driver'])
     escort = get_object_or_404(User, id=context['escort'])
