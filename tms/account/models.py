@@ -61,7 +61,6 @@ class User(AbstractBaseUser):
 
     device_token = models.CharField(
         max_length=100,
-        unique=True,
         null=True,
         blank=True
     )
