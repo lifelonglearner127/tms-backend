@@ -20,7 +20,7 @@ def updated_job(sender, instance, created, **kwargs):
         )
 
     if instance.progress == c.JOB_PROGRESS_COMPLETE:
-        calculate_job_report(
+        calculate_job_report.apply_async(
             args=[{
                 'job': instance.id,
                 'vehicle': instance.vehicle.id,
