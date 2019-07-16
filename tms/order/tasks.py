@@ -22,56 +22,67 @@ channel_layer = get_channel_layer()
 
 
 @app.task
-def notify_new_job(context):
+def notify_job_changes(context):
     """
     Send notificatio when a new job is created
     """
-    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
-    driver = get_object_or_404(User, id=context['driver'])
-    escort = get_object_or_404(User, id=context['escort'])
+    job = get_object_or_404(m.Job, id=context['job'])
 
     # bind vehicle, driver, escort
     if not VehicleUserBind.binds_by_admin.filter(
-        vehicle=vehicle,
-        driver=driver,
-        escort=escort
+        vehicle=job.vehicle,
+        driver=job.driver,
+        escort=job.escort
     ).exists():
         VehicleUserBind.objects.get_or_create(
-            vehicle=vehicle,
-            driver=driver,
-            escort=escort,
+            vehicle=job.vehicle,
+            driver=job.driver,
+            escort=job.escort,
             bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
         )
 
     # set the vehicle status to in-work
-    vehicle.status = c.VEHICLE_STATUS_INWORK
-    vehicle.save()
+    job.vehicle.status = c.VEHICLE_STATUS_INWORK
+    job.vehicle.save()
 
     # set the driver & escrot to in-work
-    driver.profile.status = c.WORK_STATUS_DRIVING
-    escort.profile.status = c.WORK_STATUS_DRIVING
-    driver.profile.save()
-    escort.profile.save()
+    job.driver.profile.status = c.WORK_STATUS_DRIVING
+    job.escort.profile.status = c.WORK_STATUS_DRIVING
+    job.driver.profile.save()
+    job.escort.profile.save()
 
     # send in-app notfication to driver & escort
-    message = "A new mission is assigned to you."\
-        "Please use {}".format(vehicle.plate_num)
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer":
+        job.order.customer.name + ' (' + job.order.customer.mobile + ')',
+        "escort": job.escort.name + ' (' + job.escort.mobile + ')',
+        "loading": job.loading_station.address,
+        "quality": job.quality_station.address,
+        "unloadings": []
+    }
+    for mission in job.mission_set.all():
+        message['unloadings'].append({
+            'station': mission.mission.unloading_station.address,
+            'product': mission.mission.order_product.product.name + ' (' +
+            str(mission.mission_weight) + ')'
+        })
 
     driver_notification = Notification.objects.create(
-        user=driver,
+        user=job.driver,
         message=message,
         msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
     escort_notification = Notification.objects.create(
-        user=escort,
+        user=job.escort,
         message=message,
         msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
-    if driver.channel_name:
+    if job.driver.channel_name:
         async_to_sync(channel_layer.send)(
-            driver.channel_name,
+            job.driver.channel_name,
             {
                 'type': 'notify',
                 'data': json.dumps(
@@ -80,9 +91,9 @@ def notify_new_job(context):
             }
         )
 
-    if escort.channel_name:
+    if job.escort.channel_name:
         async_to_sync(channel_layer.send)(
-            driver.channel_name,
+            job.escort.channel_name,
             {
                 'type': 'notify',
                 'data': json.dumps(
@@ -92,8 +103,8 @@ def notify_new_job(context):
         )
 
     # send push notification to driver & escort
-    if driver.device_token:
-        to = [driver.device_token]
+    if job.driver.device_token:
+        to = [job.driver.device_token]
         data = {
             'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
             'message': message

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 from ..core import constants as c
 from ..account.models import User
 from . import managers
@@ -17,7 +18,7 @@ class Notification(models.Model):
         default=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
-    message = models.TextField()
+    message = JSONField()
 
     is_read = models.BooleanField(
         default=False

@@ -32,6 +32,8 @@ from ..core.views import TMSViewSet
 # other
 from ..g7.interfaces import G7Interface
 
+from .tasks import notify_job_changes
+
 
 class OrderViewSet(TMSViewSet):
     """
@@ -346,11 +348,13 @@ class OrderViewSet(TMSViewSet):
 
         # 3. create or update job payload
         for job in jobs:
+            is_new_job = False
             vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
             driver = get_object_or_404(User, id=job['driver'])
             escort = get_object_or_404(User, id=job['escort'])
             route = get_object_or_404(Route, id=job['route'])
             if job['id'] is None:
+                is_new_job = True
                 job_obj = m.Job.objects.create(
                     order=order, vehicle=vehicle, driver=driver,
                     escort=escort, route=route,
@@ -379,6 +383,13 @@ class OrderViewSet(TMSViewSet):
                             product_deliver.unloading_station
                         )
                     )
+
+            if is_new_job:
+                notify_job_changes.apply_async(
+                    args=[{
+                        'job': job_obj.id
+                    }]
+                )
 
         return Response(
             {'msg': 'Success'},
