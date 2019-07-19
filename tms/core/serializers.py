@@ -50,9 +50,13 @@ class TMSChoiceField(serializers.Field):
         super().__init__(**kwargs)
 
     def to_representation(self, value):
+        try:
+            text = self.choices[value]
+        except KeyError:
+            text = 'Unknown'
         ret = {
             'value': value,
-            'text': self.choices[value]
+            'text': text
         }
         return ret
 

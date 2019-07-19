@@ -8,11 +8,6 @@ class OrderAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.OrderLoadingStation)
-class OrderLoadingStationAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.OrderProduct)
 class OrderProductAdmin(admin.ModelAdmin):
     pass
@@ -28,8 +23,13 @@ class JobAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.Mission)
-class MissionAdmin(admin.ModelAdmin):
+@admin.register(m.JobStation)
+class JobStationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.JobStationProduct)
+class JobStationProductAdmin(admin.ModelAdmin):
     pass
 
 
