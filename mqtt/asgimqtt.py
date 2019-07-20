@@ -89,12 +89,12 @@ class Config:
                 if Config.DEBUG:
                     print('[Load Data]: Loading updated station...')
                 cursor.execute("""
-                    SELECT latitude, longitude, radius
+                    SELECT id, latitude, longitude, radius
                     FROM info_station
                 """)
                 results = cursor.fetchall()
                 for row in results:
-                    cls.stations.append([row[0], row[1], row[2]])
+                    cls.stations.append([row[0], row[1], row[2]], row[3])
 
                 if Config.DEBUG:
                     print('[Load Data]: ', cls.stations)
@@ -263,30 +263,30 @@ def _on_message(client, userdata, message):
                 plate_num, vehicle['lat'], vehicle['lng']
             ))
         for station in Config.stations:
-            station_pos = (station[0], station[1])
+            station_pos = (station[1], station[2])
             enter_exit_event = 0
             delta_distance = distance.distance(vehicle_pos, station_pos).m
 
             if Config.DEBUG:
                 print('[GeoPy]: Distance with ({}, {}) is {}'.format(
-                    station[0], station[1], delta_distance
+                    station[1], station[2], delta_distance
                 ))
-            if delta_distance < station[2] and\
+            if delta_distance < station[3] and\
                Config.vehicles[plate_num] == Config.VEHICLE_OUT_AREA:
                 Config.vehicles[plate_num] = Config.VEHICLE_IN_AREA
                 enter_exit_event = Config.VEHICLE_ENTER_EVENT
                 if Config.DEBUG:
                     print('[GeoPy]: {} enter into ({}, {})'.format(
-                        plate_num, station[0], station[1]
+                        plate_num, station[1], station[2]
                     ))
 
-            if delta_distance > station[2] and\
+            if delta_distance > station[3] and\
                Config.vehicles[plate_num] == Config.VEHICLE_IN_AREA:
                 Config.vehicles[plate_num] = Config.VEHICLE_OUT_AREA
                 enter_exit_event = Config.VEHICLE_EXIT_EVENT
                 if Config.DEBUG:
                     print('[G7]: {} exit from ({}, {})'.format(
-                        plate_num, station[0], station[1]
+                        plate_num, station[1], station[2]
                     ))
 
             if enter_exit_event:
@@ -305,7 +305,7 @@ def _on_message(client, userdata, message):
                                 'data': json.dumps({
                                     'msg_type': enter_exit_event,
                                     'plate_num': plate_num,
-                                    'station_pos': station_pos
+                                    'station_id': station[0]
                                 })
                             }
                         )
