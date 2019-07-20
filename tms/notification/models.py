@@ -1,5 +1,7 @@
+from collections import OrderedDict
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+
+from jsonfield import JSONField
 from ..core import constants as c
 from ..account.models import User
 from . import managers
@@ -18,7 +20,7 @@ class Notification(models.Model):
         default=c.DRIVER_NOTIFICATION_TYPE_JOB
     )
 
-    message = JSONField()
+    message = JSONField(load_kwargs={'object_pairs_hook': OrderedDict})
 
     is_read = models.BooleanField(
         default=False

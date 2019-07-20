@@ -17,47 +17,33 @@ router.register(
     r'job-report', v.JobReportViewSet, base_name='job-report'
 )
 
-# /orders/{order_pk}/loading-stations
-# /orders/{order_pk}/loading-stations/{pk}
-order_router = routers.NestedSimpleRouter(
+# # /jobs/{job_pk}/stations
+# # /jobs/{job_pk}/stations/{pk}
+job_router = routers.NestedSimpleRouter(
     router,
-    r'orders',
-    lookup='order'
+    r'jobs',
+    lookup='job'
 )
-order_router.register(
-    r'loading-stations',
-    v.OrderLoadingStationViewSet,
-    base_name='order-loading-stations'
+job_router.register(
+    r'stations',
+    v.JobStationViewSet,
+    base_name='job-stations'
+)
+# /jobs/{job_pk}/stations/{jobstation_pk}/products
+# /jobs/{job_pk}/stations/{jobstation_pk}/products/{pk}
+jobstation_router = routers.NestedSimpleRouter(
+    job_router,
+    r'stations',
+    lookup='job_station'
+)
+jobstation_router.register(
+    r'products',
+    v.JobStationProductViewSet,
+    base_name='job-station-products'
 )
 
-# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products
-# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/{pk}
-orderloadingstation_router = routers.NestedSimpleRouter(
-    order_router,
-    r'loading-stations',
-    lookup='orderloadingstation'
-)
-orderloadingstation_router.register(
-    r'products',
-    v.OrderProductViewSet,
-    base_name='order-loadingstations'
-)
-
-# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/delivers
-# /orders/{order_pk}/loading-stations/{orderloadingstation_pk}/products/delivers/{pk}
-orderproduct_router = routers.NestedSimpleRouter(
-    orderloadingstation_router,
-    r'products',
-    lookup='orderproduct'
-)
-orderproduct_router.register(
-    r'delivers',
-    v.OrderProductDeliverViewSet,
-    base_name='delivers'
-)
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^', include(order_router.urls)),
-    url(r'^', include(orderloadingstation_router.urls)),
-    url(r'^', include(orderproduct_router.urls)),
+    url(r'^', include(job_router.urls)),
+    url(r'^', include(jobstation_router.urls)),
 ]

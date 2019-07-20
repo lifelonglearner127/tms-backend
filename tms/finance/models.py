@@ -5,7 +5,6 @@ from ..core import constants as c
 from ..core.models import CreatedTimeModel
 from ..account.models import User
 from ..hr.models import Department
-from ..order.models import Job
 from ..order.models import Order
 from ..vehicle.models import Vehicle
 
@@ -98,12 +97,12 @@ class BillDocument(CreatedTimeModel):
         related_name='bills'
     )
 
-    job = models.ForeignKey(
-        Job,
-        on_delete=models.SET_NULL,
-        related_name='bills',
-        null=True
-    )
+    # job = models.ForeignKey(
+    #     Job,
+    #     on_delete=models.SET_NULL,
+    #     related_name='bills',
+    #     null=True
+    # )
 
     amount = models.DecimalField(
         max_digits=c.WEIGHT_MAX_DIGITS,

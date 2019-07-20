@@ -57,15 +57,19 @@ def notify_job_changes(context):
         "customer":
         job.order.customer.name + ' (' + job.order.customer.mobile + ')',
         "escort": job.escort.name + ' (' + job.escort.mobile + ')',
-        "loading": job.loading_station.address,
-        "quality": job.quality_station.address,
-        "unloadings": []
+        "stations": []
     }
-    for mission in job.mission_set.all():
-        message['unloadings'].append({
-            'station': mission.mission.unloading_station.address,
-            'product': mission.mission.order_product.product.name + ' (' +
-            str(mission.mission_weight) + ')'
+
+    for job_station in job.jobstation_set.all():
+        products = []
+        for jobstationproduct in job_station.jobstationproduct_set.all():
+            product = jobstationproduct.product.name + '(' +\
+                      str(jobstationproduct.mission_weight) + ')'
+            products.append(product)
+
+        message['stations'].append({
+            'station': job_station.station.address,
+            'products': ', '.join(products)
         })
 
     driver_notification = Notification.objects.create(

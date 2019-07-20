@@ -24,7 +24,6 @@ from ..vehicle.models import Vehicle
 
 # serializers
 from . import serializers as s
-from ..finance.serializers import BillDocumentSerializer
 
 # views
 from ..core.views import TMSViewSet
@@ -45,9 +44,11 @@ class OrderViewSet(TMSViewSet):
 
     def create(self, request):
         context = {
-            'loading_stations': request.data.pop('loading_stations'),
             'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer')
+            'customer': request.data.pop('customer'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station'),
+            'products': request.data.pop('products')
         }
 
         serializer = s.OrderSerializer(
@@ -66,9 +67,11 @@ class OrderViewSet(TMSViewSet):
         serializer_instance = self.get_object()
 
         context = {
-            'loading_stations': request.data.pop('loading_stations'),
             'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer')
+            'customer': request.data.pop('customer'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station'),
+            'products': request.data.pop('products')
         }
 
         serializer = s.OrderSerializer(
@@ -91,7 +94,7 @@ class OrderViewSet(TMSViewSet):
             self.get_queryset().all()
         )
 
-        serializer = s.OrderDataViewSerializer(
+        serializer = self.serializer_class(
             page,
             many=True
         )
@@ -153,10 +156,9 @@ class OrderViewSet(TMSViewSet):
                 index = index + 1
 
             # calculate the distance between new order loading and current
-            loading_station = order.loading_stations.all()[0]
             destination = [
-                str(loading_station.longitude),
-                str(loading_station.latitude)
+                str(order.loading_station.longitude),
+                str(order.loading_station.latitude)
             ]
             queries = {
                 'key': settings.MAP_WEB_SERVICE_API_KEY,
@@ -196,17 +198,18 @@ class OrderViewSet(TMSViewSet):
         [
             {
                 id: ,   // orderproductdeliver id
-                due_time: , // due time to be delivered to unloading station
+                arrivingDueTime: , // due time to be delivered to unloadings
                 weight: ,   // product weight to be delivered to unloading
                 unloading_station: {},
-                missions: [
+                job_delivers: [
                     {
-                        id: ''  // mission id [optional]
+                        id: ''  // jobstationproduct id [optional]
                         mission_weight: 1,
                         vehicle: { id: '', plate_nume: '' },
                         driver: { id: '', name: '' },
                         escort: { id: '', name: '' },
-                        route: { id: '', name: '' }
+                        route: { id: '', name: '' },
+                        loop: 1
                     }
                 ]
             }
@@ -215,7 +218,7 @@ class OrderViewSet(TMSViewSet):
         order = self.get_object()
         jobs = []
         weight_errors = {}
-        missions = []
+        job_delivers = []
 
         # validate weights by missions
         product = None
@@ -223,35 +226,38 @@ class OrderViewSet(TMSViewSet):
         unloading_station_index = 0
         for unloading_station_data in request.data:
             weight = float(unloading_station_data.get('weight', 0))
-            missions_data = unloading_station_data.get('missions', None)
-            if missions_data is None:
+            job_delivers_data = unloading_station_data.get(
+                'job_delivers', None
+            )
+            if job_delivers_data is None:
                 raise s.serializers.ValidationError({
-                    'missions': 'Mission data are missing'
+                    'job_delivers': 'Job deliver data is missing'
                 })
 
-            for mission_data in missions_data:
-                mission_data['orderproductdeliver'] =\
-                    unloading_station_data.get('id', None)
-
+            for job_deliver_data in job_delivers_data:
                 orderproductdeliver = get_object_or_404(
                     m.OrderProductDeliver,
-                    id=mission_data['orderproductdeliver']
+                    id=unloading_station_data.get('id', None)
                 )
+
+                job_deliver_data['orderproductdeliver'] = orderproductdeliver
 
                 if product != orderproductdeliver.order_product.product:
                     product = orderproductdeliver.order_product.product
                     product_index = product_index + 1
                     unloading_station_index = 0
 
-                mission_weight = float(mission_data.get('mission_weight', 0))
+                mission_weight = float(
+                    job_deliver_data.get('mission_weight', 0)
+                )
                 weight = weight - mission_weight
 
-            if weight != 0:
+            if weight < 0:
                 if product_index not in weight_errors:
                     weight_errors[product_index] = []
                 weight_errors[product_index].append(unloading_station_index)
             unloading_station_index = unloading_station_index + 1
-            missions.extend(missions_data)
+            job_delivers.extend(job_delivers_data)
 
         if weight_errors:
             raise s.serializers.ValidationError({
@@ -260,62 +266,113 @@ class OrderViewSet(TMSViewSet):
 
         # if vehicle & driver & escort is mulitple selected for delivers
         # we assume that this is one job
-        for mission in missions:
-            new_job = True
+        for job_deliver in job_delivers:
 
-            job_id = mission.get('job_id', None)
-
-            driver_data = mission.get('driver', None)
+            driver_data = job_deliver.get('driver', None)
             driver_id = driver_data.get('id', None)
 
-            escort_data = mission.get('escort', None)
+            escort_data = job_deliver.get('escort', None)
             escort_id = escort_data.get('id', None)
 
-            vehicle_data = mission.get('vehicle', None)
+            vehicle_data = job_deliver.get('vehicle', None)
             vehicle_id = vehicle_data.get('id', None)
 
-            route_data = mission.get('route', None)
+            route_data = job_deliver.get('route', None)
             route_id = route_data.get('id', None)
 
-            orderproductdeliver_id = mission.get('orderproductdeliver', None)
+            orderproductdeliver = job_deliver['orderproductdeliver']
 
-            mission_id = mission.get('id', None)
-            mission_weight = mission.get('mission_weight', 0)
+            mission_weight = float(job_deliver.get('mission_weight', 0))
 
             for job in jobs:
                 if (
                     job['driver'] == driver_id and
                     job['escort'] == escort_id and
-                    job['vehicle'] == vehicle_id
+                    job['vehicle'] == vehicle_id and
+                    job['route'] == route_id
                 ):
-                    job['orderproductdeliver_ids'].append(
-                        orderproductdeliver_id
-                    )
-                    job['mission_ids'].append(mission_id)
-                    job['mission_weights'].append(mission_weight)
-                    job['total_weight'] += float(mission_weight)
-                    if job['id'] is None and job_id is not None:
-                        job['id'] = job_id
 
-                    new_job = False
+                    loading_station_products = job['stations'][0]['products']
+
+                    for product in loading_station_products:
+                        if product['product'] ==\
+                           orderproductdeliver.order_product.product:
+                            product['mission_weight'] += mission_weight
+                            break
+                    else:
+                        loading_station_products.append({
+                            'product':
+                            orderproductdeliver.order_product.product,
+                            'mission_weight': mission_weight
+                        })
+
+                    job['total_weight'] += mission_weight
+
+                    job['stations'][0]['products'] = loading_station_products
+                    job['stations'][1]['products'] = loading_station_products
+
+                    for station in job['stations'][2:]:
+                        if station['station'] ==\
+                           orderproductdeliver.unloading_station:
+                            station['products'].append({
+                                'orderproductdeliver': orderproductdeliver,
+                                'product':
+                                orderproductdeliver.order_product.product,
+                                'mission_weight': mission_weight
+                            })
+                            break
+                    else:
+                        job['stations'].append({
+                            'station': orderproductdeliver.unloading_station,
+                            'products': [{
+                                'orderproductdeliver': orderproductdeliver,
+                                'product':
+                                orderproductdeliver.order_product.product,
+                                'mission_weight': mission_weight
+                            }]
+                        })
                     break
 
-            if new_job:
+            else:
+                stations = []
+                stations.append({
+                    'station':
+                    orderproductdeliver.order_product.order.loading_station,
+                    'products': [{
+                        'product': orderproductdeliver.order_product.product,
+                        'mission_weight': mission_weight
+                    }]
+                })
+                stations.append({
+                    'station':
+                    orderproductdeliver.order_product.order.quality_station,
+                    'products': [{
+                        'product': orderproductdeliver.order_product.product,
+                        'mission_weight': mission_weight
+                    }]
+                })
+                stations.append({
+                    'station': orderproductdeliver.unloading_station,
+                    'products': [{
+                        'orderproductdeliver': orderproductdeliver,
+                        'product': orderproductdeliver.order_product.product,
+                        'mission_weight': mission_weight
+                    }]
+                })
                 jobs.append({
-                    'id': job_id,
                     'driver': driver_id,
                     'escort': escort_id,
                     'vehicle': vehicle_id,
                     'route': route_id,
-                    'orderproductdeliver_ids': [orderproductdeliver_id],
-                    'mission_ids': [mission_id],
-                    'mission_weights': [mission_weight],
-                    'total_weight': float(mission_weight)
+                    'total_weight': mission_weight,
+                    'stations': stations
                 })
 
-        # 1. validate job payload
+        # validate job payload;
+        # 1. check if the job mission weight is over its available load
+        # 2. check if the specified route is correct
         for job in jobs:
-            # validate weight
+            # check if the job mission weight is over its available load
             vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
             total_weight = job.get('total_weight', 0)
             if total_weight > vehicle.total_load:
@@ -323,89 +380,61 @@ class OrderViewSet(TMSViewSet):
                     'overweight': vehicle.plate_num
                 })
 
-            # validate route
+            # check if the specified route is correct
             route = get_object_or_404(Route, id=job['route'])
-            if route.loading_station != order.loading_stations.all()[0]:
+            if route.loading_station != order.loading_station:
                 raise s.serializers.ValidationError({
                     'route': 'Missing loading station'
                 })
 
-            if not order.orderloadingstation_set.first().is_same_station:
-                if route.stations[1] != order.quality_stations[0]:
+            if not order.is_same_station:
+                if route.stations[1] != order.quality_station:
                     raise s.serializers.ValidationError({
                         'route': 'Missing quality station'
                     })
 
-            for orderproductdeliver_id in job['orderproductdeliver_ids']:
-                orderproductdeliver = get_object_or_404(
-                    m.OrderProductDeliver, id=orderproductdeliver_id
-                )
-                if orderproductdeliver.unloading_station\
-                   not in route.unloading_stations:
+            for station in job['stations'][2:]:
+                if station['station'] not in route.unloading_stations:
                     raise s.serializers.ValidationError({
                         'route': 'Unmatching unloading stations'
                     })
 
-        # 3. create or update job payload
-        for job in jobs:
-            is_new_job = False
             vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
             driver = get_object_or_404(User, id=job['driver'])
             escort = get_object_or_404(User, id=job['escort'])
             route = get_object_or_404(Route, id=job['route'])
-            if job['id'] is None:
-                is_new_job = True
-                job_obj = m.Job.objects.create(
-                    order=order, vehicle=vehicle, driver=driver,
-                    escort=escort, route=route,
-                    total_weight=job['total_weight']
-                )
-            else:
-                job_obj = get_object_or_404(m.Job, id=job['id'])
 
-            for (orderproductdeliver_id, mission_id, mission_weight)\
-                in zip(
-                    job['orderproductdeliver_ids'], job['mission_ids'],
-                    job['mission_weights']
-                    ):
-                product_deliver = get_object_or_404(
-                    m.OrderProductDeliver, id=orderproductdeliver_id
+            job_obj = m.Job.objects.create(
+                order=order, vehicle=vehicle, driver=driver,
+                escort=escort, route=route,
+                total_weight=job['total_weight']
+            )
+
+            for station in job['stations']:
+                job_station_obj = m.JobStation.objects.create(
+                    job=job_obj,
+                    station=station['station'],
+                    step=route.stations.index(station['station'])
                 )
-                if mission_id is not None:
-                    mission = get_object_or_404(m.Mission, id=mission_id)
-                    mission.mission_weight = mission_weight
-                    mission.save()
-                else:
-                    m.Mission.objects.create(
-                        job=job_obj, mission=product_deliver,
-                        mission_weight=mission_weight,
-                        step=route.unloading_stations.index(
-                            product_deliver.unloading_station
+                for product in station['products']:
+                    m.JobStationProduct.objects.create(
+                        job_station=job_station_obj,
+                        product=product['product'],
+                        mission_weight=product['mission_weight'],
+                        orderproductdeliver=product.get(
+                            'orderproductdeliver', None
                         )
                     )
 
-            if is_new_job:
-                notify_job_changes.apply_async(
-                    args=[{
-                        'job': job_obj.id
-                    }]
-                )
+            notify_job_changes.apply_async(
+                args=[{
+                    'job': job_obj.id
+                }]
+            )
 
         return Response(
             {'msg': 'Success'},
             status=status.HTTP_201_CREATED
-        )
-
-
-class OrderLoadingStationViewSet(viewsets.ModelViewSet):
-    """
-    OrderProduct Viewset
-    """
-    serializer_class = s.OrderLoadingStationSerializer
-
-    def get_queryset(self):
-        return m.OrderLoadingStation.objects.filter(
-            order__id=self.kwargs['order_pk']
         )
 
 
@@ -538,13 +567,13 @@ class JobViewSet(TMSViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(
-        detail=False, url_path='cost'
+        detail=False, url_path='documents'
     )
-    def get_cost(self, request):
+    def get_documents(self, request):
         page = self.paginate_queryset(
             m.Job.objects.all()
         )
-        serializer = s.JobCostSerializer(
+        serializer = s.JobDocumentSerializer(
             page,
             many=True,
             context={'request': request}
@@ -650,187 +679,210 @@ class JobViewSet(TMSViewSet):
     def progress_update(self, request, pk=None):
         job = self.get_object()
 
-        progress = job.progress
-        if progress == c.JOB_PROGRESS_COMPLETE:
+        current_progress = job.progress
+        if current_progress == c.JOB_PROGRESS_COMPLETE:
             return Response(
-                {'progress': 'This is already completed progress'},
+                {
+                    'progress': 'This is already completed progress',
+                    'last_progress_finished_on': job.finished_on
+                },
                 status=status.HTTP_200_OK
             )
 
-        if job.route is None:
-            return Response(
-                {'route': 'Not found route in this job'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if progress == c.JOB_PROGRESS_NOT_STARTED:
+        if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_TO_LOADING_STATION:
-            job.arrived_loading_station_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
-            job.started_loading_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_LOADING_AT_LOADING_STATION:
-            job.finished_loading_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_FINISH_LOADING_AT_LOADING_STATION:
-            job.departure_loading_station_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_TO_QUALITY_STATION:
-            job.arrived_quality_station_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_ARRIVED_AT_QUALITY_STATION:
-            job.started_checking_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_CHECKING_AT_QUALITY_STATION:
-            job.finished_checking_on = timezone.now()
-
-        elif progress == c.JOB_PROGRESS_FINISH_CHECKING_AT_QUALITY_STATION:
-            job.departure_quality_station_on = timezone.now()
-
-        elif (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) >= 0:
-            us_progress = (progress - c.JOB_PROGRESS_TO_UNLOADING_STATION) % 4
-            current_mission = job.mission_set.filter(
+            last_progress_finished_on = None
+        else:
+            current_station = job.jobstation_set.filter(
                 is_completed=False
             ).first()
-            if current_mission is not None:
-                if us_progress == 0:
-                    current_mission.arrived_station_on = timezone.now()
-                    current_mission.save()
 
-                elif us_progress == 1:
-                    current_mission.started_unloading_on = timezone.now()
-                    current_mission.save()
+            sub_progress =\
+                (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
+            if sub_progress == 0:
+                current_station.arrived_station_on = timezone.now()
+                current_station.save()
+                if current_station.step == 0:
+                    last_progress_finished_on = job.started_on
+                else:
+                    last_progress_finished_on =\
+                        current_station.previous_station.departure_station_on
+            elif sub_progress == 1:
+                current_station.started_working_on = timezone.now()
+                last_progress_finished_on = current_station.arrived_station_on
+                current_station.save()
+            elif sub_progress == 2:
+                current_station.finished_working_on = timezone.now()
+                last_progress_finished_on = current_station.started_working_on
+                current_station.save()
+            elif sub_progress == 3:
+                current_station.departure_station_on = timezone.now()
+                last_progress_finished_on = current_station.finished_working_on
+                current_station.is_completed = True
+                current_station.save()
 
-                elif us_progress == 2:
-                    current_mission.finished_unloading_on = timezone.now()
-                    current_mission.save()
+                if not current_station.has_next_station:
+                    job.progress = c.JOB_PROGRESS_COMPLETE
+                    job.finished_on = timezone.now()
 
-                elif us_progress == 3:
-                    current_mission.is_completed = True
-                    current_mission.departure_station_on = timezone.now()
-                    current_mission.save()
+                    # update job empty mileage
+                    loading_station_arrived_on =\
+                        job.jobstation_set.get(step=0).arrived_station_on
 
-                    if not job.mission_set.filter(is_completed=False).exists():
-                        job.progress = c.JOB_PROGRESS_COMPLETE
-                        job.finished_on = timezone.now()
+                    queries = {
+                        'plate_num':
+                            job.vehicle.plate_num,
+                        'from':
+                            job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+                        'to':
+                            loading_station_arrived_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            )
+                    }
+                    data = G7Interface.call_g7_http_interface(
+                        'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                        queries=queries
+                    )
+                    job.empty_mileage = data['total_mileage']
 
-                        # update job empty mileage
-                        queries = {
-                            'plate_num':
-                                job.vehicle.plate_num,
-                            'from':
-                                job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
-                            'to':
-                                job.departure_loading_station_on.strftime(
-                                    '%Y-%m-%d %H:%M:%S'
-                                )
-                        }
-                        data = G7Interface.call_g7_http_interface(
-                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-                            queries=queries
-                        )
-                        job.empty_mileage = data['total_mileage']
-
-                        # update job heavy mileage
-                        queries = {
-                            'plate_num':
-                                job.vehicle.plate_num,
-                            'from':
-                                job.departure_loading_station_on.strftime(
-                                    '%Y-%m-%d %H:%M:%S'
-                                ),
-                            'to':
-                                job.finished_on.strftime(
-                                    '%Y-%m-%d %H:%M:%S'
-                                )
-                        }
-                        job.heavy_mileage = data['total_mileage']
-                        job.total_mileage =\
-                            job.empty_mileage + job.heavy_mileage
-                        job.highway_mileage = 0
-                        job.normalway_mileage = 0
-                        job.save()
-                        return Response(
-                            s.JobProgressSerializer(job).data,
-                            status=status.HTTP_200_OK
-                        )
-        job.progress = progress + 1
+                    # update job heavy mileage
+                    queries = {
+                        'plate_num':
+                            job.vehicle.plate_num,
+                        'from':
+                            loading_station_arrived_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            ),
+                        'to':
+                            job.finished_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            )
+                    }
+                    job.heavy_mileage = data['total_mileage']
+                    job.total_mileage =\
+                        job.empty_mileage + job.heavy_mileage
+                    job.highway_mileage = 0
+                    job.normalway_mileage = 0
+                    job.save()
+                    return Response(
+                        {
+                            'progress': c.JOB_PROGRESS_COMPLETE,
+                            'last_progress_finished_on':
+                            last_progress_finished_on
+                        },
+                        status=status.HTTP_200_OK
+                    )
+        job.progress = current_progress + 1
         job.save()
 
         return Response(
-            s.JobProgressSerializer(job).data,
+            {
+                'progress': job.progress,
+                'last_progress_finished_on': last_progress_finished_on,
+            },
             status=status.HTTP_200_OK
         )
 
     @action(
-        detail=True, url_path='upload-bill-document', methods=['post'],
-        permission_classes=[IsDriverOrEscortUser]
+        detail=True, url_path='upload-bill-document', methods=['post']
     )
     def upload_bill_document(self, request, pk=None):
-        data = request.data
-        data['job'] = pk
-        serializer = BillDocumentSerializer(
-            data=data,
+        job = self.get_object()
+        serializer = s.JobBillSerializer(
+            data=request.data,
             context={
-                'request': request,
-                'user': request.user
+                'request': request
             }
         )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        job.bills.add(serializer.instance)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
+    @action(
+        detail=True, url_path='documents'
+    )
+    def get_job_documents(self, request, pk=None):
+        job = self.get_object()
+        documents = {}
+
+        for bill in job.bills.all():
+            category = bill.category
+
+            if category not in documents:
+                documents[category] = []
+
+            documents[category].append(
+                s.JobBillViewSerializer({
+                    'amount': bill.amount,
+                    'unit_price': bill.unit_price,
+                    'cost': bill.cost,
+                    'document': bill.document
+                }, context={'request': request}).data
+            )
+
+        for job_station in job.jobstation_set.all():
+            documents[job_station.station.station_type] = []
+            for job_product in job_station.jobstationproduct_set.all():
+                documents[job_station.station.station_type].append(
+                    s.JobBillViewSerializer({
+                        'document': job_product.document,
+                        'weight': job_product.weight
+                    }, context={'request': request}).data
+                )
+
+        return Response(
+            documents,
+            status=status.HTTP_200_OK
+        )
+
+
+class JobStationViewSet(viewsets.ModelViewSet):
+
+    serializer_class = s.JobStationSerializer
+
+    def get_queryset(self):
+        return m.JobStation.objects.filter(
+            job__id=self.kwargs['job_pk']
+        )
+
+
+class JobStationProductViewSet(viewsets.ModelViewSet):
+
+    serializer_class = s.JobStationProductSerializer
+
+    def get_queryset(self):
+        return m.JobStationProduct.objects.filter(
+            job_station__id=self.kwargs['job_station_pk']
+        )
+
+    @action(
+        detail=True, url_path='upload-product-document', methods=['post']
+    )
+    def upload_product_document(self, request, job_pk=None,
+                                job_station_pk=None, pk=None):
+        """
+        for driver app;
+        driver shoud upload the product document in each station
+        this api end point is used to upload the product document weight
+        weight is different from mission weight
+        """
+        instance = self.get_object()
+        serializer = s.JobStationProductDocumentSerializer(
+            instance,
+            data=request.data,
+            context={'request': request},
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(
             serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    @action(
-        detail=False, url_path='bill-documents'
-    )
-    def get_all_job_documents(self, request, pk=None):
-        bill_type = request.query_params.get('type', 'all')
-
-        page = self.paginate_queryset(
-            request.user.jobs_as_driver.filter(
-                ~Q(progress=c.JOB_PROGRESS_NOT_STARTED)
-            )
-        )
-
-        serializer = s.JobBillViewSerializer(
-            page,
-            context={'request': request, 'bill_type': bill_type},
-            many=True
-        )
-        return self.get_paginated_response(serializer.data)
-
-    @action(
-        detail=True, url_path='bill-documents'
-    )
-    def bill_documents(self, request, pk=None):
-        bill_type = request.query_params.get('type', 'all')
-        job = self.get_object()
-
-        return Response(
-            s.NewJobBillViewSerializer(
-                job,
-                context={'request': request, 'bill_type': bill_type}
-            ).data,
             status=status.HTTP_200_OK
-        )
-
-
-class MissionViewSet(viewsets.ModelViewSet):
-    """
-    """
-    serializer_class = s.MissionSerializer
-
-    def get_queryset(self):
-        return m.Mission.objects.filter(
-            job__id=self.kwargs['job_pk']
         )
 
 

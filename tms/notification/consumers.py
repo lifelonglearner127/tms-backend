@@ -38,8 +38,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             plate_num = data['plate_num']
             try:
                 station = Station.objects.get(
-                    latitude=data['station_pos'][0],
-                    longitude=data['station_pos'][1]
+                    id=data['station_id']
                 )
                 if station.station_type == c.STATION_TYPE_BLACK_DOT:
                     if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA:

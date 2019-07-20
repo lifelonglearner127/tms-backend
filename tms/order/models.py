@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.utils import timezone as datetime
 from month.models import MonthField
 
 from . import managers
@@ -30,6 +29,16 @@ class Order(TimeStampedModel):
         null=True
     )
 
+    start_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finish_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     customer = models.ForeignKey(
         CustomerProfile,
         on_delete=models.CASCADE,
@@ -48,42 +57,27 @@ class Order(TimeStampedModel):
         default=c.ORDER_STATUS_PENDING
     )
 
-    due_time = models.DateTimeField()
-
-    loading_stations = models.ManyToManyField(
+    loading_station = models.ForeignKey(
         Station,
-        through='OrderLoadingStation',
-        through_fields=('order', 'loading_station')
+        on_delete=models.CASCADE,
+        related_name='orders_as_loading_station'
     )
 
-    @property
-    def products(self):
-        products = []
-        for order_loading_station in self.orderloadingstation_set.all():
-            products.extend(order_loading_station.products.all())
+    quality_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='orders_as_quality_station'
+    )
 
-        return products
+    is_same_station = models.BooleanField(
+        default=False
+    )
 
-    @property
-    def loading_stations_data(self):
-        return self.loading_stations.all()
-
-    @property
-    def quality_stations(self):
-        stations = []
-        for order_loading_station in self.orderloadingstation_set.all():
-            stations.append(order_loading_station.quality_station)
-
-        return stations
-
-    @property
-    def unloading_stations(self):
-        stations = []
-        for order_loading_station in self.orderloadingstation_set.all():
-            for order_product in order_loading_station.orderproduct_set.all():
-                stations.extend(order_product.unloading_stations.all())
-
-        return stations
+    products = models.ManyToManyField(
+        Product,
+        through='OrderProduct',
+        through_fields=('order', 'product')
+    )
 
     objects = models.Manager()
     pendings = managers.PendingOrderManager()
@@ -99,52 +93,12 @@ class Order(TimeStampedModel):
         ordering = ['-updated']
 
 
-class OrderLoadingStation(models.Model):
-    """
-    Intermediate model for order model and loading station
-    Currently order has only one loading station, but I create it
-    for future business logic
-    """
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE
-    )
-
-    loading_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name='loading_stations'
-    )
-
-    quality_station = models.ForeignKey(
-        Station,
-        on_delete=models.SET_NULL,
-        related_name='unloading_stations',
-        null=True,
-        blank=True
-    )
-
-    products = models.ManyToManyField(
-        Product,
-        through='OrderProduct'
-    )
-
-    is_same_station = models.BooleanField(
-        default=False
-    )
-
-    # def __str__(self):
-    #     return '{} - Load from {}'.format(
-    #         self.order.alias, self.loading_station.name
-    #     )
-
-
 class OrderProduct(models.Model):
     """
     Intermediate model for order model and product model
     """
-    order_loading_station = models.ForeignKey(
-        OrderLoadingStation,
+    order = models.ForeignKey(
+        Order,
         on_delete=models.CASCADE
     )
 
@@ -197,7 +151,8 @@ class OrderProduct(models.Model):
 
     unloading_stations = models.ManyToManyField(
         Station,
-        through='OrderProductDeliver'
+        through='OrderProductDeliver',
+        through_fields=('order_product', 'unloading_station')
     )
 
     # def __str__(self):
@@ -221,15 +176,9 @@ class OrderProductDeliver(models.Model):
         on_delete=models.CASCADE
     )
 
-    due_time = models.DateTimeField()
+    arriving_due_time = models.DateTimeField()
 
     weight = models.FloatField()
-
-    def __str__(self):
-        return '{} - {}'.format(
-            self.order_product.order_loading_station.loading_station,
-            self.unloading_station.name
-        )
 
 
 class Job(models.Model):
@@ -286,74 +235,33 @@ class Job(models.Model):
         blank=True
     )
 
-    arrived_loading_station_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    started_loading_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finished_loading_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    departure_loading_station_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    arrived_quality_station_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    started_checking_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finished_checking_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    departure_quality_station_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
     finished_on = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    total_weight = models.FloatField()
+    total_weight = models.FloatField(
+        default=0
+    )
 
-    total_mileage = models.PositiveIntegerField(
+    total_mileage = models.FloatField(
+        default=0
+    )
+
+    empty_mileage = models.FloatField(
+        default=0
+    )
+
+    heavy_mileage = models.FloatField(
+        default=0
+    )
+
+    highway_mileage = models.FloatField(
         null=True,
         blank=True
     )
 
-    empty_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
-    )
-
-    heavy_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
-    )
-
-    highway_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
-    )
-
-    normalway_mileage = models.PositiveIntegerField(
+    normalway_mileage = models.FloatField(
         null=True,
         blank=True
     )
@@ -362,193 +270,43 @@ class Job(models.Model):
         default=False
     )
 
-    missions = models.ManyToManyField(
-        OrderProductDeliver,
-        through='Mission'
+    bills = models.ManyToManyField(
+        'JobBill',
+        blank=True
     )
 
-    @property
-    def total_time(self):
-        if self.started_on is None:
-            return None
-
-        if self.finished_on is None:
-            return datetime.now() - self.started_on
-
-        return self.finished_on - self.started_on
-
-    @property
-    def rushing_time_to_loading_station(self):
-        if self.started_on is None:
-            return None
-
-        if self.arrived_loading_station_on is None:
-            return datetime.now() - self.started_on
-
-        return self.arrived_loading_station_on - self.started_on
-
-    @property
-    def waiting_time_on_loading_station(self):
-        if self.arrived_loading_station_on is None:
-            return None
-
-        if self.started_loading_on is None:
-            return datetime.now() - self.arrived_loading_station_on
-
-        return self.started_loading_on - self.arrived_loading_station_on
-
-    @property
-    def loading_time_on_loading_station(self):
-        if self.started_loading_on is None:
-            return None
-
-        if self.finished_loading_on is None:
-            return datetime.now() - self.started_on
-
-        return self.finished_loading_on - self.started_loading_on
-
-    @property
-    def rushing_time_to_quality_station(self):
-        if self.finished_loading_on is None:
-            return None
-
-        if self.arrived_quality_station_on is None:
-            return datetime.now() - self.started_on
-
-        return self.arrived_quality_station_on - self.finished_loading_on
-
-    @property
-    def waiting_time_on_quality_station(self):
-        if self.arrived_quality_station_on is None:
-            return None
-
-        if self.started_checking_on is None:
-            return datetime.now() - self.arrived_quality_station_on
-
-        return self.started_checking_on - self.arrived_quality_station_on
-
-    @property
-    def checking_time_on_quality_station(self):
-        if self.started_checking_on is None:
-            return None
-
-        if self.finished_loading_on is None:
-            return datetime.now() - self.started_checking_on
-
-        return self.finished_checking_on - self.started_checking_on
-
-    @property
-    def loading_station(self):
-        """
-        loading station of this job
-        """
-        return self.order.loading_stations.all()[0]
-
-    @property
-    def quality_station(self):
-        """
-        quality station of this job
-        """
-        return self.order.quality_stations[0]
-
-    @property
-    def unloading_stations(self):
-        """
-        unloading stations of this job
-        """
-        stations = []
-        for mission in self.mission_set.all():
-            stations.append(mission.mission.unloading_station)
-
-        return stations
-
-    @property
-    def stations(self):
-        stations = []
-        stations.append(self.loading_station)
-        stations.append(self.quality_station)
-        stations.extend(self.unloading_stations)
-        return stations
-
-    @property
-    def delivers(self):
-        """
-        delivers
-        """
-        products = []
-        for mission in self.mission_set.all():
-            products.append({
-                'name': mission.mission.order_product.product.name,
-                'mission_weight': mission.mission_weight,
-                'unloading_weight': mission.unloading_weight
-            })
-        return products
-
-    @property
-    def products(self):
-        products = []
-        for mission in self.mission_set.all():
-            for product in products:
-                if product['name'] ==\
-                   mission.mission.order_product.product.name:
-                    product['mission_weight'] += float(mission.mission_weight)
-                    product['unloading_weight'] +=\
-                        float(mission.unloading_weight)
-                    break
-            else:
-                products.append({
-                    'name': mission.mission.order_product.product.name,
-                    'mission_weight': mission.mission_weight,
-                    'unloading_weight': mission.unloading_weight
-                })
-
-        return products
-
-    objects = models.Manager()
-    pendings = managers.PendingJobManager()
-    inprogress = managers.InProgressJobManager()
-    completeds = managers.CompleteJobManager()
-
-    class Meta:
-        ordering = (
-            'start_due_time',
-        )
+    stations = models.ManyToManyField(
+        Station,
+        through='JobStation',
+        through_fields=('job', 'station')
+    )
 
 
-class Mission(models.Model):
+class JobStation(models.Model):
 
     job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE
     )
 
-    mission = models.ForeignKey(
-        OrderProductDeliver,
-        on_delete=models.CASCADE,
-        related_name='missions'
+    station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE
     )
 
     step = models.PositiveIntegerField()
-
-    mission_weight = models.FloatField(
-        default=0
-    )
-
-    unloading_weight = models.FloatField(
-        default=0
-    )
 
     arrived_station_on = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    started_unloading_on = models.DateTimeField(
+    started_working_on = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    finished_unloading_on = models.DateTimeField(
+    finished_working_on = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -558,71 +316,82 @@ class Mission(models.Model):
         blank=True
     )
 
-    branches = ArrayField(
-        models.PositiveIntegerField(),
-        default=list
-    )
-
     is_completed = models.BooleanField(
         default=False
     )
 
-    @property
-    def next_mission(self):
-        try:
-            return self.job.mission_set.get(step=self.step + 1)
-        except Exception:
-            return None
+    products = models.ManyToManyField(
+        Product,
+        through='JobStationProduct',
+        through_fields=('job_station', 'product')
+    )
 
     @property
-    def previous_mission(self):
-        if self.step == 0:
-            return None
-
-        return self.job.mission_set.get(step=self.step - 1)
-
-    @property
-    def rushing_time_to_unloading_station(self):
-        if self.step == 0:
-            last_event_time = self.job.departure_quality_station_on
-        else:
-            last_event_time = self.previous_mission.departure_station_on
-
-        if last_event_time is None:
-            return None
-
-        if self.arrived_station_on is None:
-            return datetime.now() - last_event_time
-
-        return self.arrived_station_on - last_event_time
+    def has_next_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step+1,
+            is_completed=False
+        ).exists()
 
     @property
-    def waiting_time_on_unloading_station(self):
-        if self.arrived_station_on is None:
-            return None
-
-        if self.started_unloading_on is None:
-            return datetime.now() - self.arrived_station_on
-
-        return self.started_unloading_on - self.arrived_station_on
+    def next_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step+1,
+        ).first()
 
     @property
-    def unloading_time_on_unloading_station(self):
-        if self.started_unloading_on is None:
-            return None
+    def has_previous_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step-1,
+            is_completed=False
+        ).exists()
 
-        if self.finished_unloading_on is None:
-            return datetime.now() - self.started_unloading_on
-
-        return self.finished_unloading_on - self.started_unloading_on
+    @property
+    def previous_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step-1
+        ).first()
 
     class Meta:
-        ordering = ['step']
+        ordering = ['job', 'step']
 
-    def __str__(self):
-        return '{}. {} - {}'.format(
-            self.id, self.step, self.mission
-        )
+
+class JobStationProduct(models.Model):
+
+    job_station = models.ForeignKey(
+        JobStation,
+        on_delete=models.CASCADE
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    mission_weight = models.FloatField(
+        default=0
+    )
+
+    weight = models.FloatField(
+        default=0
+    )
+
+    document = models.ImageField(
+        null=True,
+        blank=True
+    )
+
+    orderproductdeliver = models.ForeignKey(
+        OrderProductDeliver,
+        on_delete=models.SET_NULL,
+        related_name='job_delivers',
+        null=True
+    )
+
+    branches = ArrayField(
+        models.PositiveIntegerField(),
+        default=list
+    )
 
 
 class JobReport(models.Model):
@@ -665,3 +434,39 @@ class JobReport(models.Model):
 
     class Meta:
         ordering = ('month', )
+
+
+class JobBill(models.Model):
+
+    amount = models.FloatField(
+        default=0
+    )
+
+    unit_price = models.FloatField(
+        default=0
+    )
+
+    cost = models.FloatField(
+        default=0
+    )
+
+    document = models.ImageField(
+        null=True,
+        blank=True
+    )
+
+    category = models.PositiveIntegerField(
+        choices=c.BILL_CATEGORY,
+        default=c.BILL_FROM_OIL_STATION
+    )
+
+    sub_category = models.PositiveIntegerField(
+        default=0
+    )
+
+    detail_category = models.PositiveIntegerField(
+        default=0
+    )
+
+    class Meta:
+        ordering = ['category', 'sub_category', 'detail_category']
