@@ -4,6 +4,8 @@ from . import models as m
 
 class NotificationSerializer(serializers.ModelSerializer):
 
+    message = serializers.JSONField()
+
     class Meta:
         model = m.Notification
         exclude = ('user', )

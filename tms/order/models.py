@@ -334,14 +334,23 @@ class JobStation(models.Model):
         ).exists()
 
     @property
-    def has_previous_station(self):
-        if self.step == 0:
-            return False
+    def next_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step+1,
+        ).first()
 
+    @property
+    def has_previous_station(self):
         return self.job.jobstation_set.filter(
             step=self.step-1,
             is_completed=False
         ).exists()
+
+    @property
+    def previous_station(self):
+        return self.job.jobstation_set.filter(
+            step=self.step-1
+        ).first()
 
     class Meta:
         ordering = ['job', 'step']
@@ -429,25 +438,16 @@ class JobReport(models.Model):
 
 class JobBill(models.Model):
 
-    amount = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES,
-        null=True,
-        blank=True
+    amount = models.FloatField(
+        default=0
     )
 
-    unit_price = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES,
-        null=True,
-        blank=True
+    unit_price = models.FloatField(
+        default=0
     )
 
-    cost = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES,
-        null=True,
-        blank=True
+    cost = models.FloatField(
+        default=0
     )
 
     document = models.ImageField(

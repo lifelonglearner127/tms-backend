@@ -682,12 +682,16 @@ class JobViewSet(TMSViewSet):
         current_progress = job.progress
         if current_progress == c.JOB_PROGRESS_COMPLETE:
             return Response(
-                {'current_progress': 'This is already completed progress'},
+                {
+                    'progress': 'This is already completed progress',
+                    'last_progress_finished_on': job.finished_on
+                },
                 status=status.HTTP_200_OK
             )
 
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
+            last_progress_finished_on = None
         else:
             current_station = job.jobstation_set.filter(
                 is_completed=False
@@ -698,14 +702,22 @@ class JobViewSet(TMSViewSet):
             if sub_progress == 0:
                 current_station.arrived_station_on = timezone.now()
                 current_station.save()
+                if current_station.step == 0:
+                    last_progress_finished_on = job.started_on
+                else:
+                    last_progress_finished_on =\
+                        current_station.previous_station.departure_station_on
             elif sub_progress == 1:
                 current_station.started_working_on = timezone.now()
+                last_progress_finished_on = current_station.arrived_station_on
                 current_station.save()
             elif sub_progress == 2:
                 current_station.finished_working_on = timezone.now()
+                last_progress_finished_on = current_station.started_working_on
                 current_station.save()
             elif sub_progress == 3:
                 current_station.departure_station_on = timezone.now()
+                last_progress_finished_on = current_station.finished_working_on
                 current_station.is_completed = True
                 current_station.save()
 
@@ -754,7 +766,9 @@ class JobViewSet(TMSViewSet):
                     job.save()
                     return Response(
                         {
-                            'current_progress': c.JOB_PROGRESS_COMPLETE
+                            'progress': c.JOB_PROGRESS_COMPLETE,
+                            'last_progress_finished_on':
+                            last_progress_finished_on
                         },
                         status=status.HTTP_200_OK
                     )
@@ -763,7 +777,8 @@ class JobViewSet(TMSViewSet):
 
         return Response(
             {
-                'current_progress': job.progress
+                'progress': job.progress,
+                'last_progress_finished_on': last_progress_finished_on,
             },
             status=status.HTTP_200_OK
         )
