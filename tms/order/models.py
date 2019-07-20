@@ -436,7 +436,7 @@ class JobReport(models.Model):
         ordering = ('month', )
 
 
-class JobBill(models.Model):
+class JobBill(TimeStampedModel):
 
     amount = models.FloatField(
         default=0

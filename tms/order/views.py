@@ -588,7 +588,6 @@ class JobViewSet(TMSViewSet):
             m.Job.objects.all(),
         )
 
-        # serializer = s.JobTimeSerializer(page, many=True)
         serializer = s.JobTimeDurationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
@@ -838,6 +837,28 @@ class JobViewSet(TMSViewSet):
             documents,
             status=status.HTTP_200_OK
         )
+
+    @action(
+        detail=False, url_path="bill-documents"
+    )
+    def get_bills(self, request):
+        """
+        for driver app
+        return bills
+        """
+        # bill_type = request.query_params.get('type', 'all')
+        page = self.paginate_queryset(
+            request.user.jobs_as_driver.filter(
+                ~Q(progress=c.JOB_PROGRESS_NOT_STARTED)
+            )
+        )
+
+        serializer = s.JobBillDocumentForDriverSerializer(
+            page,
+            context={'request': request},
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class JobStationViewSet(viewsets.ModelViewSet):

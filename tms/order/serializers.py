@@ -951,111 +951,22 @@ class JobDocumentSerializer(serializers.ModelSerializer):
                 sub_category = bill.sub_category
                 if sub_category in ret[category]['documents']:
                     ret[category]['documents'][sub_category].append({
-                        'cost': bill.cost,
-                        'document': bill.document
+                        'cost': bill.cost
                     })
                 else:
                     ret[category]['documents'][sub_category] = [{
-                        'cost': bill.cost,
-                        'document': bill.document
+                        'cost': bill.cost
                     }]
             else:
                 ret[category] = {
                     'total_cost': bill.cost,
                     'documents': {
                         bill.sub_category: [{
-                            'cost': bill.cost,
-                            'document': bill.document
+                            'cost': bill.cost
                         }]
                     }
                 }
         return ret
-
-# class LoadingStationTimeField(serializers.Field):
-
-#     def to_representation(self, value):
-#         ret = {
-#             "arrived_on": format_datetime(value.arrived_loading_station_on),
-#             "started_working_on": format_datetime(value.started_loading_on),
-#             "finished_working_on": format_datetime(value.finished_loading_on),
-#             "departure_on": format_datetime(value.departure_loading_station_on)
-#         }
-#         return ret
-
-#     def to_internal_value(self, data):
-#         ret = {
-#             "arrived_loading_station_on": data['arrived_on']
-#         }
-#         return ret
-
-
-# class QualityStationTimeField(serializers.Field):
-
-#     def to_representation(self, value):
-#         ret = {
-#             "arrived_on": format_datetime(value.arrived_quality_station_on),
-#             "started_working_on": format_datetime(value.started_checking_on),
-#             "finished_working_on": format_datetime(value.finished_checking_on),
-#             "departure_on": format_datetime(value.departure_quality_station_on)
-#         }
-#         return ret
-
-#     def to_internal_value(self, data):
-#         ret = {
-#             "arrived_loading_station_on": data['arrived_on']
-#         }
-#         return ret
-
-
-# class UnLoadingStationTimeField(serializers.Field):
-#     def to_representation(self, value):
-#         ret = []
-#         for station in value.all():
-#             ret.append({
-#                 "arrived_on":
-#                     format_datetime(station.arrived_station_on),
-#                 "started_working_on":
-#                     format_datetime(station.started_unloading_on),
-#                 "finished_working_on":
-#                     format_datetime(station.finished_unloading_on),
-#                 "departure_on":
-#                     format_datetime(station.departure_station_on)
-#             })
-
-#         return ret
-
-#     def to_internal_value(self, data):
-#         pass
-
-
-# class JobTimeSerializer(serializers.ModelSerializer):
-
-#     order = ShortOrderSerializer()
-#     vehicle = ShortVehicleSerializer()
-#     driver = ShortUserSerializer()
-#     escort = ShortUserSerializer()
-#     loading_station_time = LoadingStationTimeField(source='*')
-#     quality_station_time = QualityStationTimeField(source='*')
-#     unloading_station_time = UnLoadingStationTimeField(source='mission_set')
-
-#     class Meta:
-#         model = m.Job
-#         fields = (
-#             'id', 'order', 'vehicle', 'driver', 'escort', 'started_on',
-#             'finished_on', 'loading_station_time', 'quality_station_time',
-#             'unloading_station_time'
-#         )
-
-
-# class MissionTimeDurationSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.Mission
-#         fields = (
-#             'rushing_time_to_unloading_station',
-#             'waiting_time_on_unloading_station',
-#             'unloading_time_on_unloading_station',
-#         )
 
 
 class JobTimeDurationSerializer(serializers.ModelSerializer):
@@ -1187,3 +1098,60 @@ class VehicleStatusOrderSerializer(serializers.Serializer):
 #             'id', 'alias', 'products', 'driver', 'escort', 'started_on',
 #             'finished_on'
 #         )
+
+
+class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
+
+    order_id = serializers.CharField(source='order.id')
+    bills = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'order_id', 'finished_on', 'bills'
+        )
+
+    def get_bills(self, instance):
+        """
+        todo; optimize the code
+        """
+        request = self.context.get('request')
+        ret = {}
+        bills = instance.bills.all()
+        for bill in bills:
+            category = bill.category
+            if category in ret:
+                ret[category]['total_cost'] += bill.cost
+
+                if category == c.BILL_FROM_OIL_STATION:
+                    sub_categories = c.OIL_BILL_SUB_CATEGORY
+                elif category == c.BILL_FROM_TRAFFIC:
+                    sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
+                elif category == c.BILL_FROM_OTHER:
+                    sub_categories == c.OTHER_BILL_SUB_CATEGORY
+
+                sub_category = bill.sub_category
+                if sub_category in ret[category]['documents']:
+                    ret[category]['documents'][sub_category].append({
+                        'cost': bill.cost,
+                        'document': request.build_absolute_uri(bill.document.url),
+                        'updated': bill.updated
+                    })
+                else:
+                    ret[category]['documents'][sub_category] = [{
+                        'cost': bill.cost,
+                        'document': request.build_absolute_uri(bill.document.url),
+                        'updated': bill.updated
+                    }]
+            else:
+                ret[category] = {
+                    'total_cost': bill.cost,
+                    'documents': {
+                        bill.sub_category: [{
+                            'cost': bill.cost,
+                            'document': request.build_absolute_uri(bill.document.url),
+                            'updated': bill.updated
+                        }]
+                    }
+                }
+        return ret
