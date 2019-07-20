@@ -846,7 +846,7 @@ class JobViewSet(TMSViewSet):
         for driver app
         return bills
         """
-        # bill_type = request.query_params.get('type', 'all')
+        bill_type = request.query_params.get('type', 'all')
         page = self.paginate_queryset(
             request.user.jobs_as_driver.filter(
                 ~Q(progress=c.JOB_PROGRESS_NOT_STARTED)
@@ -855,7 +855,7 @@ class JobViewSet(TMSViewSet):
 
         serializer = s.JobBillDocumentForDriverSerializer(
             page,
-            context={'request': request},
+            context={'request': request, 'bill_type': bill_type},
             many=True
         )
         return self.get_paginated_response(serializer.data)

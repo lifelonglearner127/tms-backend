@@ -1116,8 +1116,12 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
         todo; optimize the code
         """
         request = self.context.get('request')
+        bill_type = self.context.get('bill_type', 'all')
         ret = {}
         bills = instance.bills.all()
+        if bill_type != 'all':
+            bills = bills.filter(category=bill_type)
+
         for bill in bills:
             category = bill.category
             if category in ret:
