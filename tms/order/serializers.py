@@ -619,7 +619,7 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'id', 'product', 'mission_weight'
+            'id', 'product', 'mission_weight', 'weight'
         )
 
 
