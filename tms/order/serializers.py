@@ -770,11 +770,10 @@ class JobCurrentSerializer(serializers.ModelSerializer):
         elif current_progress == c.JOB_PROGRESS_TO_LOADING_STATION:
             last_progress_finished_on = instance.started_on
         else:
-            station_step = int(
-                (current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION) / 4
-            )
-            sub_progress =\
-                (current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION) % 4
+            progress_from_start =\
+                current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION
+            station_step = int(progress_from_start / 4)
+            sub_progress = progress_from_start % 4
 
             station = instance.jobstation_set.get(step=station_step)
             if sub_progress == 0:
@@ -1138,13 +1137,15 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
                 if sub_category in ret[category]['documents']:
                     ret[category]['documents'][sub_category].append({
                         'cost': bill.cost,
-                        'document': request.build_absolute_uri(bill.document.url),
+                        'document':
+                        request.build_absolute_uri(bill.document.url),
                         'updated': bill.updated
                     })
                 else:
                     ret[category]['documents'][sub_category] = [{
                         'cost': bill.cost,
-                        'document': request.build_absolute_uri(bill.document.url),
+                        'document':
+                        request.build_absolute_uri(bill.document.url),
                         'updated': bill.updated
                     }]
             else:
@@ -1153,7 +1154,8 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
                     'documents': {
                         bill.sub_category: [{
                             'cost': bill.cost,
-                            'document': request.build_absolute_uri(bill.document.url),
+                            'document':
+                            request.build_absolute_uri(bill.document.url),
                             'updated': bill.updated
                         }]
                     }
