@@ -1,12 +1,17 @@
 import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from . import models as m
-from . import serializers as s
+
 from ..core import constants as c
+
+# models
+from . import models as m
 from ..account.models import User
 from ..info.models import Station
-from ..order.models import Job
+from ..order.models import Job, JobStation
+
+# serializers
+from . import serializers as s
 
 
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
@@ -32,44 +37,50 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         msg_type = int(data['msg_type'])
 
         if msg_type in [
-            c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA,
-            c.DRIVER_NOTIFICATION_TYPE_EXIT_AREA
+            c.DRIVER_NOTIFICATION_TYPE_ENTER_BLACK_DOT,
+            c.DRIVER_NOTIFICATION_TYPE_EXIT_BLACK_DOT,
+            c.DRIVER_NOTIFICATION_TYPE_ENTER_STATION,
+            c.DRIVER_NOTIFICATION_TYPE_EXIT_STATION
         ]:
-            plate_num = data['plate_num']
-            try:
-                station = Station.objects.get(
-                    id=data['station_id']
-                )
-                if station.station_type == c.STATION_TYPE_BLACK_DOT:
-                    if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA:
-                        message = station.notification_message
-                    else:
-                        message = "Out of this black dot"
+            station = Station.objects.get(id=data['station_id'])
+            message = {
+                'name': station.name,
+                'address': station.address
+            }
 
+            if station.notification_message:
+                message['notification'] = station.notification_message
+
+            notification = m.Notification.objects.create(
+                user=self.user,
+                message=message,
+                msg_type=msg_type
+            )
+
+            if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_STATION:
+                job = Job.objects.get(id=data['job_id'])
+                job_station = JobStation.objects.get(job=job, station=station)
+                expected_progress = job_station.step * 4 + 2
+
+                if job.progress != expected_progress:
+                    job.progress = expected_progress
+                    job.save()
+
+            elif msg_type == c.DRIVER_NOTIFICATION_TYPE_EXIT_STATION:
+                job = Job.objects.get(id=data['job_id'])
+                if job.order.is_same_station:
+                    expected_progress = 10 + job_station.step * 4
                 else:
-                    job = Job.inprogress.filter(
-                        vehicle__plate_num=plate_num,
-                        driver=self.user
-                    ).first()
-                    if job is None or job.route is None:
-                        return
+                    expected_progress = 6 + job_station.step * 4
 
-                    if station in job.route.stations:
-                        if msg_type == c.DRIVER_NOTIFICATION_TYPE_ENTER_AREA:
-                            message = "In {}".format(station.name)
-                        else:
-                            message = "Out of {}".format(station.name)
-                notification = m.Notification.objects.create(
-                    user=self.user,
-                    message=message,
-                    msg_type=msg_type
-                )
-                await self.send_json({
-                    'content':
-                    json.dumps(s.NotificationSerializer(notification).data)
-                })
-            except Station.DoesNotExist:
-                return
+                if job.progress != expected_progress:
+                    job.progress = expected_progress
+                    job.save()
+
+            await self.send_json({
+                'content':
+                json.dumps(s.NotificationSerializer(notification).data)
+            })
         else:
             await self.send_json({
                 'content': event['data']
