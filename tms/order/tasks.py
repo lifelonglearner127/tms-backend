@@ -1,3 +1,6 @@
+"""
+todo: code optimization, sending notification logic was used in multiple places
+"""
 import json
 import month
 from django.shortcuts import get_object_or_404
@@ -5,8 +8,9 @@ from config.celery import app
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from ..core.pushy import PushyAPI
 from ..core import constants as c
+from ..core.pushy import PushyAPI
+from ..core.redis import r
 
 # models
 from . import models as m
@@ -52,13 +56,13 @@ def notify_job_changes(context):
     driver_notification = Notification.objects.create(
         user=job.driver,
         message=message,
-        msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
+        msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
     )
 
     escort_notification = Notification.objects.create(
         user=job.escort,
         message=message,
-        msg_type=c.DRIVER_NOTIFICATION_TYPE_JOB
+        msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
     )
 
     if job.driver.channel_name:
@@ -87,7 +91,7 @@ def notify_job_changes(context):
     if job.driver.device_token:
         to = [job.driver.device_token]
         data = {
-            'msg_type': c.DRIVER_NOTIFICATION_TYPE_JOB,
+            'msg_type': c.DRIVER_NOTIFICATION_NEW_JOB,
             'message': message
         }
         options = {
@@ -194,3 +198,81 @@ def bind_vehicle_user(context):
     job.escort.profile.status = c.WORK_STATUS_DRIVING
     job.driver.profile.save()
     job.escort.profile.save()
+
+
+@app.task
+def notify_of_job_cancelled(context):
+    """
+    send notification when the job is cancelled
+    """
+    job_id = context['job']
+    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
+    driver = get_object_or_404(User, id=context['driver'])
+    escort = get_object_or_404(User, id=context['escort'])
+
+    # unbind vehicle and driver
+    r.srem('jobs', job_id)
+    m.VehicleUserBind.objects.filter(
+        vehicle=vehicle,
+        driver=driver,
+        escort=escort,
+        bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+    ).delete()
+
+    # send notification
+    message = {
+        "vehicle": vehicle.plate_num,
+        "notification": str(job_id) + ' was cancelled'
+    }
+
+    driver_notification = Notification.objects.create(
+        user=driver,
+        message=message,
+        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
+    )
+
+    escort_notification = Notification.objects.create(
+        user=escort,
+        message=message,
+        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
+    )
+
+    if driver.channel_name:
+        async_to_sync(channel_layer.send)(
+            driver.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(driver_notification).data
+                )
+            }
+        )
+
+    if escort.channel_name:
+        async_to_sync(channel_layer.send)(
+            escort.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(escort_notification).data
+                )
+            }
+        )
+
+    # send push notification to driver & escort
+    if driver.device_token:
+        to = [driver.device_token]
+        data = {
+            'msg_type': c.DRIVER_NOTIFICATION_DELETE_JOB,
+            'message': message
+        }
+        options = {
+            'notification': {
+                'badge': 1,
+                'sound': 'ping.aiff',
+                'body': u'New job is assigned to you'
+            }
+        }
+
+        # Send the push notification with Pushy
+        PushyAPI.sendPushNotification(data, to, options)

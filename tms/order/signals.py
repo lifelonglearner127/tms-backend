@@ -6,7 +6,7 @@ from ..core.redis import r
 
 # models
 from . import models as m
-from .tasks import calculate_job_report
+from .tasks import calculate_job_report, notify_of_job_cancelled
 
 
 @receiver(post_save, sender=m.Job)
@@ -29,10 +29,12 @@ def updated_job(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=m.Job)
 def job_deleted(sender, instance, **kwargs):
-    r.srem('jobs', instance.id)
-    m.VehicleUserBind.objects.filter(
-        vehicle=instance.vehicle,
-        driver=instance.driver,
-        escort=instance.escort,
-        bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-    ).delete()
+
+    notify_of_job_cancelled.apply_async(
+        args=[{
+            'job': instance.id,
+            'vehicle': instance.vehicle.id,
+            'driver': instance.driver.id,
+            'escort': instance.escort.id
+        }]
+    )

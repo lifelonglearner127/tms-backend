@@ -17,7 +17,7 @@ class Notification(models.Model):
 
     msg_type = models.PositiveIntegerField(
         choices=c.NOTIFICATION_TYPE,
-        default=c.DRIVER_NOTIFICATION_TYPE_JOB
+        default=c.DRIVER_NOTIFICATION_NEW_JOB
     )
 
     message = JSONField(load_kwargs={'object_pairs_hook': OrderedDict})
