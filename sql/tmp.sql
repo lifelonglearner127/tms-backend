@@ -35,6 +35,35 @@ left outer join
 ) tmp2
 on tmp1.id = tmp2.vehicle_id;
 
+-- [mine] select job station locations if current vehicle is under mission
+select oj.progress, oo.is_same_station, vv.plate_num, au.channel_name, tmp.stations
+from order_job oj
+left join order_order oo on oo.id=oj.order_id
+left join vehicle_vehicle vv on vv.id=oj.vehicle_id
+left join account_user au on au.id=oj.driver_id
+left join (
+	select ojs.job_id, array_agg(json_build_object('id', ist.id, 'station_type', ist.station_type, 'longitude', ist.longitude, 'latitude', ist.latitude) order by ojs.step asc) as stations
+	from order_jobstation ojs
+	left join info_station ist on ojs.station_id=ist.id
+	group by ojs.job_id
+) as tmp on oj.id=tmp.job_id
+order by oj.id;
+
+-- [mine] select next job station location if current vehicle is under mission
+select oj.id, oj.progress, oo.is_same_station, vv.plate_num, au.channel_name, tmp.id, tmp.station_type, tmp.longitude, tmp.latitude
+from order_job oj
+left join order_order oo on oo.id=oj.order_id
+left join vehicle_vehicle vv on vv.id=oj.vehicle_id
+left join account_user au on au.id=oj.driver_id
+left join (
+	select distinct on (ojs.job_id) ojs.job_id, ist.id, ist.station_type, ist.longitude, ist.latitude
+	from order_jobstation ojs
+	left join info_station ist on ist.id=ojs.station_id
+) tmp on tmp.job_id=oj.id
+where oj.progress > 1;
+
+-- [mine] select all vehicles with its next job station location if vehicle is under mission
+
 
 -- [reference] select vehicle status depending on order
 select  *
@@ -50,4 +79,3 @@ from  (
 		group by oj.vehicle_id, au.name
 		) tmp2
 	on tmp1.id = tmp2.vehicle_id
-
