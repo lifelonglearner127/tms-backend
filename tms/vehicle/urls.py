@@ -15,11 +15,7 @@ router.register(
     v.VehicleMaintenanceRequestViewSet,
     base_name='vehicle-maintenances'
 )
-router.register(
-    r'vehicle-binds',
-    v.VehicleUserBindViewSet,
-    base_name='vehicle-user-binds'
-)
+
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]

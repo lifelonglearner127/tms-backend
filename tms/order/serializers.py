@@ -770,11 +770,10 @@ class JobCurrentSerializer(serializers.ModelSerializer):
         elif current_progress == c.JOB_PROGRESS_TO_LOADING_STATION:
             last_progress_finished_on = instance.started_on
         else:
-            station_step = int(
-                (current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION) / 4
-            )
-            sub_progress =\
-                (current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION) % 4
+            progress_from_start =\
+                current_progress - c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION
+            station_step = int(progress_from_start / 4)
+            sub_progress = progress_from_start % 4
 
             station = instance.jobstation_set.get(step=station_step)
             if sub_progress == 0:
@@ -1171,4 +1170,23 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
                         }
                     }
                 }
+        return ret
+
+
+class VehicleUserBindSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
+
+    class Meta:
+        model = m.VehicleUserBind
+        fields = '__all__'
+
+    def to_internal_value(self, data):
+        ret = {
+            'vehicle': get_object_or_404(m.Vehicle, id=data['vehicle']['id']),
+            'driver': get_object_or_404(m.User, id=data['driver']['id']),
+            'escort': get_object_or_404(m.User, id=data['escort']['id'])
+        }
         return ret

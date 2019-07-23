@@ -31,7 +31,7 @@ from ..core.views import TMSViewSet
 # other
 from ..g7.interfaces import G7Interface
 
-from .tasks import notify_job_changes
+from .tasks import notify_job_changes, bind_vehicle_user
 
 
 class OrderViewSet(TMSViewSet):
@@ -691,6 +691,11 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
             last_progress_finished_on = None
+            bind_vehicle_user.apply_async(
+                args=[{
+                    'job': job.id
+                }]
+            )
         else:
             current_station = job.jobstation_set.filter(
                 is_completed=False
@@ -928,3 +933,11 @@ class JobReportViewSet(viewsets.ModelViewSet):
             request.user.report.all()
         )
         return request.user
+
+
+class VehicleUserBindViewSet(TMSViewSet):
+
+    serializer_class = s.VehicleUserBindSerializer
+
+    def get_queryset(self):
+        return m.VehicleUserBind.binds_by_admin.all()

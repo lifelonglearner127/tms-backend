@@ -1,10 +1,12 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from . import models as m
 from ..core import constants as c
+
+# models
+from . import models as m
+
+# serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import ShortUserSerializer
 
 
 class ShortVehicleSerializer(serializers.ModelSerializer):
@@ -90,22 +92,3 @@ class VehicleMaintenanceRequestDataViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.VehicleMaintenanceRequest
         fields = '__all__'
-
-
-class VehicleUserBindSerializer(serializers.ModelSerializer):
-
-    vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
-
-    class Meta:
-        model = m.VehicleUserBind
-        fields = '__all__'
-
-    def to_internal_value(self, data):
-        ret = {
-            'vehicle': get_object_or_404(m.Vehicle, id=data['vehicle']['id']),
-            'driver': get_object_or_404(m.User, id=data['driver']['id']),
-            'escort': get_object_or_404(m.User, id=data['escort']['id'])
-        }
-        return ret
