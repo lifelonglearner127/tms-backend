@@ -16,6 +16,9 @@ router.register(
 router.register(
     r'job-report', v.JobReportViewSet, base_name='job-report'
 )
+router.register(
+    r'vehicle-binds', v.VehicleUserBindViewSet, base_name='vehicle-user-binds'
+)
 
 # # /jobs/{job_pk}/stations
 # # /jobs/{job_pk}/stations/{pk}

@@ -12,7 +12,7 @@ from ..core import constants as c
 from . import models as m
 from ..account.models import User
 from ..notification.models import Notification
-from ..vehicle.models import Vehicle, VehicleUserBind
+from ..vehicle.models import Vehicle
 
 # serializers
 from ..notification.serializers import NotificationSerializer
@@ -27,29 +27,6 @@ def notify_job_changes(context):
     Send notificatio when a new job is created
     """
     job = get_object_or_404(m.Job, id=context['job'])
-
-    # bind vehicle, driver, escort
-    if not VehicleUserBind.binds_by_admin.filter(
-        vehicle=job.vehicle,
-        driver=job.driver,
-        escort=job.escort
-    ).exists():
-        VehicleUserBind.objects.get_or_create(
-            vehicle=job.vehicle,
-            driver=job.driver,
-            escort=job.escort,
-            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-        )
-
-    # set the vehicle status to in-work
-    job.vehicle.status = c.VEHICLE_STATUS_INWORK
-    job.vehicle.save()
-
-    # set the driver & escrot to in-work
-    job.driver.profile.status = c.WORK_STATUS_DRIVING
-    job.escort.profile.status = c.WORK_STATUS_DRIVING
-    job.driver.profile.save()
-    job.escort.profile.save()
 
     # send in-app notfication to driver & escort
     message = {
@@ -133,20 +110,21 @@ def calculate_job_report(context):
     escort = get_object_or_404(User, id=context['escort'])
 
     # unbind vehicle, driver, escort
-    if not VehicleUserBind.binds_by_admin.filter(
+    if not m.VehicleUserBind.binds_by_admin.filter(
         vehicle=vehicle,
         driver=driver,
         escort=escort
     ).exists():
         try:
-            vehicle_bind = VehicleUserBind.objects.get(
+            vehicle_bind = m.VehicleUserBind.objects.get(
                 vehicle=vehicle,
                 driver=driver,
                 escort=escort,
+                job=job,
                 bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
             )
             vehicle_bind.delete()
-        except VehicleUserBind.DoesNotExist:
+        except m.VehicleUserBind.DoesNotExist:
             pass
 
     # set the vehicle status to available
@@ -189,3 +167,32 @@ def calculate_job_report(context):
             highway_mileage=job.highway_mileage,
             normalway_mileage=job.normalway_mileage
         )
+
+
+@app.task
+def bind_vehicle_user(context):
+    job = get_object_or_404(m.Job, id=context['job'])
+
+    # bind vehicle, driver, escort
+    if not m.VehicleUserBind.binds_by_admin.filter(
+        vehicle=job.vehicle,
+        driver=job.driver,
+        escort=job.escort
+    ).exists():
+        m.VehicleUserBind.objects.get_or_create(
+            vehicle=job.vehicle,
+            driver=job.driver,
+            escort=job.escort,
+            job=job,
+            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+        )
+
+    # set the vehicle status to in-work
+    job.vehicle.status = c.VEHICLE_STATUS_INWORK
+    job.vehicle.save()
+
+    # set the driver & escrot to in-work
+    job.driver.profile.status = c.WORK_STATUS_DRIVING
+    job.escort.profile.status = c.WORK_STATUS_DRIVING
+    job.driver.profile.save()
+    job.escort.profile.save()

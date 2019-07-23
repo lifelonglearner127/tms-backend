@@ -11,8 +11,3 @@ class VehicleAdmin(admin.ModelAdmin):
 @admin.register(m.VehicleMaintenanceRequest)
 class VehicleMaintenanceRequestAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(m.VehicleUserBind)
-class VehicleUserBindAdmin(admin.ModelAdmin):
-    pass

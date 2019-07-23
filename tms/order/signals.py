@@ -30,3 +30,4 @@ def updated_job(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=m.Job)
 def job_deleted(sender, instance, **kwargs):
     r.srem('jobs', instance.id)
+    instance.bind.delete()

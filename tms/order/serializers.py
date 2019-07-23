@@ -1161,3 +1161,22 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
                     }
                 }
         return ret
+
+
+class VehicleUserBindSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
+
+    class Meta:
+        model = m.VehicleUserBind
+        fields = '__all__'
+
+    def to_internal_value(self, data):
+        ret = {
+            'vehicle': get_object_or_404(m.Vehicle, id=data['vehicle']['id']),
+            'driver': get_object_or_404(m.User, id=data['driver']['id']),
+            'escort': get_object_or_404(m.User, id=data['escort']['id'])
+        }
+        return ret

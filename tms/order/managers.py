@@ -81,3 +81,23 @@ class CompleteJobManager(models.Manager):
         return super().get_queryset().filter(
             progress=c.JOB_PROGRESS_COMPLETE
         )
+
+
+class AdminVehicleUserBindManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_ADMIN
+        )
+
+
+class JobVehicleUserBindManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+        )

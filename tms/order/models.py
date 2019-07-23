@@ -470,3 +470,45 @@ class JobBill(TimeStampedModel):
 
     class Meta:
         ordering = ['category', 'sub_category', 'detail_category']
+
+
+class VehicleUserBind(models.Model):
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="vehicles_as_driver"
+    )
+
+    escort = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="vehicles_as_escort"
+    )
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='bind'
+    )
+
+    bind_method = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_USER_BIND_METHOD,
+        default=c.VEHICLE_USER_BIND_METHOD_BY_ADMIN
+    )
+
+    objects = models.Manager()
+    binds_by_job = managers.JobVehicleUserBindManager()
+    binds_by_admin = managers.AdminVehicleUserBindManager()
+
+    class Meta:
+        unique_together = (
+            'vehicle', 'driver', 'escort'
+        )
