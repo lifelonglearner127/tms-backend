@@ -468,6 +468,11 @@ class JobBill(TimeStampedModel):
         default=0
     )
 
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
     class Meta:
         ordering = ['category', 'sub_category', 'detail_category']
 
