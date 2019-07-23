@@ -74,7 +74,7 @@ class Config:
     def load_data_from_db(cls):
         is_blackdots_updated = r.get('blackdot') == b'updated'
         is_vehicles_updated = r.get('vehicle') == b'updated'
-        updated_jobs = r.smember('jobs')
+        updated_jobs = r.smembers('jobs')
         if not is_blackdots_updated and not is_vehicles_updated and\
            updated_jobs is None:
             return
@@ -92,7 +92,7 @@ class Config:
                 """)
                 results = cursor.fetchall()
                 for row in results:
-                    cls.stations.append({
+                    cls.blackdots.append({
                         'station_id': row[0],
                         'latitude': row[1],
                         'longitude': row[2],
@@ -100,21 +100,26 @@ class Config:
                     })
 
                 if Config.DEBUG:
-                    print('[Load Data]: ', cls.stations)
+                    print('[Load Data]: ', cls.blackdots)
 
                 r.set('blackdot', 'read')
 
             if is_vehicles_updated or updated_jobs:
                 if Config.DEBUG:
-                    print('[Load Data]: Loading updated vehicles...')
+                    if is_vehicles_updated:
+                        print('[Load Data]: Loading updated vehicles...')
+                    else:
+                        print('[Load Data]: Loading updated jobs...')
 
                 current_updated_jobs = []
                 for updated_job in updated_jobs:
                     current_updated_jobs.append(
-                        int(updated_job.decode('utf-8'))
+                        updated_job.decode('utf-8')
                     )
 
-                cursor.execute("""
+                current_updated_job_ids = ', '.join(current_updated_jobs)
+                if current_updated_job_ids:
+                    query_str = """
                     SELECT vv.plate_num, tmp2.*
                     FROM vehicle_vehicle vv
                     LEFT JOIN (
@@ -138,7 +143,34 @@ class Config:
                             LEFT JOIN info_station ist on ojs.station_id=ist.id
                         ) tmp ON oj.id=tmp.job_id
                     ) tmp2 ON vv.id=tmp2.vehicle_id;
-                """.format(', '.join(current_updated_jobs)))
+                    """.format(current_updated_job_ids)
+                else:
+                    query_str = """
+                    SELECT vv.plate_num, tmp2.*
+                    FROM vehicle_vehicle vv
+                    LEFT JOIN (
+                        SELECT oj.vehicle_id, oo.is_same_station, oj.progress,
+                            tmp.*
+                        FROM (
+                            SELECT id, order_id, vehicle_id, progress
+                            FROM order_job
+                            WHERE progress > 1
+                        ) oj
+                        LEFT JOIN order_order oo ON oj.order_id=oo.id
+                        LEFT JOIN (
+                            SELECT ojs.job_id, ojs.station_id,
+                                ist.station_type, ist.longitude, ist.latitude,
+                                ist.radius
+                            FROM (
+                                SELECT DISTINCT ON (job_id) job_id, station_id
+                                FROM order_jobstation
+                                ORDER BY job_id, is_completed, step
+                            ) ojs
+                            LEFT JOIN info_station ist on ojs.station_id=ist.id
+                        ) tmp ON oj.id=tmp.job_id
+                    ) tmp2 ON vv.id=tmp2.vehicle_id;
+                    """
+                cursor.execute(query_str)
                 results = cursor.fetchall()
                 for row in results:
                     cls.vehicles[row[0]] = {
@@ -222,76 +254,6 @@ def _on_message(client, userdata, message):
     )
 
     Config.load_data_from_db()
-
-    if Config.DEBUG:
-        try:
-            connection = psycopg2.connect(Config.DB_URL)
-            cursor = connection.cursor()
-            cursor.execute(
-                Config.CHANNEL_NAME_QUERY.format('鲁UG2802')
-            )
-            result = cursor.fetchone()
-            print('[Enter & Exit]: User ', result)
-
-            if result is not None and result[1] is not None:
-                print('[Enter & Exit]: Websocket exists')
-                async_to_sync(channel_layer.send)(
-                    result[0],
-                    {
-                        'type': 'notify',
-                        'data': json.dumps({
-                            'msg_type': Config.VEHICLE_ENTER_EVENT,
-                            'plate_num': '鲁UG2802',
-                            'station_pos': (39.90923, 117.397428)
-                        })
-                    }
-                )
-                print('[Enter & Exit]: Sent Vehicle Enter event')
-                async_to_sync(channel_layer.send)(
-                    result[0],
-                    {
-                        'type': 'notify',
-                        'data': json.dumps({
-                            'msg_type': Config.VEHICLE_EXIT_EVENT,
-                            'plate_num': '鲁UG2802',
-                            'station_pos': (39.90923, 117.397428)
-                        })
-                    }
-                )
-                print('[Enter & Exit]: Sent Vehicle Exit event')
-                # black dot
-                async_to_sync(channel_layer.send)(
-                    result[0],
-                    {
-                        'type': 'notify',
-                        'data': json.dumps({
-                            'msg_type': Config.VEHICLE_ENTER_EVENT,
-                            'plate_num': '鲁UG2802',
-                            'station_pos': (49.90923, 106.357428)
-                        })
-                    }
-                )
-                print('[Enter & Exit]: Sent Vehicle Enter event')
-                async_to_sync(channel_layer.send)(
-                    result[0],
-                    {
-                        'type': 'notify',
-                        'data': json.dumps({
-                            'msg_type': Config.VEHICLE_EXIT_EVENT,
-                            'plate_num': '鲁UG2802',
-                            'station_pos': (49.90923, 106.357428)
-                        })
-                    }
-                )
-                print('[Enter & Exit]: Sent Vehicle Exit event')
-
-            cursor.close()
-        except psycopg2.DatabaseError:
-            pass
-        finally:
-            if connection is not None:
-                connection.close()
-                print('[Enter & Exit]: Database connection closed.')
 
     # area enter & exit event
     for vehicle in vehicles:
