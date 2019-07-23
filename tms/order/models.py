@@ -491,13 +491,6 @@ class VehicleUserBind(models.Model):
         related_name="vehicles_as_escort"
     )
 
-    job = models.ForeignKey(
-        Job,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='bind'
-    )
-
     bind_method = models.CharField(
         max_length=1,
         choices=c.VEHICLE_USER_BIND_METHOD,

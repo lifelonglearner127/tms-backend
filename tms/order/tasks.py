@@ -120,7 +120,6 @@ def calculate_job_report(context):
                 vehicle=vehicle,
                 driver=driver,
                 escort=escort,
-                job=job,
                 bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
             )
             vehicle_bind.delete()
@@ -183,7 +182,6 @@ def bind_vehicle_user(context):
             vehicle=job.vehicle,
             driver=job.driver,
             escort=job.escort,
-            job=job,
             bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
         )
 

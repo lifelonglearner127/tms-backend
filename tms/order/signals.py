@@ -30,4 +30,9 @@ def updated_job(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=m.Job)
 def job_deleted(sender, instance, **kwargs):
     r.srem('jobs', instance.id)
-    instance.bind.delete()
+    m.VehicleUserBind.objects.filter(
+        vehicle=instance.vehicle,
+        driver=instance.driver,
+        escort=instance.escort,
+        bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+    ).delete()
