@@ -16,12 +16,10 @@ from geopy import distance
 
 
 r = redis.StrictRedis(host='localhost', port=6379, db=15)
-# p = r.pubsub()
-# p.subscribe('station')
 
 
 class Config:
-    stations = []
+    blackdots = []
     vehicles = {}
     DB_URL = ''
     HOST = ''
@@ -34,20 +32,17 @@ class Config:
     DEBUG = False
     VEHICLE_OUT_AREA = 0
     VEHICLE_IN_AREA = 1
-    VEHICLE_ENTER_EVENT = 1
-    VEHICLE_EXIT_EVENT = 2
+    ENTER_STATION_EVENT = 1
+    EXIT_STATION_EVENT = 2
+    ENTER_BLACK_DOT_EVENT = 3
+    EXIT_BLACK_DOT_EVENT = 4
 
     CHANNEL_NAME_QUERY = """
-        SELECT id, channel_name
-        FROM account_user
-        RIGHT JOIN(
-            SELECT bind.driver_id as driver_id
-            FROM vehicle_vehicleuserbind AS bind
-            LEFT JOIN vehicle_vehicle AS vehicle
-            ON bind.vehicle_id = vehicle.id
-            WHERE vehicle.plate_num='{}'
-        ) AS vehiclebind
-        ON account_user.id = vehiclebind.driver_id;
+        SELECT channel_name
+        FROM account_user au
+        LEFT JOIN order_vehicleuserbind ovub ON ovub.driver_id=au.id
+        LEFT JOIN vehicle_vehicle vv ON vv.id=ovub.vehicle_id
+        where vv.plate_num='{}'
         """
 
     @classmethod
@@ -76,46 +71,95 @@ class Config:
                 line = fd.readline()
 
     @classmethod
-    def load_data_from_db(cls,
-                          updated_stations=True,
-                          updated_vehicles=True):
-        if not updated_stations and not updated_vehicles:
+    def load_data_from_db(cls):
+        is_blackdots_updated = r.get('blackdot') == b'updated'
+        is_vehicles_updated = r.get('vehicle') == b'updated'
+        updated_jobs = r.smember('jobs')
+        if not is_blackdots_updated and not is_vehicles_updated and\
+           updated_jobs is None:
             return
 
         try:
             connection = psycopg2.connect(cls.DB_URL)
             cursor = connection.cursor()
-            if updated_stations:
+            if is_blackdots_updated:
                 if Config.DEBUG:
-                    print('[Load Data]: Loading updated station...')
+                    print('[Load Data]: Loading blackdots...')
                 cursor.execute("""
                     SELECT id, latitude, longitude, radius
                     FROM info_station
+                    WHERE station_type='B'
                 """)
                 results = cursor.fetchall()
                 for row in results:
-                    cls.stations.append([row[0], row[1], row[2]], row[3])
+                    cls.stations.append({
+                        'station_id': row[0],
+                        'latitude': row[1],
+                        'longitude': row[2],
+                        'radius': row[3]
+                    })
 
                 if Config.DEBUG:
                     print('[Load Data]: ', cls.stations)
 
-                r.set('station', 'read')
+                r.set('blackdot', 'read')
 
-            if updated_vehicles:
+            if is_vehicles_updated or updated_jobs:
                 if Config.DEBUG:
                     print('[Load Data]: Loading updated vehicles...')
+
+                current_updated_jobs = []
+                for updated_job in updated_jobs:
+                    current_updated_jobs.append(
+                        int(updated_job.decode('utf-8'))
+                    )
+
                 cursor.execute("""
-                    SELECT plate_num
-                    FROM vehicle_vehicle
-                """)
+                    SELECT vv.plate_num, tmp2.*
+                    FROM vehicle_vehicle vv
+                    LEFT JOIN (
+                        SELECT oj.vehicle_id, oo.is_same_station, oj.progress,
+                            tmp.*
+                        FROM (
+                            SELECT id, order_id, vehicle_id, progress
+                            FROM order_job
+                            WHERE id IN ({})
+                        ) oj
+                        LEFT JOIN order_order oo ON oj.order_id=oo.id
+                        LEFT JOIN (
+                            SELECT ojs.job_id, ojs.station_id,
+                                ist.station_type, ist.longitude, ist.latitude,
+                                ist.radius
+                            FROM (
+                                SELECT DISTINCT ON (job_id) job_id, station_id
+                                FROM order_jobstation
+                                ORDER BY job_id, is_completed, step
+                            ) ojs
+                            LEFT JOIN info_station ist on ojs.station_id=ist.id
+                        ) tmp ON oj.id=tmp.job_id
+                    ) tmp2 ON vv.id=tmp2.vehicle_id;
+                """.format(', '.join(current_updated_jobs)))
                 results = cursor.fetchall()
                 for row in results:
-                    cls.vehicles[row[0]] = cls.VEHICLE_OUT_AREA
+                    cls.vehicles[row[0]] = {
+                        'position': cls.VEHICLE_OUT_AREA,
+                        'is_same_station': row[2],
+                        'progress': row[3],
+                        'job_id': row[4],
+                        'station_id': row[5],
+                        'station_type': row[6],
+                        'longitude': row[7],
+                        'latitude': row[9]
+                    }
 
                 if Config.DEBUG:
                     print('[Load Data]: ', cls.vehicles)
 
-                r.set('vehicle', 'read')
+                if is_vehicles_updated:
+                    r.set('vehicle', 'read')
+
+                for job in current_updated_jobs:
+                    r.srem('jobs', job)
 
             cursor.close()
         except psycopg2.DatabaseError:
@@ -177,10 +221,7 @@ def _on_message(client, userdata, message):
         }
     )
 
-    Config.load_data_from_db(
-        r.get('station') == b'updated',
-        r.get('vehicle') == b'updated',
-    )
+    Config.load_data_from_db()
 
     if Config.DEBUG:
         try:
@@ -195,7 +236,7 @@ def _on_message(client, userdata, message):
             if result is not None and result[1] is not None:
                 print('[Enter & Exit]: Websocket exists')
                 async_to_sync(channel_layer.send)(
-                    result[1],
+                    result[0],
                     {
                         'type': 'notify',
                         'data': json.dumps({
@@ -207,7 +248,7 @@ def _on_message(client, userdata, message):
                 )
                 print('[Enter & Exit]: Sent Vehicle Enter event')
                 async_to_sync(channel_layer.send)(
-                    result[1],
+                    result[0],
                     {
                         'type': 'notify',
                         'data': json.dumps({
@@ -220,7 +261,7 @@ def _on_message(client, userdata, message):
                 print('[Enter & Exit]: Sent Vehicle Exit event')
                 # black dot
                 async_to_sync(channel_layer.send)(
-                    result[1],
+                    result[0],
                     {
                         'type': 'notify',
                         'data': json.dumps({
@@ -232,7 +273,7 @@ def _on_message(client, userdata, message):
                 )
                 print('[Enter & Exit]: Sent Vehicle Enter event')
                 async_to_sync(channel_layer.send)(
-                    result[1],
+                    result[0],
                     {
                         'type': 'notify',
                         'data': json.dumps({
@@ -262,31 +303,39 @@ def _on_message(client, userdata, message):
             print('[GeoPy]: Current {} Position - ({}, {})'.format(
                 plate_num, vehicle['lat'], vehicle['lng']
             ))
-        for station in Config.stations:
-            station_pos = (station[1], station[2])
+
+        # check if the vehicle enter or exit black dot
+        for blackdot in Config.blackdots:
+            blackdot_pos = (blackdot['latitude'], blackdot['longitude'])
             enter_exit_event = 0
-            delta_distance = distance.distance(vehicle_pos, station_pos).m
+            delta_distance = distance.distance(vehicle_pos, blackdot_pos).m
 
             if Config.DEBUG:
                 print('[GeoPy]: Distance with ({}, {}) is {}'.format(
-                    station[1], station[2], delta_distance
+                    blackdot['latitude'], blackdot['longitude'],
+                    delta_distance
                 ))
-            if delta_distance < station[3] and\
-               Config.vehicles[plate_num] == Config.VEHICLE_OUT_AREA:
-                Config.vehicles[plate_num] = Config.VEHICLE_IN_AREA
-                enter_exit_event = Config.VEHICLE_ENTER_EVENT
+
+            if delta_distance < blackdot['radius'] and\
+               Config.vehicles[plate_num]['position'] ==\
+               Config.VEHICLE_OUT_AREA:
+
+                Config.vehicles[plate_num]['position'] = Config.VEHICLE_IN_AREA
+                enter_exit_event = Config.ENTER_BLACK_DOT_EVENT
                 if Config.DEBUG:
                     print('[GeoPy]: {} enter into ({}, {})'.format(
-                        plate_num, station[1], station[2]
+                        plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
-            if delta_distance > station[3] and\
-               Config.vehicles[plate_num] == Config.VEHICLE_IN_AREA:
+            if delta_distance > blackdot['radius'] and\
+               Config.vehicles[plate_num]['position'] ==\
+               Config.VEHICLE_IN_AREA:
+
                 Config.vehicles[plate_num] = Config.VEHICLE_OUT_AREA
-                enter_exit_event = Config.VEHICLE_EXIT_EVENT
+                enter_exit_event = Config.EXIT_BLACK_DOT_EVENT
                 if Config.DEBUG:
                     print('[G7]: {} exit from ({}, {})'.format(
-                        plate_num, station[1], station[2]
+                        plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
             if enter_exit_event:
@@ -299,13 +348,12 @@ def _on_message(client, userdata, message):
                     result = cursor.fetchone()
                     if result is not None:
                         async_to_sync(channel_layer.send)(
-                            result[1],
+                            result[0],
                             {
                                 'type': 'notify',
                                 'data': json.dumps({
                                     'msg_type': enter_exit_event,
-                                    'plate_num': plate_num,
-                                    'station_id': station[0]
+                                    'station_id': blackdot['station_id']
                                 })
                             }
                         )
@@ -319,6 +367,58 @@ def _on_message(client, userdata, message):
                             print(
                                 '[Enter & Exit]: Database connection closed.'
                             )
+
+        # check if the vehicle enter or exit next station
+        next_station_pos = (
+            Config.vehicles[plate_num]['latitude'],
+            Config.vehicles[plate_num]['longitude']
+        )
+        next_station_radius = Config.vehicles[plate_num]['radius']
+        enter_exit_event = 0
+        delta_distance = distance.distance(vehicle_pos, next_station_pos).m
+        if delta_distance < next_station_radius and\
+           Config.vehicles[plate_num]['position'] ==\
+           Config.VEHICLE_OUT_AREA:
+            Config.vehicles[plate_num]['position'] = Config.VEHICLE_IN_AREA
+            enter_exit_event = Config.ENTER_STATION_EVENT
+
+        if delta_distance > next_station_radius and\
+           Config.vehicles[plate_num]['position'] ==\
+           Config.VEHICLE_IN_AREA:
+            Config.vehicles[plate_num] = Config.VEHICLE_OUT_AREA
+            enter_exit_event = Config.EXIT_STATION_EVENT
+
+        if enter_exit_event:
+            try:
+                connection = psycopg2.connect(Config.DB_URL)
+                cursor = connection.cursor()
+                cursor.execute(
+                    Config.CHANNEL_NAME_QUERY.format(plate_num)
+                )
+                result = cursor.fetchone()
+                if result is not None:
+                    async_to_sync(channel_layer.send)(
+                        result[0],
+                        {
+                            'type': 'notify',
+                            'data': json.dumps({
+                                'msg_type': enter_exit_event,
+                                'job_id': Config.vehicles[plate_num]['job_id'],
+                                'station_id':
+                                Config.vehicles[plate_num]['station_id']
+                            })
+                        }
+                    )
+                cursor.close()
+            except psycopg2.DatabaseError:
+                pass
+            finally:
+                if connection is not None:
+                    connection.close()
+                    if Config.DEBUG:
+                        print(
+                            '[Enter & Exit]: Database connection closed.'
+                        )
 
 
 def _on_disconnect(client, userdata, rc):
