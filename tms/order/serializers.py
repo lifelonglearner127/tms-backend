@@ -1136,26 +1136,39 @@ class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
 
                 sub_category = bill.sub_category
                 if sub_category in ret[category]['documents']:
-                    ret[category]['documents'][sub_category].append({
+                    ret[category]['documents'][sub_category]['sub_total_cost'] += bill.cost
+                    ret[category]['documents'][sub_category]['documents'].append({
+                        'id': bill.id,
                         'cost': bill.cost,
-                        'document': request.build_absolute_uri(bill.document.url),
+                        'document':
+                        request.build_absolute_uri(bill.document.url),
                         'updated': bill.updated
                     })
                 else:
-                    ret[category]['documents'][sub_category] = [{
-                        'cost': bill.cost,
-                        'document': request.build_absolute_uri(bill.document.url),
-                        'updated': bill.updated
-                    }]
+                    ret[category]['documents'][sub_category] = {
+                        'sub_total_cost': bill.cost,
+                        'documents': [{
+                            'id': bill.id,
+                            'cost': bill.cost,
+                            'document':
+                            request.build_absolute_uri(bill.document.url),
+                            'updated': bill.updated
+                        }]
+                    }
             else:
                 ret[category] = {
                     'total_cost': bill.cost,
                     'documents': {
-                        bill.sub_category: [{
-                            'cost': bill.cost,
-                            'document': request.build_absolute_uri(bill.document.url),
-                            'updated': bill.updated
-                        }]
+                        bill.sub_category: {
+                            'sub_total_cost': bill.cost,
+                            'documents': [{
+                                'id': bill.id,
+                                'cost': bill.cost,
+                                'document':
+                                request.build_absolute_uri(bill.document.url),
+                                'updated': bill.updated
+                            }]
+                        }
                     }
                 }
         return ret
