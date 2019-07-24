@@ -1081,22 +1081,22 @@ class VehicleStatusOrderSerializer(serializers.Serializer):
     g7_error = serializers.BooleanField()
 
 
-# class JobByVehicleSerializer(serializers.ModelSerializer):
-#     """
-#     Serialize the query result of jobs by plate number and time period
-#     Used for truck playback response
-#     """
-#     alias = serializers.CharField(source='order.alias')
-#     products = ShortProductSerializer(source='order.products', many=True)
-#     driver = ShortUserSerializer(read_only=True)
-#     escort = ShortUserSerializer(read_only=True)
+class JobByVehicleSerializer(serializers.ModelSerializer):
+    """
+    Serialize the query result of jobs by plate number and time period
+    Used for truck playback response
+    """
+    alias = serializers.CharField(source='order.alias')
+    products = ShortProductSerializer(source='order.products', many=True)
+    driver = ShortUserSerializer(read_only=True)
+    escort = ShortUserSerializer(read_only=True)
 
-#     class Meta:
-#         model = m.Job
-#         fields = (
-#             'id', 'alias', 'products', 'driver', 'escort', 'started_on',
-#             'finished_on'
-#         )
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'alias', 'products', 'driver', 'escort', 'started_on',
+            'finished_on'
+        )
 
 
 class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
