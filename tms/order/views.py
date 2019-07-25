@@ -678,6 +678,14 @@ class JobViewSet(TMSViewSet):
     def progress_update(self, request, pk=None):
         job = self.get_object()
 
+        if request.user.jobs_as_driver.exclude(id=job.id).filter(
+            progress__gt=1
+        ).exists():
+            return Response(
+                {'error': 'Cannot proceed more than 2 jobs simultaneously'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         current_progress = job.progress
         if current_progress == c.JOB_PROGRESS_COMPLETE:
             return Response(
@@ -864,6 +872,51 @@ class JobViewSet(TMSViewSet):
             many=True
         )
         return self.get_paginated_response(serializer.data)
+
+    @action(
+        detail=True, url_path="test/station-efence"
+    )
+    def test_station_efence(self, request, pk=None):
+        """
+        This api is only used for test purpose
+        """
+        from ..core.redis import r
+
+        job = self.get_object()
+        if job.progress <= 1:
+            return Response(
+                {
+                    'msg':
+                    'enter & exit event test is only enabled for in-progress'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        event = request.query_params.get('type', 'in')
+        if event == 'in':
+            r.set('station_delta_distance', 10)
+        elif event == 'out':
+            r.set('station_delta_distance', 1000)
+        return Response(
+            {'msg': 'success'},
+            status=status.HTTP_200_OK
+        )
+
+    @action(
+        detail=False, url_path="test/blackdot-efence"
+    )
+    def test_black_dot_efence(self, request, pk=None):
+        from ..core.redis import r
+
+        event = request.query_params.get('type', 'in')
+        if event == 'in':
+            r.set('blackdot_delta_distance', 10)
+        elif event == 'out':
+            r.set('blackdot_delta_distance', 1000)
+        return Response(
+            {'msg': 'success'},
+            status=status.HTTP_200_OK
+        )
 
 
 class JobStationViewSet(viewsets.ModelViewSet):

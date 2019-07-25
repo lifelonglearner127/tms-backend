@@ -87,13 +87,10 @@ def notify_job_changes(context):
             }
         )
 
-    # send push notification to driver & escort
+    # send push notification to driver
     if job.driver.device_token:
         to = [job.driver.device_token]
-        data = {
-            'msg_type': c.DRIVER_NOTIFICATION_NEW_JOB,
-            'message': message
-        }
+
         options = {
             'notification': {
                 'badge': 1,
@@ -103,7 +100,26 @@ def notify_job_changes(context):
         }
 
         # Send the push notification with Pushy
-        PushyAPI.sendPushNotification(data, to, options)
+        PushyAPI.sendPushNotification(
+            NotificationSerializer(driver_notification).data, to, options
+        )
+
+    # send push notification to escort
+    if job.escort.device_token:
+        to = [job.escort.device_token]
+
+        options = {
+            'notification': {
+                'badge': 1,
+                'sound': 'ping.aiff',
+                'body': u'New job is assigned to you'
+            }
+        }
+
+        # Send the push notification with Pushy
+        PushyAPI.sendPushNotification(
+            NotificationSerializer(escort_notification).data, to, options
+        )
 
 
 @app.task
@@ -259,13 +275,10 @@ def notify_of_job_cancelled(context):
             }
         )
 
-    # send push notification to driver & escort
+    # send push notification to driver
     if driver.device_token:
         to = [driver.device_token]
-        data = {
-            'msg_type': c.DRIVER_NOTIFICATION_DELETE_JOB,
-            'message': message
-        }
+
         options = {
             'notification': {
                 'badge': 1,
@@ -274,5 +287,22 @@ def notify_of_job_cancelled(context):
             }
         }
 
-        # Send the push notification with Pushy
-        PushyAPI.sendPushNotification(data, to, options)
+        PushyAPI.sendPushNotification(
+            NotificationSerializer(driver_notification).data, to, options
+        )
+
+    # send push notification to escort
+    if driver.device_token:
+        to = [escort.device_token]
+
+        options = {
+            'notification': {
+                'badge': 1,
+                'sound': 'ping.aiff',
+                'body': u'New job is assigned to you'
+            }
+        }
+
+        PushyAPI.sendPushNotification(
+            NotificationSerializer(escort_notification).data, to, options
+        )
