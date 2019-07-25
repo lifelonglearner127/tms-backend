@@ -66,6 +66,60 @@
     }
   },
   {
+    "model": "account.User",
+    "pk": 7,
+    "fields": {
+        "username": "driver2",
+        "email": "driver2@email.com",
+        "mobile": "000005",
+        "device_token": "7d925fa2a6167c27893127",
+        "name": "Driver2",
+        "role": "D",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 8,
+    "fields": {
+        "username": "escort2",
+        "email": "escort2@email.com",
+        "mobile": "000006",
+        "name": "Escort2",
+        "role": "E",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 9,
+    "fields": {
+        "username": "driver3",
+        "email": "driver3@email.com",
+        "mobile": "000007",
+        "device_token": "7d925fa2a6167c27893127",
+        "name": "Driver3",
+        "role": "D",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "account.User",
+    "pk": 10,
+    "fields": {
+        "username": "escort3",
+        "email": "escort3@email.com",
+        "mobile": "000008",
+        "name": "Escort3",
+        "role": "E",
+        "date_joined": "2013-03-16T17:41:28+00:00",
+        "last_seen": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
     "model": "hr.Department",
     "pk": 1,
     "fields": {
@@ -109,7 +163,40 @@
     "model": "hr.StaffProfile",
     "pk": 4,
     "fields": {
-      "user": 4,
+      "user": 7,
+      "department": 1,
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.StaffProfile",
+    "pk": 5,
+    "fields": {
+      "user": 8,
+      "department": 1,
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.StaffProfile",
+    "pk": 6,
+    "fields": {
+      "user": 9,
+      "department": 1,
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.StaffProfile",
+    "pk": 7,
+    "fields": {
+      "user": 10,
       "department": 1,
       "position": 1,
       "created": "2013-03-16T17:41:28+00:00",
