@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from ..core import constants as c
 
 # models
 from . import models as m
+from ..order.models import VehicleUserBind
 
 # serializer
 from . import serializers as s
@@ -161,9 +163,18 @@ class VehicleViewSet(TMSViewSet):
         get the vehicle status of selected vehicle
         this api will be called when admin hit on the truck icon on dashbaord
         """
-        # todo: get bound of vehicle with driver and escort
-
         plate_num = self.request.query_params.get('plate_num', None)
+        vehicle = get_object_or_404(m.Vehicle, plate_num=plate_num)
+
+        # Get the current driver and escorts of this vehicle
+        try:
+            bind = VehicleUserBind.objects.get(vehicle=vehicle)
+            driver = bind.driver.name
+            escort = bind.escort.name
+        except VehicleUserBind.DoesNotExist:
+            driver = '未知'
+            escort = '未知'
+
         queries = {
             'plate_num': plate_num,
             'fields': 'loc',
@@ -177,10 +188,10 @@ class VehicleViewSet(TMSViewSet):
 
         ret = {
             'plate_num': plate_num,
-            'driver': 'Driver',
-            'escort': 'Escort',
+            'driver': driver,
+            'escort': escort,
             'gpsno': data.get('gpsno', ''),
-            'location': data['loc']['address'],
+            'location': data['loc']['address'].split(' ')[0],
             'speed': data['loc']['speed']
         }
         return Response(

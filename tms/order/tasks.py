@@ -35,9 +35,14 @@ def notify_job_changes(context):
     # send in-app notfication to driver & escort
     message = {
         "vehicle": job.vehicle.plate_num,
-        "customer":
-        job.order.customer.name + ' (' + job.order.customer.mobile + ')',
-        "escort": job.escort.name + ' (' + job.escort.mobile + ')',
+        "customer": {
+            "name": job.order.customer.name,
+            "mobile": job.order.customer.mobile
+        },
+        "escort": {
+            "name": job.escort.name,
+            "mobile": job.escort.mobile
+        },
         "stations": []
     }
 
