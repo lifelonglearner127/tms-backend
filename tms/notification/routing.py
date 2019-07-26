@@ -11,4 +11,8 @@ websocket_urlpatterns = [
         r'^ws/position/(?P<user_pk>[^/]+)/$',
         consumers.PositionConsumer
     ),
+    url(
+        r'^ws/jobposition/(?P<user_pk>[^/]+)/orders/(?P<order_pk>[^/]+)/$',
+        consumers.CustomerJobPositionConsumer
+    ),
 ]

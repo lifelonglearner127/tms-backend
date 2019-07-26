@@ -14,6 +14,57 @@ from ..info.models import Route
 from ..vehicle.models import Vehicle
 
 
+class OrderCart(TimeStampedModel):
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    unit_price = models.FloatField(
+        default=0
+    )
+
+    weight = models.FloatField(
+        default=0
+    )
+
+    loading_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='cart_as_loading_station'
+    )
+
+    quality_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='cart_as_quality_station'
+    )
+
+    unloading_stations = models.ManyToManyField(
+        Station,
+        through='OrderCartUnloadingStation',
+        through_fields=('item', 'unloading_station')
+    )
+
+
+class OrderCartUnloadingStation(models.Model):
+
+    item = models.ForeignKey(
+        OrderCart,
+        on_delete=models.CASCADE
+    )
+
+    unloading_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE
+    )
+
+    weight = models.FloatField(
+        default=0
+    )
+
+
 class Order(TimeStampedModel):
     """
     Order model
@@ -26,7 +77,8 @@ class Order(TimeStampedModel):
         User,
         on_delete=models.SET_NULL,
         related_name='charge_orders',
-        null=True
+        null=True,
+        blank=True
     )
 
     start_due_time = models.DateTimeField(
@@ -127,7 +179,9 @@ class OrderProduct(models.Model):
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
-    loss = models.FloatField()
+    loss = models.FloatField(
+        default=0
+    )
 
     loss_unit = models.CharField(
         max_length=2,
@@ -176,7 +230,10 @@ class OrderProductDeliver(models.Model):
         on_delete=models.CASCADE
     )
 
-    arriving_due_time = models.DateTimeField()
+    arriving_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     weight = models.FloatField()
 

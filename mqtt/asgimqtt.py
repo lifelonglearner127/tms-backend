@@ -292,15 +292,16 @@ def _on_message(client, userdata, message):
             'speed': vehicle['speed']
         })
 
-    # send current vehicle position to position consumer
-    # in order to display on frontend
-    async_to_sync(channel_layer.group_send)(
-        'position',
-        {
-            'type': 'notify_position',
-            'data': positions
-        }
-    )
+    if len(positions):
+        # send current vehicle position to position consumer
+        # in order to display on frontend
+        async_to_sync(channel_layer.group_send)(
+            'position',
+            {
+                'type': 'notify_position',
+                'data': positions
+            }
+        )
 
     Config.load_data_from_db()
 
@@ -416,7 +417,7 @@ def _on_message(client, userdata, message):
                             channel_name,
                             {
                                 'type': 'notify',
-                                'data': json.dumps(data)
+                                'data': data
                             }
                         )
 
@@ -663,7 +664,7 @@ def _on_message(client, userdata, message):
                         channel_name,
                         {
                             'type': 'notify',
-                            'data': json.dumps(data)
+                            'data': data
                         }
                     )
 

@@ -38,7 +38,7 @@ class ProductViewSet(StaffViewSet):
         )
 
 
-class StationViewSet(StaffViewSet):
+class StationViewSet(TMSViewSet):
     """
     Viewset for Loading Station
     """
@@ -47,7 +47,13 @@ class StationViewSet(StaffViewSet):
 
     def create(self, request):
         products = request.data.pop('products', None)
-        customer = request.data.pop('customer', None)
+        if request.user.role == c.USER_ROLE_CUSTOMER:
+            customer = {
+                'id': request.user.customer_profile.id
+            }
+        else:
+            customer = request.data.pop('customer', None)
+
         serializer = s.StationSerializer(
             data=request.data,
             context={
@@ -66,6 +72,13 @@ class StationViewSet(StaffViewSet):
     def update(self, request, pk=None):
         instance = self.get_object()
         products = request.data.pop('products', None)
+        if request.user.role == c.USER_ROLE_CUSTOMER:
+            customer = {
+                'id': request.user.customer_profile.id
+            }
+        else:
+            customer = request.data.pop('customer', None)
+
         customer = request.data.pop('customer', None)
         serializer = s.StationSerializer(
             instance,
@@ -141,6 +154,26 @@ class StationViewSet(StaffViewSet):
         )
 
         serializer = s.OilStationSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='me')
+    def get_customer_stations(self, request):
+        """
+        This api endpoint is for customer app
+        """
+        station_type = self.request.query_params.get(
+            'type', None
+        )
+
+        queryset = m.Station.objects.filter(
+            customer=request.user.customer_profile
+        )
+        if station_type:
+            queryset = queryset.filter(station_type=station_type)
+
+        page = self.paginate_queryset(queryset)
+        serializer = s.WorkStationSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
