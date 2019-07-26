@@ -139,16 +139,18 @@ class StationSerializer(serializers.ModelSerializer):
                 'customer': 'Customer data is missing'
             })
 
-        station = m.Station.objects.create(
-            **validated_data
-        )
+        if customer is not None:
+            try:
+                customer = CustomerProfile.objects.get(
+                    id=customer.get('id', None)
+                )
+            except CustomerProfile.DoesNotExist:
+                customer = None
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION:
-            customer = get_object_or_404(
-                CustomerProfile, id=customer.get('id', None)
-            )
-            station.customer = customer
-            station.save()
+        station = m.Station.objects.create(
+            **validated_data,
+            customer=customer
+        )
 
         if station_type == c.STATION_TYPE_LOADING_STATION:
             for product in products:
@@ -187,11 +189,15 @@ class StationSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION:
-            customer = get_object_or_404(
-                CustomerProfile, id=customer.get('id', None)
-            )
-            instance.customer = customer
+        if customer is not None:
+            try:
+                customer = CustomerProfile.objects.get(
+                    id=customer.get('id', None)
+                )
+            except CustomerProfile.DoesNotExist:
+                customer = None
+
+        instance.customer = customer
 
         if station_type == c.STATION_TYPE_LOADING_STATION:
             instance.products.clear()
