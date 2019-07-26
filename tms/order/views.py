@@ -26,6 +26,7 @@ from ..vehicle.models import Vehicle
 
 # serializers
 from . import serializers as s
+from ..vehicle.serializers import VehiclePositionSerializer
 
 # views
 from ..core.views import TMSViewSet
@@ -549,6 +550,39 @@ class OrderViewSet(TMSViewSet):
         serializer = s.OrderCustomerAppSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, url_path='position')
+    def get_all_vehicle_positions(self, request, pk=None):
+        """
+        Get the current location of all in-progress order-job vehicles
+        This api will be called at most once when customer click monitoring
+        After then vehicle positioning data will be notified via web sockets
+        """
+        order = self.get_object()
+        plate_nums = order.jobs.filter(progress__gt=1).values_list(
+            'vehicle__plate_num', flat=True
+        )
+        body = {
+            'plate_nums': list(plate_nums),
+            'fields': ['loc']
+        }
+        data = G7Interface.call_g7_http_interface(
+            'BULK_VEHICLE_STATUS_INQUIRY',
+            body=body
+        )
+        ret = []
+        for key, value in data.items():
+            if value['code'] == 0:
+                ret.append(value)
+
+        serializer = VehiclePositionSerializer(
+            ret, many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class OrderProductViewSet(viewsets.ModelViewSet):

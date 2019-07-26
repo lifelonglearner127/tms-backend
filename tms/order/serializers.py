@@ -567,13 +567,13 @@ class OrderAdminAppSerializer(OrderSerializer):
             if 'total_weight_measure_unit' in order_product_data:
                 order_product_data['total_weight_measure_unit'] =\
                     order_product_data['total_weight_measure_unit']['value']
-            elif 'price_weight_measure_unit' in order_product_data:
+            if 'price_weight_measure_unit' in order_product_data:
                 order_product_data['price_weight_measure_unit'] =\
                     order_product_data['price_weight_measure_unit']['value']
-            elif 'loss_unit' in order_product_data:
+            if 'loss_unit' in order_product_data:
                 order_product_data['loss_unit'] =\
                     order_product_data['loss_unit']['value']
-            elif 'payment_method' in order_product_data:
+            if 'payment_method' in order_product_data:
                 order_product_data['payment_method'] =\
                     order_product_data['payment_method']['value']
 
@@ -770,13 +770,13 @@ class OrderAdminAppSerializer(OrderSerializer):
             if 'total_weight_measure_unit' in order_product_data:
                 order_product_data['total_weight_measure_unit'] =\
                     order_product_data['total_weight_measure_unit']['value']
-            elif 'price_weight_measure_unit' in order_product_data:
+            if 'price_weight_measure_unit' in order_product_data:
                 order_product_data['price_weight_measure_unit'] =\
                     order_product_data['price_weight_measure_unit']['value']
-            elif 'loss_unit' in order_product_data:
+            if 'loss_unit' in order_product_data:
                 order_product_data['loss_unit'] =\
                     order_product_data['loss_unit']['value']
-            elif 'payment_method' in order_product_data:
+            if 'payment_method' in order_product_data:
                 order_product_data['payment_method'] =\
                     order_product_data['payment_method']['value']
 
