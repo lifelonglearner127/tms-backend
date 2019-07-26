@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from ..core import constants as c
 
 # permissions
-from ..core.permissions import IsDriverOrEscortUser
+from ..core.permissions import IsDriverOrEscortUser, IsCustomerUser
 
 # models
 from . import models as m
@@ -30,8 +30,72 @@ from ..core.views import TMSViewSet
 
 # other
 from ..g7.interfaces import G7Interface
-
 from .tasks import notify_job_changes, bind_vehicle_user
+
+
+class OrderCartViewSet(TMSViewSet):
+
+    queryset = m.OrderCart.objects.all()
+    serializer_class = s.OrderCartSerializer
+    permission_classes = [IsCustomerUser]
+
+    def create(self, request):
+        context = {
+            'product': request.data.pop('product'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station'),
+            'unloading_stations': request.data.pop('unloading_stations'),
+            'customer': request.user.customer_profile
+        }
+
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+
+        context = {
+            'product': request.data.pop('product'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station'),
+            'unloading_stations': request.data.pop('unloading_stations')
+        }
+
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def list(self, request):
+        page = self.paginate_queryset(
+            self.get_queryset().all()
+        )
+
+        serializer = self.serializer_class(
+            page,
+            many=True
+        )
+
+        return self.get_paginated_response(serializer.data)
 
 
 class OrderViewSet(TMSViewSet):

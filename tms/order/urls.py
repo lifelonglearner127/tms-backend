@@ -11,6 +11,9 @@ router.register(
     r'orders', v.OrderViewSet, base_name='order'
 )
 router.register(
+    r'cart', v.OrderCartViewSet, base_name='order-cart'
+)
+router.register(
     r'jobs', v.JobViewSet, base_name='job'
 )
 router.register(
