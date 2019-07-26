@@ -410,11 +410,20 @@ class OrderViewSet(TMSViewSet):
                 total_weight=job['total_weight']
             )
 
+            station_index = 0
             for station in job['stations']:
+                if station_index < 2:
+                    step = station_index
+                    station_index += 1
+                else:
+                    step = route.stations.index(station['station'])
+                    if order.is_same_station:
+                        step += 1
+
                 job_station_obj = m.JobStation.objects.create(
                     job=job_obj,
                     station=station['station'],
-                    step=route.stations.index(station['station'])
+                    step=step
                 )
                 for product in station['products']:
                     m.JobStationProduct.objects.create(
@@ -425,7 +434,6 @@ class OrderViewSet(TMSViewSet):
                             'orderproductdeliver', None
                         )
                     )
-
             notify_job_changes.apply_async(
                 args=[{
                     'job': job_obj.id
