@@ -589,7 +589,8 @@ def _on_message(client, userdata, message):
                         if result is None:
                             cursor.execute("""
                             UPDATE order_job
-                            SET progress=0
+                            SET progress=0,
+                                finished_on=now()
                             WHERE id={}
                             """.format(job_id))
                             Config.vehicles[plate_num]['is_same_station'] =\
