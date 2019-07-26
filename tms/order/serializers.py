@@ -272,12 +272,25 @@ class ShortJobSerializer(serializers.ModelSerializer):
 
 
 class OrderProductDeliverSerializer(serializers.ModelSerializer):
-
+    """
+    Order Product Deliver Serializer
+    """
     unloading_station = ShortStationSerializer(read_only=True)
-    job_delivers = serializers.SerializerMethodField()
 
     class Meta:
         model = m.OrderProductDeliver
+        fields = (
+            'id', 'unloading_station', 'arriving_due_time', 'weight',
+        )
+
+
+class OrderProductDeliverAdminAppSerializer(OrderProductDeliverSerializer):
+    """
+    Order Product Deliver Serializer for Web manager
+    """
+    job_delivers = serializers.SerializerMethodField()
+
+    class Meta(OrderProductDeliverSerializer.Meta):
         fields = (
             'id', 'unloading_station', 'arriving_due_time', 'weight',
             'job_delivers'
@@ -296,6 +309,13 @@ class OrderProductDeliverSerializer(serializers.ModelSerializer):
                 'mission_weight': job_deliver.mission_weight,
             })
         return ret
+
+
+class OrderProductDeliverCustomerAppSerializer(OrderProductDeliverSerializer):
+    """
+    Order Product Deliver Serializer for Customer manager
+    """
+    pass
 
 
 class OrderProductSerializer(serializers.ModelSerializer):
@@ -327,6 +347,24 @@ class OrderProductSerializer(serializers.ModelSerializer):
         )
 
 
+class OrderProductAdminAppSerializer(OrderProductSerializer):
+    """
+    Serializer for Order product for admin manager
+    """
+    unloading_stations = OrderProductDeliverAdminAppSerializer(
+        source='orderproductdeliver_set', many=True, read_only=True
+    )
+
+
+class OrderProductCustomerAppSerializer(OrderProductSerializer):
+    """
+    Serializer for Order product for customer app
+    """
+    unloading_stations = OrderProductDeliverCustomerAppSerializer(
+        source='orderproductdeliver_set', many=True, read_only=True
+    )
+
+
 class ShortOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -338,7 +376,7 @@ class ShortOrderSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     """
-    Order Create and Update Serializer
+    order model serializer
     """
     assignee = ShortUserSerializer(read_only=True)
     customer = ShortCustomerProfileSerializer(read_only=True)
@@ -347,6 +385,20 @@ class OrderSerializer(serializers.ModelSerializer):
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     products = OrderProductSerializer(
+        source='orderproduct_set', many=True, read_only=True
+    )
+
+    class Meta:
+        model = m.Order
+        fields = '__all__'
+
+
+class OrderAdminAppSerializer(OrderSerializer):
+    """
+    1. Order Create and Update Serializer,
+    2. Data view serializer for admin manager
+    """
+    products = OrderProductAdminAppSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
 
@@ -384,17 +436,19 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         # check if assginee exists
         assignee_data = self.context.pop('assignee', None)
-        if assignee_data is None:
-            raise serializers.ValidationError({
-                'assignee': 'Assignee data is missing'
-            })
-
-        try:
-            assignee = m.User.objects.get(id=assignee_data.get('id', None))
-        except m.User.DoesNotExist:
-            raise serializers.ValidationError({
-                'assignee': 'Such user does not exist'
-            })
+        # if assignee_data is None:
+        #     raise serializers.ValidationError({
+        #         'assignee': 'Assignee data is missing'
+        #     })
+        if assignee_data is not None:
+            try:
+                assignee = m.User.objects.get(id=assignee_data.get('id', None))
+            except m.User.DoesNotExist:
+                raise serializers.ValidationError({
+                    'assignee': 'Such user does not exist'
+                })
+        else:
+            assignee = None
 
         # check if customer exists
         customer_data = self.context.pop('customer', None)
@@ -492,6 +546,7 @@ class OrderSerializer(serializers.ModelSerializer):
             customer=customer,
             loading_station=loading_station,
             quality_station=quality_station,
+            order_source=self.context.get('source', c.ORDER_SOURCE_INTERNAL),
             **validated_data
         )
 
@@ -509,14 +564,18 @@ class OrderSerializer(serializers.ModelSerializer):
                     'product': 'Product does not exist'
                 })
 
-            order_product_data['total_weight_measure_unit'] =\
-                order_product_data['total_weight_measure_unit']['value']
-            order_product_data['price_weight_measure_unit'] =\
-                order_product_data['price_weight_measure_unit']['value']
-            order_product_data['loss_unit'] =\
-                order_product_data['loss_unit']['value']
-            order_product_data['payment_method'] =\
-                order_product_data['payment_method']['value']
+            if 'total_weight_measure_unit' in order_product_data:
+                order_product_data['total_weight_measure_unit'] =\
+                    order_product_data['total_weight_measure_unit']['value']
+            elif 'price_weight_measure_unit' in order_product_data:
+                order_product_data['price_weight_measure_unit'] =\
+                    order_product_data['price_weight_measure_unit']['value']
+            elif 'loss_unit' in order_product_data:
+                order_product_data['loss_unit'] =\
+                    order_product_data['loss_unit']['value']
+            elif 'payment_method' in order_product_data:
+                order_product_data['payment_method'] =\
+                    order_product_data['payment_method']['value']
 
             order_product = m.OrderProduct.objects.create(
                 order=order, product=product, **order_product_data
@@ -571,17 +630,20 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         # check if assginee exists
         assignee_data = self.context.pop('assignee', None)
-        if assignee_data is None:
-            raise serializers.ValidationError({
-                'assignee': 'Assignee data is missing'
-            })
+        # if assignee_data is None:
+        #     raise serializers.ValidationError({
+        #         'assignee': 'Assignee data is missing'
+        #     })
 
-        try:
-            assignee = m.User.objects.get(id=assignee_data.get('id', None))
-        except m.User.DoesNotExist:
-            raise serializers.ValidationError({
-                'assignee': 'Such user does not exist'
-            })
+        if assignee_data is not None:
+            try:
+                assignee = m.User.objects.get(id=assignee_data.get('id', None))
+            except m.User.DoesNotExist:
+                raise serializers.ValidationError({
+                    'assignee': 'Such user does not exist'
+                })
+        else:
+            assignee = None
 
         # check if customer exists
         customer_data = self.context.pop('customer', None)
@@ -680,6 +742,7 @@ class OrderSerializer(serializers.ModelSerializer):
         instance.customer = customer
         instance.loading_station = loading_station
         instance.quality_station = quality_station
+        instance.source = self.context.get('source', c.ORDER_SOURCE_INTERNAL)
         instance.save()
 
         # instance.products.clear()
@@ -704,14 +767,18 @@ class OrderSerializer(serializers.ModelSerializer):
                     'product': 'Product does not exist'
                 })
 
-            order_product_data['total_weight_measure_unit'] =\
-                order_product_data['total_weight_measure_unit']['value']
-            order_product_data['price_weight_measure_unit'] =\
-                order_product_data['price_weight_measure_unit']['value']
-            order_product_data['loss_unit'] =\
-                order_product_data['loss_unit']['value']
-            order_product_data['payment_method'] =\
-                order_product_data['payment_method']['value']
+            if 'total_weight_measure_unit' in order_product_data:
+                order_product_data['total_weight_measure_unit'] =\
+                    order_product_data['total_weight_measure_unit']['value']
+            elif 'price_weight_measure_unit' in order_product_data:
+                order_product_data['price_weight_measure_unit'] =\
+                    order_product_data['price_weight_measure_unit']['value']
+            elif 'loss_unit' in order_product_data:
+                order_product_data['loss_unit'] =\
+                    order_product_data['loss_unit']['value']
+            elif 'payment_method' in order_product_data:
+                order_product_data['payment_method'] =\
+                    order_product_data['payment_method']['value']
 
             order_product_id = order_product_data.get('id', None)
             if order_product_id is None:
@@ -769,6 +836,15 @@ class OrderSerializer(serializers.ModelSerializer):
                     })
 
         return instance
+
+
+class OrderCustomerAppSerializer(OrderSerializer):
+    """
+    Data view serializer for customer app
+    """
+    products = OrderProductCustomerAppSerializer(
+        source='orderproduct_set', many=True, read_only=True
+    )
 
 
 class JobMileageField(serializers.Field):

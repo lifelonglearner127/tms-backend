@@ -77,7 +77,8 @@ class Order(TimeStampedModel):
         User,
         on_delete=models.SET_NULL,
         related_name='charge_orders',
-        null=True
+        null=True,
+        blank=True
     )
 
     start_due_time = models.DateTimeField(
@@ -178,7 +179,9 @@ class OrderProduct(models.Model):
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
-    loss = models.FloatField()
+    loss = models.FloatField(
+        default=0
+    )
 
     loss_unit = models.CharField(
         max_length=2,
@@ -227,7 +230,10 @@ class OrderProductDeliver(models.Model):
         on_delete=models.CASCADE
     )
 
-    arriving_due_time = models.DateTimeField()
+    arriving_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     weight = models.FloatField()
 

@@ -14,7 +14,9 @@ from rest_framework.response import Response
 from ..core import constants as c
 
 # permissions
-from ..core.permissions import IsDriverOrEscortUser, IsCustomerUser
+from ..core.permissions import (
+    IsDriverOrEscortUser, IsCustomerUser, OrderPermission
+)
 
 # models
 from . import models as m
@@ -103,19 +105,28 @@ class OrderViewSet(TMSViewSet):
     Order Viewset
     """
     queryset = m.Order.objects.all()
-    serializer_class = s.OrderSerializer
+    serializer_class = s.OrderAdminAppSerializer
     # data_view_serializer_class = s.OrderDataViewSerializer
+    permission_classes = [OrderPermission]
 
     def create(self, request):
+
         context = {
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
             'loading_station': request.data.pop('loading_station'),
             'quality_station': request.data.pop('quality_station'),
             'products': request.data.pop('products')
         }
+        if request.user.role == c.USER_ROLE_CUSTOMER:
+            context['customer'] = {
+                'id': request.user.customer_profile.id
+            }
+            context['source'] = c.ORDER_SOURCE_CUSTOMER
+        else:
+            context['assignee'] = request.data.pop('assignee')
+            context['customer'] = request.data.pop('customer')
+            context['source'] = c.ORDER_SOURCE_INTERNAL
 
-        serializer = s.OrderSerializer(
+        serializer = s.OrderAdminAppSerializer(
             data=request.data, context=context
         )
 
@@ -131,14 +142,21 @@ class OrderViewSet(TMSViewSet):
         serializer_instance = self.get_object()
 
         context = {
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
             'loading_station': request.data.pop('loading_station'),
             'quality_station': request.data.pop('quality_station'),
             'products': request.data.pop('products')
         }
+        if request.user.role == c.USER_ROLE_CUSTOMER:
+            context['customer'] = {
+                'id': request.user.customer_profile.id
+            }
+            context['source'] = c.ORDER_SOURCE_CUSTOMER
+        else:
+            context['assignee'] = request.data.pop('assignee')
+            context['customer'] = request.data.pop('customer')
+            context['source'] = c.ORDER_SOURCE_INTERNAL
 
-        serializer = s.OrderSerializer(
+        serializer = s.OrderAdminAppSerializer(
             serializer_instance,
             data=request.data,
             context=context,
@@ -508,6 +526,29 @@ class OrderViewSet(TMSViewSet):
             {'msg': 'Success'},
             status=status.HTTP_201_CREATED
         )
+
+    @action(
+        detail=False, methods=['get'], url_path='me',
+        permission_classes=[IsCustomerUser]
+    )
+    def get_customer_orders(self, request):
+        queryset = m.Order.objects.filter(
+            customer=request.user.customer_profile
+        )
+
+        order_status = request.query_params.get('status', None)
+        if order_status == c.ORDER_STATUS_PENDING:
+            queryset = queryset.filter(status=order_status)
+        elif order_status == c.ORDER_STATUS_INPROGRESS:
+            queryset = queryset.filter(status=order_status)
+        elif order_status == c.ORDER_STATUS_COMPLETE:
+            queryset = queryset.filter(status=order_status)
+
+        page = self.paginate_queryset(queryset)
+
+        serializer = s.OrderCustomerAppSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
 
 
 class OrderProductViewSet(viewsets.ModelViewSet):

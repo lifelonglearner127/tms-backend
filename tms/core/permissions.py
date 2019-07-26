@@ -35,3 +35,21 @@ class IsCustomerUser(permissions.BasePermission):
         return request.user.is_authenticated and request.user.role in [
             c.USER_ROLE_CUSTOMER
         ]
+
+
+class OrderPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if request.user.role in [c.USER_ROLE_STAFF, c.USER_ROLE_ADMIN]:
+            return True
+
+        if request.user.role == c.USER_ROLE_CUSTOMER:
+            if obj.customer == request.user.customer_profile:
+                return True
+
+        return False
