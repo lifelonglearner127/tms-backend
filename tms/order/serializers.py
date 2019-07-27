@@ -384,6 +384,9 @@ class OrderSerializer(serializers.ModelSerializer):
     quality_station = ShortStationSerializer(read_only=True)
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    arrangement_status = TMSChoiceField(
+        choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
+    )
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )

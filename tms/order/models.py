@@ -109,6 +109,12 @@ class Order(TimeStampedModel):
         default=c.ORDER_STATUS_PENDING
     )
 
+    arrangement_status = models.CharField(
+        max_length=1,
+        choices=c.TRUCK_ARRANGEMENT_STATUS,
+        default=c.TRUCK_ARRANGEMENT_STATUS_PENDING
+    )
+
     loading_station = models.ForeignKey(
         Station,
         on_delete=models.CASCADE,
