@@ -15,6 +15,11 @@ def updated_job(sender, instance, created, **kwargs):
     if instance.progress > c.JOB_PROGRESS_NOT_STARTED:
         r.sadd('jobs', instance.id)
 
+        # set order status to in-progress
+        if instance.order.status == c.ORDER_STATUS_PENDING:
+            instance.order.status = c.ORDER_STATUS_INPROGRESS
+            instance.order.save()
+
     if instance.progress == c.JOB_PROGRESS_COMPLETE:
         r.srem('jobs', instance.id)
         calculate_job_report.apply_async(

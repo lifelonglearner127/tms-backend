@@ -163,7 +163,7 @@
     "model": "hr.StaffProfile",
     "pk": 4,
     "fields": {
-      "user": 7,
+      "user": 4,
       "department": 1,
       "position": 1,
       "created": "2013-03-16T17:41:28+00:00",
@@ -174,7 +174,7 @@
     "model": "hr.StaffProfile",
     "pk": 5,
     "fields": {
-      "user": 8,
+      "user": 7,
       "department": 1,
       "position": 1,
       "created": "2013-03-16T17:41:28+00:00",
@@ -185,7 +185,7 @@
     "model": "hr.StaffProfile",
     "pk": 6,
     "fields": {
-      "user": 9,
+      "user": 8,
       "department": 1,
       "position": 1,
       "created": "2013-03-16T17:41:28+00:00",
@@ -195,6 +195,17 @@
   {
     "model": "hr.StaffProfile",
     "pk": 7,
+    "fields": {
+      "user": 9,
+      "department": 1,
+      "position": 1,
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.StaffProfile",
+    "pk": 8,
     "fields": {
       "user": 10,
       "department": 1,

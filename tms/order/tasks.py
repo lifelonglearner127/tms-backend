@@ -134,6 +134,12 @@ def calculate_job_report(context):
     driver = get_object_or_404(User, id=context['driver'])
     escort = get_object_or_404(User, id=context['escort'])
 
+    if not job.order.jobs.filter(
+        progress__gt=c.JOB_PROGRESS_COMPLETE
+    ).exists():
+        job.order.status = c.ORDER_STATUS_COMPLETE
+        job.order.save()
+
     # unbind vehicle, driver, escort
     if not m.VehicleUserBind.binds_by_admin.filter(
         vehicle=vehicle,
