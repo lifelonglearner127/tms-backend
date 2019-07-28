@@ -3,11 +3,11 @@
       "model": "account.User",
       "pk": 2,
       "fields": {
-          "username": "staff",
-          "email": "staff@email.com",
-          "mobile": "000000",
-          "name": "Staff",
-          "role": "S",
+          "username": "guanli1",
+          "email": "guanli1@outlook.com",
+          "mobile": "133",
+          "name": "管理1",
+          "role": "A",
           "date_joined": "2013-03-16T17:41:28+00:00",
           "last_seen": "2013-03-16T17:41:28+00:00"
       }
@@ -16,11 +16,11 @@
     "model": "account.User",
     "pk": 3,
     "fields": {
-        "username": "driver",
-        "email": "driver@email.com",
-        "mobile": "000001",
+        "username": "siji1",
+        "email": "siji1@outlook.com",
+        "mobile": "131",
         "device_token": "7d925fa2a6167c27893127",
-        "name": "Driver",
+        "name": "司机1",
         "role": "D",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
@@ -30,11 +30,12 @@
     "model": "account.User",
     "pk": 4,
     "fields": {
-        "username": "escort",
-        "email": "escort@email.com",
-        "mobile": "000002",
-        "name": "Escort",
-        "role": "E",
+        "username": "siji2",
+        "email": "siji2@outlook.com",
+        "mobile": "135",
+        "device_token": "7d925fa2a6167c27893127",
+        "name": "司机2",
+        "role": "D",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -43,11 +44,11 @@
     "model": "account.User",
     "pk": 5,
     "fields": {
-        "username": "customer",
-        "email": "customer@email.com",
-        "mobile": "000003",
-        "name": "Customer",
-        "role": "C",
+        "username": "yayun1",
+        "email": "yayun1@outlook.com",
+        "mobile": "132",
+        "name": "押运1",
+        "role": "E",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -56,11 +57,11 @@
     "model": "account.User",
     "pk": 6,
     "fields": {
-        "username": "customer2",
-        "email": "customer2@email.com",
-        "mobile": "000004",
-        "name": "Customer2",
-        "role": "C",
+        "username": "yayun2",
+        "email": "yayun2@outlook.com",
+        "mobile": "136",
+        "name": "押运2",
+        "role": "E",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -69,12 +70,11 @@
     "model": "account.User",
     "pk": 7,
     "fields": {
-        "username": "driver2",
-        "email": "driver2@email.com",
-        "mobile": "000005",
-        "device_token": "7d925fa2a6167c27893127",
-        "name": "Driver2",
-        "role": "D",
+        "username": "yuangong1",
+        "email": "yuangong1@outlook.com",
+        "mobile": "134",
+        "name": "员工1",
+        "role": "S",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -83,11 +83,11 @@
     "model": "account.User",
     "pk": 8,
     "fields": {
-        "username": "escort2",
-        "email": "escort2@email.com",
-        "mobile": "000006",
-        "name": "Escort2",
-        "role": "E",
+        "username": "hdsm",
+        "email": "hdsm@outlook.com",
+        "mobile": "123",
+        "name": "",
+        "role": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -96,12 +96,12 @@
     "model": "account.User",
     "pk": 9,
     "fields": {
-        "username": "driver3",
-        "email": "driver3@email.com",
-        "mobile": "000007",
-        "device_token": "7d925fa2a6167c27893127",
-        "name": "Driver3",
-        "role": "D",
+        "username": "jirun1",
+        "email": "jirun1@outlook.com",
+        "mobile": "1234",
+        "device_token": "",
+        "name": "",
+        "role": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -110,29 +110,93 @@
     "model": "account.User",
     "pk": 10,
     "fields": {
-        "username": "escort3",
-        "email": "escort3@email.com",
-        "mobile": "000008",
-        "name": "Escort3",
-        "role": "E",
+        "username": "zxs",
+        "email": "zxs@outlook.com",
+        "mobile": "12345",
+        "name": "",
+        "role": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
   },
   {
     "model": "hr.Department",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-      "name": "Finance",
+      "name": "管理部",
+      "description": "管理",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.Department",
+    "pk": 3,
+    "fields": {
+      "name": "运输部",
+      "description": "运输",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
     "model": "hr.Position",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-      "name": "Manager",
+      "name": "负责人",
+      "description": "主",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.Position",
+    "pk": 3,
+    "fields": {
+      "name": "员工",
+      "description": "次",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.CustomerProfile",
+    "pk": 3,
+    "fields": {
+      "user": 10,
+      "associated_with": 2,
+      "name": "中兴石",
+      "contact": "李1",
+      "mobile": "151",
+      "address": "Address 1",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.CustomerProfile",
+    "pk": 4,
+    "fields": {
+      "user": 8,
+      "associated_with": 2,
+      "name": "汇东商贸",
+      "contact": "李2",
+      "mobile": "152",
+      "address": "",
+      "created": "2013-03-16T17:41:28+00:00",
+      "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "hr.CustomerProfile",
+    "pk": 5,
+    "fields": {
+      "user": 9,
+      "associated_with": 2,
+      "name": "吉润",
+      "contact": "李",
+      "mobile": "18618493825",
+      "address": "",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -141,9 +205,9 @@
     "model": "hr.StaffProfile",
     "pk": 2,
     "fields": {
-      "user": 2,
-      "department": 1,
-      "position": 1,
+      "user": 3,
+      "department": 3,
+      "position": 3,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -152,9 +216,9 @@
     "model": "hr.StaffProfile",
     "pk": 3,
     "fields": {
-      "user": 3,
-      "department": 1,
-      "position": 1,
+      "user": 6,
+      "department": 3,
+      "position": 3,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -164,8 +228,8 @@
     "pk": 4,
     "fields": {
       "user": 4,
-      "department": 1,
-      "position": 1,
+      "department": 3,
+      "position": 3,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -174,9 +238,9 @@
     "model": "hr.StaffProfile",
     "pk": 5,
     "fields": {
-      "user": 7,
-      "department": 1,
-      "position": 1,
+      "user": 5,
+      "department": 3,
+      "position": 3,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -185,9 +249,9 @@
     "model": "hr.StaffProfile",
     "pk": 6,
     "fields": {
-      "user": 8,
-      "department": 1,
-      "position": 1,
+      "user": 7,
+      "department": 2,
+      "position": 3,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -196,61 +260,32 @@
     "model": "hr.StaffProfile",
     "pk": 7,
     "fields": {
-      "user": 9,
-      "department": 1,
-      "position": 1,
+      "user": 2,
+      "department": 2,
+      "position": 2,
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
-    "model": "hr.StaffProfile",
-    "pk": 8,
-    "fields": {
-      "user": 10,
-      "department": 1,
-      "position": 1,
-      "created": "2013-03-16T17:41:28+00:00",
-      "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
-    "model": "hr.CustomerProfile",
+    "model": "info.ProductCategory",
     "pk": 1,
     "fields": {
-      "user": 5,
-      "associated_with": 2,
-      "name": "Customer Name 1",
-      "contact": "Customer Contact 1",
-      "mobile": "0123456789",
-      "address": "Address 1",
-      "created": "2013-03-16T17:41:28+00:00",
-      "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
-    "model": "hr.CustomerProfile",
-    "pk": 2,
-    "fields": {
-      "user": 6,
-      "associated_with": 2,
-      "name": "Customer Name 2",
-      "contact": "Customer Contact 2",
-      "mobile": "0123456789",
-      "address": "Address 2",
-      "created": "2013-03-16T17:41:28+00:00",
-      "updated": "2013-03-16T17:41:28+00:00"
+        "name": "汽油",
+        "level": "1",
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
     }
   },
   {
     "model": "info.Product",
     "pk": 1,
     "fields": {
-        "name": "Product1",
-        "code": "product-1-code",
-        "category": "G",
-        "price": 1,
-        "description": "This is the description for Product1",
+        "name": "汽油95",
+        "code": "222",
+        "category": 1,
+        "price": 2,
+        "description": "",
         "created": "2013-03-16T17:41:28+00:00",
         "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -259,63 +294,11 @@
       "model": "info.Product",
       "pk": 2,
       "fields": {
-          "name": "Product2",
-          "code": "product-2-code",
-          "category": "G",
+          "name": "汽油92",
+          "code": "111",
+          "category": 1,
           "price": 1,
-          "description": "This is the description for Product2",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Product",
-      "pk": 3,
-      "fields": {
-          "name": "Product3",
-          "code": "product-3-code",
-          "category": "G",
-          "price": 1,
-          "description": "This is the description for Product3",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Product",
-      "pk": 4,
-      "fields": {
-          "name": "Product4",
-          "code": "product-4-code",
-          "category": "O",
-          "price": 1,
-          "description": "This is the description for Product4",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Product",
-      "pk": 5,
-      "fields": {
-          "name": "Product5",
-          "code": "product-5-code",
-          "category": "O",
-          "price": 1,
-          "description": "This is the description for Product6",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Product",
-      "pk": 6,
-      "fields": {
-          "name": "Product6",
-          "code": "product-6-code",
-          "category": "O",
-          "price": 1,
-          "description": "This is the description for Product6",
+          "description": "",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -324,19 +307,19 @@
       "model": "info.Station",
       "pk": 1,
       "fields": {
-          "name": "Loading A",
-          "contact": "Zhang Shi Jun",
-          "mobile": "123456789",
-          "address": "Tongzhou District Beijing",
+          "name": "滨阳化工",
+          "contact": "王1",
+          "mobile": "141",
+          "address": "山东省滨州市阳信县劳店镇工业七路",
           "station_type": "L",
-          "longitude": 117.397428,
-          "latitude": 39.90923,
+          "longitude": 117.62865,
+          "latitude": 37.68002,
           "radius": 100,
           "price": 1,
           "products": [1,2],
           "working_time": 1,
           "working_time_measure_unit": "H",
-          "average_time": 2,
+          "average_time": 1,
           "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
@@ -346,19 +329,19 @@
       "model": "info.Station",
       "pk": 2,
       "fields": {
-          "name": "Loading B",
-          "contact": "Zhen He",
-          "mobile": "123456789",
-          "address": "Tongzhou District Beijing",
-          "station_type": "L",
-          "longitude": 115.397428,
-          "latitude": 39.90923,
+          "name": "滨阳化工",
+          "contact": "张1",
+          "mobile": "161",
+          "address": "山东省滨州市阳信县劳店镇工业七路",
+          "station_type": "Q",
+          "longitude": 117.62865,
+          "latitude": 37.68002,
           "radius": 100,
           "price": 1,
           "products": [1,2],
           "working_time": 1,
           "working_time_measure_unit": "H",
-          "average_time": 2,
+          "average_time": 1,
           "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
@@ -368,19 +351,20 @@
       "model": "info.Station",
       "pk": 3,
       "fields": {
-          "name": "Loading C",
-          "contact": "Zhen Ge",
-          "mobile": "123456789",
-          "address": "Jilin",
-          "station_type": "L",
-          "longitude": 114.397428,
-          "latitude": 39.90923,
+          "name": "大学东路",
+          "contact": "高3",
+          "mobile": "183",
+          "address": "山东省德州市德城区宋官屯街道康博大道86",
+          "station_type": "U",
+          "longitude": 116.36605,
+          "latitude": 37.46102,
           "radius": 100,
           "price": 1,
           "products": [1,2],
+          "customer": 4,
           "working_time": 1,
           "working_time_measure_unit": "H",
-          "average_time": 2,
+          "average_time": 1,
           "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
@@ -390,20 +374,21 @@
       "model": "info.Station",
       "pk": 4,
       "fields": {
-          "name": "Loading D",
-          "contact": "D Manager",
-          "mobile": "123456789",
-          "address": "Chaoyang District Beijing",
-          "station_type": "L",
-          "longitude": 113.397428,
-          "latitude": 39.90923,
+          "name": "铁西大街",
+          "contact": "高2",
+          "mobile": "182",
+          "address": "河北省沧州市新华区南大街街道交通南大道58摩卡小镇(交通南大道)",
+          "station_type": "U",
+          "longitude": 116.86844,
+          "latitude": 38.29849,
           "radius": 100,
           "price": 1,
           "products": [1,2],
+          "customer": 3,
           "working_time": 1,
-          "working_time_measure_unit": "M",
+          "working_time_measure_unit": "H",
           "average_time": 2,
-          "average_time_measure_unit": "M",
+          "average_time_measure_unit": "H",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -412,60 +397,17 @@
       "model": "info.Station",
       "pk": 5,
       "fields": {
-          "name": "Loading E",
-          "contact": "E Manager",
-          "mobile": "123456789",
-          "address": "Shen Zhen District Beijing",
-          "station_type": "L",
-          "longitude": 112.397428,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 5,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "M",
-          "average_time": 2,
-          "average_time_measure_unit": "M",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 6,
-      "fields": {
-          "name": "Loading F",
-          "contact": "F Manager",
-          "mobile": "123456789",
-          "address": "Shang hai",
-          "station_type": "L",
-          "longitude": 111.397428,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "M",
-          "average_time": 2,
-          "average_time_measure_unit": "M",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 7,
-      "fields": {
-          "name": "UnLoading A",
-          "contact": "UnLoading A",
-          "mobile": "123456789",
-          "address": "UnLoading A",
+          "name": "海河西路",
+          "contact": "高1",
+          "mobile": "181",
+          "address": "河北省沧州市运河区南陈屯乡海河西路16号",
           "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 39.90933,
+          "longitude": 116.83136,
+          "latitude": 38.273,
           "radius": 100,
           "price": 1,
           "products": [1,2],
+          "customer": 3,
           "working_time": 1,
           "working_time_measure_unit": "H",
           "average_time": 2,
@@ -475,276 +417,13 @@
       }
   },
   {
-      "model": "info.Station",
-      "pk": 8,
-      "fields": {
-          "name": "UnLoading B",
-          "contact": "UnLoading B",
-          "mobile": "123456789",
-          "address": "UnLoading B",
-          "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 38.910923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "H",
-          "average_time": 2,
-          "average_time_measure_unit": "H",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 9,
-      "fields": {
-          "name": "UnLoading C",
-          "contact": "C Manager",
-          "mobile": "123456789",
-          "address": "Beijing",
-          "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 37.90923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "H",
-          "average_time": 2,
-          "average_time_measure_unit": "H",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 10,
-      "fields": {
-          "name": "UnLoading D",
-          "contact": "D Manager",
-          "mobile": "123456789",
-          "address": "Shang hai",
-          "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 36.90923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "M",
-          "average_time": 2,
-          "average_time_measure_unit": "M",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 11,
-      "fields": {
-          "name": "UnLoading E",
-          "contact": "E Manager",
-          "mobile": "123456789",
-          "address": "UnLoading A",
-          "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 35.90923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "M",
-          "average_time": 2,
-          "average_time_measure_unit": "M",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 12,
-      "fields": {
-          "name": "UnLoading F",
-          "contact": "F Manager",
-          "mobile": "123456789",
-          "address": "Loading B",
-          "station_type": "U",
-          "longitude": 116.397428,
-          "latitude": 34.90923,
-          "radius": 100,
-          "price": 1,
-          "products": [1,2],
-          "working_time": 1,
-          "working_time_measure_unit": "M",
-          "average_time": 2,
-          "average_time_measure_unit": "M",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 13,
-      "fields": {
-          "name": "Oil A",
-          "contact": "Oil A",
-          "mobile": "123456789",
-          "address": "Oil A",
-          "station_type": "O",
-          "longitude": 116.397428,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 1,
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 14,
-      "fields": {
-          "name": "Oil B",
-          "contact": "Oil B",
-          "mobile": "123456789",
-          "address": "Loading B",
-          "station_type": "O",
-          "longitude": 114.397428,
-          "latitude": 35.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 2,
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 15,
-      "fields": {
-          "name": "Oil C",
-          "contact": "C Manager",
-          "mobile": "123456789",
-          "address": "Beijing",
-          "station_type": "O",
-          "longitude": 116.397428,
-          "latitude": 38.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 3,
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 16,
-      "fields": {
-          "name": "Oil D",
-          "contact": "D Manager",
-          "mobile": "123456789",
-          "address": "Shang hai",
-          "station_type": "O",
-          "longitude": 119.397428,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 1,
-          "price_vary_duration_unit": "Y",
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 17,
-      "fields": {
-          "name": "Oil E",
-          "contact": "E Manager",
-          "mobile": "123456789",
-          "address": "Oil A",
-          "station_type": "O",
-          "longitude": 114.392428,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 2,
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-      "model": "info.Station",
-      "pk": 18,
-      "fields": {
-          "name": "Oil F",
-          "contact": "F Manager",
-          "mobile": "123456789",
-          "address": "Loading B",
-          "station_type": "O",
-          "longitude": 116.397422,
-          "latitude": 39.90923,
-          "radius": 100,
-          "price": 1,
-          "price_vary_duration": 3,
-          "created": "2013-03-16T17:41:28+00:00",
-          "updated": "2013-03-16T17:41:28+00:00"
-      }
-  },
-  {
-    "model": "info.Station",
-    "pk": 19,
+    "model": "info.Route",
+    "pk": 1,
     "fields": {
-        "name": "Quality Station A",
-        "contact": "Quality Station A Contact",
-        "mobile": "123456789",
-        "address": "Quality Station A Address",
-        "station_type": "Q",
-        "longitude": 116.396428,
-        "latitude": 39.90923,
-        "radius": 100,
-        "price": 1,
-        "working_time": 1,
-        "working_time_measure_unit": "H",
-        "average_time": 2,
-        "average_time_measure_unit": "H",
-        "created": "2013-03-16T17:41:28+00:00",
-        "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
-    "model": "info.Station",
-    "pk": 20,
-    "fields": {
-        "name": "Quality Station B",
-        "contact": "Quality Station B Contact",
-        "mobile": "123456789",
-        "address": "Quality Station B Address",
-        "station_type": "Q",
-        "longitude": 116.357428,
-        "latitude": 39.90923,
-        "radius": 100,
-        "price": 1,
-        "working_time": 1,
-        "working_time_measure_unit": "H",
-        "average_time": 2,
-        "average_time_measure_unit": "H",
-        "created": "2013-03-16T17:41:28+00:00",
-        "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
-    "model": "info.Station",
-    "pk": 21,
-    "fields": {
-        "name": "Black dot",
-        "station_type": "B",
-        "longitude": 106.357428,
-        "latitude": 49.90923,
-        "radius": 100,
-        "notification_message": "Do not run at high speed",
+        "name": "路书1",
+        "path": [1, 4, 5],
+        "policy": 0,
+        "distance": 149,
         "created": "2013-03-16T17:41:28+00:00",
         "updated": "2013-03-16T17:41:28+00:00"
     }
@@ -793,29 +472,5 @@
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
-  },
-  {
-    "model": "info.Route",
-    "pk": 1,
-    "fields": {
-        "name": "A-A-A-B-C",
-        "path": [1,19,7,8,9],
-        "policy": 0,
-        "distance": 408628,
-        "created": "2013-03-16T17:41:28+00:00",
-        "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
-    "model": "info.Route",
-    "pk": 2,
-    "fields": {
-        "name": "A-A-A",
-        "path": [1,19,7],
-        "policy": 0,
-        "distance": 112054,
-        "created": "2013-03-16T17:41:28+00:00",
-        "updated": "2013-03-16T17:41:28+00:00"
-    }
   }
 ]

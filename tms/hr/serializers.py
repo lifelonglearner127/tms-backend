@@ -93,6 +93,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
 
 class StaffProfileSerializer(serializers.ModelSerializer):
 
+    driver_license = DriverLicenseSerializer(read_only=True)
     department = ShortDepartmentSerializer(read_only=True)
     position = ShortPositionSerializer(read_only=True)
 
@@ -122,6 +123,14 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
         # check user role
         user_data['role'] = user_data['role']['value']
+
+        if user_data['role'] == c.USER_ROLE_DRIVER:
+            driver_license_data = self.context.get('driver_license', None)
+            if driver_license_data is None:
+                raise serializers.ValidationError({
+                    'license': 'Driver license data is missing'
+                })
+
         user = m.User.objects.create_user(**user_data)
 
         department_data = self.context.get('department', None)
@@ -136,16 +145,15 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             id=position_data.get('id', None)
         )
 
-        driver_license = self.context.get('driver_license', None)
-        if driver_license is not None:
-            driver_license = m.DriverLicense.objects.create(
-                **driver_license
-            )
+        driver_license = m.DriverLicense.objects.create(
+            **driver_license_data
+        )
 
         profile = m.StaffProfile.objects.create(
             user=user,
             department=department,
             position=position,
+            driver_license=driver_license,
             **validated_data
         )
         return profile
@@ -172,11 +180,18 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'mobile': 'Such mobile already exisits'
             })
 
+        user_data['role'] = user_data['role']['value']
+        if user_data['role'] == c.USER_ROLE_DRIVER:
+            driver_license_data = self.context.get('driver_license', None)
+            if driver_license_data is None:
+                raise serializers.ValidationError({
+                    'license': 'Driver License data is missing'
+                })
+
         password = user_data.pop('password', None)
         if password is not None:
             instance.user.set_password(password)
 
-        user_data['role'] = user_data['role']['value']
         for (key, value) in user_data.items():
             setattr(instance.user, key, value)
         instance.user.save()
@@ -195,6 +210,17 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+
+        if instance.driver_license is None:
+            driver_license = m.DriverLicense.objects.create(
+                **driver_license_data
+            )
+            instance.driver_license = driver_license
+        else:
+            for (key, value) in driver_license_data.items():
+                setattr(instance.driver_license, key, value)
+
+        instance.driver_license.save()
 
         instance.department = department
         instance.position = position
