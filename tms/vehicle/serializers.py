@@ -16,6 +16,13 @@ class FuelConsumptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TireSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Tire
+        fields = '__all__'
+
+
 class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle

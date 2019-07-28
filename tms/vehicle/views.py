@@ -287,3 +287,9 @@ class FuelConsumptionViewSet(StaffViewSet):
 
     queryset = m.FuelConsumption.objects.all()
     serializer_class = s.FuelConsumptionSerializer
+
+
+class TireViewSet(StaffViewSet):
+
+    queryset = m.Tire.objects.all()
+    serializer_class = s.TireSerializer

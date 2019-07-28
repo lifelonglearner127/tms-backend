@@ -16,6 +16,11 @@ router.register(
     base_name='fuel-consumptions'
 )
 router.register(
+    r'tires',
+    v.TireViewSet,
+    base_name='tires'
+)
+router.register(
     r'vehicle-maintenances',
     v.VehicleMaintenanceRequestViewSet,
     base_name='vehicle-maintenances'
