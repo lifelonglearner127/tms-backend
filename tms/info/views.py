@@ -16,6 +16,12 @@ from ..core.serializers import ChoiceSerializer
 from ..core.views import StaffViewSet, TMSViewSet
 
 
+class ProductCategoryViewSet(StaffViewSet):
+    queryset = m.ProductCategory.objects.all()
+    serializer_class = s.ProductCategorySerializer
+    short_serializer_class = s.ShortProductCategorySerializer
+
+
 class ProductViewSet(StaffViewSet):
     """
     Viewset for products
@@ -23,6 +29,37 @@ class ProductViewSet(StaffViewSet):
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
+
+    def create(self, request):
+        context = {
+            'category': request.data.pop('category')
+        }
+
+        serializer = s.ProductSerializer(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'category': request.data.pop('category')
+        }
+
+        serializer = s.ProductSerializer(
+            instance, data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, url_path="categories")
     def get_product_cateogires(self, request):

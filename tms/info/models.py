@@ -7,6 +7,23 @@ from ..core.models import TimeStampedModel, BasicContactModel
 from ..hr.models import CustomerProfile
 
 
+class ProductCategory(TimeStampedModel):
+
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    level = models.PositiveIntegerField(
+        default=1
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
 class Product(TimeStampedModel):
     """
     Product model
@@ -21,10 +38,9 @@ class Product(TimeStampedModel):
         unique=True
     )
 
-    category = models.CharField(
-        max_length=10,
-        choices=c.PRODUCT_CATEGORY,
-        default=c.PRODUCT_CATEGORY_GASOLINE
+    category = models.ForeignKey(
+        ProductCategory,
+        on_delete=models.CASCADE
     )
 
     price = models.DecimalField(
