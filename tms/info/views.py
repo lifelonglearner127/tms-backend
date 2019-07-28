@@ -302,3 +302,48 @@ class RouteViewSet(TMSViewSet):
             s.RoutePointSerializer(instance).data,
             status=status.HTTP_200_OK
         )
+
+
+class TransportationDistanceViewSet(StaffViewSet):
+
+    queryset = m.TransportationDistance.objects.all()
+    serializer_class = s.TransportationDistanceSerializer
+
+    def create(self, request):
+        context = {
+            'start_point': request.data.pop('start_point'),
+            'end_point': request.data.pop('end_point')
+        }
+        serializer = s.TransportationDistanceSerializer(
+            data=request.data,
+            context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'start_point': request.data.pop('start_point'),
+            'end_point': request.data.pop('end_point')
+        }
+        serializer = s.TransportationDistanceSerializer(
+            instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

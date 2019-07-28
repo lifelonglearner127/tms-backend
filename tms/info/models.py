@@ -202,6 +202,38 @@ class Station(BasicContactModel):
         return self.name
 
 
+class TransportationDistance(TimeStampedModel):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    start_point = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='start_points'
+    )
+
+    end_point = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='end_points'
+    )
+
+    distance = models.FloatField(
+        default=0
+    )
+
+    average_time = models.FloatField(
+        default=1
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
 class Route(TimeStampedModel):
 
     name = models.CharField(

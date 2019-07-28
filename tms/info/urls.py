@@ -19,6 +19,11 @@ router.register(
     v.StationViewSet,
     base_name='stations'
 )
+router.register(
+    r'transportation-distance',
+    v.TransportationDistanceViewSet,
+    base_name='transportation-distance'
+)
 
 router.register(
     r'routes',

@@ -390,3 +390,86 @@ class RoutePointSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'path'
         )
+
+
+class TransportationDistanceSerializer(serializers.ModelSerializer):
+
+    start_point = ShortStationSerializer(read_only=True)
+    end_point = ShortStationSerializer(read_only=True)
+
+    class Meta:
+        model = m.TransportationDistance
+        fields = '__all__'
+
+    def create(self, validated_data):
+        start_point_data = self.context.get('start_point')
+        if start_point_data is None:
+            raise serializers.ValidationError({
+                'start_point': 'Start point data is missing'
+            })
+        try:
+            start_point = m.Station.objects.get(
+                id=start_point_data.get('id', None)
+            )
+        except m.Station.DoesNotExist:
+            raise serializers.ValidationError({
+                'start_point': 'Such station data does not exist'
+            })
+
+        end_point_data = self.context.get('end_point')
+        if end_point_data is None:
+            raise serializers.ValidationError({
+                'end_point': 'End point data is missing'
+            })
+        try:
+            end_point = m.Station.objects.get(
+                id=end_point_data.get('id', None)
+            )
+        except m.Station.DoesNotExist:
+            raise serializers.ValidationError({
+                'end_point': 'Such station data does not exist'
+            })
+
+        return m.TransportationDistance.objects.create(
+            start_point=start_point,
+            end_point=end_point,
+            **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        start_point_data = self.context.get('start_point')
+        if start_point_data is None:
+            raise serializers.ValidationError({
+                'start_point': 'Start point data is missing'
+            })
+        try:
+            start_point = m.Station.objects.get(
+                id=start_point_data.get('id', None)
+            )
+        except m.Station.DoesNotExist:
+            raise serializers.ValidationError({
+                'start_point': 'Such station data does not exist'
+            })
+
+        end_point_data = self.context.get('end_point')
+        if end_point_data is None:
+            raise serializers.ValidationError({
+                'end_point': 'End point data is missing'
+            })
+        try:
+            end_point = m.Station.objects.get(
+                id=end_point_data.get('id', None)
+            )
+        except m.Station.DoesNotExist:
+            raise serializers.ValidationError({
+                'end_point': 'Such station data does not exist'
+            })
+
+        instance.start_point = start_point
+        instance.end_point = end_point
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
