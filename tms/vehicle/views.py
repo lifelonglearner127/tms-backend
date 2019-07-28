@@ -15,7 +15,7 @@ from . import serializers as s
 from ..core.serializers import ChoiceSerializer
 
 # views
-from ..core.views import TMSViewSet, ApproveViewSet
+from ..core.views import TMSViewSet, ApproveViewSet, StaffViewSet
 from ..g7.interfaces import G7Interface
 
 
@@ -281,3 +281,9 @@ class VehicleMaintenanceRequestViewSet(ApproveViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class FuelConsumptionViewSet(StaffViewSet):
+
+    queryset = m.FuelConsumption.objects.all()
+    serializer_class = s.FuelConsumptionSerializer

@@ -231,6 +231,26 @@ class Vehicle(TimeStampedModel):
         return self.plate_num
 
 
+class FuelConsumption(TimeStampedModel):
+
+    vehicle_type = models.CharField(
+        max_length=100
+    )
+
+    high_way = models.FloatField(
+        default=0
+    )
+
+    normal_way = models.FloatField(
+        default=0
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
 class VehicleMaintenanceRequest(ApprovedModel):
 
     vehicle = models.ForeignKey(

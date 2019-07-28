@@ -9,6 +9,13 @@ from . import models as m
 from ..core.serializers import TMSChoiceField
 
 
+class FuelConsumptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.FuelConsumption
+        fields = '__all__'
+
+
 class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
