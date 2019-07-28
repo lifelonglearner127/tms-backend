@@ -70,6 +70,49 @@ class Product(TimeStampedModel):
         return self.name
 
 
+class AlarmSetting(TimeStampedModel):
+
+    rapid_acceleration = models.PositiveIntegerField(
+        default=0
+    )
+
+    rapid_deceleration = models.PositiveIntegerField(
+        default=0
+    )
+
+    sharp_turn = models.PositiveIntegerField(
+        default=0
+    )
+
+    over_speed = models.PositiveIntegerField(
+        default=0
+    )
+
+    over_speed_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+    rotation_speed = models.PositiveIntegerField(
+        default=0
+    )
+
+    vehicle_review_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+    driver_license_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+    vehicle_operation_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+    vehicle_insurance_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+
 class Station(BasicContactModel):
     """
     Station model, used as base class

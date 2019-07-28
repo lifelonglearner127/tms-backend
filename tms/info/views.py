@@ -13,10 +13,47 @@ from . import serializers as s
 from ..core.serializers import ChoiceSerializer
 
 # views
-from ..core.views import StaffViewSet, TMSViewSet
+from ..core.views import StaffViewSet, TMSViewSet, StaffAPIView
+
+
+class AlarmSettingAPIView(StaffAPIView):
+
+    def get(self, request):
+        instance = m.AlarmSetting.objects.first()
+        if instance is None:
+            return Response(
+                None,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            s.AlarmSettingSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        instance = m.AlarmSetting.objects.first()
+        if instance is None:
+            serializer = s.AlarmSettingSerializer(
+                data=request.data
+            )
+        else:
+            serializer = s.AlarmSettingSerializer(
+                instance,
+                data=request.data,
+                partial=True
+            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class ProductCategoryViewSet(StaffViewSet):
+
     queryset = m.ProductCategory.objects.all()
     serializer_class = s.ProductCategorySerializer
     short_serializer_class = s.ShortProductCategorySerializer

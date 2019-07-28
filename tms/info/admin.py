@@ -3,6 +3,11 @@ from django.contrib import admin
 from . import models as m
 
 
+@admin.register(m.AlarmSetting)
+class AlarmSettingAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.ProductCategory)
 class ProductCategoryAdmin(admin.ModelAdmin):
     pass

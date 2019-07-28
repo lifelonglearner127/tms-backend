@@ -113,6 +113,13 @@ class ProductSerializer(serializers.ModelSerializer):
         return ret
 
 
+class AlarmSettingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.AlarmSetting
+        fields = '__all__'
+
+
 class ShortStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Loading Station
