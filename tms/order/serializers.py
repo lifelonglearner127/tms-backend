@@ -748,8 +748,10 @@ class OrderAdminAppSerializer(OrderSerializer):
         instance.source = self.context.get('source', c.ORDER_SOURCE_INTERNAL)
         instance.save()
 
+        old_products = set(instance.products.values_list('id', flat=True))
         # instance.products.clear()
 
+        new_products = set()
         # save models
         for order_product_data in order_products_data:
             unloading_stations_data = order_product_data.pop(
@@ -783,6 +785,9 @@ class OrderAdminAppSerializer(OrderSerializer):
                 order_product_data['payment_method'] =\
                     order_product_data['payment_method']['value']
 
+            old_delivers = set()
+            new_delivers = set()
+
             order_product_id = order_product_data.get('id', None)
             if order_product_id is None:
                 order_product = m.OrderProduct.objects.create(
@@ -797,6 +802,12 @@ class OrderAdminAppSerializer(OrderSerializer):
                 for (key, value) in order_product_data.items():
                     setattr(order_product, key, value)
                 order_product.save()
+
+                old_delivers = set(
+                    order_product.unloading_stations.values_list(
+                        'id', flat=True
+                    )
+                )
 
             for unloading_station_data in unloading_stations_data:
                 unloading_station_data.pop('job_delivers', None)
@@ -832,11 +843,24 @@ class OrderAdminAppSerializer(OrderSerializer):
                             setattr(order_product_deliver, key, value)
 
                         order_product_deliver.save()
+                    new_delivers.add(unloading_station.id)
 
                 except Station.DoesNotExist:
                     raise serializers.ValidationError({
                         'product': 'Product does not exist'
                     })
+
+            m.OrderProductDeliver.objects.filter(
+                order_product=order_product,
+                unloading_station__id__in=old_delivers.difference(new_delivers)
+            ).delete()
+
+            new_products.add(product.id)
+
+        m.OrderProduct.objects.filter(
+            order=instance,
+            product__id__in=old_products.difference(new_products)
+        ).delete()
 
         return instance
 
