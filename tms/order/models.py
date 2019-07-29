@@ -468,28 +468,23 @@ class JobReport(models.Model):
     month = MonthField()
 
     total_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
+        default=0
     )
 
     empty_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
+        default=0
     )
 
     heavy_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
+        default=0
     )
 
     highway_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
+        default=0
     )
 
     normalway_mileage = models.PositiveIntegerField(
-        null=True,
-        blank=True
+        default=0
     )
 
     def __str__(self):

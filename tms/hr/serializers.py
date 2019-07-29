@@ -145,9 +145,11 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             id=position_data.get('id', None)
         )
 
-        driver_license = m.DriverLicense.objects.create(
-            **driver_license_data
-        )
+        driver_license = None
+        if user_data['role'] == c.USER_ROLE_DRIVER:
+            driver_license = m.DriverLicense.objects.create(
+                **driver_license_data
+            )
 
         profile = m.StaffProfile.objects.create(
             user=user,
@@ -211,16 +213,17 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if instance.driver_license is None:
-            driver_license = m.DriverLicense.objects.create(
-                **driver_license_data
-            )
-            instance.driver_license = driver_license
-        else:
-            for (key, value) in driver_license_data.items():
-                setattr(instance.driver_license, key, value)
+        if user_data['role'] == c.USER_ROLE_DRIVER:
+            if instance.driver_license is None:
+                driver_license = m.DriverLicense.objects.create(
+                    **driver_license_data
+                )
+                instance.driver_license = driver_license
+            else:
+                for (key, value) in driver_license_data.items():
+                    setattr(instance.driver_license, key, value)
 
-        instance.driver_license.save()
+                instance.driver_license.save()
 
         instance.department = department
         instance.position = position

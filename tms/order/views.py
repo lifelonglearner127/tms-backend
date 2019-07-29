@@ -1122,7 +1122,7 @@ class JobReportViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(
             request.user.report.all()
         )
-        serializer = s.JobReportSEr(
+        serializer = s.DriverJobReportSerializer(
             page,
             many=True,
             context={'request': request}
