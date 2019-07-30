@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytz import timezone as tz
 import requests
 
 from django.conf import settings
@@ -656,50 +657,68 @@ class JobViewSet(TMSViewSet):
     def get_vehicle_playback_by_job(self, request, pk=None):
         job = self.get_object()
 
-        queries = {
-            'plate_num': job.vehicle.plate_num,
-            'from': job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
-            'to': job.finished_on.strftime('%Y-%m-%d %H:%M:%S'),
-            'timeInterval': 10
+        start_time = timezone.localtime(job.started_on).strftime(
+            '%Y-%m-%d %H:%M:%S'
+        )
+        finish_time = timezone.localtime(job.finished_on).strftime(
+            '%Y-%m-%d %H:%M:%S'
+        )
+        results = {
+            'total_distance': 0,
+            'paths': [],
+            'meta': []
         }
-
-        try:
-            data = G7Interface.call_g7_http_interface(
-                'VEHICLE_HISTORY_TRACK_QUERY',
-                queries=queries
-            )
-            if data is None:
-                results = []
-            else:
-                paths = []
-
-                index = 0
+        while 1:
+            queries = {
+                'plate_num': job.vehicle.plate_num,
+                'from': start_time,
+                'to': finish_time,
+                'timeInterval': '10'
+            }
+            try:
+                data = G7Interface.call_g7_http_interface(
+                    'VEHICLE_HISTORY_TRACK_QUERY',
+                    queries=queries
+                )
                 for x in data:
-                    paths.append([x.pop('lng'), x.pop('lat')])
-                    x['no'] = index
-                    x['time'] = datetime.utcfromtimestamp(
-                        int(x['time'])/1000
+                    results['paths'].append([x.pop('lng'), x.pop('lat')])
+                    results['total_distance'] += round(x['distance'] / 100)
+                    x['distance'] = round(
+                        results['total_distance'] / 1000, 2
+                    )
+                    x['time'] = datetime.fromtimestamp(
+                        int(x['time'])/1000, tz=tz('Asia/Shanghai')
                     ).strftime('%Y-%m-%d %H:%M:%S')
-                    index = index + 1
 
+                results['meta'].extend(data)
+
+                if len(data) == 1000:
+                    start_time = datetime.strptime(
+                        data[999]['time'], '%Y-%m-%d %H:%M:%S'
+                    )
+                    start_time = start_time + timedelta(seconds=1)
+                    start_time = start_time.strftime('%Y-%m-%d %H:%M:%S')
+
+                else:
+                    break
+            except Exception:
                 results = {
-                    'paths': paths,
-                    'meta': data
-                }
-
-            return Response(
-                results,
-                status=status.HTTP_200_OK
-            )
-        except Exception:
-            return Response(
-                {
                     'result': {
                         'code': '1',
                         'msg': 'g7 error'
                     }
                 }
+                break
+
+        if 'total_distance' in results:
+            results['total_distance'] = round(
+                results['total_distance'] / 1000, 2
             )
+
+        return Response(
+            results,
+            status=status.HTTP_200_OK
+        )
 
     @action(
         detail=False, url_path='mileage'

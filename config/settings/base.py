@@ -24,7 +24,7 @@ env.read_env(str(ROOT_DIR.path(".env")))
 DEBUG = env.bool("DJANGO_DEBUG", False)
 # LANGUAGE_CODE = 'zh-hans'   # en-us
 LANGUAGE_CODE = 'en-us'   # en-us
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
