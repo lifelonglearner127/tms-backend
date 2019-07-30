@@ -390,6 +390,7 @@ class OrderSerializer(serializers.ModelSerializer):
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
+    created = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = m.Order
@@ -1318,10 +1319,18 @@ class JobTimeDurationSerializer(serializers.ModelSerializer):
         if instance.finished_on is not None:
             time_list.append(instance.finished_on)
 
-        durations = [
-            round((time_list[i + 1] - time_list[i]).total_seconds() / 60)
-            for i in range(len(time_list) - 1)
-        ]
+        station_duration = []
+        for i in range(len(time_list) - 1):
+            if i % 4 == 0:
+                station_duration = []
+            elif i % 4 == 3:
+                durations.append(station_duration)
+
+            station_duration.append(
+                round(
+                    (time_list[i + 1] - time_list[i]).total_seconds() / 60
+                )
+            )
 
         return durations
 
