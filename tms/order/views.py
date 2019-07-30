@@ -737,7 +737,7 @@ class JobViewSet(TMSViewSet):
     )
     def get_documents(self, request):
         page = self.paginate_queryset(
-            m.Job.objects.all()
+            m.Job.completed_jobs.all()
         )
         serializer = s.JobDocumentSerializer(
             page,
@@ -751,7 +751,7 @@ class JobViewSet(TMSViewSet):
     )
     def get_time(self, request):
         page = self.paginate_queryset(
-            m.Job.objects.all(),
+            m.Job.completed_jobs.all(),
         )
 
         serializer = s.JobTimeDurationSerializer(page, many=True)

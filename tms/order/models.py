@@ -344,6 +344,11 @@ class Job(models.Model):
         through_fields=('job', 'station')
     )
 
+    objects = models.Manager()
+    completed_jobs = managers.CompleteJobManager()
+    progress_jobs = managers.InProgressJobManager()
+    pending_jobs = managers.PendingJobManager()
+
 
 class JobStation(models.Model):
 
