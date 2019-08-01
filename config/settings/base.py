@@ -58,7 +58,8 @@ LOCAL_APPS = [
     'tms.g7.apps.G7Config',
     'tms.notification.apps.NotificationConfig',
     'tms.hr.apps.HrConfig',
-    'tms.finance.apps.FinanceConfig'
+    'tms.finance.apps.FinanceConfig',
+    'tms.security.apps.SecurityConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
