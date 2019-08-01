@@ -1480,6 +1480,55 @@ class VehicleUserBindSerializer(serializers.ModelSerializer):
         model = m.VehicleUserBind
         fields = '__all__'
 
+    def validate(self, data):
+        vehicle = data['vehicle']
+        driver = data['driver']
+        escort = data['escort']
+
+        if self.instance is None and m.VehicleUserBind.objects.filter(
+            vehicle=vehicle
+        ).exists():
+            raise serializers.ValidationError({
+                'vehicle': 'This vehicle bind already exits'
+            })
+
+        if self.instance is not None and m.VehicleUserBind.objects.exclude(
+            id=self.instance.id
+        ).filter(vehicle=vehicle).exists():
+            raise serializers.ValidationError({
+                'vehicle': 'This vehicle bind already exits'
+            })
+
+        if self.instance is None and m.VehicleUserBind.objects.filter(
+            driver=driver
+        ).exists():
+            raise serializers.ValidationError({
+                'driver': 'This vehicle bind already exits'
+            })
+
+        if self.instance is not None and m.VehicleUserBind.objects.exclude(
+            id=self.instance.id
+        ).filter(driver=driver).exists():
+            raise serializers.ValidationError({
+                'driver': 'This driver bind already exits'
+            })
+
+        if self.instance is None and m.VehicleUserBind.objects.filter(
+            escort=escort
+        ).exists():
+            raise serializers.ValidationError({
+                'escort': 'This escort bind already exits'
+            })
+
+        if self.instance is not None and m.VehicleUserBind.objects.exclude(
+            id=self.instance.id
+        ).filter(escort=escort).exists():
+            raise serializers.ValidationError({
+                'escort': 'This escort bind already exits'
+            })
+
+        return data
+
     def to_internal_value(self, data):
         ret = {
             'vehicle': get_object_or_404(m.Vehicle, id=data['vehicle']['id']),
