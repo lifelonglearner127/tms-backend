@@ -231,6 +231,26 @@ class StationViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='black-dots')
+    def black_dots(self, request):
+        page = self.paginate_queryset(
+            m.Station.blackdots.all(),
+        )
+
+        serializer = s.BlackDotSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='parking-stations')
+    def parking_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.parkingstations.all(),
+        )
+
+        serializer = s.ParkingStationSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='me')
     def get_customer_stations(self, request):
         """
@@ -248,16 +268,6 @@ class StationViewSet(TMSViewSet):
 
         page = self.paginate_queryset(queryset)
         serializer = s.WorkStationSerializer(page, many=True)
-
-        return self.get_paginated_response(serializer.data)
-
-    @action(detail=False, url_path='black-dots')
-    def black_dots(self, request):
-        page = self.paginate_queryset(
-            m.Station.blackdots.all(),
-        )
-
-        serializer = s.BlackDotSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
