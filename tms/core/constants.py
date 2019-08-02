@@ -443,3 +443,13 @@ TRAFFIC_VIOLATION_DETAIL_CATEGORY = (
     (TRAFFIC_VIOLATION_OVER_SPEED, '超速'),
     (TRAFFIC_VIOLATION_OVER_WEIGHT, '超重'),
 )
+
+
+# warehouse app
+# ----------------------------------------------------------------------------
+WEIGHT_UNIT_KG = 'K'
+WEIGHT_UNIT_TON = 'T'
+WEIGHT_UNIT = (
+    (WEIGHT_UNIT_KG, '公斤'),
+    (WEIGHT_UNIT_TON, '吨')
+)
