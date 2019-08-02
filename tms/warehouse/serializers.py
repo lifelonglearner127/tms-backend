@@ -6,7 +6,9 @@ from ..core import constants as c
 from . import models as m
 
 # serializers
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import (
+    ShortUserSerializer, ShortCompanyMemberSerializer
+)
 from ..core.serializers import TMSChoiceField
 
 
@@ -22,9 +24,11 @@ class WarehouseProductNameSerializer(serializers.ModelSerializer):
 class InTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
+    amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
 
     class Meta:
         model = m.InTransaction
+        fields = '__all__'
 
     def create(self, validated_data):
         product = self.context.get('product')
@@ -56,24 +60,52 @@ class InTransactionSerializer(serializers.ModelSerializer):
 class OutTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
+    recipient = ShortCompanyMemberSerializer(read_only=True)
+    amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
 
     class Meta:
         model = m.OutTransaction
+        fields = '__all__'
 
     def create(self, validated_data):
         product = self.context.get('product')
+        recipient_data = self.context.get('recipient')
+        if recipient_data is None:
+            raise serializers.ValidationError({
+                'recipient': 'Recipient data is missing'
+            })
+
+        try:
+            recipient = m.User.objects.get(pk=recipient_data.get('id'))
+        except m.User.DoesNotExists:
+            raise serializers.ValidationError({
+                'recipient': 'Recipient data is missing'
+            })
 
         amount = validated_data.get('amount')
         product.amount -= amount
         product.save()
 
-        return m.InTransaction.objects.create(
+        return m.OutTransaction.objects.create(
             product=product,
+            recipient=recipient,
             **validated_data
         )
 
     def update(self, instance, validated_data):
         product = self.context.get('product')
+        recipient_data = self.context.get('recipient')
+        if recipient_data is None:
+            raise serializers.ValidationError({
+                'recipient': 'Recipient data is missing'
+            })
+
+        try:
+            recipient = m.User.objects.get(pk=recipient_data.get('id'))
+        except m.User.DoesNotExists:
+            raise serializers.ValidationError({
+                'recipient': 'Recipient data is missing'
+            })
 
         amount = validated_data.get('amount')
         product.amount += instance.amount
@@ -83,6 +115,7 @@ class OutTransactionSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
+        instance.recipient = recipient
         instance.save()
         return instance
 

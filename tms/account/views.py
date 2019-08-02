@@ -79,6 +79,17 @@ class UserViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='company-members/short')
+    def get_short_company_members(self, request):
+        serializer = s.ShortCompanyMemberSerializer(
+            m.User.companymembers.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path='staffs/short')
     def get_short_staff_users(self, request):
         serializer = s.ShortUserSerializer(

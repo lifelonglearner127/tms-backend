@@ -66,7 +66,7 @@ class InTransaction(TimeStampedModel):
         max_length=100
     )
 
-    transactions_on = models.DateTimeField()
+    transaction_on = models.DateTimeField()
 
 
 class OutTransaction(TimeStampedModel):
@@ -90,4 +90,4 @@ class OutTransaction(TimeStampedModel):
         choices=c.WEIGHT_UNIT
     )
 
-    transactions_on = models.DateTimeField()
+    transaction_on = models.DateTimeField()

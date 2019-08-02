@@ -110,8 +110,40 @@ class OutTransactionViewSet(StaffViewSet):
             product__id=self.kwargs['product_pk']
         )
 
-    def create(self, request):
-        pass
+    def create(self, request, product_pk=None):
+        product = get_object_or_404(m.WarehouseProduct, id=product_pk)
+        serializer = s.OutTransactionSerializer(
+            data=request.data,
+            context={
+                'product': product,
+                'recipient': request.data.pop('recipient')
+            }
+        )
 
-    def update(self, request, pk=None):
-        pass
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, product_pk=None, pk=None):
+        product = get_object_or_404(m.WarehouseProduct, id=product_pk)
+        instance = self.get_object()
+        serializer = s.OutTransactionSerializer(
+            instance,
+            data=request.data,
+            context={
+                'product': product,
+                'recipient': request.data.pop('recipient')
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

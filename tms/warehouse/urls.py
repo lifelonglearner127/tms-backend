@@ -10,10 +10,6 @@ router.register(
     base_name='product'
 )
 
-urlpatterns = [
-    url(r'^', include(router.urls))
-]
-
 # # /products/{product_pk}/in_transactions
 # # /products/{product_pk}/in_transactions/{pk}
 transaction_router = routers.NestedSimpleRouter(
@@ -22,12 +18,18 @@ transaction_router = routers.NestedSimpleRouter(
     lookup='product'
 )
 transaction_router.register(
-    r'in-transaction',
+    r'in-transactions',
     v.InTransactionViewSet,
     base_name='in-transaction'
 )
 transaction_router.register(
-    r'out-transaction',
+    r'out-transactions',
     v.OutTransactionViewSet,
     base_name='out-transaction'
 )
+
+
+urlpatterns = [
+    url(r'^', include(router.urls)),
+    url(r'^', include(transaction_router.urls)),
+]

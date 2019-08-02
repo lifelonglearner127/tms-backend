@@ -49,4 +49,9 @@ class CustomerUserManager(models.Manager):
 class CompanyMemberUserManager(models.Manager):
 
     def get_queryset(self):
-        return super().get_queryset().filter(~Q(role=c.USER_ROLE_CUSTOMER))
+        return super().get_queryset().filter(
+            role__in=[
+                c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF,
+                c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+            ]
+        )
