@@ -107,29 +107,25 @@ class OrderViewSet(TMSViewSet):
     Order Viewset
     """
     queryset = m.Order.objects.all()
-    serializer_class = s.OrderAdminAppSerializer
-    # data_view_serializer_class = s.OrderDataViewSerializer
+    serializer_class = s.OrderSerializer
     permission_classes = [OrderPermission]
 
     def create(self, request):
 
         context = {
-            'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station'),
             'products': request.data.pop('products')
         }
+        data = request.data
         if request.user.role == c.USER_ROLE_CUSTOMER:
-            context['customer'] = {
+            data['customer'] = {
                 'id': request.user.customer_profile.id
             }
-            context['source'] = c.ORDER_SOURCE_CUSTOMER
+            data['order_source'] = c.ORDER_SOURCE_CUSTOMER
         else:
-            context['assignee'] = request.data.pop('assignee')
-            context['customer'] = request.data.pop('customer')
-            context['source'] = c.ORDER_SOURCE_INTERNAL
+            data['order_source'] = c.ORDER_SOURCE_INTERNAL
 
-        serializer = s.OrderAdminAppSerializer(
-            data=request.data, context=context
+        serializer = s.OrderSerializer(
+            data=data, context=context
         )
 
         serializer.is_valid(raise_exception=True)
@@ -142,25 +138,21 @@ class OrderViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         serializer_instance = self.get_object()
-
+        data = request.data
         context = {
-            'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station'),
             'products': request.data.pop('products')
         }
         if request.user.role == c.USER_ROLE_CUSTOMER:
             context['customer'] = {
                 'id': request.user.customer_profile.id
             }
-            context['source'] = c.ORDER_SOURCE_CUSTOMER
+            data['order_source'] = c.ORDER_SOURCE_CUSTOMER
         else:
-            context['assignee'] = request.data.pop('assignee')
-            context['customer'] = request.data.pop('customer')
-            context['source'] = c.ORDER_SOURCE_INTERNAL
+            data['order_source'] = c.ORDER_SOURCE_INTERNAL
 
-        serializer = s.OrderAdminAppSerializer(
+        serializer = s.OrderSerializer(
             serializer_instance,
-            data=request.data,
+            data=data,
             context=context,
             partial=True
         )

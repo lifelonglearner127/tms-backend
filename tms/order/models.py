@@ -81,16 +81,6 @@ class Order(TimeStampedModel):
         blank=True
     )
 
-    start_due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finish_due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
     customer = models.ForeignKey(
         CustomerProfile,
         on_delete=models.CASCADE,
@@ -115,20 +105,17 @@ class Order(TimeStampedModel):
         default=c.TRUCK_ARRANGEMENT_STATUS_PENDING
     )
 
-    loading_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name='orders_as_loading_station'
-    )
-
-    quality_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name='orders_as_quality_station'
-    )
-
-    is_same_station = models.BooleanField(
+    invoice_ticket = models.BooleanField(
         default=False
+    )
+
+    tax_rate = models.FloatField(
+        default=0
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
     )
 
     products = models.ManyToManyField(
@@ -173,34 +160,6 @@ class OrderProduct(models.Model):
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
-    price = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES,
-        default=0
-    )
-
-    price_weight_measure_unit = models.CharField(
-        max_length=1,
-        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
-        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
-    )
-
-    loss = models.FloatField(
-        default=0
-    )
-
-    loss_unit = models.CharField(
-        max_length=2,
-        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
-        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
-    )
-
-    payment_method = models.CharField(
-        max_length=1,
-        choices=c.PAYMENT_METHOD,
-        default=c.PAYMENT_METHOD_TON
-    )
-
     is_split = models.BooleanField(
         default=False
     )
@@ -208,18 +167,6 @@ class OrderProduct(models.Model):
     is_pump = models.BooleanField(
         default=False
     )
-
-    unloading_stations = models.ManyToManyField(
-        Station,
-        through='OrderProductDeliver',
-        through_fields=('order_product', 'unloading_station')
-    )
-
-    # def __str__(self):
-    #     return 'Order from {}- {} of {}'.format(
-    #         self.order_loading_station.loading_station,
-    #         self.total_weight, self.product.name
-    #     )
 
 
 class OrderProductDeliver(models.Model):
