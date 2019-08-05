@@ -165,6 +165,22 @@ class ShortUserSerializer(serializers.ModelSerializer):
         return ret
 
 
+class ShortCompanyMemberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name', 'role'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.username
+
+        return ret
+
+
 class MainUserSerializer(serializers.ModelSerializer):
     """
     Serializer for User's main data

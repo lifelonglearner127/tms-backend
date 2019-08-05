@@ -540,20 +540,21 @@ class JobBill(TimeStampedModel):
         ordering = ['category', 'sub_category', 'detail_category']
 
 
-class VehicleUserBind(models.Model):
+class VehicleUserBind(TimeStampedModel):
 
-    vehicle = models.ForeignKey(
+    vehicle = models.OneToOneField(
         Vehicle,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='bind'
     )
 
-    driver = models.ForeignKey(
+    driver = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name="vehicles_as_driver"
     )
 
-    escort = models.ForeignKey(
+    escort = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name="vehicles_as_escort"
@@ -568,8 +569,3 @@ class VehicleUserBind(models.Model):
     objects = models.Manager()
     binds_by_job = managers.JobVehicleUserBindManager()
     binds_by_admin = managers.AdminVehicleUserBindManager()
-
-    class Meta:
-        unique_together = (
-            'vehicle', 'driver', 'escort'
-        )

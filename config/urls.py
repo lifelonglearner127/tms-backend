@@ -67,6 +67,20 @@ urlpatterns = [
     path(
         'api/',
         include(
+            ('tms.security.urls', 'security'),
+            namespace='security'
+        )
+    ),
+    path(
+        'api/warehouse/',
+        include(
+            ('tms.warehouse.urls', 'warehouse'),
+            namespace='warehouse'
+        )
+    ),
+    path(
+        'api/',
+        include(
             ('tms.notification.urls', 'notification'),
             namespace='notification'
         )

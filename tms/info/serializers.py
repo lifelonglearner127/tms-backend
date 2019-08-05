@@ -318,13 +318,21 @@ class OilStationSerializer(serializers.ModelSerializer):
         return ret
 
 
-class BlackDotSerializer(serializers.ModelSerializer):
+class MainStationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Station
         fields = (
             'id', 'name', 'longitude', 'latitude', 'radius'
         )
+
+
+class BlackDotSerializer(MainStationSerializer):
+    pass
+
+
+class ParkingStationSerializer(MainStationSerializer):
+    pass
 
 
 class ShortRouteSerializer(serializers.ModelSerializer):

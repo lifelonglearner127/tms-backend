@@ -77,6 +77,14 @@ class BlackDotManager(models.Manager):
         )
 
 
+class ParkingStationManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            station_type=c.STATION_TYPE_PARKING_STATION
+        )
+
+
 class LoadingStationPointManager(models.Manager):
 
     def get_queryset(self):
