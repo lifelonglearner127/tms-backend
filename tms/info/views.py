@@ -119,6 +119,14 @@ class StationViewSet(TMSViewSet):
     queryset = m.Station.objects.all()
     serializer_class = s.StationSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        station_type = self.request.query_params.get('station_type', None)
+        if station_type is not None:
+            queryset = queryset.filter(station_type=station_type)
+
+        return queryset
+
     def create(self, request):
         products = request.data.pop('products', None)
         if request.user.role == c.USER_ROLE_CUSTOMER:

@@ -122,9 +122,13 @@ class Station(BasicContactModel):
         choices=c.STATION_TYPE,
     )
 
-    longitude = models.FloatField()
+    longitude = models.FloatField(
+        default=0
+    )
 
-    latitude = models.FloatField()
+    latitude = models.FloatField(
+        default=0
+    )
 
     radius = models.PositiveIntegerField(
         null=True,
@@ -180,6 +184,11 @@ class Station(BasicContactModel):
     )
 
     notification_message = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
         null=True,
         blank=True
     )
