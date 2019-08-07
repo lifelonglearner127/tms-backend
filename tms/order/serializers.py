@@ -361,6 +361,28 @@ class ShortOrderSerializer(serializers.ModelSerializer):
         )
 
 
+class OrderCustomerAppSerializer(serializers.ModelSerializer):
+
+    assignee = ShortUserSerializer()
+    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
+    status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    arrangement_status = TMSChoiceField(
+        choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
+    )
+    products = OrderProductSerializer(
+        source='orderproduct_set', many=True, read_only=True
+    )
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+
+    class Meta:
+        model = m.Order
+        exclude = (
+            'customer',
+        )
+
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     order model serializer
@@ -494,7 +516,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         ret = data
-        ret['assignee'] = get_object_or_404(m.User, id=data['assignee']['id'])
+        if 'assignee' in data:
+            ret['assignee'] = get_object_or_404(m.User, id=data['assignee']['id'])
         ret['customer'] = get_object_or_404(
             CustomerProfile, id=data['customer']['id']
         )

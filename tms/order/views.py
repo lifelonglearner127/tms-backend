@@ -143,7 +143,7 @@ class OrderViewSet(TMSViewSet):
             'products': request.data.pop('products')
         }
         if request.user.role == c.USER_ROLE_CUSTOMER:
-            context['customer'] = {
+            data['customer'] = {
                 'id': request.user.customer_profile.id
             }
             data['order_source'] = c.ORDER_SOURCE_CUSTOMER
