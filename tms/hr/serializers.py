@@ -124,7 +124,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         # check user role
         user_data['role'] = user_data['role']['value']
 
-        if user_data['role'] == c.USER_ROLE_DRIVER:
+        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
             driver_license_data = self.context.get('driver_license', None)
             if driver_license_data is None:
                 raise serializers.ValidationError({
@@ -146,7 +146,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         )
 
         driver_license = None
-        if user_data['role'] == c.USER_ROLE_DRIVER:
+        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
             driver_license = m.DriverLicense.objects.create(
                 **driver_license_data
             )
@@ -183,7 +183,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             })
 
         user_data['role'] = user_data['role']['value']
-        if user_data['role'] == c.USER_ROLE_DRIVER:
+        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
             driver_license_data = self.context.get('driver_license', None)
             if driver_license_data is None:
                 raise serializers.ValidationError({
@@ -213,7 +213,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if user_data['role'] == c.USER_ROLE_DRIVER:
+        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
             if instance.driver_license is None:
                 driver_license = m.DriverLicense.objects.create(
                     **driver_license_data
