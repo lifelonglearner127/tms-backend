@@ -44,6 +44,17 @@ class VehicleViewSet(TMSViewSet):
             serializer.data, status=status.HTTP_201_CREATED
         )
 
+    @action(detail=True, methods=['get'], url_path='branches')
+    def get_vehicle_branches(self, request, pk=None):
+        vehicle = self.get_object()
+
+        return Response(
+            {
+                'branches': vehicle.branches
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['get'], url_path='playback')
     def vehicle_history_track_query(self, request, pk=None):
         """

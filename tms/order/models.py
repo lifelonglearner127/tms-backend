@@ -152,12 +152,18 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE
     )
 
-    total_weight = models.FloatField()
+    weight = models.FloatField(
+        default=0
+    )
 
-    total_weight_measure_unit = models.CharField(
+    weight_measure_unit = models.CharField(
         max_length=1,
         choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
+    )
+
+    delivered_weight = models.FloatField(
+        default=0
     )
 
     is_split = models.BooleanField(
@@ -230,16 +236,6 @@ class Job(models.Model):
         default=c.JOB_PROGRESS_NOT_STARTED
     )
 
-    start_due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finish_due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
     started_on = models.DateTimeField(
         null=True,
         blank=True
@@ -285,6 +281,10 @@ class Job(models.Model):
         blank=True
     )
 
+    is_same_station = models.BooleanField(
+        default=False
+    )
+
     stations = models.ManyToManyField(
         Station,
         through='JobStation',
@@ -308,6 +308,8 @@ class JobStation(models.Model):
         Station,
         on_delete=models.CASCADE
     )
+
+    due_time = models.DateTimeField()
 
     step = models.PositiveIntegerField()
 
@@ -394,13 +396,6 @@ class JobStationProduct(models.Model):
     document = models.ImageField(
         null=True,
         blank=True
-    )
-
-    orderproductdeliver = models.ForeignKey(
-        OrderProductDeliver,
-        on_delete=models.SET_NULL,
-        related_name='job_delivers',
-        null=True
     )
 
     branches = ArrayField(

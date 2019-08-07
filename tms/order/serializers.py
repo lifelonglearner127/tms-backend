@@ -323,7 +323,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
     Serializer for ordred products
     """
     product = ShortProductSerializer(read_only=True)
-    total_weight_measure_unit = TMSChoiceField(
+    weight_measure_unit = TMSChoiceField(
         choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
     )
 
@@ -392,7 +392,7 @@ class OrderSerializer(serializers.ModelSerializer):
             customer: { id: '', name: '' },
             products: [
                 product: { id: '', ... },
-                total_weight: total_weight
+                weight: 0
             ]
         }
         """
@@ -414,9 +414,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 m.Product, id=product_data.get('id', None)
             )
 
-            if 'total_weight_measure_unit' in order_product_data:
-                order_product_data['total_weight_measure_unit'] =\
-                    order_product_data['total_weight_measure_unit']['value']
+            if 'weight_measure_unit' in order_product_data:
+                order_product_data['weight_measure_unit'] =\
+                    order_product_data['weight_measure_unit']['value']
 
             m.OrderProduct.objects.create(
                 order=order, product=product, **order_product_data
@@ -433,7 +433,7 @@ class OrderSerializer(serializers.ModelSerializer):
             customer: { id: '', name: '' },
             products: [
                 product: { id: '', ... },
-                total_weight: total_weight
+                weight: 0
             ]
         }
         1. Validate the data
@@ -465,9 +465,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 id=product_data.get('id', None)
             )
 
-            if 'total_weight_measure_unit' in order_product_data:
-                order_product_data['total_weight_measure_unit'] =\
-                    order_product_data['total_weight_measure_unit']['value']
+            if 'weight_measure_unit' in order_product_data:
+                order_product_data['weight_measure_unit'] =\
+                    order_product_data['weight_measure_unit']['value']
 
             order_product_id = order_product_data.get('id', None)
             new_products.add(order_product_id)
@@ -592,6 +592,76 @@ class JobStationSerializer(serializers.ModelSerializer):
         )
 
 
+class JobAdminSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
+    loading_station = serializers.SerializerMethodField()
+    due_time = serializers.SerializerMethodField()
+    quality_station = serializers.SerializerMethodField()
+    route = ShortRouteSerializer()
+    branches = serializers.SerializerMethodField()
+    branch_options = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id', 'vehicle', 'driver', 'escort', 'loading_station',
+            'quality_station', 'due_time', 'route', 'branches',
+            'branch_options'
+        )
+
+    def get_loading_station(self, instance):
+        return ShortStationSerializer(
+            instance.stations.all()[0]
+        ).data
+
+    def get_due_time(self, instance):
+        return instance.jobstation_set.all()[0].due_time
+
+    def get_quality_station(self, instance):
+        return ShortStationSerializer(
+            instance.stations.all()[0]
+        ).data
+
+    def get_branch_options(self, instance):
+        options = []
+        for i in range(0, instance.vehicle.branch_count):
+            options.append({
+                'id': i
+            })
+
+        return options
+
+    def get_branches(self, instance):
+        branches = []
+        for job_station in instance.jobstation_set.all():
+            for job_station_product in job_station.jobstationproduct_set.all():
+                for product_branch in job_station_product.branches:
+                    for branch in branches:
+                        if product_branch == branch.branch.id:
+                            branch['mission_weight'] += job_station_product.mission_weight
+                            branch['unloading_stations'].append({
+                                'unloading_station': ShortStationSerializer(job_station.station).data,
+                                'mission_weight': job_station_product.mission_weight
+                            })
+                            break
+                    else:
+                        branches.append({
+                            'branch': {'id': product_branch},
+                            'product': ShortProductSerializer(job_station_product.product).data,
+                            'mission_weight': job_station_product.mission_weight,
+                            'unloading_stations': [{
+                                'unloading_station': ShortStationSerializer(job_station.station).data,
+                                'due_time': job_station.due_time,
+                                'mission_weight': job_station_product.mission_weight
+                            }]
+                        })
+
+        return branches
+
+
 class JobSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
@@ -612,12 +682,12 @@ class JobSerializer(serializers.ModelSerializer):
 
     def get_loading_station(self, instance):
         return ShortStationSerializer(
-            instance.order.loading_station
+            instance.stations.all()[0]
         ).data
 
     def get_quality_station(self, instance):
         return ShortStationSerializer(
-            instance.order.quality_station
+            instance.stations.all()[0]
         ).data
 
     def get_unloading_stations(self, instance):

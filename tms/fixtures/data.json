@@ -436,9 +436,9 @@
           "plate_num": "鲁UG2802",
           "identifier_code": "Model-1",
           "brand": "T",
-          "total_load": 100,
-          "actual_load": 100,
-          "branches": [50, 50],
+          "total_load": 60,
+          "actual_load": 60,
+          "branches": [10, 20, 30],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -451,9 +451,9 @@
           "plate_num": "鲁UC6753",
           "identifier_code": "Model-2",
           "brand": "T",
-          "total_load": 100,
-          "actual_load": 100,
-          "branches": [100],
+          "total_load": 60,
+          "actual_load": 60,
+          "branches": [10, 20, 30],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
@@ -466,9 +466,9 @@
           "plate_num": "鲁UA3161",
           "identifier_code": "Model-2",
           "brand": "T",
-          "total_load": 100,
-          "actual_load": 100,
-          "branches": [100],
+          "total_load": 60,
+          "actual_load": 60,
+          "branches": [10, 20, 30],
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }

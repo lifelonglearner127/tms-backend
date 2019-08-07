@@ -127,7 +127,7 @@ class ShortStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Station
         fields = (
-            'id', 'name', 'contact', 'mobile', 'address'
+            'id', 'name', 'contact', 'mobile', 'address', 'station_type'
         )
 
 
