@@ -122,17 +122,17 @@ class StationViewSet(TMSViewSet):
     def create(self, request):
         products = request.data.pop('products', None)
         if request.user.role == c.USER_ROLE_CUSTOMER:
-            customer = {
+            customers = [{
                 'id': request.user.customer_profile.id
-            }
+            }]
         else:
-            customer = request.data.pop('customer', None)
+            customers = request.data.pop('customers', None)
 
         serializer = s.StationSerializer(
             data=request.data,
             context={
                 'products': products,
-                'customer': customer
+                'customers': customers
             }
         )
         serializer.is_valid(raise_exception=True)
@@ -147,19 +147,18 @@ class StationViewSet(TMSViewSet):
         instance = self.get_object()
         products = request.data.pop('products', None)
         if request.user.role == c.USER_ROLE_CUSTOMER:
-            customer = {
+            customers = [{
                 'id': request.user.customer_profile.id
-            }
+            }]
         else:
-            customer = request.data.pop('customer', None)
+            customers = request.data.pop('customers', None)
 
-        customer = request.data.pop('customer', None)
         serializer = s.StationSerializer(
             instance,
             data=request.data,
             context={
                 'products': products,
-                'customer': customer
+                'customers': customers
             },
             partial=True
         )

@@ -164,7 +164,7 @@ class StationSerializer(serializers.ModelSerializer):
     Serializer for Station
     """
     products = ShortProductSerializer(many=True, read_only=True)
-    customer = ShortCustomerProfileSerializer(read_only=True)
+    customers = ShortCustomerProfileSerializer(many=True, read_only=True)
     working_time_measure_unit = TMSChoiceField(
         choices=c.TIME_MEASURE_UNIT, required=False
     )
@@ -181,7 +181,7 @@ class StationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         products = self.context.get('products', None)
-        customer = self.context.get('customer', None)
+        customers = self.context.get('customers', None)
         station_type = validated_data.get('station_type', None)
 
         # validation if the station name exists already
@@ -199,22 +199,13 @@ class StationSerializer(serializers.ModelSerializer):
             })
 
         if station_type == c.STATION_TYPE_UNLOADING_STATION\
-           and customer is None:
+           and customers is None:
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
             })
 
-        if customer is not None:
-            try:
-                customer = CustomerProfile.objects.get(
-                    id=customer.get('id', None)
-                )
-            except CustomerProfile.DoesNotExist:
-                customer = None
-
         station = m.Station.objects.create(
-            **validated_data,
-            customer=customer
+            **validated_data
         )
 
         if station_type == c.STATION_TYPE_LOADING_STATION:
@@ -223,6 +214,13 @@ class StationSerializer(serializers.ModelSerializer):
                     m.Product, id=product.get('id', None)
                 )
                 station.products.add(product)
+
+        elif station_type == c.STATION_TYPE_UNLOADING_STATION:
+            for customer in customers:
+                customer = get_object_or_404(
+                    m.CustomerProfile, id=customer.get('id', None)
+                )
+                station.customers.add(customer)
 
         return station
 
@@ -281,7 +279,7 @@ class WorkStationSerializer(serializers.ModelSerializer):
     Serializer for Loading Station, Unloading Station, Quality Station
     """
     products = ShortProductSerializer(many=True, read_only=True)
-    customer = ShortCustomerProfileSerializer(read_only=True)
+    customers = ShortCustomerProfileSerializer(many=True, read_only=True)
 
     class Meta:
         model = m.Station

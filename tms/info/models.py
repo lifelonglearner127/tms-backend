@@ -135,10 +135,8 @@ class Station(BasicContactModel):
         Product
     )
 
-    customer = models.ForeignKey(
-        CustomerProfile,
-        on_delete=models.SET_NULL,
-        null=True
+    customers = models.ManyToManyField(
+        CustomerProfile
     )
 
     price = models.DecimalField(

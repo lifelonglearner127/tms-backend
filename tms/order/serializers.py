@@ -640,7 +640,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
             for job_station_product in job_station.jobstationproduct_set.all():
                 for product_branch in job_station_product.branches:
                     for branch in branches:
-                        if product_branch == branch.branch.id:
+                        if product_branch == branch['branch']['id']:
                             branch['mission_weight'] += job_station_product.mission_weight
                             branch['unloading_stations'].append({
                                 'unloading_station': ShortStationSerializer(job_station.station).data,
