@@ -15,7 +15,7 @@ class ProductCategory(TimeStampedModel):
     )
 
     level = models.PositiveIntegerField(
-        default=1
+        default=3
     )
 
     description = models.TextField(
