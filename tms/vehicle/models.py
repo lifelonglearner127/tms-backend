@@ -298,3 +298,151 @@ class VehicleMaintenanceRequest(ApprovedModel):
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
         unique_together = ['vehicle', 'approved']
+
+
+class VehicleCheckItem(TimeStampedModel):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    is_before_driving_item = models.BooleanField(
+        default=False
+    )
+
+    is_driving_item = models.BooleanField(
+        default=False
+    )
+
+    is_after_driving_item = models.BooleanField(
+        default=False
+    )
+
+    is_published = models.BooleanField(
+        default=False
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
+class VehicleBeforeDrivingCheckHistory(models.Model):
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    check_items = models.ManyToManyField(
+        VehicleCheckItem,
+        through='VehicleBeforeDrivingItemCheck',
+        through_fields=('vehicle_check_history', 'item')
+    )
+
+    checked_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class VehicleBeforeDrivingItemCheck(models.Model):
+
+    vehicle_check_history = models.ForeignKey(
+        VehicleBeforeDrivingCheckHistory,
+        on_delete=models.CASCADE
+    )
+
+    item = models.ForeignKey(
+        VehicleCheckItem,
+        on_delete=models.CASCADE
+    )
+
+    is_checked = models.BooleanField(
+        default=False
+    )
+
+
+class VehicleDrivingCheckHistory(models.Model):
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    check_items = models.ManyToManyField(
+        VehicleCheckItem,
+        through='VehicleDrivingItemCheck',
+        through_fields=('vehicle_check_history', 'item')
+    )
+
+    checked_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class VehicleDrivingItemCheck(models.Model):
+
+    vehicle_check_history = models.ForeignKey(
+        VehicleDrivingCheckHistory,
+        on_delete=models.CASCADE
+    )
+
+    item = models.ForeignKey(
+        VehicleCheckItem,
+        on_delete=models.CASCADE
+    )
+
+    is_checked = models.BooleanField(
+        default=False
+    )
+
+
+class VehicleAfterDrivingCheckHistory(models.Model):
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    check_items = models.ManyToManyField(
+        VehicleCheckItem,
+        through='VehicleAfterDrivingItemCheck',
+        through_fields=('vehicle_check_history', 'item')
+    )
+
+    checked_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class VehicleAfterDrivingItemCheck(models.Model):
+
+    vehicle_check_history = models.ForeignKey(
+        VehicleAfterDrivingCheckHistory,
+        on_delete=models.CASCADE
+    )
+
+    item = models.ForeignKey(
+        VehicleCheckItem,
+        on_delete=models.CASCADE
+    )
+
+    is_checked = models.BooleanField(
+        default=False
+    )

@@ -260,6 +260,90 @@ class VehicleViewSet(TMSViewSet):
         serializer = s.ShortVehicleSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=True, methods=['post'], url_path='before-driving-check')
+    def before_driving_check(self, request, pk=None):
+        data = {}
+        data['vehicle'] = pk
+        data['driver'] = request.user.id
+        serializer = s.VehicleBeforeDrivingCheckHistorySerializer(
+            data=data,
+            context={'items': request.data}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='driving-check')
+    def driving_check(self, request, pk=None):
+        data = {}
+        data['vehicle'] = pk
+        data['driver'] = request.user.id
+        serializer = s.VehicleDrivingCheckHistorySerializer(
+            data=data,
+            context={'items': request.data}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='after-driving-check')
+    def after_driving_check(self, request, pk=None):
+        data = {}
+        data['vehicle'] = pk
+        data['driver'] = request.user.id
+        serializer = s.VehicleAfterDrivingCheckHistorySerializer(
+            data=data,
+            context={'items': request.data}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VehicleCheckItemViewSet(TMSViewSet):
+
+    queryset = m.VehicleCheckItem.objects.all()
+    serializer_class = s.VehicleCheckItemSerializer
+
+    @action(detail=False, url_path='get-before-items')
+    def get_before_driving_items(self, request):
+        serializer = s.VehicleCheckItemNameSerializer(
+            m.VehicleCheckItem.objects.filter(is_before_driving_item=True, is_published=True),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='get-driving-items')
+    def get_driving_items(self, request):
+        serializer = s.VehicleCheckItemNameSerializer(
+            m.VehicleCheckItem.objects.filter(is_driving_item=True, is_published=True),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='get-after-items')
+    def get_after_driving_items(self, request):
+        serializer = s.VehicleCheckItemNameSerializer(
+            m.VehicleCheckItem.objects.filter(is_after_driving_item=True, is_published=True),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class VehicleMaintenanceRequestViewSet(ApproveViewSet):
 

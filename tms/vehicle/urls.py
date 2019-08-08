@@ -25,7 +25,12 @@ router.register(
     v.VehicleMaintenanceRequestViewSet,
     base_name='vehicle-maintenances'
 )
+router.register(
+    r'vehicle-check-items',
+    v.VehicleCheckItemViewSet,
+    base_name='vehicle-check-items'
+)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+    url(r'^', include(router.urls))
 ]
