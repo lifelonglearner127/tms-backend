@@ -22,45 +22,6 @@ class OrderCart(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    unit_price = models.FloatField(
-        default=0
-    )
-
-    weight = models.FloatField(
-        default=0
-    )
-
-    loading_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name='cart_as_loading_station'
-    )
-
-    quality_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name='cart_as_quality_station'
-    )
-
-    unloading_stations = models.ManyToManyField(
-        Station,
-        through='OrderCartUnloadingStation',
-        through_fields=('item', 'unloading_station')
-    )
-
-
-class OrderCartUnloadingStation(models.Model):
-
-    item = models.ForeignKey(
-        OrderCart,
-        on_delete=models.CASCADE
-    )
-
-    unloading_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE
-    )
-
     weight = models.FloatField(
         default=0
     )

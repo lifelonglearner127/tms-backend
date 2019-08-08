@@ -47,9 +47,6 @@ class OrderCartViewSet(TMSViewSet):
     def create(self, request):
         context = {
             'product': request.data.pop('product'),
-            'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station'),
-            'unloading_stations': request.data.pop('unloading_stations'),
             'customer': request.user.customer_profile
         }
 
@@ -69,10 +66,7 @@ class OrderCartViewSet(TMSViewSet):
         serializer_instance = self.get_object()
 
         context = {
-            'product': request.data.pop('product'),
-            'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station'),
-            'unloading_stations': request.data.pop('unloading_stations')
+            'product': request.data.pop('product')
         }
 
         serializer = self.serializer_class(

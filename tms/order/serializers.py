@@ -24,23 +24,9 @@ from ..info.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 
 
-class OrderCartUnloadingStationSerializer(serializers.ModelSerializer):
-
-    unloading_station = ShortStationSerializer(read_only=True)
-
-    class Meta:
-        model = m.OrderCartUnloadingStation
-        exclude = ('item', )
-
-
 class OrderCartSerializer(serializers.ModelSerializer):
 
     product = ShortProductSerializer(read_only=True)
-    loading_station = ShortStationSerializer(read_only=True)
-    quality_station = ShortStationSerializer(read_only=True)
-    unloading_stations = OrderCartUnloadingStationSerializer(
-        source='ordercartunloadingstation_set', many=True, read_only=True
-    )
 
     class Meta:
         model = m.OrderCart
@@ -64,70 +50,11 @@ class OrderCartSerializer(serializers.ModelSerializer):
                 'product': 'Such Product does not exist'
             })
 
-        # loading station validation
-        loading_station_data = self.context.get('loading_station', None)
-        if loading_station_data is None:
-            raise serializers.ValidationError({
-                'loading_station': 'Loading Station data is missing'
-            })
-
-        try:
-            loading_station = Station.loadingstations.get(
-                id=loading_station_data.get('id', None)
-            )
-        except Station.DoesNotExist:
-            raise serializers.ValidationError({
-                'loading_station': 'Such Loading Station does not exist'
-            })
-
-        # quality station validation
-        quality_station_data = self.context.get('quality_station', None)
-        if quality_station_data is None:
-            raise serializers.ValidationError({
-                'quality_station': 'Quality Station data is missing'
-            })
-
-        try:
-            quality_station = Station.qualitystations.get(
-                id=quality_station_data.get('id', None)
-            )
-        except Station.DoesNotExist:
-            raise serializers.ValidationError({
-                'loading_station': 'Such Quality Station does not exist'
-            })
-
-        unloading_stations_data = self.context.get('unloading_stations', None)
-        unloading_weights = 0
-        for unloading_station_data in unloading_stations_data:
-            unloading_weights += unloading_station_data.get('weight', 0)
-
-        if unloading_weights > validated_data.get('weight', 0):
-            raise serializers.ValidationError({
-                'weight':
-                'Sum of unloading stations weight exceed the product weight'
-            })
-
         # create cart item
-        cart_item = m.OrderCart.objects.create(
+        return m.OrderCart.objects.create(
             product=product,
-            loading_station=loading_station,
-            quality_station=quality_station,
             **validated_data
         )
-
-        unloading_stations_data = self.context.get('unloading_stations', None)
-        for unloading_station_data in unloading_stations_data:
-            station_data = unloading_station_data.pop('unloading_station')
-            unloading_station = get_object_or_404(
-                Station, id=station_data.get('id', None)
-            )
-            m.OrderCartUnloadingStation.objects.create(
-                item=cart_item,
-                unloading_station=unloading_station,
-                **unloading_station_data
-            )
-
-        return cart_item
 
     def update(self, instance, validated_data):
         # validate payload
@@ -147,70 +74,12 @@ class OrderCartSerializer(serializers.ModelSerializer):
                 'product': 'Such Product does not exist'
             })
 
-        # loading station validation
-        loading_station_data = self.context.get('loading_station', None)
-        if loading_station_data is None:
-            raise serializers.ValidationError({
-                'loading_station': 'Loading Station data is missing'
-            })
-
-        try:
-            loading_station = Station.loadingstations.get(
-                id=loading_station_data.get('id', None)
-            )
-        except Station.DoesNotExist:
-            raise serializers.ValidationError({
-                'loading_station': 'Such Loading Station does not exist'
-            })
-
-        # quality station validation
-        quality_station_data = self.context.get('quality_station', None)
-        if quality_station_data is None:
-            raise serializers.ValidationError({
-                'quality_station': 'Quality Station data is missing'
-            })
-
-        try:
-            quality_station = Station.qualitystations.get(
-                id=quality_station_data.get('id', None)
-            )
-        except Station.DoesNotExist:
-            raise serializers.ValidationError({
-                'loading_station': 'Such Quality Station does not exist'
-            })
-
-        unloading_stations_data = self.context.get('unloading_stations', None)
-        unloading_weights = 0
-        for unloading_station_data in unloading_stations_data:
-            unloading_weights += unloading_station_data.get('weight', 0)
-
-        if unloading_weights > validated_data.get('weight', 0):
-            raise serializers.ValidationError({
-                'weight':
-                'Sum of unloading stations weight exceed the product weight'
-            })
-
         instance.product = product
-        instance.loading_station = loading_station
-        instance.quality_station = quality_station
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
         instance.save()
-        instance.unloading_stations.clear()
-
-        unloading_stations_data = self.context.get('unloading_stations', None)
-        for unloading_station_data in unloading_stations_data:
-            station_data = unloading_station_data.pop('unloading_station')
-            unloading_station = get_object_or_404(
-                Station, id=station_data.get('id', None)
-            )
-            m.OrderCartUnloadingStation.objects.create(
-                item=instance,
-                unloading_station=unloading_station,
-                **unloading_station_data
-            )
         return instance
 
 
