@@ -1,5 +1,6 @@
 # from collections import defaultdict
 # from django.db.models import Q
+import json
 from django.shortcuts import get_object_or_404
 from django.utils import timezone as datetime
 from rest_framework import serializers
@@ -555,6 +556,13 @@ class JobMileageField(serializers.Field):
 #         )
 
 
+class QualityCheckSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.QualityCheck
+        fields = '__all__'
+
+
 class ShortJobStationProductSerializer(serializers.ModelSerializer):
 
     product = ShortProductSerializer(read_only=True)
@@ -562,7 +570,7 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'id', 'product', 'mission_weight', 'weight'
+            'id', 'product', 'branch', 'mission_weight', 'weight'
         )
 
 
@@ -659,28 +667,28 @@ class JobAdminSerializer(serializers.ModelSerializer):
 
     def get_branches(self, instance):
         branches = []
-        for job_station in instance.jobstation_set.all():
+        for job_station in instance.jobstation_set.all()[2:]:
             for job_station_product in job_station.jobstationproduct_set.all():
-                for product_branch in job_station_product.branches:
-                    for branch in branches:
-                        if product_branch == branch['branch']['id']:
-                            branch['mission_weight'] += job_station_product.mission_weight
-                            branch['unloading_stations'].append({
-                                'unloading_station': ShortStationSerializer(job_station.station).data,
-                                'mission_weight': job_station_product.mission_weight
-                            })
-                            break
-                    else:
-                        branches.append({
-                            'branch': {'id': product_branch},
-                            'product': ShortProductSerializer(job_station_product.product).data,
-                            'mission_weight': job_station_product.mission_weight,
-                            'unloading_stations': [{
-                                'unloading_station': ShortStationSerializer(job_station.station).data,
-                                'due_time': job_station.due_time,
-                                'mission_weight': job_station_product.mission_weight
-                            }]
+                for branch in branches:
+                    if branch['branch']['id'] == job_station_product.branch:
+                        branch['mission_weight'] += job_station_product.mission_weight
+                        branch['unloading_stations'].append({
+                            'unloading_station': ShortStationSerializer(job_station.station).data,
+                            'due_time': job_station.due_time,
+                            'mission_weight': job_station_product.mission_weight
                         })
+                        break
+                else:
+                    branches.append({
+                        'branch': {'id': job_station_product.branch},
+                        'product': ShortProductSerializer(job_station_product.product).data,
+                        'mission_weight': job_station_product.mission_weight,
+                        'unloading_stations': [{
+                            'unloading_station': ShortStationSerializer(job_station.station).data,
+                            'due_time': job_station.due_time,
+                            'mission_weight': job_station_product.mission_weight
+                        }]
+                    })
 
         return branches
 

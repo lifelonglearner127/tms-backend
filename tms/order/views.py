@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from pytz import timezone as tz
 import requests
@@ -705,7 +706,7 @@ class JobViewSet(TMSViewSet):
 
             for branch_data in job_data['branches']:
                 branch_id = int(branch_data.get('branch').get('id'))
-                branch_mission_weight = int(
+                branch_mission_weight = float(
                     branch_data.get('mission_weight')
                 )
 
@@ -730,14 +731,11 @@ class JobViewSet(TMSViewSet):
                         order_product['left_weight'] -= branch_mission_weight
 
                 for i in range(0, 2):
-                    for station_product in job_data['stations'][i]['products']:
-                        if station_product['product'] == product:
-                            station_product['mission_weight'] += branch_mission_weight
-                    else:
-                        job_data['stations'][i]['products'].append({
-                            'product': product,
-                            'mission_weight': branch_mission_weight
-                        })
+                    job_data['stations'][i]['products'].append({
+                        'product': product,
+                        'branch': branch_id,
+                        'mission_weight': branch_mission_weight
+                    })
 
                 unloading_stations_data = branch_data.pop('unloading_stations')
 
@@ -759,23 +757,15 @@ class JobViewSet(TMSViewSet):
                     due_time = unloading_station_data.get(
                         'due_time'
                     )
-                    weight = float(
-                        unloading_station_data.get('mission_weight', 0)
-                    )
-                    branch_mission_weight -= weight
+                    unloading_station_mission_weight = float(unloading_station_data.get('mission_weight', 0))
+                    branch_mission_weight -= unloading_station_mission_weight
                     for unloading_station in job_data['stations'][2:]:
                         if unloading_station['station'] == station:
-                            for station_product in unloading_station['products']:
-                                if station_product['product'] == product:
-                                    station_product['mission_weight'] += weight
-                                    station_product['branches'].append(branch_id)
-                            else:
-                                unloading_station['products'].append({
-                                    'product': product,
-                                    'mission_weight': weight,
-                                    'branches': [branch_id]
-                                })
-
+                            unloading_station['products'].append({
+                                'product': product,
+                                'branch': branch_id,
+                                'mission_weight': unloading_station_mission_weight
+                            })
                             break
 
                     else:
@@ -784,8 +774,8 @@ class JobViewSet(TMSViewSet):
                             'due_time': due_time,
                             'products': [{
                                 'product': product,
-                                'mission_weight': weight,
-                                'branches': [branch_id]
+                                'branch': branch_id,
+                                'mission_weight': unloading_station_mission_weight
                             }]
                         })
 
@@ -861,6 +851,34 @@ class JobViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         pass
+
+    @action(detail=True, methods=['post'], url_path='upload-quality-check')
+    def upload_quality_check(self, request, pk=None):
+        job = self.get_object()
+        data = request.data
+        data['job'] = pk
+
+        branch = data.get('branch', 0)
+        weight = data.pop('weight', 0)
+
+        job_qualitystation = job.jobstation_set.all()[1]
+        job_qualitystation_product = job_qualitystation.jobstationproduct_set.filter(
+            branch=branch
+        ).first()
+
+        job_qualitystation_product.weight = weight
+        job_qualitystation_product.save()
+
+        serializer = s.QualityCheckSerializer(
+            data=data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, url_path='vehicles')
     def get_vehicle_jobs_by_time(self, request):

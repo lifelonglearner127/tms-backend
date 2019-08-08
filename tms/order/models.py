@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
+from jsonfield import JSONField
 
 from . import managers
 from ..core import constants as c
@@ -297,6 +298,34 @@ class Job(models.Model):
     pending_jobs = managers.PendingJobManager()
 
 
+class QualityCheck(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    branch = models.PositiveIntegerField(
+        default=0
+    )
+
+    density = models.FloatField(
+        default=0
+    )
+
+    additive = models.FloatField(
+        default=0
+    )
+
+    man_hole = models.CharField(
+        max_length=100
+    )
+
+    branch_hole = models.CharField(
+        max_length=100
+    )
+
+
 class JobStation(models.Model):
 
     job = models.ForeignKey(
@@ -385,22 +414,21 @@ class JobStationProduct(models.Model):
         on_delete=models.CASCADE
     )
 
+    document = models.ImageField(
+        null=True,
+        blank=True
+    )
+
+    branch = models.PositiveIntegerField(
+        default=0
+    )
+
     mission_weight = models.FloatField(
         default=0
     )
 
     weight = models.FloatField(
         default=0
-    )
-
-    document = models.ImageField(
-        null=True,
-        blank=True
-    )
-
-    branches = ArrayField(
-        models.PositiveIntegerField(),
-        default=list
     )
 
 
