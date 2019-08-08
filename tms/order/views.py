@@ -532,6 +532,18 @@ class OrderViewSet(TMSViewSet):
         After then vehicle positioning data will be notified via web sockets
         """
         order = self.get_object()
+        if order.status == c.ORDER_STATUS_COMPLETE:
+            return Response(
+                {'order': 'This order is already completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if order.status == c.ORDER_STATUS_PENDING:
+            return Response(
+                {'order': 'This order is still in pending'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         plate_nums = order.jobs.filter(progress__gt=1).values_list(
             'vehicle__plate_num', flat=True
         )
