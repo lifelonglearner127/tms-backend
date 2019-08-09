@@ -15,9 +15,13 @@ class BaseCard(models.Model):
         max_length=100
     )
 
+    issued_on = models.DateField(
+        null=True,
+        blank=True
+    )
+
     number = models.CharField(
-        max_length=100,
-        unique=True
+        max_length=100
     )
 
     key = models.CharField(
@@ -29,7 +33,7 @@ class BaseCard(models.Model):
         blank=True
     )
 
-    balance = models.PositiveIntegerField(
+    balance = models.FloatField(
         default=0
     )
 
@@ -56,6 +60,42 @@ class ETCCard(BaseCard):
     )
 
 
+class ETCCardChargeHistory(models.Model):
+
+    card = models.ForeignKey(
+        ETCCard,
+        on_delete=models.CASCADE
+    )
+
+    previous_amount = models.FloatField(
+        default=0
+    )
+
+    charged_amount = models.FloatField(
+        default=0
+    )
+
+    charged_on = models.DateTimeField()
+
+
+class ETCCardUsageHistory(models.Model):
+
+    card = models.ForeignKey(
+        ETCCard,
+        on_delete=models.CASCADE
+    )
+
+    amount = models.FloatField(
+        default=0
+    )
+
+    address = models.CharField(
+        max_length=200
+    )
+
+    paid_on = models.DateTimeField()
+
+
 class FuelCard(BaseCard):
 
     master = models.ForeignKey(
@@ -70,6 +110,42 @@ class FuelCard(BaseCard):
         on_delete=models.SET_NULL,
         null=True
     )
+
+
+class FuelCardChargeHistory(models.Model):
+
+    card = models.ForeignKey(
+        FuelCard,
+        on_delete=models.CASCADE
+    )
+
+    previous_amount = models.FloatField(
+        default=0
+    )
+
+    charged_amount = models.FloatField(
+        default=0
+    )
+
+    charged_on = models.DateTimeField()
+
+
+class FuelCardUsageHistory(models.Model):
+
+    card = models.ForeignKey(
+        ETCCard,
+        on_delete=models.CASCADE
+    )
+
+    amount = models.FloatField(
+        default=0
+    )
+
+    address = models.CharField(
+        max_length=200
+    )
+
+    paid_on = models.DateTimeField()
 
 
 class OrderPayment(models.Model):

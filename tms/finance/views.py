@@ -21,15 +21,31 @@ class ETCCardViewSet(TMSViewSet):
     queryset = m.ETCCard.objects.all()
     serializer_class = s.ETCCardSerializer
     short_serializer_class = s.ShortETCCardSerializer
-    data_view_serializer_class = s.ETCCardDataViewSerializer
+
+
+class ETCCardChargeHistoryViewSet(TMSViewSet):
+
+    queryset = m.ETCCardChargeHistory.objects.all()
+    serializer_class = s.ETCCardChargeHistorySerializer
+
+
+class ETCCardUsageHistoryViewSet(TMSViewSet):
+
+    queryset = m.ETCCardUsageHistory.objects.all()
+    serializer_class = s.ETCCardUsageHistorySerializer
 
 
 class FuelCardViewSet(TMSViewSet):
 
     queryset = m.FuelCard.objects.all()
-    serializer_class = s.FuelCardSerializer
     short_serializer_class = s.ShortFuelCardSerializer
-    data_view_serializer_class = s.FuelCardDataViewSerializer
+    serializer_class = s.FuelCardSerializer
+
+    def create(self, request):
+        pass
+
+    def update(self, request, pk=None):
+        pass
 
 
 class BillDocumentViewSet(TMSViewSet):

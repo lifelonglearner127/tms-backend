@@ -16,6 +16,16 @@ router.register(
     base_name='etc-card'
 )
 router.register(
+    r'etc-charges',
+    v.ETCCardChargeHistoryViewSet,
+    base_name='etc-charges'
+)
+router.register(
+    r'etc-usages',
+    v.ETCCardUsageHistoryViewSet,
+    base_name='etc-usages'
+)
+router.register(
     r'fuel-card',
     v.FuelCardViewSet,
     base_name='fuel-card'

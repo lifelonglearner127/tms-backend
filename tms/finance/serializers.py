@@ -1,7 +1,14 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from . import models as m
 from ..core import constants as c
+
+# models
+from . import models as m
+from ..hr.models import Department
+from ..vehicle.models import Vehicle
+
+# serializers
 from ..core.serializers import Base64ImageField, TMSChoiceField
 from ..hr.serializers import ShortDepartmentSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
@@ -32,19 +39,50 @@ class ShortETCCardSerializer(serializers.ModelSerializer):
 
 class ETCCardSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.ETCCard
-        fields = '__all__'
-
-
-class ETCCardDataViewSerializer(serializers.ModelSerializer):
-
-    department = ShortDepartmentSerializer()
     vehicle = ShortVehicleSerializer()
+    department = ShortDepartmentSerializer()
 
     class Meta:
         model = m.ETCCard
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        ret = data
+        if 'vehicle' in data:
+            ret['vehicle'] = get_object_or_404(Vehicle, id=data['vehicle']['id'])
+
+        if 'department' in data:
+            ret['department'] = get_object_or_404(Department, id=data['department']['id'])
+
+        return ret
+
+
+class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.ETCCardChargeHistory
+        fields = '__all__'
+
+    def to_internal_value(self, data):
+        ret = data
+        if 'card' in data:
+            ret['card'] = get_object_or_404(m.ETCCard, id=data['card']['id'])
+
+        return ret
+
+
+class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.ETCCardUsageHistory
+        fields = '__all__'
+
+    def to_internal_value(self, data):
+        ret = data
+        if 'card' in data:
+            ret['card'] = get_object_or_404(m.ETCCard, id=data['card']['id'])
+
+        return ret
 
 
 class ShortFuelCardSerializer(serializers.ModelSerializer):
