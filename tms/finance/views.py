@@ -41,11 +41,55 @@ class FuelCardViewSet(TMSViewSet):
     short_serializer_class = s.ShortFuelCardSerializer
     serializer_class = s.FuelCardSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        card_type = self.request.query_params.get('type', None)
+        if card_type == 'master':
+            queryset = queryset.filter(is_child=False)
+        elif card_type == 'child':
+            queryset = queryset.filter(is_child=True)
+
+        return queryset
+
     def create(self, request):
-        pass
+        context = {
+            'master': request.data.pop('master'),
+            'vehicle': request.data.pop('vehicle'),
+            'department': request.data.pop('department')
+        }
+        serializer = s.FuelCardSerializer(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
-        pass
+        instance = self.get_object()
+        context = {
+            'master': request.data.pop('master'),
+            'vehicle': request.data.pop('vehicle'),
+            'department': request.data.pop('department')
+        }
+        serializer = s.FuelCardSerializer(
+            instance, data=request.data, context=context, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, url_path="master")
+    def get_master_cards(self, request):
+        serializer = s.ShortFuelCardSerializer(
+            self.queryset.filter(is_child=False), many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class BillDocumentViewSet(TMSViewSet):

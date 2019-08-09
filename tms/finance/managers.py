@@ -27,3 +27,15 @@ class OtherBillDocumentManager(models.Manager):
                 c.BILL_FROM_OTHER
             ]
         )
+
+
+class FuelMasterCards(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_child=False)
+
+
+class FuelChildernCards(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_child=True)

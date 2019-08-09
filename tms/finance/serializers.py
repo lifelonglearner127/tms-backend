@@ -111,19 +111,82 @@ class ShortFuelCardSerializer(serializers.ModelSerializer):
 
 class FuelCardSerializer(serializers.ModelSerializer):
 
+    master = ShortFuelCardSerializer(read_only=True)
+    vehicle = ShortVehicleSerializer(read_only=True)
+    department = ShortDepartmentSerializer(read_only=True)
+
     class Meta:
         model = m.FuelCard
         fields = '__all__'
 
-    def validate(self, data):
-        master = data.get('master', None)
-        vehicle = data.get('vehicle', None)
-        if master is not None and vehicle is None:
-            raise serializers.ValidationError({
-                'vehicle': 'Vehicle is required'
-            })
+    def create(self, validated_data):
+        master_data = self.context.get('master', None)
+        department_data = self.context.get('department', None)
+        vehicle_data = self.context.get('vehicle', None)
 
-        return data
+        if department_data is None:
+            raise serializers.ValidationError({
+                'department': 'department data is missing'
+            })
+        department = Department.objects.get(id=department_data.get('id'))
+        master = None
+        vehicle = None
+
+        if validated_data['is_child']:
+            if master_data is None:
+                raise serializers.ValidationError({
+                    'master': 'master data is missing'
+                })
+            else:
+                master = m.FuelCard.masters.get(id=master_data.get('id'))
+
+            if vehicle_data is None:
+                raise serializers.ValidationError({
+                    'vehicle': 'vehicle data is missing'
+                })
+            else:
+                vehicle = Vehicle.objects.get(id=vehicle_data.get('id', None))
+
+        return m.FuelCard.objects.create(
+            master=master, vehicle=vehicle, department=department, **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        master_data = self.context.get('master', None)
+        department_data = self.context.get('department', None)
+        vehicle_data = self.context.get('vehicle', None)
+
+        if department_data is None:
+            raise serializers.ValidationError({
+                'department': 'department data is missing'
+            })
+        department = Department.objects.get(id=department_data.get('id'))
+        master = None
+        vehicle = None
+
+        if validated_data['is_child']:
+            if master_data is None:
+                raise serializers.ValidationError({
+                    'master': 'master data is missing'
+                })
+            else:
+                master = m.FuelCard.masters.get(id=master_data.get('id'))
+
+            if vehicle_data is None:
+                raise serializers.ValidationError({
+                    'vehicle': 'vehicle data is missing'
+                })
+            else:
+                vehicle = Vehicle.objects.get(id=vehicle_data.get('id', None))
+
+        instance.master = master
+        instance.department = department
+        instance.vehicle = vehicle
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
 
 
 class FuelCardDataViewSerializer(serializers.ModelSerializer):

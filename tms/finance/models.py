@@ -104,14 +104,24 @@ class FuelCard(BaseCard):
         'self',
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name='children'
     )
 
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
+
+    is_child = models.BooleanField(
+        default=False
+    )
+
+    objects = models.Manager()
+    masters = managers.FuelMasterCards()
+    children = managers.FuelChildernCards()
 
 
 class FuelCardChargeHistory(models.Model):
