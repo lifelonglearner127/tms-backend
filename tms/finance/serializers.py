@@ -59,9 +59,22 @@ class ETCCardSerializer(serializers.ModelSerializer):
 
 class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
 
+    card = ETCCardSerializer()
+
     class Meta:
         model = m.ETCCardChargeHistory
         fields = '__all__'
+
+    def create(self, validated_data):
+        card = self.validated_data['card']
+
+        charge_history = m.ETCCardChargeHistory.objects.create(
+            previous_amount=card.balance, **validated_data
+        )
+        card.balance += float(validated_data['charged_amount'])
+        card.save()
+
+        return charge_history
 
     def to_internal_value(self, data):
         ret = data
@@ -72,6 +85,8 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
 
 
 class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
+
+    card = ETCCardSerializer()
 
     class Meta:
         model = m.ETCCardUsageHistory

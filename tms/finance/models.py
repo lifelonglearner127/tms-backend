@@ -75,7 +75,9 @@ class ETCCardChargeHistory(models.Model):
         default=0
     )
 
-    charged_on = models.DateTimeField()
+    charged_on = models.DateField(
+        auto_now_add=True
+    )
 
 
 class ETCCardUsageHistory(models.Model):
