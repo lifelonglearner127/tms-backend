@@ -354,7 +354,7 @@ class RouteSerializer(serializers.ModelSerializer):
 class PathStationNameField(serializers.ListField):
 
     def to_representation(self, value):
-        paths = m.Station.workstations.filter(id__in=value)
+        paths = m.Station.objects.filter(id__in=value)
         paths = dict([(point.id, point) for point in paths])
 
         serializer = StationPointSerializer(

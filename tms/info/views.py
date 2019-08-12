@@ -312,6 +312,63 @@ class RouteViewSet(TMSViewSet):
     short_serializer_class = s.ShortRouteSerializer
     data_view_serializer_class = s.RouteDataViewSerializer
 
+    def create(self, request):
+        data = request.data
+        paths = []
+        for item in data.pop('path', None):
+            if item.get('id', None):
+                paths.append(item.get('id'))
+                continue
+
+            custom_point = m.Station.objects.create(
+                station_type=c.STATION_TYPE_CUSTOM_POINT,
+                latitude=item.pop('latitude'),
+                longitude=item.pop('longitude'),
+                name=item.pop('name')
+            )
+            paths.append(custom_point.id)
+
+        data['path'] = paths
+        serializer = s.RouteSerializer(
+            data=data
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        data = request.data
+        paths = []
+        for item in data.pop('path', None):
+            if item.get('id', None):
+                paths.append(item.get('id'))
+                continue
+
+            custom_point = m.Station.objects.create(
+                station_type=c.STATION_TYPE_CUSTOM_POINT,
+                latitude=item.pop('latitude'),
+                longitude=item.pop('longitude'),
+                name=item.pop('name')
+            )
+            paths.append(custom_point.id)
+
+        data['path'] = paths
+        serializer = s.RouteSerializer(
+            instance, data=data, partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, url_path='points', methods=['get'])
     def get_route_point(self, request, pk=None):
         instance = self.get_object()

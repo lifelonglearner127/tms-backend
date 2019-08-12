@@ -250,8 +250,7 @@ class Route(TimeStampedModel):
 
     # current map api allow only 16 waypoints
     path = ArrayField(
-        models.PositiveIntegerField(),
-        size=18
+        models.PositiveIntegerField()
     )
 
     policy = models.PositiveIntegerField(
@@ -259,7 +258,9 @@ class Route(TimeStampedModel):
         default=c.ROUTE_PLANNING_POLICY_LEAST_TIME
     )
 
-    distance = models.PositiveIntegerField()
+    distance = models.FloatField(
+        default=0
+    )
 
     @property
     def loading_station(self):
