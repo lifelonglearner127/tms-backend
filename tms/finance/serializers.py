@@ -21,13 +21,6 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrderPaymentDataViewSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.OrderPayment
-        fields = '__all__'
-
-
 class ShortETCCardSerializer(serializers.ModelSerializer):
 
     class Meta:

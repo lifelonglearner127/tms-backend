@@ -8,10 +8,10 @@ from . import models as m
 from . import serializers as s
 
 # views
-from ..core.views import StaffViewSet
+from ..core.views import TMSViewSet
 
 
-class CompanyPolicyViewSet(StaffViewSet):
+class CompanyPolicyViewSet(TMSViewSet):
 
     queryset = m.CompanyPolicy.objects.all()
     serializer_class = s.CompanyPolicySerializer
@@ -63,7 +63,7 @@ class CompanyPolicyViewSet(StaffViewSet):
         )
 
 
-class SecurityKnowledgeViewSet(StaffViewSet):
+class SecurityKnowledgeViewSet(TMSViewSet):
 
     queryset = m.SecurityKnowledge.objects.all()
     serializer_class = s.SecurityKnowledgeSerializer

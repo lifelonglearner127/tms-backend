@@ -4,7 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .permissions import IsStaffUser
+from .permissions import IsStaffUser, TMSStaffPermission
 
 
 class TMSViewSet(viewsets.ModelViewSet):
@@ -12,14 +12,8 @@ class TMSViewSet(viewsets.ModelViewSet):
     Vieweset only allowed for admin or staff permission
     """
     short_serializer_class = None
-    data_view_serializer_class = None
-
-    def get_serializer_class(self):
-        if self.action not in ['create', 'update'] and\
-           self.data_view_serializer_class is not None:
-            return self.data_view_serializer_class
-        else:
-            return self.serializer_class
+    page_name = None
+    permission_classes = [TMSStaffPermission]
 
     def get_short_serializer_class(self):
         if self.short_serializer_class is not None:
@@ -37,13 +31,6 @@ class TMSViewSet(viewsets.ModelViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
-
-
-class StaffViewSet(TMSViewSet):
-    """
-    Vieweset only allowed for admin or staff permission
-    """
-    permission_classes = [IsStaffUser]
 
 
 class ApproveViewSet(TMSViewSet):

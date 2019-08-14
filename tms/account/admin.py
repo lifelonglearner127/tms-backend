@@ -7,6 +7,16 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from . import models as m
 
 
+@admin.register(m.UserPermission)
+class UserPermissionAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    pass
+
+
 class UserCreationForm(forms.ModelForm):
 
     password1 = forms.CharField(
@@ -63,7 +73,7 @@ class UserAdmin(BaseUserAdmin):
         ('Personal info', {
             'fields': ('name', 'mobile', 'device_token', 'channel_name')
         }),
-        ('Permissions', {'fields': ('role',)}),
+        ('Permissions', {'fields': ('role', 'permission')}),
     )
 
     add_fieldsets = (

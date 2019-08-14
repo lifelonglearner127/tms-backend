@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from . import models as m
+from ..account.models import UserPermission
 from ..core import constants as c
 
 # serializers
@@ -50,16 +51,6 @@ class RoleManagementSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RoleManagementDataViewSerializer(serializers.ModelSerializer):
-
-    department = ShortDepartmentSerializer()
-    position = ShortPositionSerializer()
-
-    class Meta:
-        model = m.RoleManagement
-        fields = '__all__'
-
-
 class DriverLicenseSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -93,6 +84,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
 
 class StaffProfileSerializer(serializers.ModelSerializer):
 
+    user = UserSerializer(read_only=True)
     driver_license = DriverLicenseSerializer(read_only=True)
     department = ShortDepartmentSerializer(read_only=True)
     position = ShortPositionSerializer(read_only=True)
@@ -131,7 +123,14 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                     'license': 'Driver license data is missing'
                 })
 
-        user = m.User.objects.create_user(**user_data)
+        permission = None
+        if user_data['role'] == c.USER_ROLE_STAFF:
+            permission_data = user_data.pop('permission')
+            permission = get_object_or_404(
+                UserPermission, id=permission_data.get('id', None)
+            )
+
+        user = m.User.objects.create_user(permission=permission, **user_data)
 
         department_data = self.context.get('department', None)
         department = get_object_or_404(
@@ -194,6 +193,14 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         if password is not None:
             instance.user.set_password(password)
 
+        permission = None
+        if user_data['role'] == c.USER_ROLE_STAFF:
+            permission_data = user_data.pop('permission')
+            permission = get_object_or_404(
+                UserPermission, id=permission_data.get('id', None)
+            )
+            instance.user.permission = permission
+
         for (key, value) in user_data.items():
             setattr(instance.user, key, value)
         instance.user.save()
@@ -241,18 +248,6 @@ class StaffProfileSerializer(serializers.ModelSerializer):
 
         ret = super().to_internal_value(data)
         return ret
-
-
-class StaffProfileDataViewSerializer(serializers.ModelSerializer):
-
-    user = UserSerializer()
-    department = ShortDepartmentSerializer()
-    position = ShortPositionSerializer()
-    driver_license = DriverLicenseSerializer()
-
-    class Meta:
-        model = m.StaffProfile
-        fields = '__all__'
 
 
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):

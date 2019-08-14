@@ -53,3 +53,12 @@ class OrderPermission(permissions.BasePermission):
                 return True
 
         return False
+
+
+class TMSStaffPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == c.USER_ROLE_ADMIN or\
+            request.user.role == c.USER_ROLE_STAFF and request.user.permission.has_permission(
+                page=view.page_name, action=view.action
+            )

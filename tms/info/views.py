@@ -13,7 +13,7 @@ from . import serializers as s
 from ..core.serializers import ChoiceSerializer
 
 # views
-from ..core.views import StaffViewSet, TMSViewSet, StaffAPIView
+from ..core.views import TMSViewSet, StaffAPIView
 
 
 class AlarmSettingAPIView(StaffAPIView):
@@ -52,20 +52,21 @@ class AlarmSettingAPIView(StaffAPIView):
         )
 
 
-class ProductCategoryViewSet(StaffViewSet):
+class ProductCategoryViewSet(TMSViewSet):
 
     queryset = m.ProductCategory.objects.all()
     serializer_class = s.ProductCategorySerializer
     short_serializer_class = s.ShortProductCategorySerializer
 
 
-class ProductViewSet(StaffViewSet):
+class ProductViewSet(TMSViewSet):
     """
     Viewset for products
     """
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
+    page_name = 'info'
 
     def create(self, request):
         context = {
@@ -310,7 +311,7 @@ class RouteViewSet(TMSViewSet):
     queryset = m.Route.objects.all()
     serializer_class = s.RouteSerializer
     short_serializer_class = s.ShortRouteSerializer
-    data_view_serializer_class = s.RouteDataViewSerializer
+    page_name = 'routes'
 
     def create(self, request):
         data = request.data
@@ -378,7 +379,7 @@ class RouteViewSet(TMSViewSet):
         )
 
 
-class TransportationDistanceViewSet(StaffViewSet):
+class TransportationDistanceViewSet(TMSViewSet):
 
     queryset = m.TransportationDistance.objects.all()
     serializer_class = s.TransportationDistanceSerializer

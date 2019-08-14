@@ -1,6 +1,5 @@
 # from collections import defaultdict
 # from django.db.models import Q
-import json
 from django.shortcuts import get_object_or_404
 from django.utils import timezone as datetime
 from rest_framework import serializers
@@ -11,7 +10,7 @@ from ..core import constants as c
 
 # models
 from ..hr.models import CustomerProfile
-from ..info.models import Station, Product
+from ..info.models import Product
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField

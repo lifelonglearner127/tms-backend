@@ -35,6 +35,42 @@ class UserManager(BaseUserManager):
         return user
 
 
+class UserPermission(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    permissions = models.ManyToManyField(
+        'Permission'
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    def has_permission(self, page, action):
+        return self.permissions.filter(page=page, action=action).exists()
+
+
+class Permission(models.Model):
+
+    page = models.CharField(
+        max_length=20
+    )
+
+    action = models.CharField(
+        max_length=20
+    )
+
+    def __str__(self):
+        return '{} permission on {} page'.format(self.action, self.page)
+
+
 class User(AbstractBaseUser):
     """
     User model
@@ -93,6 +129,12 @@ class User(AbstractBaseUser):
         max_length=1,
         choices=c.USER_ROLE,
         default=c.USER_ROLE_STAFF
+    )
+
+    permission = models.ForeignKey(
+        UserPermission,
+        on_delete=models.SET_NULL,
+        null=True
     )
 
     @property

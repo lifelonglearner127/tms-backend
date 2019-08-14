@@ -15,7 +15,7 @@ from . import serializers as s
 from ..core.serializers import ChoiceSerializer
 
 # views
-from ..core.views import TMSViewSet, ApproveViewSet, StaffViewSet
+from ..core.views import TMSViewSet, ApproveViewSet
 from ..g7.interfaces import G7Interface
 
 
@@ -349,7 +349,6 @@ class VehicleMaintenanceRequestViewSet(ApproveViewSet):
 
     queryset = m.VehicleMaintenanceRequest.objects.all()
     serializer_class = s.VehicleMaintenanceRequestSerializer
-    data_view_serializer_class = s.VehicleMaintenanceRequestDataViewSerializer
 
     def create(self, request):
         data = request.data
@@ -378,13 +377,13 @@ class VehicleMaintenanceRequestViewSet(ApproveViewSet):
         )
 
 
-class FuelConsumptionViewSet(StaffViewSet):
+class FuelConsumptionViewSet(TMSViewSet):
 
     queryset = m.FuelConsumption.objects.all()
     serializer_class = s.FuelConsumptionSerializer
 
 
-class TireViewSet(StaffViewSet):
+class TireViewSet(TMSViewSet):
 
     queryset = m.Tire.objects.all()
     serializer_class = s.TireSerializer

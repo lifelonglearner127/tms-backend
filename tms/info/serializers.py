@@ -342,15 +342,6 @@ class ShortRouteSerializer(serializers.ModelSerializer):
         )
 
 
-class RouteSerializer(serializers.ModelSerializer):
-
-    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
-
-    class Meta:
-        model = m.Route
-        fields = '__all__'
-
-
 class PathStationNameField(serializers.ListField):
 
     def to_representation(self, value):
@@ -364,14 +355,23 @@ class PathStationNameField(serializers.ListField):
         return serializer.data
 
 
-class RouteDataViewSerializer(serializers.ModelSerializer):
-
-    path = PathStationNameField()
-    # policy = TMSChoiceField(choices=c.ROUTE_PLANNING_POLICY)
+class RouteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Route
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        paths = m.Station.objects.filter(id__in=ret['path'])
+        paths = dict([(point.id, point) for point in paths])
+
+        ret['path'] = StationPointSerializer(
+            [paths[id] for id in paths],
+            many=True
+        ).data
+
+        return ret
 
 
 class PathLngLatField(serializers.ListField):

@@ -34,6 +34,24 @@ class AuthSerializer(serializers.ModelSerializer):
         if ret['name'] is None:
             ret['name'] = instance.username
 
+        if instance.role == c.USER_ROLE_ADMIN:
+            ret['permissions'] = []
+        elif instance.role == c.USER_ROLE_STAFF:
+            ret['permissions'] = []
+            if instance.permission is not None:
+                for permission in instance.permission.permissions.all():
+                    action = permission.action
+                    for value in ret['permissions']:
+                        if value['page'] == permission.page:
+                            value['view'] = value['view'] or action == 'list' or action == 'get'
+                            value['edit'] = value['edit'] or action == 'create' or action == 'update' or action == 'delete'
+                            break
+                    else:
+                        ret['permissions'].append({
+                            'page': permission.page,
+                            'view': action == 'list' or action == 'get',
+                            'edit': action == 'create' or action == 'update' or action == 'delete'
+                        })
         return ret
 
 
@@ -201,12 +219,49 @@ class DriverAppUserSerializer(serializers.ModelSerializer):
         )
 
 
+class ShortUserPermissionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.UserPermission
+        fields = (
+            'id', 'name'
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User
     """
     role = TMSChoiceField(choices=c.USER_ROLE)
+    permission = ShortUserPermissionSerializer(read_only=True)
 
     class Meta:
         model = m.User
         fields = '__all__'
+
+
+class UserPermissionSerializer(serializers.ModelSerializer):
+
+    check_items = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.UserPermission
+        fields = '__all__'
+
+    def get_check_items(self, instance):
+        ret = []
+        for permission in instance.permissions.all():
+            action = permission.action
+            for value in ret:
+                if value['page'] == permission.page:
+                    value['view'] = value['view'] or action == 'list' or action == 'get'
+                    value['edit'] = value['edit'] or action == 'create' or action == 'update' or action == 'delete'
+                    break
+            else:
+                ret.append({
+                    'page': permission.page,
+                    'view': action == 'list' or action == 'get',
+                    'edit': action == 'create' or action == 'update' or action == 'delete'
+                })
+
+        return ret

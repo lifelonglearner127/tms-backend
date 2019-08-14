@@ -133,3 +133,55 @@ class UserViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class UserPermissionViewSet(TMSViewSet):
+
+    queryset = m.UserPermission.objects.all()
+    serializer_class = s.UserPermissionSerializer
+    short_serializer_class = s.ShortUserPermissionSerializer
+
+    def create(self, request):
+        data = request.data
+        permission_data = request.data.pop('permissions')
+        permissions = []
+        for key, actions in permission_data.items():
+            for action_name in actions:
+                obj, created = m.Permission.objects.get_or_create(
+                    page=key,
+                    action=action_name
+                )
+                permissions.append(obj.id)
+
+        data['permissions'] = permissions
+        serializer = s.UserPermissionSerializer(
+            data=data
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        data = request.data
+        permission_data = request.data.pop('permissions')
+        permissions = []
+        for key, actions in permission_data.items():
+            for action_name in actions:
+                obj, created = m.Permission.objects.get_or_create(
+                    page=key,
+                    action=action_name
+                )
+                permissions.append(obj.id)
+
+        data['permissions'] = permissions
+        serializer = s.UserPermissionSerializer(
+            instance, data=data, partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

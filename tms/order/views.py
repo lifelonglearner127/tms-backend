@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 from pytz import timezone as tz
 import requests

@@ -99,15 +99,6 @@ class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
         return data
 
 
-class VehicleMaintenanceRequestDataViewSerializer(serializers.ModelSerializer):
-
-    vehicle = ShortVehicleSerializer()
-
-    class Meta:
-        model = m.VehicleMaintenanceRequest
-        fields = '__all__'
-
-
 class VehicleCheckItemSerializer(serializers.ModelSerializer):
 
     class Meta:

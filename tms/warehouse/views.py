@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 
 # models
@@ -10,10 +9,10 @@ from . import models as m
 from . import serializers as s
 
 # views
-from ..core.views import StaffViewSet
+from ..core.views import TMSViewSet
 
 
-class WarehouseProductViewSet(StaffViewSet):
+class WarehouseProductViewSet(TMSViewSet):
 
     queryset = m.WarehouseProduct.objects.all()
     serializer_class = s.WarehouseProductSerializer
@@ -55,7 +54,7 @@ class WarehouseProductViewSet(StaffViewSet):
         )
 
 
-class InTransactionViewSet(StaffViewSet):
+class InTransactionViewSet(TMSViewSet):
 
     serializer_class = s.InTransactionSerializer
 
@@ -101,7 +100,7 @@ class InTransactionViewSet(StaffViewSet):
         )
 
 
-class OutTransactionViewSet(StaffViewSet):
+class OutTransactionViewSet(TMSViewSet):
 
     serializer_class = s.OutTransactionSerializer
 

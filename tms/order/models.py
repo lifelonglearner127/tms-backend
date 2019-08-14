@@ -1,7 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
-from jsonfield import JSONField
 
 from . import managers
 from ..core import constants as c

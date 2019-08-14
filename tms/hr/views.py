@@ -27,7 +27,6 @@ class RoleManagementViewSet(TMSViewSet):
 
     queryset = m.RoleManagement.objects.all()
     serializer_class = s.RoleManagementSerializer
-    data_view_serializer_class = s.RoleManagementDataViewSerializer
 
 
 class StaffProfileViewSet(TMSViewSet):
@@ -35,7 +34,6 @@ class StaffProfileViewSet(TMSViewSet):
     queryset = m.StaffProfile.objects.all()
     serializer_class = s.StaffProfileSerializer
     short_serializer_class = s.ShortStaffProfileSerializer
-    data_view_serializer_class = s.StaffProfileDataViewSerializer
 
     def get_queryset(self):
         queryset = self.queryset

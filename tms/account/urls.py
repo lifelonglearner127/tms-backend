@@ -8,6 +8,9 @@ router = routers.SimpleRouter(trailing_slash=False)
 router.register(
     r'users', v.UserViewSet, base_name='user'
 )
+router.register(
+    r'permissions', v.UserPermissionViewSet, base_name='permissions'
+)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

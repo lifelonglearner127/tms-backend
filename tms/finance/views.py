@@ -13,7 +13,6 @@ class OrderPaymentViewSet(TMSViewSet):
 
     queryset = m.OrderPayment.objects.all()
     serializer_class = s.OrderPaymentSerializer
-    data_view_serializer_class = s.OrderPaymentDataViewSerializer
 
 
 class ETCCardViewSet(TMSViewSet):
