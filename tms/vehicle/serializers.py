@@ -99,6 +99,13 @@ class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
         return data
 
 
+class VehicleStatusSerializer(serializers.Serializer):
+
+    plate_num = serializers.CharField()
+    driver = serializers.CharField()
+    status = serializers.CharField()
+
+
 class VehicleCheckItemSerializer(serializers.ModelSerializer):
 
     class Meta:
