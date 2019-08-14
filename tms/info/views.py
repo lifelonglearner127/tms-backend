@@ -8,6 +8,9 @@ from ..core import constants as c
 # models
 from . import models as m
 
+# permissions
+from . import permissions as p
+
 # serializers
 from . import serializers as s
 from ..core.serializers import ChoiceSerializer
@@ -66,7 +69,7 @@ class ProductViewSet(TMSViewSet):
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
     short_serializer_class = s.ShortProductSerializer
-    page_name = 'info'
+    permission_classes = [p.ProductViewSetPermission]
 
     def create(self, request):
         context = {

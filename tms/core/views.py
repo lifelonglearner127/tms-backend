@@ -12,8 +12,6 @@ class TMSViewSet(viewsets.ModelViewSet):
     Vieweset only allowed for admin or staff permission
     """
     short_serializer_class = None
-    page_name = None
-    permission_classes = [TMSStaffPermission]
 
     def get_short_serializer_class(self):
         if self.short_serializer_class is not None:
