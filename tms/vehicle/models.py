@@ -49,6 +49,43 @@ class Vehicle(TimeStampedModel):
         decimal_places=c.WEIGHT_DECIMAL_PLACES
     )
 
+    model_2 = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_MODEL_TYPE,
+        default=c.VEHICLE_MODEL_TYPE_TRUCK
+    )
+
+    plate_num_2 = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    identifier_code_2 = models.CharField(
+        max_length=100
+    )
+
+    brand_2 = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_BRAND,
+        default=c.VEHICLE_BRAND_TONGHUA
+    )
+
+    use_for_2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    total_load_2 = models.DecimalField(
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    )
+
+    actual_load_2 = models.DecimalField(
+        max_digits=c.WEIGHT_MAX_DIGITS,
+        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    )
+
     affiliation_unit = models.CharField(
         max_length=100,
         null=True,
@@ -123,6 +160,49 @@ class Vehicle(TimeStampedModel):
     )
 
     insurance_expires_on = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    cert_type_2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    cert_id_2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    cert_authority_2 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    cert_registered_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    cert_active_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    cert_expires_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    insurance_active_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    insurance_expires_on_2 = models.DateField(
         null=True,
         blank=True
     )

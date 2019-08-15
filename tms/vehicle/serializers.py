@@ -40,6 +40,8 @@ class VehicleSerializer(serializers.ModelSerializer):
     """
     model = TMSChoiceField(choices=c.VEHICLE_MODEL_TYPE)
     brand = TMSChoiceField(choices=c.VEHICLE_BRAND)
+    model_2 = TMSChoiceField(choices=c.VEHICLE_MODEL_TYPE)
+    brand_2 = TMSChoiceField(choices=c.VEHICLE_BRAND)
 
     class Meta:
         model = m.Vehicle
