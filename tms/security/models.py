@@ -1,12 +1,13 @@
 from django.db import models
 
+from ..core import constants as c
+
 # models
 from ..core.models import TimeStampedModel
 from ..account.models import User
 
 
-class CompanyContent(TimeStampedModel):
-
+class CompanyPolicy(TimeStampedModel):
     title = models.CharField(
         max_length=100
     )
@@ -25,15 +26,10 @@ class CompanyContent(TimeStampedModel):
         default=False
     )
 
+    policy_type = models.CharField(
+        max_length=1,
+        choices=c.COMPANY_POLICY_TYPE,
+        default=c.COMPANY_POLICY_TYPE_SHELL
+    )
+
     content = models.TextField()
-
-    class Meta:
-        abstract = True
-
-
-class CompanyPolicy(CompanyContent):
-    pass
-
-
-class SecurityKnowledge(CompanyContent):
-    pass

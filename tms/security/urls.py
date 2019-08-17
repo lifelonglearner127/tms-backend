@@ -9,11 +9,11 @@ router.register(
     v.CompanyPolicyViewSet,
     base_name='company-policy'
 )
-router.register(
-    r'security-knowledge',
-    v.SecurityKnowledgeViewSet,
-    base_name='security-knowledge'
-)
+# router.register(
+#     r'security-knowledge',
+#     v.SecurityKnowledgeViewSet,
+#     base_name='security-knowledge'
+# )
 
 urlpatterns = [
     url(r'^', include(router.urls))

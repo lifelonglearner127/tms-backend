@@ -1,15 +1,19 @@
 from rest_framework import serializers
 
+from ..core import constants as c
+
 # models
 from . import models as m
 
 # serializers
+from ..core.serializers import TMSChoiceField
 from ..account.serializers import ShortUserSerializer
 
 
-class CompanyContentSerializer(serializers.ModelSerializer):
+class CompanyPolicySerializer(serializers.ModelSerializer):
 
     author = ShortUserSerializer(read_only=True)
+    policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
@@ -18,7 +22,7 @@ class CompanyContentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = m.CompanyContent
+        model = m.CompanyPolicy
         fields = '__all__'
 
     def create(self, validated_data):
@@ -60,15 +64,3 @@ class CompanyContentSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
-
-class CompanyPolicySerializer(CompanyContentSerializer):
-
-    class Meta(CompanyContentSerializer.Meta):
-        model = m.CompanyPolicy
-
-
-class SecurityKnowledgeSerializer(CompanyContentSerializer):
-
-    class Meta(CompanyContentSerializer.Meta):
-        model = m.SecurityKnowledge
