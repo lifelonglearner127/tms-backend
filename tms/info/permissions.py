@@ -8,7 +8,7 @@ class ProductViewSetPermission(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        if request.user.role == c.USER_ROLE_ADMIN:
+        if request.user.role in [c.USER_ROLE_ADMIN, c.USER_ROLE_CUSTOMER]:
             return True
 
         if request.user.role == c.USER_ROLE_STAFF:
