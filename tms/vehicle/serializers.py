@@ -177,7 +177,10 @@ class VehicleBeforeDrivingCheckHistorySerializer(serializers.ModelSerializer):
 
         for image in images:
             image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(data=image)
+            serializer = VehicleBeforeDrivingDocumentSerializer(
+                data=image,
+                context={'request': self.context.get('request')}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
@@ -186,7 +189,8 @@ class VehicleBeforeDrivingCheckHistorySerializer(serializers.ModelSerializer):
     def get_images(self, instance):
         ret = []
         for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(image).data)
+            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
+                image, context={'request': self.context.get('request')}).data)
 
         return ret
 
@@ -244,7 +248,10 @@ class VehicleDrivingCheckHistorySerializer(serializers.ModelSerializer):
 
         for image in images:
             image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(data=image)
+            serializer = VehicleBeforeDrivingDocumentSerializer(
+                data=image,
+                context={'request': self.context.get('request')}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
@@ -253,7 +260,8 @@ class VehicleDrivingCheckHistorySerializer(serializers.ModelSerializer):
     def get_images(self, instance):
         ret = []
         for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(image).data)
+            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
+                image, context={'request': self.context.get('request')}).data)
 
         return ret
 
@@ -311,7 +319,10 @@ class VehicleAfterDrivingCheckHistorySerializer(serializers.ModelSerializer):
 
         for image in images:
             image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(data=image)
+            serializer = VehicleBeforeDrivingDocumentSerializer(
+                data=image,
+                context={'request': self.context.get('request')}
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
@@ -320,7 +331,10 @@ class VehicleAfterDrivingCheckHistorySerializer(serializers.ModelSerializer):
     def get_images(self, instance):
         ret = []
         for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(image).data)
+            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
+                image,
+                context={'request': self.context.get('request')}
+            ).data)
 
         return ret
 
