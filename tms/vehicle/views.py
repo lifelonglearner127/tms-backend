@@ -319,7 +319,7 @@ class VehicleViewSet(TMSViewSet):
     def before_driving_check(self, request, pk=None):
         data = {}
         items = request.data.pop('items')
-        images = request.data.pop('images')
+        images = request.data.pop('images', [])
         data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
@@ -356,7 +356,7 @@ class VehicleViewSet(TMSViewSet):
     def driving_check(self, request, pk=None):
         data = {}
         items = request.data.pop('items')
-        images = request.data.pop('images')
+        images = request.data.pop('images', [])
         data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
@@ -393,7 +393,7 @@ class VehicleViewSet(TMSViewSet):
     def after_driving_check(self, request, pk=None):
         data = {}
         items = request.data.pop('items')
-        images = request.data.pop('images')
+        images = request.data.pop('images', [])
         data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
