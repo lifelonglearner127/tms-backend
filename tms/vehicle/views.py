@@ -340,8 +340,13 @@ class VehicleViewSet(TMSViewSet):
             vehicle=vehicle, driver=request.user
         ).first()
 
+        if driving_check is not None:
+            ret = s.VehicleBeforeDrivingCheckHistorySerializer(driving_check).data
+        else:
+            ret = []
+
         return Response(
-            s.VehicleBeforeDrivingCheckHistorySerializer(driving_check).data,
+            ret,
             status=status.HTTP_200_OK
         )
 
@@ -352,8 +357,13 @@ class VehicleViewSet(TMSViewSet):
             vehicle=vehicle, driver=request.user
         ).first()
 
+        if driving_check is not None:
+            ret = s.VehicleDrivingCheckHistorySerializer(driving_check).data
+        else:
+            ret = []
+
         return Response(
-            s.VehicleDrivingCheckHistorySerializer(driving_check).data,
+            ret,
             status=status.HTTP_200_OK
         )
 
@@ -364,8 +374,13 @@ class VehicleViewSet(TMSViewSet):
             vehicle=vehicle, driver=request.user
         ).first()
 
+        if driving_check is not None:
+            ret = s.VehicleAfterDrivingCheckHistorySerializer(driving_check).data
+        else:
+            ret = []
+
         return Response(
-            s.VehicleAfterDrivingCheckHistorySerializer(driving_check).data,
+            ret,
             status=status.HTTP_200_OK
         )
 

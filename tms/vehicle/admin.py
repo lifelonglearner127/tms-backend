@@ -26,3 +26,33 @@ class VehicleBeforeDrivingCheckHistoryAdmin(admin.ModelAdmin):
 @admin.register(m.VehicleBeforeDrivingItemCheck)
 class VehicleBeforeDrivingItemCheckAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.VehicleDrivingDocument)
+class VehicleDrivingDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleDrivingCheckHistory)
+class VehicleDrivingCheckHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleDrivingItemCheck)
+class VehicleDrivingItemCheckAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleAfterDrivingDocument)
+class VehicleAfterDrivingDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleAfterDrivingCheckHistory)
+class VehicleAfterDrivingCheckHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleAfterDrivingItemCheck)
+class VehicleAfterDrivingItemCheckAdmin(admin.ModelAdmin):
+    pass
