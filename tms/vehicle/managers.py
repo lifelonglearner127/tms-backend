@@ -31,3 +31,33 @@ class RepairVehicleManager(models.Manager):
         return super().get_queryset().filter(
             status=c.VEHICLE_STATUS_REPAIR
         )
+
+
+class BeforeDrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=c.VEHICLE_STATUS_REPAIR
+        )
+
+
+class DrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=c.VEHICLE_STATUS_REPAIR
+        )
+
+
+class AfterDrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            status=c.VEHICLE_STATUS_REPAIR
+        )

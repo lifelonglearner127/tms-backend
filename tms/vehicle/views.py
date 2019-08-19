@@ -318,11 +318,14 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='before-driving-check')
     def before_driving_check(self, request, pk=None):
         data = {}
+        items = request.data.pop('items')
+        images = request.data.pop('images')
+        data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
         serializer = s.VehicleBeforeDrivingCheckHistorySerializer(
             data=data,
-            context={'items': request.data}
+            context={'items': items, 'images': images}
         )
 
         serializer.is_valid(raise_exception=True)
@@ -330,14 +333,52 @@ class VehicleViewSet(TMSViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['get'], url_path='last-before-driving-check')
+    def get_last_before_driving_check(self, request, pk=None):
+        vehicle = self.get_object()
+        driving_check = m.VehicleBeforeDrivingCheckHistory.objects.filter(
+            vehicle=vehicle, driver=request.user
+        ).first()
+
+        return Response(
+            s.VehicleBeforeDrivingCheckHistorySerializer(driving_check).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['get'], url_path='last-driving-check')
+    def get_last_driving_check(self, request, pk=None):
+        vehicle = self.get_object()
+        driving_check = m.VehicleDrivingCheckHistory.objects.filter(
+            vehicle=vehicle, driver=request.user
+        ).first()
+
+        return Response(
+            s.VehicleDrivingCheckHistorySerializer(driving_check).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['get'], url_path='last-after-driving-check')
+    def get_last_after_driving_check(self, request, pk=None):
+        vehicle = self.get_object()
+        driving_check = m.VehicleAfterDrivingCheckHistory.objects.filter(
+            vehicle=vehicle, driver=request.user
+        ).first()
+
+        return Response(
+            s.VehicleAfterDrivingCheckHistorySerializer(driving_check).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['post'], url_path='driving-check')
     def driving_check(self, request, pk=None):
         data = {}
+        items = request.data.pop('items')
+        data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
         serializer = s.VehicleDrivingCheckHistorySerializer(
             data=data,
-            context={'items': request.data}
+            context={'items': items}
         )
 
         serializer.is_valid(raise_exception=True)
@@ -348,13 +389,26 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='after-driving-check')
     def after_driving_check(self, request, pk=None):
         data = {}
+        items = request.data.pop('items')
+        data = request.data
         data['vehicle'] = pk
         data['driver'] = request.user.id
         serializer = s.VehicleAfterDrivingCheckHistorySerializer(
             data=data,
-            context={'items': request.data}
+            context={'items': items}
         )
 
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='daily-bind')
+    def vehicle_driver_daily_bind(self, request, pk=None):
+        data = request.data
+        data['vehicle'] = pk
+        data['driver'] = request.user.id
+        serializer = s.VehicleDriverDailyBindSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

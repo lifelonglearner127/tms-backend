@@ -11,3 +11,18 @@ class VehicleAdmin(admin.ModelAdmin):
 @admin.register(m.VehicleMaintenanceRequest)
 class VehicleMaintenanceRequestAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.VehicleBeforeDrivingDocument)
+class VehicleBeforeDrivingDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleBeforeDrivingCheckHistory)
+class VehicleBeforeDrivingCheckHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.VehicleBeforeDrivingItemCheck)
+class VehicleBeforeDrivingItemCheckAdmin(admin.ModelAdmin):
+    pass
