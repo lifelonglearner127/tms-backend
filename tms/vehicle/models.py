@@ -615,5 +615,10 @@ class VehicleDriverDailyBind(models.Model):
         auto_now_add=True
     )
 
+    get_off = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     class Meta:
         ordering = ['vehicle', 'get_on']
