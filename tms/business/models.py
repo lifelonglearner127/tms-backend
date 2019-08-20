@@ -1,10 +1,12 @@
 from django.db import models
 
 from ..core import constants as c
+
+# models
 from ..core.models import ApprovedModel
 from ..account.models import User
-from ..vehicle.models import Vehicle
 from ..order.models import Job
+from ..vehicle.models import Vehicle
 
 
 class ParkingRequest(ApprovedModel):
@@ -110,14 +112,16 @@ class EscortChangeRequest(ApprovedModel):
         unique_together = ['job', 'old_escort']
 
 
-class RestRequest(ApprovedModel):
+class RestRequest(models.Model):
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='my_rest_request'
     )
 
-    category = models.PositiveIntegerField(
+    category = models.CharField(
+        max_length=1,
         choices=c.REST_REQUEST_CATEGORY,
         default=c.REST_REQUEST_ILL
     )
@@ -126,6 +130,104 @@ class RestRequest(ApprovedModel):
 
     to_date = models.DateField()
 
+    request_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    approved = models.BooleanField(
+        default=False
+    )
+
+    approved_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    approvers = models.ManyToManyField(
+        User,
+        through='RestRequestApprover',
+        through_fields=('rest_request', 'approver'),
+        related_name='rest_request_as_approver'
+    )
+
+    ccs = models.ManyToManyField(
+        User,
+        through='RestRequestCC',
+        through_fields=('rest_request', 'cc'),
+        related_name='rest_request_as_cc'
+    )
+
+    @property
+    def approvers_count(self):
+        return self.approvers.all().count()
+
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['user', 'from_date', 'to_date']
+        # unique_together = ['user', 'from_date', 'to_date']
+
+
+class RestRequestApprover(models.Model):
+
+    rest_request = models.ForeignKey(
+        RestRequest,
+        on_delete=models.CASCADE
+    )
+
+    approver_type = models.CharField(
+        max_length=1,
+        choices=c.APPROVER_TYPE,
+        default=c.APPROVER_TYPE_MEMBER
+    )
+
+    approver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    approved = models.BooleanField(
+        default=False
+    )
+
+    approved_time = models.DateTimeField(
+        auto_now=True
+    )
+
+    step = models.PositiveIntegerField(
+        default=0
+    )
+
+    description = models.TextField(
+        null=True, blank=True
+    )
+
+
+class RestRequestCC(models.Model):
+
+    rest_request = models.ForeignKey(
+        RestRequest,
+        on_delete=models.CASCADE
+    )
+
+    cc_type = models.CharField(
+        max_length=1,
+        choices=c.CC_TYPE,
+        default=c.CC_TYPE_MEMBER
+    )
+
+    cc = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    is_read = models.BooleanField(
+        default=False
+    )
+
+    read_time = models.DateTimeField(
+        auto_now=True
+    )

@@ -13,10 +13,10 @@ from . import serializers as s
 from ..core.serializers import ChoiceSerializer
 
 # views
-from ..core.views import ApproveViewSet
+from ..core.views import TMSViewSet
 
 
-class ParkingRequestViewSet(ApproveViewSet):
+class ParkingRequestViewSet(TMSViewSet):
 
     queryset = m.ParkingRequest.objects.all()
     serializer_class = s.ParkingRequestSerializer
@@ -52,7 +52,7 @@ class ParkingRequestViewSet(ApproveViewSet):
         )
 
 
-class DriverChangeRequestViewSet(ApproveViewSet):
+class DriverChangeRequestViewSet(TMSViewSet):
 
     queryset = m.DriverChangeRequest.objects.all()
     serializer_class = s.DriverChangeRequestSerializer
@@ -92,7 +92,7 @@ class DriverChangeRequestViewSet(ApproveViewSet):
         )
 
 
-class EscortChangeRequestViewSet(ApproveViewSet):
+class EscortChangeRequestViewSet(TMSViewSet):
 
     queryset = m.EscortChangeRequest.objects.all()
     serializer_class = s.EscortChangeRequestSerializer
@@ -133,16 +133,18 @@ class EscortChangeRequestViewSet(ApproveViewSet):
         )
 
 
-class RestRequestViewSet(ApproveViewSet):
+class RestRequestViewSet(TMSViewSet):
 
     queryset = m.RestRequest.objects.all()
     serializer_class = s.RestRequestSerializer
 
     def create(self, request):
+        approvers = request.data.pop('approvers', [])
+        ccs = request.data.pop('ccs', [])
         serializer = self.serializer_class(
             data=request.data,
             context={
-                'user': request.user
+                'user': request.user, 'approvers': approvers, 'ccs': ccs
             }
         )
 
@@ -156,10 +158,12 @@ class RestRequestViewSet(ApproveViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
+        approvers = request.data.pop('approvers', [])
+        ccs = request.data.pop('ccs', [])
         serializer = self.serializer_class(
             instance, data=request.data,
             context={
-                'user': request.user
+                'user': request.user, 'approvers': approvers, 'ccs': ccs
             },
             partial=True
         )
@@ -169,6 +173,43 @@ class RestRequestViewSet(ApproveViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def retrive(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.serializer_class(
+            instance, context={'requester': request.user}
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path="approve")
+    def approve(self, request, pk=None):
+        rest_request = self.get_object()
+        approver = request.user
+        if approver not in rest_request.approvers.all():
+            return Response(
+                {'request': 'You cannot handle this request'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        rest_request_approve = m.RestRequestApprover.objects.filter(
+            rest_request=rest_request, approver=approver
+        ).first()
+
+        rest_request_approve.approved = request.data.get('approve', False)
+        rest_request_approve.description = request.data.get('description', '')
+        rest_request_approve.save()
+
+        if not m.RestRequestApprover.objects.filter(rest_request=rest_request, approved=False).exists():
+            rest_request.approved = True
+            rest_request.save()
+
+        return Response(
+            s.RestRequestApproverSerializer(rest_request_approve).data,
             status=status.HTTP_200_OK
         )
 
