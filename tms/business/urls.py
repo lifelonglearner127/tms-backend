@@ -25,6 +25,11 @@ router.register(
     v.RestRequestViewSet,
     base_name='rest-request'
 )
+router.register(
+    r'vehicle-repair-request',
+    v.VehicleRepairRequestViewSet,
+    base_name='vehicle-repair-request'
+)
 
 # # /jobs/{job_pk}/missions
 # # /jobs/{job_pk}/missions/{pk}

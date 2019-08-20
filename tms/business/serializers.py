@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 # constants
@@ -102,7 +103,7 @@ class RestRequestSerializer(serializers.ModelSerializer):
         source='restrequestcc_set', many=True, read_only=True
     )
     request_time = serializers.DateTimeField(
-        format='%Y-%m-%d %H:%M:%S', required=False
+        format='%Y-%m-%d', required=False
     )
     days = serializers.SerializerMethodField()
 
@@ -154,6 +155,55 @@ class RestRequestSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
         instance.user = user
+        instance.save()
+        return instance
+
+    def validate(self, data):
+        from_date = data.get('from_date', None)
+        to_date = data.get('to_date', None)
+
+        if from_date > to_date:
+            raise serializers.ValidationError({
+                'to_date': 'Error'
+            })
+
+        return data
+
+    def get_days(self, instance):
+        return (instance.to_date - instance.from_date).days
+
+
+class VehicleRepairRequestSerializer(serializers.ModelSerializer):
+
+    requester = ShortUserSerializer(read_only=True)
+    vehicle = ShortVehicleSerializer(read_only=True)
+    category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
+    request_time = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
+    days = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.VehicleRepairRequest
+        fields = '__all__'
+
+    def create(self, validated_data):
+        repair_request = m.VehicleRepairRequest.objects.create(
+            requester=self.context.get('requester'),
+            vehicle=self.context.get('vehicle'),
+            **validated_data
+        )
+
+        return repair_request
+
+    def update(self, instance, validated_data):
+        # TODO: update the approvers
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.requester = self.context.get('requester')
+        instance.vehicle = self.context.get('vehicle')
         instance.save()
         return instance
 

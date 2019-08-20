@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -208,6 +209,79 @@ class RestRequestViewSet(TMSViewSet):
         serializer = ChoiceSerializer(
             [
                 {'value': x, 'text': y} for (x, y) in c.REST_REQUEST_CATEGORY
+            ],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class VehicleRepairRequestViewSet(TMSViewSet):
+
+    queryset = m.VehicleRepairRequest.objects.all()
+    serializer_class = s.VehicleRepairRequestSerializer
+
+    def create(self, request):
+        # approvers = request.data.pop('approvers', [])
+        # ccs = request.data.pop('ccs', [])
+        vehicle_data = request.data.pop('vehicle')
+        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
+        requester = request.data.pop('requester')
+        if requester is not None:
+            requester = get_object_or_404(m.User, id=requester.get('id', None))
+        else:
+            requester = request.user
+
+        serializer = self.serializer_class(
+            data=request.data,
+            context={
+                'requester': requester, 'vehicle': vehicle
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        # approvers = request.data.pop('approvers', [])
+        # ccs = request.data.pop('ccs', [])
+        vehicle_data = request.data.pop('vehicle')
+        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
+        requester = request.data.pop('requester')
+        if requester is not None:
+            requester = get_object_or_404(m.User, id=requester.get('id', None))
+        else:
+            requester = request.user
+
+        serializer = self.serializer_class(
+            instance, data=request.data,
+            context={
+                'requester': requester, 'vehicle': vehicle
+            },
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="categories")
+    def get_rest_request_cateogires(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in c.VEHICLE_REPAIR_REQUEST_CATEGORY
             ],
             many=True
         )

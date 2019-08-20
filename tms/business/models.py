@@ -231,3 +231,48 @@ class RestRequestCC(models.Model):
     read_time = models.DateTimeField(
         auto_now=True
     )
+
+
+class VehicleRepairRequest(models.Model):
+
+    requester = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='my_vehicle_request'
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    category = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY,
+        default=c.VEHICLE_REPAIR_REQUEST_CATEGORY_BRAKE
+    )
+
+    from_date = models.DateField()
+
+    to_date = models.DateField()
+
+    request_time = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    approved = models.BooleanField(
+        default=False
+    )
+
+    approved_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        ordering = ['approved', '-approved_time', '-request_time']

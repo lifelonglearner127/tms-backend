@@ -279,6 +279,8 @@ PERMISSION_TYPE = (
     (PERMISSION_TYPE_WRITE, 'Write Permission')
 )
 
+# hr app
+# ----------------------------------------------------------------------------
 REST_REQUEST_ILL = 'I'
 REST_REQUEST_PERSONAL = 'P'
 REST_REQUEST_CATEGORY = (
@@ -298,6 +300,11 @@ CC_TYPE_MEMBER = 'W'
 CC_TYPE = (
     (CC_TYPE_POSITION, '职位'),
     (CC_TYPE_MEMBER, '人员'),
+)
+
+VEHICLE_REPAIR_REQUEST_CATEGORY_BRAKE = 'B'
+VEHICLE_REPAIR_REQUEST_CATEGORY = (
+    (REST_REQUEST_ILL, '查看刹车'),
 )
 
 
