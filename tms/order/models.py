@@ -24,6 +24,14 @@ class OrderCart(TimeStampedModel):
         default=0
     )
 
+    is_split = models.BooleanField(
+        default=False
+    )
+
+    is_pump = models.BooleanField(
+        default=False
+    )
+
 
 class Order(TimeStampedModel):
     """
