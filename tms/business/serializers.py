@@ -105,7 +105,6 @@ class RestRequestSerializer(serializers.ModelSerializer):
         format='%Y-%m-%d %H:%M:%S', required=False
     )
     days = serializers.SerializerMethodField()
-    is_approvable = serializers.SerializerMethodField()
 
     class Meta:
         model = m.RestRequest
@@ -171,7 +170,3 @@ class RestRequestSerializer(serializers.ModelSerializer):
 
     def get_days(self, instance):
         return (instance.to_date - instance.from_date).days
-
-    def get_is_approvable(self, instance):
-        requester = self.context.get('requester')
-        return requester in instance.approvers.all()

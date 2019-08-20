@@ -176,17 +176,7 @@ class RestRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    def retrive(self, request, pk=None):
-        instance = self.get_object()
-        serializer = self.serializer_class(
-            instance, context={'requester': request.user}
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, url_path="approve")
+    @action(detail=True, methods=['post'], url_path="approve")
     def approve(self, request, pk=None):
         rest_request = self.get_object()
         approver = request.user
@@ -200,7 +190,7 @@ class RestRequestViewSet(TMSViewSet):
             rest_request=rest_request, approver=approver
         ).first()
 
-        rest_request_approve.approved = request.data.get('approve', False)
+        rest_request_approve.approved = request.data.get('approved', False)
         rest_request_approve.description = request.data.get('description', '')
         rest_request_approve.save()
 
