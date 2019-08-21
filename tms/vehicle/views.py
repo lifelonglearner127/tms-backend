@@ -316,108 +316,16 @@ class VehicleViewSet(TMSViewSet):
         serializer = s.ShortVehicleSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post'], url_path='before-driving-check')
-    def before_driving_check(self, request, pk=None):
-        data = {}
-        items = request.data.pop('items')
-        images = request.data.pop('images', [])
-        data = request.data
-        data['vehicle'] = pk
-        data['driver'] = request.user.id
-        serializer = s.VehicleBeforeDrivingCheckHistorySerializer(
-            data=data,
-            context={'items': items, 'images': images, 'request': request}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['get'], url_path='last-before-driving-check')
-    def get_last_before_driving_check(self, request, pk=None):
+    @action(detail=True, methods=['get'], url_path='last-vehicle-check')
+    def get_last_vehicle_check(self, request, pk=None):
         vehicle = self.get_object()
-        driving_check = m.VehicleBeforeDrivingCheckHistory.objects.filter(
+        vehicle_check = m.VehicleCheckHistory.objects.filter(
             vehicle=vehicle, driver=request.user
         ).first()
 
-        if driving_check is not None:
-            ret = s.VehicleBeforeDrivingCheckHistorySerializer(
-                driving_check, context={'request': request}
-            ).data
-        else:
-            ret = []
-
-        return Response(
-            ret,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, methods=['post'], url_path='driving-check')
-    def driving_check(self, request, pk=None):
-        data = {}
-        items = request.data.pop('items')
-        images = request.data.pop('images', [])
-        data = request.data
-        data['vehicle'] = pk
-        data['driver'] = request.user.id
-        serializer = s.VehicleDrivingCheckHistorySerializer(
-            data=data,
-            context={'items': items, 'images': images, 'request': request}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['get'], url_path='last-driving-check')
-    def get_last_driving_check(self, request, pk=None):
-        vehicle = self.get_object()
-        driving_check = m.VehicleDrivingCheckHistory.objects.filter(
-            vehicle=vehicle, driver=request.user
-        ).first()
-
-        if driving_check is not None:
-            ret = s.VehicleDrivingCheckHistorySerializer(
-                driving_check, context={'request': request}
-            ).data
-        else:
-            ret = []
-
-        return Response(
-            ret,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, methods=['post'], url_path='after-driving-check')
-    def after_driving_check(self, request, pk=None):
-        data = {}
-        items = request.data.pop('items')
-        images = request.data.pop('images', [])
-        data = request.data
-        data['vehicle'] = pk
-        data['driver'] = request.user.id
-        serializer = s.VehicleAfterDrivingCheckHistorySerializer(
-            data=data,
-            context={'items': items, 'images': images, 'request': request}
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['get'], url_path='last-after-driving-check')
-    def get_last_after_driving_check(self, request, pk=None):
-        vehicle = self.get_object()
-        driving_check = m.VehicleAfterDrivingCheckHistory.objects.filter(
-            vehicle=vehicle, driver=request.user
-        ).first()
-
-        if driving_check is not None:
-            ret = s.VehicleAfterDrivingCheckHistorySerializer(
-                driving_check, context={'request': request}
+        if vehicle_check is not None:
+            ret = s.VehicleCheckHistorySerializer(
+                vehicle_check, context={'request': request}
             ).data
         else:
             ret = []
@@ -529,3 +437,74 @@ class TireViewSet(TMSViewSet):
 
     queryset = m.Tire.objects.all()
     serializer_class = s.TireSerializer
+
+
+class VehicleCheckHistoryViewSet(TMSViewSet):
+
+    serializer_class = s.VehicleCheckHistorySerializer
+
+    def get_queryset(self):
+        return m.VehicleCheckHistory.objects.filter(
+            vehicle__id=self.kwargs['vehicle_pk']
+        )
+
+    def create(self, request, vehicle_pk=None):
+        items = request.data.pop('items')
+        images = request.data.pop('images', [])
+        check_type = request.data.pop('check_type')
+        data = request.data
+        data['vehicle'] = vehicle_pk
+        data['driver'] = request.user.id
+        if check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            data['before_driving_checked_time'] = timezone.now()
+        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
+            data['driving_checked_time'] = timezone.now()
+        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            data['after_driving_checked_time'] = timezone.now()
+
+        serializer = s.VehicleCheckHistorySerializer(
+            data=data,
+            context={
+                'items': items, 'images': images, 'request': request, 'check_type': check_type
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, vehicle_pk=None, pk=None):
+        instance = self.get_object()
+        items = request.data.pop('items')
+        images = request.data.pop('images', [])
+        check_type = request.data.pop('check_type')
+        data = request.data
+        data['vehicle'] = vehicle_pk
+        data['driver'] = request.user.id
+        if check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            data['before_driving_checked_time'] = timezone.now()
+        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
+            data['driving_checked_time'] = timezone.now()
+        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            data['after_driving_checked_time'] = timezone.now()
+
+        serializer = s.VehicleCheckHistorySerializer(
+            instance, data=data,
+            context={
+                'items': items, 'images': images, 'request': request, 'check_type': check_type
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, url_path="me")
+    def me(self, request, vehicle_pk=None):
+        page = self.paginate_queryset(
+            self.get_queryset().filter(driver=request.user)
+        )
+        serializer = s.VehicleCheckHistorySerializer(page, context={'request': request}, many=True)
+        return self.get_paginated_response(serializer.data)

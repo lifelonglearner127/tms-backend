@@ -490,5 +490,31 @@
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
       }
+  },
+  {
+    "model": "vehicle.VehicleCheckItem",
+    "pk": 1,
+    "fields": {
+        "name": "Do you have driver license?",
+        "is_before_driving_item": true,
+        "is_driving_item": true,
+        "is_after_driving_item": true,
+        "is_published": true,
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
+  },
+  {
+    "model": "vehicle.VehicleCheckItem",
+    "pk": 2,
+    "fields": {
+        "name": "Dashboard okay?",
+        "is_before_driving_item": true,
+        "is_driving_item": true,
+        "is_after_driving_item": true,
+        "is_published": true,
+        "created": "2013-03-16T17:41:28+00:00",
+        "updated": "2013-03-16T17:41:28+00:00"
+    }
   }
 ]

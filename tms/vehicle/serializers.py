@@ -126,192 +126,92 @@ class VehicleCheckItemNameSerializer(serializers.ModelSerializer):
 
 class VehicleBeforeDrivingItemCheckSerializer(serializers.ModelSerializer):
 
+    item = VehicleCheckItemNameSerializer(read_only=True)
+
     class Meta:
         model = m.VehicleBeforeDrivingItemCheck
-        exclude = ('vehicle_check_history', )
-
-
-class VehicleBeforeDrivingDocumentOnlySerializer(serializers.ModelSerializer):
-
-    document = Base64ImageField()
-
-    class Meta:
-        model = m.VehicleBeforeDrivingDocument
-        fields = (
-            'document',
-        )
-
-
-class VehicleBeforeDrivingDocumentSerializer(serializers.ModelSerializer):
-
-    document = Base64ImageField()
-
-    class Meta:
-        model = m.VehicleBeforeDrivingDocument
-        fields = '__all__'
-
-
-class VehicleBeforeDrivingCheckHistorySerializer(serializers.ModelSerializer):
-
-    check_items = VehicleBeforeDrivingItemCheckSerializer(
-        source='vehiclebeforedrivingitemcheck_set', many=True, read_only=True
-    )
-
-    images = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.VehicleBeforeDrivingCheckHistory
-        fields = '__all__'
-
-    def create(self, validated_data):
-        check_history = m.VehicleBeforeDrivingCheckHistory.objects.create(**validated_data)
-        items = self.context.get('items')
-        images = self.context.get('images')
-        for item in items:
-            check_item = get_object_or_404(m.VehicleCheckItem, id=item.get('id'), is_before_driving_item=True)
-            m.VehicleBeforeDrivingItemCheck.objects.create(
-                vehicle_check_history=check_history,
-                item=check_item,
-                is_checked=item.get('is_checked', False)
-            )
-
-        for image in images:
-            image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(
-                data=image,
-                context={'request': self.context.get('request')}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        return check_history
-
-    def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
-                image, context={'request': self.context.get('request')}).data)
-
-        return ret
+        fields = ('item', 'is_checked')
 
 
 class VehicleDrivingItemCheckSerializer(serializers.ModelSerializer):
 
+    item = VehicleCheckItemNameSerializer(read_only=True)
+
     class Meta:
         model = m.VehicleDrivingItemCheck
-        exclude = ('vehicle_check_history', )
-
-
-class VehicleDrivingDocumentOnlySerializer(serializers.ModelSerializer):
-
-    document = Base64ImageField()
-
-    class Meta:
-        model = m.VehicleDrivingDocument
-        fields = (
-            'document',
-        )
-
-
-class VehicleDrivingDocumentSerializer(serializers.ModelSerializer):
-
-    document = Base64ImageField()
-
-    class Meta:
-        model = m.VehicleDrivingDocument
-        fields = '__all__'
-
-
-class VehicleDrivingCheckHistorySerializer(serializers.ModelSerializer):
-
-    check_items = VehicleDrivingItemCheckSerializer(
-        source='vehicledrivingitemcheck_set', many=True, read_only=True
-    )
-    images = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.VehicleDrivingCheckHistory
-        fields = '__all__'
-
-    def create(self, validated_data):
-        check_history = m.VehicleDrivingCheckHistory.objects.create(**validated_data)
-        items = self.context.get('items')
-        images = self.context.get('images')
-
-        for item in items:
-            check_item = get_object_or_404(m.VehicleCheckItem, id=item.get('id'), is_driving_item=True)
-            m.VehicleDrivingItemCheck.objects.create(
-                vehicle_check_history=check_history,
-                item=check_item,
-                is_checked=item.get('is_checked', False)
-            )
-
-        for image in images:
-            image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(
-                data=image,
-                context={'request': self.context.get('request')}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        return check_history
-
-    def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
-                image, context={'request': self.context.get('request')}).data)
-
-        return ret
+        fields = ('item', 'is_checked')
 
 
 class VehicleAfterDrivingItemCheckSerializer(serializers.ModelSerializer):
 
+    item = VehicleCheckItemNameSerializer(read_only=True)
+
     class Meta:
         model = m.VehicleAfterDrivingItemCheck
-        exclude = ('vehicle_check_history', )
+        fields = ('item', 'is_checked')
 
 
-class VehicleAfterDrivingDocumentOnlySerializer(serializers.ModelSerializer):
+class VehicleCheckDocumentSerializer(serializers.ModelSerializer):
 
     document = Base64ImageField()
 
     class Meta:
-        model = m.VehicleAfterDrivingDocument
+        model = m.VehicleCheckDocument
+        fields = '__all__'
+
+
+class ShortVehicleCheckDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.VehicleCheckDocument
         fields = (
             'document',
         )
 
 
-class VehicleAfterDrivingDocumentSerializer(serializers.ModelSerializer):
+class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
-    document = Base64ImageField()
-
-    class Meta:
-        model = m.VehicleAfterDrivingDocument
-        fields = '__all__'
-
-
-class VehicleAfterDrivingCheckHistorySerializer(serializers.ModelSerializer):
-
-    check_items = VehicleAfterDrivingItemCheckSerializer(
+    before_driving_checked_items = VehicleBeforeDrivingItemCheckSerializer(
+        source='vehiclebeforedrivingitemcheck_set', many=True, read_only=True
+    )
+    driving_checked_items = VehicleDrivingItemCheckSerializer(
+        source='vehicledrivingitemcheck_set', many=True, read_only=True
+    )
+    after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
         source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
     )
-    images = serializers.SerializerMethodField()
+
+    before_driving_images = serializers.SerializerMethodField()
+    driving_images = serializers.SerializerMethodField()
+    after_driving_images = serializers.SerializerMethodField()
+    before_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    after_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
 
     class Meta:
-        model = m.VehicleAfterDrivingCheckHistory
+        model = m.VehicleCheckHistory
         fields = '__all__'
 
     def create(self, validated_data):
-        check_history = m.VehicleAfterDrivingCheckHistory.objects.create(**validated_data)
+        check_history = m.VehicleCheckHistory.objects.create(**validated_data)
         items = self.context.get('items')
         images = self.context.get('images')
+        check_type = self.context.get('check_type')
+        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
+            args = {'is_before_driving_item': True}
+            model_class = m.VehicleBeforeDrivingItemCheck
+        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
+            args = {'is_driving_item': True}
+            model_class = m.VehicleDrivingItemCheck
+        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            args = {'is_after_driving_item': True}
+            model_class = m.VehicleAfterDrivingItemCheck
 
         for item in items:
-            check_item = get_object_or_404(m.VehicleCheckItem, id=item.get('id'), is_after_driving_item=True)
-            m.VehicleAfterDrivingItemCheck.objects.create(
+            check_item = get_object_or_404(m.VehicleCheckItem, id=item.get('id'), **args)
+            model_class.objects.create(
                 vehicle_check_history=check_history,
                 item=check_item,
                 is_checked=item.get('is_checked', False)
@@ -319,7 +219,8 @@ class VehicleAfterDrivingCheckHistorySerializer(serializers.ModelSerializer):
 
         for image in images:
             image['vehicle_check_history'] = check_history.id
-            serializer = VehicleBeforeDrivingDocumentSerializer(
+            image['document_type'] = check_type
+            serializer = VehicleCheckDocumentSerializer(
                 data=image,
                 context={'request': self.context.get('request')}
             )
@@ -328,13 +229,81 @@ class VehicleAfterDrivingCheckHistorySerializer(serializers.ModelSerializer):
 
         return check_history
 
-    def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(VehicleBeforeDrivingDocumentOnlySerializer(
-                image,
+    def update(self, instance, validated_data):
+        items = self.context.get('items')
+        images = self.context.get('images')
+        check_type = self.context.get('check_type')
+
+        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
+            args = {'is_before_driving_item': True}
+            model_class = m.VehicleBeforeDrivingItemCheck
+            instance.before_driving_checked_items.clear()
+            m.VehicleCheckDocument.objects.filter(
+                vehicle_check_history=instance, document_type=c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING
+            ).delete()
+        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
+            args = {'is_driving_item': True}
+            model_class = m.VehicleDrivingItemCheck
+            instance.driving_checked_items.clear()
+            m.VehicleCheckDocument.objects.filter(
+                vehicle_check_history=instance, document_type=c.VEHICLE_CHECK_TYPE_DRIVING
+            ).delete()
+        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            args = {'is_after_driving_item': True}
+            model_class = m.VehicleAfterDrivingItemCheck
+            instance.after_driving_checked_items.clear()
+            m.VehicleCheckDocument.objects.filter(
+                vehicle_check_history=instance, document_type=c.VEHICLE_CHECK_TYPE_AFTER_DRIVING
+            ).delete()
+
+        for item in items:
+            check_item = get_object_or_404(m.VehicleCheckItem, id=item.get('id'), **args)
+            model_class.objects.create(
+                vehicle_check_history=instance,
+                item=check_item,
+                is_checked=item.get('is_checked', False)
+            )
+
+        for image in images:
+            image['vehicle_check_history'] = instance.id
+            image['document_type'] = check_type
+            serializer = VehicleCheckDocumentSerializer(
+                data=image,
                 context={'request': self.context.get('request')}
-            ).data)
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
+
+    def get_before_driving_images(self, instance):
+        ret = []
+        for image in instance.images.filter(document_type=c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING):
+            ret.append(ShortVehicleCheckDocumentSerializer(
+                image, context={'request': self.context.get('request')}).data
+            )
+
+        return ret
+
+    def get_driving_images(self, instance):
+        ret = []
+        for image in instance.images.filter(document_type=c.VEHICLE_CHECK_TYPE_DRIVING):
+            ret.append(ShortVehicleCheckDocumentSerializer(
+                image, context={'request': self.context.get('request')}).data
+            )
+
+        return ret
+
+    def get_after_driving_images(self, instance):
+        ret = []
+        for image in instance.images.filter(document_type=c.VEHICLE_CHECK_TYPE_AFTER_DRIVING):
+            ret.append(ShortVehicleCheckDocumentSerializer(
+                image, context={'request': self.context.get('request')}).data
+            )
 
         return ret
 

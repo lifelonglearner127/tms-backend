@@ -413,7 +413,7 @@ class VehicleCheckItem(TimeStampedModel):
     after_driving_check_items = managers.AfterDrivingCheckItemsManager()
 
 
-class VehicleBeforeDrivingCheckHistory(models.Model):
+class VehicleCheckHistory(models.Model):
 
     driver = models.ForeignKey(
         User,
@@ -433,26 +433,55 @@ class VehicleBeforeDrivingCheckHistory(models.Model):
         null=True, blank=True
     )
 
-    checked_time = models.DateTimeField(
-        auto_now_add=True
+    before_driving_checked_time = models.DateTimeField(
+        null=True, blank=True
     )
 
-    check_items = models.ManyToManyField(
+    driving_checked_time = models.DateTimeField(
+        null=True, blank=True
+    )
+
+    after_driving_checked_time = models.DateTimeField(
+        null=True, blank=True
+    )
+
+    before_driving_checked_items = models.ManyToManyField(
         VehicleCheckItem,
         through='VehicleBeforeDrivingItemCheck',
-        through_fields=('vehicle_check_history', 'item')
+        through_fields=('vehicle_check_history', 'item'),
+        related_name='befores'
+    )
+
+    driving_checked_items = models.ManyToManyField(
+        VehicleCheckItem,
+        through='VehicleDrivingItemCheck',
+        through_fields=('vehicle_check_history', 'item'),
+        related_name='drivings'
+    )
+
+    after_driving_checked_items = models.ManyToManyField(
+        VehicleCheckItem,
+        through='VehicleAfterDrivingItemCheck',
+        through_fields=('vehicle_check_history', 'item'),
+        related_name='afters'
     )
 
     class Meta:
-        ordering = ['-checked_time']
+        ordering = ['-before_driving_checked_time']
 
 
-class VehicleBeforeDrivingDocument(models.Model):
+class VehicleCheckDocument(models.Model):
 
     vehicle_check_history = models.ForeignKey(
-        VehicleBeforeDrivingCheckHistory,
+        VehicleCheckHistory,
         on_delete=models.CASCADE,
         related_name='images'
+    )
+
+    document_type = models.CharField(
+        max_length=1,
+        choices=c.VEHICLE_CHECK_TYPE,
+        default=c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING
     )
 
     document = models.ImageField()
@@ -461,7 +490,7 @@ class VehicleBeforeDrivingDocument(models.Model):
 class VehicleBeforeDrivingItemCheck(models.Model):
 
     vehicle_check_history = models.ForeignKey(
-        VehicleBeforeDrivingCheckHistory,
+        VehicleCheckHistory,
         on_delete=models.CASCADE
     )
 
@@ -473,57 +502,12 @@ class VehicleBeforeDrivingItemCheck(models.Model):
     is_checked = models.BooleanField(
         default=False
     )
-
-
-class VehicleDrivingCheckHistory(models.Model):
-
-    driver = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE
-    )
-
-    problems = models.PositiveIntegerField(
-        default=0
-    )
-
-    description = models.TextField(
-        null=True, blank=True
-    )
-
-    checked_time = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    check_items = models.ManyToManyField(
-        VehicleCheckItem,
-        through='VehicleDrivingItemCheck',
-        through_fields=('vehicle_check_history', 'item')
-    )
-
-    class Meta:
-        ordering = ['-checked_time']
-
-
-class VehicleDrivingDocument(models.Model):
-
-    vehicle_check_history = models.ForeignKey(
-        VehicleDrivingCheckHistory,
-        on_delete=models.CASCADE,
-        related_name='images'
-    )
-
-    document = models.ImageField()
 
 
 class VehicleDrivingItemCheck(models.Model):
 
     vehicle_check_history = models.ForeignKey(
-        VehicleDrivingCheckHistory,
+        VehicleCheckHistory,
         on_delete=models.CASCADE
     )
 
@@ -537,55 +521,10 @@ class VehicleDrivingItemCheck(models.Model):
     )
 
 
-class VehicleAfterDrivingCheckHistory(models.Model):
-
-    driver = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE
-    )
-
-    problems = models.PositiveIntegerField(
-        default=0
-    )
-
-    description = models.TextField(
-        null=True, blank=True
-    )
-
-    checked_time = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    check_items = models.ManyToManyField(
-        VehicleCheckItem,
-        through='VehicleAfterDrivingItemCheck',
-        through_fields=('vehicle_check_history', 'item')
-    )
-
-    class Meta:
-        ordering = ['-checked_time']
-
-
-class VehicleAfterDrivingDocument(models.Model):
-
-    vehicle_check_history = models.ForeignKey(
-        VehicleAfterDrivingCheckHistory,
-        on_delete=models.CASCADE,
-        related_name='images'
-    )
-
-    document = models.ImageField()
-
-
 class VehicleAfterDrivingItemCheck(models.Model):
 
     vehicle_check_history = models.ForeignKey(
-        VehicleAfterDrivingCheckHistory,
+        VehicleCheckHistory,
         on_delete=models.CASCADE
     )
 

@@ -31,6 +31,18 @@ router.register(
     base_name='vehicle-check-items'
 )
 
+vehicle_check_router = routers.NestedSimpleRouter(
+    router,
+    r'vehicles',
+    lookup='vehicle'
+)
+vehicle_check_router.register(
+    r'checks',
+    v.VehicleCheckHistoryViewSet,
+    base_name='vehicle-checks'
+)
+
 urlpatterns = [
-    url(r'^', include(router.urls))
+    url(r'^', include(router.urls)),
+    url(r'^', include(vehicle_check_router.urls))
 ]
