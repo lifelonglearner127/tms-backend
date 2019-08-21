@@ -182,15 +182,15 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
 
                     ret.append(item)
 
-        ret[0]['remaining'] = []
-        for product in instance.orderproduct_set.all():
-            for ret_product in ret[0]['products']:
-                if ret_product['product']['id'] == product.product.id and\
-                   ret_product['weight'] < product.weight:
-                    ret[0]['remaining'].append({
-                        'product': ShortProductSerializer(product.product).data,
-                        'weight': product.weight - ret_product['weight']
-                    })
+        if len(ret) > 0:
+            ret[0]['remaining'] = []
+            for product in instance.orderproduct_set.all():
+                for ret_product in ret[0]['products']:
+                    if ret_product['product']['id'] == product.product.id and ret_product['weight'] < product.weight:
+                        ret[0]['remaining'].append({
+                            'product': ShortProductSerializer(product.product).data,
+                            'weight': product.weight - ret_product['weight']
+                        })
         return ret
 
 
