@@ -154,7 +154,6 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                                 ret_station['products'].append({
                                     'product': ShortProductSerializer(jobstationproduct.product).data,
                                     'weight': jobstationproduct.mission_weight,
-                                    'due_time': job_station.due_time,
                                     'vehicle': job.vehicle.plate_num,
                                     'driver': job.driver.name,
                                     'escort': job.driver.name
@@ -163,6 +162,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                 else:
                     item = {}
                     item['station'] = ShortStationSerializer(job_station.station).data
+                    item['due_time'] = job_station.due_time
                     item['products'] = []
                     for jobstationproduct in job_station.jobstationproduct_set.all():
                         for product in item['products']:
@@ -174,7 +174,6 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                             item['products'].append({
                                 'product': ShortProductSerializer(jobstationproduct.product).data,
                                 'weight': jobstationproduct.mission_weight,
-                                'due_time': job_station.due_time,
                                 'vehicle': job.vehicle.plate_num,
                                 'driver': job.driver.name,
                                 'escort': job.driver.name
