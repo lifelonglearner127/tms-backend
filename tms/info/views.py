@@ -271,9 +271,8 @@ class StationViewSet(TMSViewSet):
             'type', None
         )
 
-        queryset = m.Station.objects.filter(
-            customer=request.user.customer_profile
-        )
+        queryset = request.user.customer_profile.stations.all()
+
         if station_type:
             queryset = queryset.filter(station_type=station_type)
 
