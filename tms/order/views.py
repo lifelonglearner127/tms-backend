@@ -268,238 +268,6 @@ class OrderViewSet(TMSViewSet):
                 status=status.HTTP_200_OK
             )
 
-    # @action(detail=True, methods=['post'], url_path='jobs')
-    # def create_or_update_job(self, request, pk=None):
-    #     order = self.get_object()
-    #     jobs = []
-    #     weight_errors = {}
-    #     job_delivers = []
-
-    #     # validate weights by missions
-    #     product = None
-    #     product_index = -1
-    #     unloading_station_index = 0
-    #     for unloading_station_data in request.data:
-    #         weight = float(unloading_station_data.get('weight', 0))
-    #         job_delivers_data = unloading_station_data.get(
-    #             'job_delivers', None
-    #         )
-    #         if job_delivers_data is None:
-    #             raise s.serializers.ValidationError({
-    #                 'job_delivers': 'Job deliver data is missing'
-    #             })
-
-    #         for job_deliver_data in job_delivers_data:
-    #             orderproductdeliver = get_object_or_404(
-    #                 m.OrderProductDeliver,
-    #                 id=unloading_station_data.get('id', None)
-    #             )
-
-    #             job_deliver_data['orderproductdeliver'] = orderproductdeliver
-
-    #             if product != orderproductdeliver.order_product.product:
-    #                 product = orderproductdeliver.order_product.product
-    #                 product_index = product_index + 1
-    #                 unloading_station_index = 0
-
-    #             mission_weight = float(
-    #                 job_deliver_data.get('mission_weight', 0)
-    #             )
-    #             weight = weight - mission_weight
-
-    #         if weight < 0:
-    #             if product_index not in weight_errors:
-    #                 weight_errors[product_index] = []
-    #             weight_errors[product_index].append(unloading_station_index)
-    #         unloading_station_index = unloading_station_index + 1
-    #         job_delivers.extend(job_delivers_data)
-
-    #     if weight_errors:
-    #         raise s.serializers.ValidationError({
-    #             'weight': weight_errors
-    #         })
-
-    #     # if vehicle & driver & escort is mulitple selected for delivers
-    #     # we assume that this is one job
-    #     for job_deliver in job_delivers:
-
-    #         driver_data = job_deliver.get('driver', None)
-    #         driver_id = driver_data.get('id', None)
-
-    #         escort_data = job_deliver.get('escort', None)
-    #         escort_id = escort_data.get('id', None)
-
-    #         vehicle_data = job_deliver.get('vehicle', None)
-    #         vehicle_id = vehicle_data.get('id', None)
-
-    #         route_data = job_deliver.get('route', None)
-    #         route_id = route_data.get('id', None)
-
-    #         orderproductdeliver = job_deliver['orderproductdeliver']
-
-    #         mission_weight = float(job_deliver.get('mission_weight', 0))
-
-    #         for job in jobs:
-    #             if (
-    #                 job['driver'] == driver_id and
-    #                 job['escort'] == escort_id and
-    #                 job['vehicle'] == vehicle_id and
-    #                 job['route'] == route_id
-    #             ):
-
-    #                 loading_station_products = job['stations'][0]['products']
-
-    #                 for product in loading_station_products:
-    #                     if product['product'] ==\
-    #                        orderproductdeliver.order_product.product:
-    #                         product['mission_weight'] += mission_weight
-    #                         break
-    #                 else:
-    #                     loading_station_products.append({
-    #                         'product':
-    #                         orderproductdeliver.order_product.product,
-    #                         'mission_weight': mission_weight
-    #                     })
-
-    #                 job['total_weight'] += mission_weight
-
-    #                 job['stations'][0]['products'] = loading_station_products
-    #                 job['stations'][1]['products'] = loading_station_products
-
-    #                 for station in job['stations'][2:]:
-    #                     if station['station'] ==\
-    #                        orderproductdeliver.unloading_station:
-    #                         station['products'].append({
-    #                             'orderproductdeliver': orderproductdeliver,
-    #                             'product':
-    #                             orderproductdeliver.order_product.product,
-    #                             'mission_weight': mission_weight
-    #                         })
-    #                         break
-    #                 else:
-    #                     job['stations'].append({
-    #                         'station': orderproductdeliver.unloading_station,
-    #                         'products': [{
-    #                             'orderproductdeliver': orderproductdeliver,
-    #                             'product':
-    #                             orderproductdeliver.order_product.product,
-    #                             'mission_weight': mission_weight
-    #                         }]
-    #                     })
-    #                 break
-
-    #         else:
-    #             stations = []
-    #             stations.append({
-    #                 'station':
-    #                 orderproductdeliver.order_product.order.loading_station,
-    #                 'products': [{
-    #                     'product': orderproductdeliver.order_product.product,
-    #                     'mission_weight': mission_weight
-    #                 }]
-    #             })
-    #             stations.append({
-    #                 'station':
-    #                 orderproductdeliver.order_product.order.quality_station,
-    #                 'products': [{
-    #                     'product': orderproductdeliver.order_product.product,
-    #                     'mission_weight': mission_weight
-    #                 }]
-    #             })
-    #             stations.append({
-    #                 'station': orderproductdeliver.unloading_station,
-    #                 'products': [{
-    #                     'orderproductdeliver': orderproductdeliver,
-    #                     'product': orderproductdeliver.order_product.product,
-    #                     'mission_weight': mission_weight
-    #                 }]
-    #             })
-    #             jobs.append({
-    #                 'driver': driver_id,
-    #                 'escort': escort_id,
-    #                 'vehicle': vehicle_id,
-    #                 'route': route_id,
-    #                 'total_weight': mission_weight,
-    #                 'stations': stations
-    #             })
-
-    #     # validate job payload;
-    #     # 1. check if the job mission weight is over its available load
-    #     # 2. check if the specified route is correct
-    #     for job in jobs:
-    #         # check if the job mission weight is over its available load
-    #         vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
-    #         total_weight = job.get('total_weight', 0)
-    #         if total_weight > vehicle.total_load:
-    #             raise s.serializers.ValidationError({
-    #                 'overweight': vehicle.plate_num
-    #             })
-
-    #         # check if the specified route is correct
-    #         route = get_object_or_404(Route, id=job['route'])
-    #         if route.loading_station != order.loading_station:
-    #             raise s.serializers.ValidationError({
-    #                 'route': 'Missing loading station'
-    #             })
-
-    #         if not order.is_same_station:
-    #             if route.stations[1] != order.quality_station:
-    #                 raise s.serializers.ValidationError({
-    #                     'route': 'Missing quality station'
-    #                 })
-
-    #         for station in job['stations'][2:]:
-    #             if station['station'] not in route.unloading_stations:
-    #                 raise s.serializers.ValidationError({
-    #                     'route': 'Unmatching unloading stations'
-    #                 })
-
-    #         vehicle = get_object_or_404(Vehicle, id=job['vehicle'])
-    #         driver = get_object_or_404(User, id=job['driver'])
-    #         escort = get_object_or_404(User, id=job['escort'])
-    #         route = get_object_or_404(Route, id=job['route'])
-
-    #         job_obj = m.Job.objects.create(
-    #             order=order, vehicle=vehicle, driver=driver,
-    #             escort=escort, route=route,
-    #             total_weight=job['total_weight']
-    #         )
-
-    #         station_index = 0
-    #         for station in job['stations']:
-    #             if station_index < 2:
-    #                 step = station_index
-    #                 station_index += 1
-    #             else:
-    #                 step = route.stations.index(station['station'])
-    #                 if order.is_same_station:
-    #                     step += 1
-
-    #             job_station_obj = m.JobStation.objects.create(
-    #                 job=job_obj,
-    #                 station=station['station'],
-    #                 step=step
-    #             )
-    #             for product in station['products']:
-    #                 m.JobStationProduct.objects.create(
-    #                     job_station=job_station_obj,
-    #                     product=product['product'],
-    #                     mission_weight=product['mission_weight'],
-    #                     orderproductdeliver=product.get(
-    #                         'orderproductdeliver', None
-    #                     )
-    #                 )
-    #         notify_job_changes.apply_async(
-    #             args=[{
-    #                 'job': job_obj.id
-    #             }]
-    #         )
-
-    #     return Response(
-    #         {'msg': 'Success'},
-    #         status=status.HTTP_201_CREATED
-    #     )
-
     @action(
         detail=False, methods=['get'], url_path='me',
         permission_classes=[IsCustomerUser]
@@ -519,7 +287,7 @@ class OrderViewSet(TMSViewSet):
 
         page = self.paginate_queryset(queryset)
 
-        serializer = self.serializer_class(page, many=True)
+        serializer = s.OrderCustomerAppSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
@@ -578,18 +346,6 @@ class OrderProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return m.OrderProduct.objects.filter(
             order_loading_station__id=self.kwargs['orderloadingstation_pk']
-        )
-
-
-class OrderProductDeliverViewSet(viewsets.ModelViewSet):
-    """
-    OrderProductDeliver ViewSet
-    """
-    serializer_class = s.OrderProductDeliverSerializer
-
-    def get_queryset(self):
-        return m.OrderProductDeliver.objects.filter(
-            order_product__id=self.kwargs['orderproduct_pk']
         )
 
 
@@ -842,6 +598,10 @@ class JobViewSet(TMSViewSet):
                         job_station=job_station,
                         **job_station_product
                     )
+
+        if jobs_data is not None:
+            order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
+            order.save()
 
         return Response(
             {'msg': 'Ok'},

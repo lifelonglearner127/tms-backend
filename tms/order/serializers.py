@@ -82,50 +82,6 @@ class OrderCartSerializer(serializers.ModelSerializer):
         return instance
 
 
-# class ShortOrderProductSerializer(serializers.ModelSerializer):
-
-#     product = ShortProductSerializer()
-
-#     class Meta:
-#         model = m.OrderProduct
-#         fields = (
-#             'product',
-#         )
-
-
-# class ShortOrderProductDeliverSerializer(serializers.ModelSerializer):
-
-#     unloading_station = ShortStationSerializer(
-#         read_only=True
-#     )
-
-#     order_product = ShortOrderProductSerializer(
-#         read_only=True
-#     )
-
-#     class Meta:
-#         model = m.OrderProductDeliver
-#         fields = (
-#             'id', 'unloading_station', 'order_product'
-#         )
-
-
-# class OrderProductDeliverMissionSerializer(serializers.ModelSerializer):
-
-#     job_id = serializers.CharField(source='job.id')
-#     vehicle = ShortVehicleSerializer(source='job.vehicle')
-#     driver = ShortUserSerializer(source='job.driver')
-#     escort = ShortUserSerializer(source='job.escort')
-#     route = ShortUserSerializer(source='job.route')
-
-#     class Meta:
-#         model = m.Mission
-#         fields = (
-#             'id', 'job_id', 'mission_weight', 'vehicle', 'driver', 'escort',
-#             'route'
-#         )
-
-
 class ShortJobSerializer(serializers.ModelSerializer):
 
     driver = ShortUserSerializer()
@@ -138,53 +94,6 @@ class ShortJobSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'route'
         )
-
-
-class OrderProductDeliverSerializer(serializers.ModelSerializer):
-    """
-    Order Product Deliver Serializer
-    """
-    unloading_station = ShortStationSerializer(read_only=True)
-
-    class Meta:
-        model = m.OrderProductDeliver
-        fields = (
-            'id', 'unloading_station', 'arriving_due_time', 'weight',
-        )
-
-
-class OrderProductDeliverAdminAppSerializer(OrderProductDeliverSerializer):
-    """
-    Order Product Deliver Serializer for Web manager
-    """
-    job_delivers = serializers.SerializerMethodField()
-
-    class Meta(OrderProductDeliverSerializer.Meta):
-        fields = (
-            'id', 'unloading_station', 'arriving_due_time', 'weight',
-            'job_delivers'
-        )
-
-    def get_job_delivers(self, instance):
-        ret = []
-        for job_deliver in instance.job_delivers.all():
-            job = job_deliver.job_station.job
-            ret.append({
-                'id': job_deliver.job_station.job.id,
-                'vehicle': ShortVehicleSerializer(job.vehicle).data,
-                'driver': ShortUserSerializer(job.driver).data,
-                'escort': ShortUserSerializer(job.escort).data,
-                'route': ShortRouteSerializer(job.route).data,
-                'mission_weight': job_deliver.mission_weight,
-            })
-        return ret
-
-
-class OrderProductDeliverCustomerAppSerializer(OrderProductDeliverSerializer):
-    """
-    Order Product Deliver Serializer for Customer manager
-    """
-    pass
 
 
 class OrderProductSerializer(serializers.ModelSerializer):
@@ -203,24 +112,6 @@ class OrderProductSerializer(serializers.ModelSerializer):
         )
 
 
-class OrderProductAdminAppSerializer(OrderProductSerializer):
-    """
-    Serializer for Order product for admin manager
-    """
-    unloading_stations = OrderProductDeliverAdminAppSerializer(
-        source='orderproductdeliver_set', many=True, read_only=True
-    )
-
-
-class OrderProductCustomerAppSerializer(OrderProductSerializer):
-    """
-    Serializer for Order product for customer app
-    """
-    unloading_stations = OrderProductDeliverCustomerAppSerializer(
-        source='orderproductdeliver_set', many=True, read_only=True
-    )
-
-
 class ShortOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -232,8 +123,6 @@ class ShortOrderSerializer(serializers.ModelSerializer):
 
 class OrderCustomerAppSerializer(serializers.ModelSerializer):
 
-    assignee = ShortUserSerializer()
-    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     arrangement_status = TMSChoiceField(
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
@@ -241,15 +130,68 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
-    created = serializers.DateTimeField(
-        format='%Y-%m-%d %H:%M:%S', required=False
-    )
+    jobs = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Order
-        exclude = (
-            'customer',
+        fields = (
+            'id', 'status', 'arrangement_status', 'invoice_ticket', 'tax_rate', 'description',
+            'products', 'jobs'
         )
+
+    def get_jobs(self, instance):
+        ret = []
+        for job in instance.jobs.all():
+            for job_station in job.jobstation_set.all():
+                for ret_station in ret:
+                    if ret_station['station']['id'] == job_station.station.id:
+                        for jobstationproduct in job_station.jobstationproduct_set.all():
+                            for product in ret_station['products']:
+                                if product['product']['id'] == jobstationproduct.product.id:
+                                    product['weight'] += jobstationproduct.mission_weight
+                                    break
+                            else:
+                                ret_station['products'].append({
+                                    'product': ShortProductSerializer(jobstationproduct.product).data,
+                                    'weight': jobstationproduct.mission_weight,
+                                    'due_time': job_station.due_time,
+                                    'vehicle': job.vehicle.plate_num,
+                                    'driver': job.driver.name,
+                                    'escort': job.driver.name
+                                })
+                        break
+                else:
+                    item = {}
+                    item['station'] = ShortStationSerializer(job_station.station).data
+                    item['products'] = []
+                    for jobstationproduct in job_station.jobstationproduct_set.all():
+                        for product in item['products']:
+                            if product['product']['id'] == jobstationproduct.product.id:
+                                product['weight'] += jobstationproduct.mission_weight
+                                break
+
+                        else:
+                            item['products'].append({
+                                'product': ShortProductSerializer(jobstationproduct.product).data,
+                                'weight': jobstationproduct.mission_weight,
+                                'due_time': job_station.due_time,
+                                'vehicle': job.vehicle.plate_num,
+                                'driver': job.driver.name,
+                                'escort': job.driver.name
+                            })
+
+                    ret.append(item)
+
+        ret[0]['remaining'] = []
+        for product in instance.orderproduct_set.all():
+            for ret_product in ret[0]['products']:
+                if ret_product['product']['id'] == product.product.id and\
+                   ret_product['weight'] < product.weight:
+                    ret[0]['remaining'].append({
+                        'product': ShortProductSerializer(product.product).data,
+                        'weight': product.weight - ret_product['weight']
+                    })
+        return ret
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -406,25 +348,6 @@ class JobMileageField(serializers.Field):
             'empty_mileage': instance.empty_mileage,
             'heavy_mileage':  instance.heavy_mileage
         }
-
-
-# class ShortJobSerializer(serializers.ModelSerializer):
-
-#     driver = ShortUserSerializer()
-#     escort = ShortUserSerializer()
-#     vehicle = ShortVehicleSerializer()
-#     route = ShortRouteSerializer()
-#     missions = ShortMissionSerializer(
-#         source='mission_set', many=True, read_only=True
-#     )
-
-#     mileage = JobMileageField(source='*')
-
-#     class Meta:
-#         model = m.Job
-#         fields = (
-#             'driver', 'escort', 'vehicle', 'missions', 'route', 'mileage'
-#         )
 
 
 class QualityCheckSerializer(serializers.ModelSerializer):

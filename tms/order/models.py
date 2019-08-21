@@ -143,28 +143,6 @@ class OrderProduct(models.Model):
     )
 
 
-class OrderProductDeliver(models.Model):
-    """
-    Intermediate model for ordered product and unloading station
-    """
-    order_product = models.ForeignKey(
-        OrderProduct,
-        on_delete=models.CASCADE
-    )
-
-    unloading_station = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE
-    )
-
-    arriving_due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    weight = models.FloatField()
-
-
 class Job(models.Model):
     """
     Job model
@@ -258,6 +236,10 @@ class Job(models.Model):
         through='JobStation',
         through_fields=('job', 'station')
     )
+
+    @property
+    def loading_station(self, instance):
+        return instance.stations.all()[0]
 
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()
