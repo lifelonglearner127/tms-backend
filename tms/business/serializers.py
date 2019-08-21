@@ -14,97 +14,107 @@ from ..vehicle.serializers import ShortVehicleSerializer
 from ..order.serializers import ShortJobSerializer
 
 
-class ParkingRequestSerializer(serializers.ModelSerializer):
+# class ParkingRequestSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.ParkingRequest
-        fields = '__all__'
-
-
-class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
-
-    vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
-
-    class Meta:
-        model = m.ParkingRequest
-        fields = '__all__'
+#     class Meta:
+#         model = m.ParkingRequest
+#         fields = '__all__'
 
 
-class DriverChangeRequestSerializer(serializers.ModelSerializer):
+# class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.DriverChangeRequest
-        fields = '__all__'
-        read_only_fields = ('new_driver', )
+#     vehicle = ShortVehicleSerializer()
+#     driver = ShortUserSerializer()
+#     escort = ShortUserSerializer()
 
-
-class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
-
-    job = ShortJobSerializer()
-    old_driver = ShortUserSerializer()
-    new_driver = ShortUserSerializer()
-
-    class Meta:
-        model = m.DriverChangeRequest
-        fields = '__all__'
+#     class Meta:
+#         model = m.ParkingRequest
+#         fields = '__all__'
 
 
-class EscortChangeRequestSerializer(serializers.ModelSerializer):
+# class DriverChangeRequestSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.EscortChangeRequest
-        fields = '__all__'
-
-
-class EscortChangeRequestDataViewSerializer(serializers.ModelSerializer):
-
-    job = ShortJobSerializer()
-    new_escort = ShortUserSerializer()
-
-    class Meta:
-        model = m.EscortChangeRequest
-        fields = '__all__'
+#     class Meta:
+#         model = m.DriverChangeRequest
+#         fields = '__all__'
+#         read_only_fields = ('new_driver', )
 
 
-class RestRequestApproverSerializer(serializers.ModelSerializer):
+# class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
+
+#     job = ShortJobSerializer()
+#     old_driver = ShortUserSerializer()
+#     new_driver = ShortUserSerializer()
+
+#     class Meta:
+#         model = m.DriverChangeRequest
+#         fields = '__all__'
+
+
+# class EscortChangeRequestSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = m.EscortChangeRequest
+#         fields = '__all__'
+
+
+# class EscortChangeRequestDataViewSerializer(serializers.ModelSerializer):
+
+#     job = ShortJobSerializer()
+#     new_escort = ShortUserSerializer()
+
+#     class Meta:
+#         model = m.EscortChangeRequest
+#         fields = '__all__'
+
+
+class RequestApproverSerializer(serializers.ModelSerializer):
 
     approver = ShortUserSerializer(read_only=True)
     approver_type = TMSChoiceField(choices=c.APPROVER_TYPE)
 
     class Meta:
-        model = m.RestRequestApprover
+        model = m.RequestApprover
         exclude = (
-            'rest_request',
+            'request',
         )
 
 
-class RestRequestCCSerializer(serializers.ModelSerializer):
+class RequestCCSerializer(serializers.ModelSerializer):
 
     cc = ShortUserSerializer(read_only=True)
     cc_type = TMSChoiceField(choices=c.CC_TYPE)
 
     class Meta:
-        model = m.RestRequestCC
+        model = m.RequestCC
         exclude = (
-            'rest_request',
+            'request',
         )
+
+
+class BasicRequestSerializer(serializers.ModelSerializer):
+
+    requester = ShortUserSerializer(read_only=True)
+    request_type = TMSChoiceField(choices=c.REQUEST_TYPE)
+    request_time = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
+    approvers = RequestApproverSerializer(
+        source='requestapprover_set', many=True, read_only=True
+    )
+    ccs = RequestCCSerializer(
+        source='requestcc_set', many=True, read_only=True
+    )
+
+    class Meta:
+        model = m.BasicRequest
+        fields = '__all__'
 
 
 class RestRequestSerializer(serializers.ModelSerializer):
 
-    user = ShortUserSerializer(read_only=True)
+    request = BasicRequestSerializer(read_only=True)
     category = TMSChoiceField(choices=c.REST_REQUEST_CATEGORY)
-    approvers = RestRequestApproverSerializer(
-        source='restrequestapprover_set', many=True, read_only=True
-    )
-    ccs = RestRequestCCSerializer(
-        source='restrequestcc_set', many=True, read_only=True
-    )
-    request_time = serializers.DateTimeField(
-        format='%Y-%m-%d', required=False
-    )
     days = serializers.SerializerMethodField()
 
     class Meta:
@@ -112,13 +122,15 @@ class RestRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        user = self.context.pop('user')
+        requester = self.context.pop('requester')
+        description = self.context.pop('description', '')
         approvers_data = self.context.pop('approvers', [])
         ccs_data = self.context.pop('ccs', [])
 
-        rest_request = m.RestRequest.objects.create(
-            user=user,
-            **validated_data
+        basic_request = m.BasicRequest.objects.create(
+            request_type=c.REQUEST_TYPE_REST,
+            requester=requester,
+            description=description
         )
 
         step = 0
@@ -127,8 +139,8 @@ class RestRequestSerializer(serializers.ModelSerializer):
             approver = approver_data.get('approver', None)
             approver = m.User.objects.get(id=approver.get('id', None))
 
-            m.RestRequestApprover.objects.create(
-                rest_request=rest_request,
+            m.RequestApprover.objects.create(
+                request=basic_request,
                 approver_type=approver_type['value'],
                 approver=approver,
                 step=step
@@ -140,23 +152,16 @@ class RestRequestSerializer(serializers.ModelSerializer):
             cc = cc_data.get('cc', None)
             cc = m.User.objects.get(id=cc.get('id', None))
 
-            m.RestRequestCC.objects.create(
-                rest_request=rest_request,
+            m.RequestCC.objects.create(
+                request=basic_request,
                 cc_type=cc_type['value'],
                 cc=cc
             )
 
-        return rest_request
+        return m.RestRequest.objects.create(request=basic_request, **validated_data)
 
     def update(self, instance, validated_data):
-        user = self.context.pop('user')
-        # TODO: update the approvers
-
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
-        instance.user = user
-        instance.save()
-        return instance
+        pass
 
     def validate(self, data):
         from_date = data.get('from_date', None)
@@ -175,48 +180,93 @@ class RestRequestSerializer(serializers.ModelSerializer):
 
 class VehicleRepairRequestSerializer(serializers.ModelSerializer):
 
-    requester = ShortUserSerializer(read_only=True)
+    request = BasicRequestSerializer(read_only=True)
     vehicle = ShortVehicleSerializer(read_only=True)
     category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
-    request_time = serializers.DateTimeField(
-        format='%Y-%m-%d', required=False
-    )
-    days = serializers.SerializerMethodField()
 
     class Meta:
         model = m.VehicleRepairRequest
         fields = '__all__'
 
     def create(self, validated_data):
-        repair_request = m.VehicleRepairRequest.objects.create(
-            requester=self.context.get('requester'),
-            vehicle=self.context.get('vehicle'),
-            **validated_data
+        requester = self.context.pop('requester')
+        description = self.context.pop('description', '')
+        approvers_data = self.context.pop('approvers', [])
+        ccs_data = self.context.pop('ccs', [])
+        vehicle = self.context.pop('vehicle')
+
+        basic_request = m.BasicRequest.objects.create(
+            request_type=c.REQUEST_TYPE_VEHICLE_REPAIR,
+            requester=requester,
+            description=description
         )
 
-        return repair_request
+        step = 0
+        for approver_data in approvers_data:
+            approver_type = approver_data.get('approver_type', None)
+            approver = approver_data.get('approver', None)
+            approver = m.User.objects.get(id=approver.get('id', None))
+
+            m.RequestApprover.objects.create(
+                request=basic_request,
+                approver_type=approver_type['value'],
+                approver=approver,
+                step=step
+            )
+            step += 1
+
+        for cc_data in ccs_data:
+            cc_type = cc_data.get('cc_type', None)
+            cc = cc_data.get('cc', None)
+            cc = m.User.objects.get(id=cc.get('id', None))
+
+            m.RequestCC.objects.create(
+                request=basic_request,
+                cc_type=cc_type['value'],
+                cc=cc
+            )
+
+        return m.VehicleRepairRequest.objects.create(
+            request=basic_request, vehicle=vehicle, **validated_data
+        )
 
     def update(self, instance, validated_data):
         # TODO: update the approvers
+        pass
 
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
 
-        instance.requester = self.context.get('requester')
-        instance.vehicle = self.context.get('vehicle')
-        instance.save()
-        return instance
+class RestRequestDataSerializer(serializers.ModelSerializer):
 
-    def validate(self, data):
-        from_date = data.get('from_date', None)
-        to_date = data.get('to_date', None)
+    request = BasicRequestSerializer(read_only=True)
+    category = TMSChoiceField(choices=c.REST_REQUEST_CATEGORY)
+    days = serializers.SerializerMethodField()
 
-        if from_date > to_date:
-            raise serializers.ValidationError({
-                'to_date': 'Error'
-            })
+    class Meta:
+        model = m.RestRequest
+        fields = '__all__'
 
-        return data
 
-    def get_days(self, instance):
-        return (instance.to_date - instance.from_date).days
+class RequestSerializer(serializers.ModelSerializer):
+    requester = ShortUserSerializer(read_only=True)
+    request_type = TMSChoiceField(choices=c.REQUEST_TYPE)
+    request_time = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
+    approvers = RequestApproverSerializer(
+        source='requestapprover_set', many=True, read_only=True
+    )
+    ccs = RequestCCSerializer(
+        source='requestcc_set', many=True, read_only=True
+    )
+    detail = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.BasicRequest
+        fields = (
+            'requester', 'request_type', 'request_time', 'approved', 'approved_time',
+            'description', 'approvers', 'ccs', 'detail'
+        )
+
+    def get_detail(self, instance):
+        if instance.request_type == c.REQUEST_TYPE_REST:
+            pass

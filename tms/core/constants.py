@@ -288,8 +288,15 @@ PERMISSION_TYPE = (
     (PERMISSION_TYPE_WRITE, 'Write Permission')
 )
 
-# hr app
+# business app
 # ----------------------------------------------------------------------------
+REQUEST_TYPE_REST = 'R'
+REQUEST_TYPE_VEHICLE_REPAIR = 'V'
+REQUEST_TYPE = (
+    (REQUEST_TYPE_REST, 'Rest Request'),
+    (REQUEST_TYPE_VEHICLE_REPAIR, 'Vehicle Repair'),
+)
+
 REST_REQUEST_ILL = 'I'
 REST_REQUEST_PERSONAL = 'P'
 REST_REQUEST_CATEGORY = (
