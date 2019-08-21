@@ -3,29 +3,31 @@ from django.db import models
 from ..core import constants as c
 
 
-class StationBillDocumentManager(models.Manager):
-    """
-    Manager for getting avaiable vehicles
-    """
+class MealBillManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            category__in=[
-                c.BILL_FROM_LOADING_STATION, c.BILL_FROM_QUALITY_STATION,
-                c.BILL_FROM_UNLOADING_STATION
-            ]
+            category=c.BILL_CATEGORY_MEAL
         )
 
 
-class OtherBillDocumentManager(models.Manager):
-    """
-    Manager for getting avaiable vehicles
-    """
+class ParkingVehicleBillManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            category__in=[
-                c.BILL_FROM_OIL_STATION, c.BILL_FROM_TRAFFIC,
-                c.BILL_FROM_OTHER
-            ]
+            category=c.BILL_CATEGORY_PARKING_VEHICLE
+        )
+
+
+class CleanVehicleBillManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            category=c.BILL_CATEGORY_CLEAN_VEHICLE
+        )
+
+
+class SleepBillManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            category=c.BILL_CATEGORY_SLEEP
         )
 
 

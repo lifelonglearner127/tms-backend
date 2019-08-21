@@ -177,7 +177,7 @@ class OrderPayment(models.Model):
     )
 
 
-class BillDocument(CreatedTimeModel):
+class Bill(CreatedTimeModel):
 
     user = models.ForeignKey(
         User,
@@ -185,45 +185,17 @@ class BillDocument(CreatedTimeModel):
         related_name='bills'
     )
 
-    # job = models.ForeignKey(
-    #     Job,
-    #     on_delete=models.SET_NULL,
-    #     related_name='bills',
-    #     null=True
-    # )
-
-    amount = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES,
-        null=True,
-        blank=True
+    category = models.CharField(
+        max_length=1,
+        choices=c.BILL_CATEGORY,
+        default=c.BILL_CATEGORY_MEAL
     )
 
-    unit_price = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES,
-        null=True,
-        blank=True
-    )
+    from_time = models.DateTimeField()
 
-    cost = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES,
-        null=True,
-        blank=True
-    )
+    to_time = models.DateTimeField()
 
-    bill = models.ImageField()
-
-    category = models.PositiveIntegerField(
-        choices=c.BILL_CATEGORY
-    )
-
-    sub_category = models.PositiveIntegerField(
-        default=0
-    )
-
-    detail_category = models.PositiveIntegerField(
+    cost = models.FloatField(
         default=0
     )
 
@@ -233,16 +205,16 @@ class BillDocument(CreatedTimeModel):
     )
 
     objects = models.Manager()
-    stationbills = managers.StationBillDocumentManager()
-    otherbills = managers.OtherBillDocumentManager()
+    meal_bills = managers.MealBillManager()
+    parking_vehicle_bills = managers.ParkingVehicleBillManager()
+    clean_vehicle_bills = managers.CleanVehicleBillManager()
+    sleep_bills = managers.SleepBillManager()
 
-    def __str__(self):
-        return '{} bill from {}'.format(
-            self.get_category_display(),
-            self.user
-        )
 
-    class Meta:
-        ordering = [
-            'category'
-        ]
+class BillDocument(models.Model):
+
+    bill = models.ForeignKey(
+        Bill, on_delete=models.CASCADE, related_name='images'
+    )
+
+    document = models.ImageField()

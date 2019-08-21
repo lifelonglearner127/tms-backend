@@ -31,8 +31,8 @@ router.register(
     base_name='fuel-card'
 )
 router.register(
-    r'bill',
-    v.BillDocumentViewSet,
+    r'bills',
+    v.BillViewSet,
     base_name='bill'
 )
 
