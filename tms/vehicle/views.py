@@ -455,12 +455,18 @@ class VehicleCheckHistoryViewSet(TMSViewSet):
         data = request.data
         data['vehicle'] = vehicle_pk
         data['driver'] = request.user.id
-        if check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
             data['before_driving_checked_time'] = timezone.now()
+            data['before_driving_problems'] = data.pop('problems')
+            data['before_driving_description'] = data.pop('description')
         elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
             data['driving_checked_time'] = timezone.now()
+            data['driving_problems'] = data.pop('problems')
+            data['driving_description'] = data.pop('description')
         elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
             data['after_driving_checked_time'] = timezone.now()
+            data['after_driving_problems'] = data.pop('problems')
+            data['after_driving_description'] = data.pop('description')
 
         serializer = s.VehicleCheckHistorySerializer(
             data=data,
@@ -482,12 +488,18 @@ class VehicleCheckHistoryViewSet(TMSViewSet):
         data = request.data
         data['vehicle'] = vehicle_pk
         data['driver'] = request.user.id
-        if check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
             data['before_driving_checked_time'] = timezone.now()
+            data['before_driving_problems'] = data.pop('problems')
+            data['before_driving_description'] = data.pop('description')
         elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
             data['driving_checked_time'] = timezone.now()
+            data['driving_problems'] = data.pop('problems')
+            data['driving_description'] = data.pop('description')
         elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
             data['after_driving_checked_time'] = timezone.now()
+            data['after_driving_problems'] = data.pop('problems')
+            data['after_driving_description'] = data.pop('description')
 
         serializer = s.VehicleCheckHistorySerializer(
             instance, data=data,

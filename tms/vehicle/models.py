@@ -425,11 +425,11 @@ class VehicleCheckHistory(models.Model):
         on_delete=models.CASCADE
     )
 
-    problems = models.PositiveIntegerField(
+    before_driving_problems = models.PositiveIntegerField(
         default=0
     )
 
-    description = models.TextField(
+    before_driving_description = models.TextField(
         null=True, blank=True
     )
 
@@ -437,7 +437,23 @@ class VehicleCheckHistory(models.Model):
         null=True, blank=True
     )
 
+    driving_problems = models.PositiveIntegerField(
+        default=0
+    )
+
+    driving_description = models.TextField(
+        null=True, blank=True
+    )
+
     driving_checked_time = models.DateTimeField(
+        null=True, blank=True
+    )
+
+    after_driving_problems = models.PositiveIntegerField(
+        default=0
+    )
+
+    after_driving_description = models.TextField(
         null=True, blank=True
     )
 

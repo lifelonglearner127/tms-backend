@@ -307,6 +307,30 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         return ret
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['before'] = {
+            'items': ret.pop('before_driving_checked_items'),
+            'problems': ret.pop('before_driving_problems'),
+            'description': ret.pop('before_driving_description'),
+            'images': ret.pop('before_driving_images')
+        }
+
+        ret['driving'] = {
+            'items': ret.pop('driving_checked_items'),
+            'problems': ret.pop('driving_problems'),
+            'description': ret.pop('driving_description'),
+            'images': ret.pop('driving_images')
+        }
+
+        ret['after'] = {
+            'items': ret.pop('after_driving_checked_items'),
+            'problems': ret.pop('after_driving_problems'),
+            'description': ret.pop('after_driving_description'),
+            'images': ret.pop('after_driving_images')
+        }
+        return ret
+
 
 class VehicleDriverDailyBindSerializer(serializers.ModelSerializer):
 
