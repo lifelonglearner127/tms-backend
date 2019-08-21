@@ -54,6 +54,35 @@ class UserViewSet(TMSViewSet):
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
 
+    @action(detail=False, methods=['post'], url_path="me")
+    def update_me(self, request):
+        username = request.data.get('username', None)
+        if username is None:
+            return Response({'username': 'Username is missing'}, status=status.HTTP_400_BAD_REQUEST)
+
+        password = request.data.get('password', None)
+        if password is None:
+            return Response({'password': 'Password is missing'}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.username = username
+        request.user.set_password(password)
+        request.user.save()
+
+        data = request.data
+        data['role'] = request.user.role
+
+        serializer = s.ObtainJWTSerializer(data=data)
+
+        if serializer.is_valid():
+            user = serializer.validated_data.get('user') or request.user
+            token = serializer.validated_data.get('token')
+            return Response({
+                'token': token,
+                'user': s.AuthSerializer(user).data
+            }, status=status.HTTP_200_OK)
+
+        return Response({'error': 'error occured while saving new credentials'}, status=status.HTTP_200_OK)
+
     @action(detail=False, url_path="roles")
     def get_user_roles(self, request):
         serializer = ChoiceSerializer(
