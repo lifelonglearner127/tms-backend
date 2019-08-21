@@ -519,7 +519,7 @@ class OrderViewSet(TMSViewSet):
 
         page = self.paginate_queryset(queryset)
 
-        serializer = s.OrderCustomerAppSerializer(page, many=True)
+        serializer = self.serializer_class(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 

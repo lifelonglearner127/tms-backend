@@ -269,6 +269,9 @@ class OrderSerializer(serializers.ModelSerializer):
     created = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
+    updated = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
 
     class Meta:
         model = m.Order
