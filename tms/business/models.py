@@ -234,6 +234,17 @@ class RequestCC(models.Model):
     )
 
 
+class RequestDocument(models.Model):
+
+    request = models.ForeignKey(
+        BasicRequest,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    document = models.ImageField()
+
+
 class RestRequest(models.Model):
 
     request = models.OneToOneField(

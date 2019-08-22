@@ -142,12 +142,6 @@ class BasicRequestViewSet(TMSViewSet):
     def get_approved_requests(self, request):
         pass
 
-
-class RestRequestViewSet(TMSViewSet):
-
-    queryset = m.RestRequest.objects.all()
-    serializer_class = s.RestRequestSerializer
-
     def create(self, request):
         requester = request.data.pop('requester', None)
         if requester is not None:
@@ -157,9 +151,10 @@ class RestRequestViewSet(TMSViewSet):
 
         context = {
             'requester': requester,
-            'description': request.data.pop('description', ''),
             'approvers': request.data.pop('approvers', []),
-            'ccs': request.data.pop('ccs', [])
+            'ccs': request.data.pop('ccs', []),
+            'images': request.data.pop('images', []),
+            'detail': request.data.pop('detail')
         }
 
         serializer = self.serializer_class(data=request.data, context=context)
@@ -188,9 +183,9 @@ class RestRequestViewSet(TMSViewSet):
 
         context = {
             'requester': requester,
-            'description': request.data.pop('description'),
             'approvers': request.data.pop('approvers', []),
-            'ccs': request.data.pop('ccs', [])
+            'ccs': request.data.pop('ccs', []),
+            'detail': request.data.pop('detail')
         }
 
         serializer = self.serializer_class(instance, data=request.data, context=context, partial=True)
@@ -202,6 +197,12 @@ class RestRequestViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class RestRequestViewSet(TMSViewSet):
+
+    queryset = m.RestRequest.objects.all()
+    serializer_class = s.RestRequestSerializer
 
     @action(detail=False, url_path="categories")
     def get_rest_request_cateogires(self, request):
@@ -221,69 +222,6 @@ class VehicleRepairRequestViewSet(TMSViewSet):
 
     queryset = m.VehicleRepairRequest.objects.all()
     serializer_class = s.VehicleRepairRequestSerializer
-
-    def create(self, request):
-        vehicle_data = request.data.pop('vehicle')
-        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
-        requester = request.data.pop('requester', None)
-        if requester is not None:
-            requester = get_object_or_404(m.User, id=requester.get('id', None))
-        else:
-            requester = request.user
-
-        context = {
-            'requester': requester,
-            'description': request.data.pop('description', ''),
-            'approvers': request.data.pop('approvers', []),
-            'ccs': request.data.pop('ccs', []),
-            'vehicle': vehicle
-        }
-
-        serializer = self.serializer_class(data=request.data, context=context)
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    def update(self, request, pk=None):
-        instance = self.get_object()
-        for approver in instance.request.requestapprover_set.all():
-            if approver.approved:
-                return Response({
-                    'msg': 'You can not update your request because it is in under approve flow'
-                })
-
-        requester = request.data.pop('requester', None)
-        vehicle_data = request.data.pop('vehicle')
-        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
-        if requester is not None:
-            requester = get_object_or_404(m.User, id=requester.get('id', None))
-        else:
-            requester = request.user
-
-        context = {
-            'requester': requester,
-            'description': request.data.pop('description'),
-            'approvers': request.data.pop('approvers', []),
-            'ccs': request.data.pop('ccs', []),
-            'vehicle': vehicle
-        }
-
-        serializer = self.serializer_class(
-            instance, data=request.data, context=context, partial=True
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
 
     @action(detail=False, url_path="categories")
     def get_rest_request_cateogires(self, request):
