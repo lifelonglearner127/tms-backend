@@ -314,6 +314,11 @@ class OrderViewSet(TMSViewSet):
         plate_nums = order.jobs.filter(progress__gt=1).values_list(
             'vehicle__plate_num', flat=True
         )
+        if len(plate_nums) == 0:
+            return Response(
+                {'job': 'Not job started'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         body = {
             'plate_nums': list(plate_nums),
             'fields': ['loc']
