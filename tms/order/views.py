@@ -18,6 +18,7 @@ from ..core import constants as c
 from ..core.permissions import (
     IsDriverOrEscortUser, IsCustomerUser, OrderPermission
 )
+from . import permissions as p
 
 # models
 from . import models as m
@@ -755,9 +756,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(
-        detail=False, url_path='mileage'
-    )
+    @action(detail=False, url_path='mileage')
     def get_mileage(self, request):
         page = self.paginate_queryset(
             m.Job.objects.all()
@@ -767,9 +766,7 @@ class JobViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
-    @action(
-        detail=False, url_path='documents'
-    )
+    @action(detail=False, url_path='documents')
     def get_documents(self, request):
         page = self.paginate_queryset(
             m.Job.completed_jobs.all()
@@ -781,9 +778,7 @@ class JobViewSet(TMSViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(
-        detail=False, url_path='time'
-    )
+    @action(detail=False, url_path='time')
     def get_time(self, request):
         page = self.paginate_queryset(
             m.Job.completed_jobs.all(),
@@ -793,16 +788,11 @@ class JobViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
-    @action(
-        detail=False, url_path='driving'
-    )
+    @action(detail=False, url_path='driving')
     def get_driving(self, request):
         pass
 
-    @action(
-        detail=False, url_path='previous',
-        permission_classes=[IsDriverOrEscortUser]
-    )
+    @action(detail=False, url_path='previous', permission_classes=[IsDriverOrEscortUser])
     def previous_jobs(self, request):
         serializer = s.JobDoneSerializer(
             request.user.jobs_as_driver.filter(
@@ -816,10 +806,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(
-        detail=False, url_path='done',
-        permission_classes=[IsDriverOrEscortUser]
-    )
+    @action(detail=False, url_path='done', permission_classes=[IsDriverOrEscortUser])
     def done_jobs(self, request):
         page = self.paginate_queryset(
             request.user.jobs_as_driver.filter(
@@ -833,10 +820,7 @@ class JobViewSet(TMSViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(
-        detail=False, url_path='current',
-        permission_classes=[IsDriverOrEscortUser]
-    )
+    @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
     def progress_jobs(self, request):
         job = request.user.jobs_as_driver.filter(
             ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
@@ -858,10 +842,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(
-        detail=False, url_path='future',
-        permission_classes=[IsDriverOrEscortUser]
-    )
+    @action(detail=False, url_path='future', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):
         page = self.paginate_queryset(
             request.user.jobs_as_driver.filter(
@@ -872,10 +853,7 @@ class JobViewSet(TMSViewSet):
         serializer = s.JobCurrentSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(
-        detail=True, url_path='update-progress',
-        permission_classes=[IsDriverOrEscortUser]
-    )
+    @action(detail=True, url_path='update-progress', permission_classes=[IsDriverOrEscortUser])
     def progress_update(self, request, pk=None):
         job = self.get_object()
 
@@ -996,87 +974,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(
-        detail=True, url_path='upload-bill-document', methods=['post']
-    )
-    def upload_bill_document(self, request, pk=None):
-        job = self.get_object()
-        serializer = s.JobBillSerializer(
-            data=request.data,
-            context={
-                'request': request
-            }
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        job.bills.add(serializer.instance)
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(
-        detail=True, url_path='documents'
-    )
-    def get_job_documents(self, request, pk=None):
-        job = self.get_object()
-        documents = {}
-
-        for bill in job.bills.all():
-            category = bill.category
-
-            if category not in documents:
-                documents[category] = []
-
-            documents[category].append(
-                s.JobBillViewSerializer({
-                    'amount': bill.amount,
-                    'unit_price': bill.unit_price,
-                    'cost': bill.cost,
-                    'document': bill.document
-                }, context={'request': request}).data
-            )
-
-        for job_station in job.jobstation_set.all():
-            documents[job_station.station.station_type] = []
-            for job_product in job_station.jobstationproduct_set.all():
-                documents[job_station.station.station_type].append(
-                    s.JobBillViewSerializer({
-                        'document': job_product.document,
-                        'weight': job_product.weight
-                    }, context={'request': request}).data
-                )
-
-        return Response(
-            documents,
-            status=status.HTTP_200_OK
-        )
-
-    @action(
-        detail=False, url_path="bill-documents"
-    )
-    def get_bills(self, request):
-        """
-        for driver app
-        return bills
-        """
-        bill_type = request.query_params.get('type', 'all')
-        page = self.paginate_queryset(
-            request.user.jobs_as_driver.filter(
-                ~Q(progress=c.JOB_PROGRESS_NOT_STARTED)
-            )
-        )
-
-        serializer = s.JobBillDocumentForDriverSerializer(
-            page,
-            context={'request': request, 'bill_type': bill_type},
-            many=True
-        )
-        return self.get_paginated_response(serializer.data)
-
-    @action(
-        detail=True, url_path="test/station-efence"
-    )
+    @action(detail=True, url_path="test/station-efence")
     def test_station_efence(self, request, pk=None):
         """
         This api is only used for test purpose
@@ -1103,9 +1001,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(
-        detail=False, url_path="test/blackdot-efence"
-    )
+    @action(detail=False, url_path="test/blackdot-efence")
     def test_black_dot_efence(self, request, pk=None):
         from ..core.redis import r
 
@@ -1118,6 +1014,50 @@ class JobViewSet(TMSViewSet):
             {'msg': 'success'},
             status=status.HTTP_200_OK
         )
+
+
+class LoadingStationProductCheckViewSet(viewsets.ModelViewSet):
+
+    serializer_class = s.LoadingStationProductCheckSerializer
+    permission_classes = [p.IsMyJob]
+
+    def get_queryset(self):
+        return m.LoadingStationProductCheck.objects.filter(
+            job__id=self.kwargs['job_pk']
+        )
+
+    def create(self, request, job_pk=None):
+        context = {
+            'images': request.data.pop('images'),
+            'product': request.data.pop('product'),
+            'request': request
+        }
+        data = request.data
+        data['job'] = job_pk
+        serializer = s.LoadingStationProductCheckSerializer(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, job_pk=None, pk=None):
+        instance = self.get_object()
+        context = {
+            'images': request.data.pop('images'),
+            'product': request.data.pop('product'),
+            'request': request
+        }
+        data = request.data
+        data['job'] = job_pk
+        serializer = s.LoadingStationProductCheckSerializer(
+            instance, data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class JobStationViewSet(viewsets.ModelViewSet):

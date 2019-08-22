@@ -222,11 +222,6 @@ class Job(models.Model):
         default=False
     )
 
-    bills = models.ManyToManyField(
-        'JobBill',
-        blank=True
-    )
-
     is_same_station = models.BooleanField(
         default=False
     )
@@ -247,6 +242,34 @@ class Job(models.Model):
     pending_jobs = managers.PendingJobManager()
 
 
+class LoadingStationProductCheck(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    weight = models.FloatField(
+        default=0
+    )
+
+
+class LoadingStationDocument(models.Model):
+
+    loading_station = models.ForeignKey(
+        LoadingStationProductCheck,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    document = models.ImageField()
+
+
 class QualityCheck(models.Model):
 
     job = models.ForeignKey(
@@ -264,14 +287,6 @@ class QualityCheck(models.Model):
 
     additive = models.FloatField(
         default=0
-    )
-
-    man_hole = models.CharField(
-        max_length=100
-    )
-
-    branch_hole = models.CharField(
-        max_length=100
     )
 
 
@@ -363,11 +378,6 @@ class JobStationProduct(models.Model):
         on_delete=models.CASCADE
     )
 
-    document = models.ImageField(
-        null=True,
-        blank=True
-    )
-
     branch = models.PositiveIntegerField(
         default=0
     )
@@ -376,9 +386,28 @@ class JobStationProduct(models.Model):
         default=0
     )
 
-    weight = models.FloatField(
+    volume = models.FloatField(
         default=0
     )
+
+    man_hole = models.CharField(
+        max_length=100
+    )
+
+    branch_hole = models.CharField(
+        max_length=100
+    )
+
+
+class JobStationProductDocument(models.Model):
+
+    job_station_product = models.ForeignKey(
+        JobStationProduct,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    document = models.ImageField()
 
 
 class JobReport(models.Model):
@@ -416,47 +445,6 @@ class JobReport(models.Model):
 
     class Meta:
         ordering = ('month', )
-
-
-class JobBill(TimeStampedModel):
-
-    amount = models.FloatField(
-        default=0
-    )
-
-    unit_price = models.FloatField(
-        default=0
-    )
-
-    cost = models.FloatField(
-        default=0
-    )
-
-    document = models.ImageField(
-        null=True,
-        blank=True
-    )
-
-    category = models.PositiveIntegerField(
-        choices=c.BILL_CATEGORY,
-        default=c.BILL_FROM_OIL_STATION
-    )
-
-    sub_category = models.PositiveIntegerField(
-        default=0
-    )
-
-    detail_category = models.PositiveIntegerField(
-        default=0
-    )
-
-    description = models.TextField(
-        null=True,
-        blank=True
-    )
-
-    class Meta:
-        ordering = ['category', 'sub_category', 'detail_category']
 
 
 class VehicleUserBind(TimeStampedModel):

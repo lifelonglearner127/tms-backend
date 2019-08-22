@@ -35,6 +35,12 @@ job_router.register(
     v.JobStationViewSet,
     base_name='job-stations'
 )
+job_router.register(
+    r'loading-station-check',
+    v.LoadingStationProductCheckViewSet,
+    base_name='loading-station-check'
+)
+
 # /jobs/{job_pk}/stations/{jobstation_pk}/products
 # /jobs/{job_pk}/stations/{jobstation_pk}/products/{pk}
 jobstation_router = routers.NestedSimpleRouter(

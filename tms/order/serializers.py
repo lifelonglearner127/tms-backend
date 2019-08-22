@@ -363,7 +363,7 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'id', 'product', 'branch', 'mission_weight', 'weight'
+            'id', 'product', 'branch', 'mission_weight', 'volume'
         )
 
 
@@ -385,7 +385,7 @@ class JobStationProductDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'document', 'weight'
+            'document', 'volume'
         )
 
 
@@ -529,6 +529,7 @@ class JobCurrentSerializer(serializers.ModelSerializer):
     driver = serializers.CharField(source='driver.name')
     escort = serializers.CharField(source='escort.name')
     total_distance = serializers.IntegerField(source='route.distance')
+    products = serializers.SerializerMethodField()
     stations = ShortJobStationSerializer(
         source='jobstation_set', many=True, read_only=True
     )
@@ -539,7 +540,7 @@ class JobCurrentSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'order_id', 'plate_num', 'driver', 'escort',
-            'total_distance', 'stations', 'progress', 'progress_bar', 'route'
+            'total_distance', 'products', 'stations', 'progress', 'progress_bar', 'route'
         )
 
     def get_progress_bar(self, instance):
@@ -603,6 +604,22 @@ class JobCurrentSerializer(serializers.ModelSerializer):
             'progress': current_progress,
             'last_progress_finished_on': last_progress_finished_on
         }
+
+    def get_products(self, instance):
+        ret = []
+        loading_station = instance.jobstation_set.all()[0]
+        for product in loading_station.jobstationproduct_set.all():
+            for ret_product in ret:
+                if ret_product['product']['id'] == product.product.id:
+                    ret_product['mission_weight'] += product.mission_weight
+                    break
+            else:
+                ret.append({
+                    'product': ShortProductSerializer(product.product).data,
+                    'mission_weight': product.mission_weight
+                })
+
+        return ret
 
 
 class JobDoneSerializer(serializers.ModelSerializer):
@@ -681,41 +698,6 @@ class BillDetailCategoyChoiceField(serializers.Field):
         return {
             'detail_category': data['value']
         }
-
-
-class JobBillSerializer(serializers.ModelSerializer):
-
-    document = Base64ImageField()
-    category = TMSChoiceField(choices=c.BILL_CATEGORY)
-    sub_category = BillSubCategoyChoiceField(source='*', required=False)
-    detail_category = BillDetailCategoyChoiceField(source='*', required=False)
-
-    class Meta:
-        model = m.JobBill
-        fields = '__all__'
-
-
-# class NewJobBillViewSerializer(serializers.ModelSerializer):
-
-#     bills = BillDocumentSerializer(many=True)
-
-#     class Meta:
-#         model = m.Job
-#         fields = (
-#             'id', 'bills'
-#         )
-
-
-class JobBillViewSerializer(serializers.Serializer):
-    """
-    job bill view serializer for driver app
-    """
-    document = serializers.ImageField(required=False)
-    category = serializers.CharField(required=False)
-    amount = serializers.FloatField(required=False)
-    unit_price = serializers.FloatField(required=False)
-    cost = serializers.FloatField(required=False)
-    weight = serializers.FloatField(required=False)
 
 
 class JobMileageSerializer(serializers.ModelSerializer):
@@ -921,73 +903,6 @@ class JobByVehicleSerializer(serializers.ModelSerializer):
         )
 
 
-class JobBillDocumentForDriverSerializer(serializers.ModelSerializer):
-
-    order_id = serializers.CharField(source='order.id')
-    bills = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.Job
-        fields = (
-            'id', 'order_id', 'finished_on', 'bills'
-        )
-
-    def get_bills(self, instance):
-        """
-        todo; optimize the code
-        """
-        request = self.context.get('request')
-        bill_type = self.context.get('bill_type', 'all')
-        ret = {}
-        bills = instance.bills.all()
-        if bill_type != 'all':
-            bills = bills.filter(category=bill_type)
-
-        for bill in bills:
-            category = bill.category
-            if category in ret:
-                ret[category]['total_cost'] += bill.cost
-
-                if category == c.BILL_FROM_OIL_STATION:
-                    sub_categories = c.OIL_BILL_SUB_CATEGORY
-                elif category == c.BILL_FROM_TRAFFIC:
-                    sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
-                elif category == c.BILL_FROM_OTHER:
-                    sub_categories == c.OTHER_BILL_SUB_CATEGORY
-
-                sub_category = bill.sub_category
-                if sub_category in ret[category]['documents']:
-                    ret[category]['documents'][sub_category]['sub_total_cost'] += bill.cost
-                    ret[category]['documents'][sub_category]['documents'].append(
-                        JobBillSerializer(
-                            bill, context={'request': request}
-                        ).data
-                    )
-                else:
-                    ret[category]['documents'][sub_category] = {
-                        'sub_total_cost': bill.cost,
-                        'documents': [
-                            JobBillSerializer(
-                                bill, context={'request': request}
-                            ).data
-                        ]
-                    }
-            else:
-                ret[category] = {
-                    'total_cost': bill.cost,
-                    'documents': {
-                        bill.sub_category: {
-                            'sub_total_cost': bill.cost,
-                            'documents':
-                            [JobBillSerializer(
-                                bill, context={'request': request}
-                            ).data]
-                        }
-                    }
-                }
-        return ret
-
-
 class VehicleUserBindSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
@@ -1053,4 +968,70 @@ class VehicleUserBindSerializer(serializers.ModelSerializer):
             'driver': get_object_or_404(m.User, id=data['driver']['id']),
             'escort': get_object_or_404(m.User, id=data['escort']['id'])
         }
+        return ret
+
+
+class ShortLoadingStationDocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.LoadingStationDocument
+        exclude = ('loading_station', )
+
+
+class LoadingStationDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.LoadingStationDocument
+        fields = '__all__'
+
+
+class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
+
+    product = ShortProductSerializer(read_only=True)
+    images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.LoadingStationProductCheck
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance = m.LoadingStationProductCheck.objects.create(
+            product=get_object_or_404(Product, id=self.context.get('product').get('id')),
+            **validated_data
+        )
+        images = self.context.pop('images', [])
+        for image in images:
+            image['loading_station'] = instance.id
+            serializer = LoadingStationDocumentSerializer(data=image)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return instance
+
+    def update(self, instance, validated_data):
+        images = self.context.pop('images', [])
+        instance.product = get_object_or_404(Product, id=self.context.get('product').get('id'))
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.images.all().delete()
+
+        for image in images:
+            image['loading_station'] = instance.id
+            serializer = LoadingStationDocumentSerializer(data=image)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        instance.save()
+        return instance
+
+    def get_images(self, instance):
+        ret = []
+        for image in instance.images.all():
+            ret.append(
+                ShortLoadingStationDocumentSerializer(image, context={'request': self.context.get('request')}).data
+            )
+
         return ret
