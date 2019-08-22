@@ -1,12 +1,15 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+# models
 from . import models as m
+
+# serializers
 from . import serializers as s
+
+# views
 from ..core.views import TMSViewSet
-from ..account.models import User
 
 
 class OrderPaymentViewSet(TMSViewSet):

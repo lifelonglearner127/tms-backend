@@ -7,7 +7,6 @@ from . import managers
 # models
 # from ..core.models import ApprovedModel
 from ..account.models import User
-from ..order.models import Job
 from ..vehicle.models import Vehicle
 
 

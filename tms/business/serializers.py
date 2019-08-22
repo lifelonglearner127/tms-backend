@@ -11,7 +11,6 @@ from . import models as m
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
-from ..order.serializers import ShortJobSerializer
 
 
 # class ParkingRequestSerializer(serializers.ModelSerializer):
