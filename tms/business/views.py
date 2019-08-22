@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # constants
 from ..core import constants as c
@@ -138,10 +139,6 @@ class BasicRequestViewSet(TMSViewSet):
     queryset = m.BasicRequest.objects.all()
     serializer_class = s.BasicRequestSerializer
 
-    @action(detail=False, url_path="me")
-    def get_approved_requests(self, request):
-        pass
-
     def create(self, request):
         requester = request.data.pop('requester', None)
         if requester is not None:
@@ -198,14 +195,34 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="me")
+    def get_my_requests(self, request):
+        page = self.paginate_queryset(
+            request.user.my_requests.all()
+        )
+        serializer = s.BasicRequestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
-class RestRequestViewSet(TMSViewSet):
+    @action(detail=False, url_path="me/approved")
+    def get_my_approved_requests(self, request):
+        page = self.paginate_queryset(
+            request.user.my_requests.filter(approved=True)
+        )
+        serializer = s.BasicRequestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
-    queryset = m.RestRequest.objects.all()
-    serializer_class = s.RestRequestSerializer
+    @action(detail=False, url_path="me/unapproved")
+    def get_my_unapproved_request(self, request):
+        page = self.paginate_queryset(
+            request.user.my_requests.filter(approved=False)
+        )
+        serializer = s.BasicRequestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path="categories")
-    def get_rest_request_cateogires(self, request):
+
+class RestRequestCateogryAPIView(APIView):
+
+    def get(self, request):
         serializer = ChoiceSerializer(
             [
                 {'value': x, 'text': y} for (x, y) in c.REST_REQUEST_CATEGORY
@@ -218,13 +235,9 @@ class RestRequestViewSet(TMSViewSet):
         )
 
 
-class VehicleRepairRequestViewSet(TMSViewSet):
+class VehicleRepairRequestCategoryAPIView(APIView):
 
-    queryset = m.VehicleRepairRequest.objects.all()
-    serializer_class = s.VehicleRepairRequestSerializer
-
-    @action(detail=False, url_path="categories")
-    def get_rest_request_cateogires(self, request):
+    def get(self, request):
         serializer = ChoiceSerializer(
             [
                 {'value': x, 'text': y} for (x, y) in c.VEHICLE_REPAIR_REQUEST_CATEGORY

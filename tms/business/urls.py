@@ -21,35 +21,13 @@ router = routers.SimpleRouter(trailing_slash=False)
 #     base_name='escort-change'
 # )
 router.register(
-    r'rest-request',
-    v.RestRequestViewSet,
-    base_name='rest-request'
-)
-router.register(
-    r'vehicle-repair-request',
-    v.VehicleRepairRequestViewSet,
-    base_name='vehicle-repair-request'
-)
-router.register(
     r'requests',
     v.BasicRequestViewSet,
     base_name='requests'
 )
 
-# # /jobs/{job_pk}/missions
-# # /jobs/{job_pk}/missions/{pk}
-# job_router = routers.NestedSimpleRouter(
-#     router,
-#     r'jobs',
-#     lookup='job'
-# )
-# job_router.register(
-#     r'missions',
-#     v.MissionViewSet,
-#     base_name='missions'
-# )
-
 urlpatterns = [
     url(r'^', include(router.urls)),
-    # url(r'^', include(job_router.urls)),
+    url(r'rest-request/categories', v.RestRequestCateogryAPIView.as_view()),
+    url(r'vehicle-repair-request/categories', v.VehicleRepairRequestCategoryAPIView.as_view()),
 ]
