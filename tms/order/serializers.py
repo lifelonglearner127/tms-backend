@@ -994,38 +994,7 @@ class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.LoadingStationProductCheck
-        fields = '__all__'
-
-    def create(self, validated_data):
-        instance = m.LoadingStationProductCheck.objects.create(
-            product=get_object_or_404(Product, id=self.context.get('product').get('id')),
-            **validated_data
-        )
-        images = self.context.pop('images', [])
-        for image in images:
-            image['loading_station'] = instance.id
-            serializer = LoadingStationDocumentSerializer(data=image)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        return instance
-
-    def update(self, instance, validated_data):
-        images = self.context.pop('images', [])
-        instance.product = get_object_or_404(Product, id=self.context.get('product').get('id'))
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
-
-        instance.images.all().delete()
-
-        for image in images:
-            image['loading_station'] = instance.id
-            serializer = LoadingStationDocumentSerializer(data=image)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-        instance.save()
-        return instance
+        fields = ('product', 'weight', 'images')
 
     def get_images(self, instance):
         ret = []

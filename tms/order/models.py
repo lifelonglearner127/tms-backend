@@ -244,9 +244,10 @@ class Job(models.Model):
 
 class LoadingStationProductCheck(models.Model):
 
-    job = models.ForeignKey(
+    job = models.OneToOneField(
         Job,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='loading_check'
     )
 
     product = models.ForeignKey(
@@ -272,9 +273,10 @@ class LoadingStationDocument(models.Model):
 
 class QualityCheck(models.Model):
 
-    job = models.ForeignKey(
+    job = models.OneToOneField(
         Job,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='quality_check'
     )
 
     branch = models.PositiveIntegerField(

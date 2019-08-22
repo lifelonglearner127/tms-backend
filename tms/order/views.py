@@ -623,6 +623,31 @@ class JobViewSet(TMSViewSet):
     def update(self, request, pk=None):
         pass
 
+    @action(detail=True, methods=['post'], url_path='upload-loading-check')
+    def upload_loading_station_check(self, request, pk=None):
+        job = self.get_object()
+        images = request.data.pop('images')
+
+        try:
+            loading_check = m.LoadingStationProductCheck.objects.get(job=job)
+            loading_check.product = get_object_or_404(Product, id=request.data.get('product').get('id'))
+            loading_check.weight = request.data.pop('weight')
+            loading_check.save()
+            loading_check.images.all().delete()
+        except m.LoadingStationProductCheck.DoesNotExist:
+            loading_check = m.LoadingStationProductCheck.objects.create(
+                job=job, product=get_object_or_404(Product, id=request.data.get('product').get('id')),
+                weight=request.data.pop('weight')
+            )
+
+        for image in images:
+            image['loading_station'] = loading_check.id
+            serializer = s.LoadingStationDocumentSerializer(data=image)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return Response(s.LoadingStationProductCheckSerializer(job.loading_check).data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['post'], url_path='upload-quality-check')
     def upload_quality_check(self, request, pk=None):
         job = self.get_object()
@@ -1014,50 +1039,6 @@ class JobViewSet(TMSViewSet):
             {'msg': 'success'},
             status=status.HTTP_200_OK
         )
-
-
-class LoadingStationProductCheckViewSet(viewsets.ModelViewSet):
-
-    serializer_class = s.LoadingStationProductCheckSerializer
-    permission_classes = [p.IsMyJob]
-
-    def get_queryset(self):
-        return m.LoadingStationProductCheck.objects.filter(
-            job__id=self.kwargs['job_pk']
-        )
-
-    def create(self, request, job_pk=None):
-        context = {
-            'images': request.data.pop('images'),
-            'product': request.data.pop('product'),
-            'request': request
-        }
-        data = request.data
-        data['job'] = job_pk
-        serializer = s.LoadingStationProductCheckSerializer(
-            data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def update(self, request, job_pk=None, pk=None):
-        instance = self.get_object()
-        context = {
-            'images': request.data.pop('images'),
-            'product': request.data.pop('product'),
-            'request': request
-        }
-        data = request.data
-        data['job'] = job_pk
-        serializer = s.LoadingStationProductCheckSerializer(
-            instance, data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class JobStationViewSet(viewsets.ModelViewSet):
