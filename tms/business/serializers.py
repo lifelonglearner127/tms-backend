@@ -161,7 +161,47 @@ class RestRequestSerializer(serializers.ModelSerializer):
         return m.RestRequest.objects.create(request=basic_request, **validated_data)
 
     def update(self, instance, validated_data):
-        pass
+        requester = self.context.pop('requester')
+        description = self.context.pop('description', '')
+        approvers_data = self.context.pop('approvers', [])
+        ccs_data = self.context.pop('ccs', [])
+
+        instance.request.requester = requester
+        instance.request.description = description
+        instance.request.save()
+
+        instance.request.approvers.clear()
+        instance.request.ccs.clear()
+        step = 0
+        for approver_data in approvers_data:
+            approver_type = approver_data.get('approver_type', None)
+            approver = approver_data.get('approver', None)
+            approver = m.User.objects.get(id=approver.get('id', None))
+
+            m.RequestApprover.objects.create(
+                request=instance.request,
+                approver_type=approver_type['value'],
+                approver=approver,
+                step=step
+            )
+            step += 1
+
+        for cc_data in ccs_data:
+            cc_type = cc_data.get('cc_type', None)
+            cc = cc_data.get('cc', None)
+            cc = m.User.objects.get(id=cc.get('id', None))
+
+            m.RequestCC.objects.create(
+                request=instance.request,
+                cc_type=cc_type['value'],
+                cc=cc
+            )
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
 
     def validate(self, data):
         from_date = data.get('from_date', None)
@@ -231,8 +271,49 @@ class VehicleRepairRequestSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        # TODO: update the approvers
-        pass
+        requester = self.context.pop('requester')
+        description = self.context.pop('description', '')
+        approvers_data = self.context.pop('approvers', [])
+        ccs_data = self.context.pop('ccs', [])
+        vehicle = self.context.pop('vehicle')
+
+        instance.request.requester = requester
+        instance.request.description = description
+        instance.request.save()
+
+        instance.request.approvers.clear()
+        instance.request.ccs.clear()
+        step = 0
+        for approver_data in approvers_data:
+            approver_type = approver_data.get('approver_type', None)
+            approver = approver_data.get('approver', None)
+            approver = m.User.objects.get(id=approver.get('id', None))
+
+            m.RequestApprover.objects.create(
+                request=instance.request,
+                approver_type=approver_type['value'],
+                approver=approver,
+                step=step
+            )
+            step += 1
+
+        for cc_data in ccs_data:
+            cc_type = cc_data.get('cc_type', None)
+            cc = cc_data.get('cc', None)
+            cc = m.User.objects.get(id=cc.get('id', None))
+
+            m.RequestCC.objects.create(
+                request=instance.request,
+                cc_type=cc_type['value'],
+                cc=cc
+            )
+
+        instance.vehicle = vehicle
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
 
 
 class RestRequestDataSerializer(serializers.ModelSerializer):

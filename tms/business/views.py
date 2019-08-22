@@ -174,7 +174,13 @@ class RestRequestViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        requester = request.data.pop('requester')
+        for approver in instance.request.requestapprover_set.all():
+            if approver.approved:
+                return Response({
+                    'msg': 'You can not update your request because it is in under approve flow'
+                })
+
+        requester = request.data.pop('requester', None)
         if requester is not None:
             requester = get_object_or_404(m.User, id=requester.get('id', None))
         else:
@@ -245,22 +251,30 @@ class VehicleRepairRequestViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        # approvers = request.data.pop('approvers', [])
-        # ccs = request.data.pop('ccs', [])
+        for approver in instance.request.requestapprover_set.all():
+            if approver.approved:
+                return Response({
+                    'msg': 'You can not update your request because it is in under approve flow'
+                })
+
+        requester = request.data.pop('requester', None)
         vehicle_data = request.data.pop('vehicle')
         vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
-        requester = request.data.pop('requester')
         if requester is not None:
             requester = get_object_or_404(m.User, id=requester.get('id', None))
         else:
             requester = request.user
 
+        context = {
+            'requester': requester,
+            'description': request.data.pop('description'),
+            'approvers': request.data.pop('approvers', []),
+            'ccs': request.data.pop('ccs', []),
+            'vehicle': vehicle
+        }
+
         serializer = self.serializer_class(
-            instance, data=request.data,
-            context={
-                'requester': requester, 'vehicle': vehicle
-            },
-            partial=True
+            instance, data=request.data, context=context, partial=True
         )
 
         serializer.is_valid(raise_exception=True)
