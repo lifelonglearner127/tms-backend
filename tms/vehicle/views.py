@@ -45,6 +45,12 @@ class VehicleViewSet(TMSViewSet):
             serializer.data, status=status.HTTP_201_CREATED
         )
 
+    @action(detail=False, url_path='vehicles')
+    def list_short_vehicles(self, request):
+        page = self.paginate_queryset(self.queryset)
+        serializer = s.ShortVehicleSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=True, methods=['get'], url_path='branches')
     def get_vehicle_branches(self, request, pk=None):
         vehicle = self.get_object()
