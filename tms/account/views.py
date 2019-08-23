@@ -57,15 +57,29 @@ class UserViewSet(TMSViewSet):
     @action(detail=False, methods=['post'], url_path="me")
     def update_me(self, request):
         username = request.data.get('username', None)
-        if username is None:
-            return Response({'username': 'Username is missing'}, status=status.HTTP_400_BAD_REQUEST)
+        if username is not None:
+            if m.User.objects.exclude(id=request.user.id).filter(username=username).exists():
+                return Response(
+                    {'username': 'Duplicate username'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                request.user.username = username
 
         password = request.data.get('password', None)
-        if password is None:
-            return Response({'password': 'Password is missing'}, status=status.HTTP_400_BAD_REQUEST)
+        if password is not None:
+            request.user.set_password(password)
 
-        request.user.username = username
-        request.user.set_password(password)
+        mobile = request.data.get('mobile', None)
+        if mobile is not None:
+            if m.User.objects.exclude(id=request.user.id).filter(mobile=mobile).exists():
+                return Response(
+                    {'mobile': 'Duplicate mobile'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                request.user.mobile = mobile
+
         request.user.save()
 
         data = request.data
