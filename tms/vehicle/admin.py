@@ -8,6 +8,11 @@ class VehicleAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.VehicleDriverDailyBind)
+class VehicleDriverDailyBindAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.VehicleMaintenanceRequest)
 class VehicleMaintenanceRequestAdmin(admin.ModelAdmin):
     pass

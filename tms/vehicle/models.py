@@ -483,7 +483,7 @@ class VehicleCheckHistory(models.Model):
     )
 
     class Meta:
-        ordering = ['-before_driving_checked_time']
+        ordering = ['driver', '-before_driving_checked_time']
 
 
 class VehicleCheckDocument(models.Model):
@@ -563,7 +563,8 @@ class VehicleDriverDailyBind(models.Model):
 
     driver = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='my_vehicle_bind'
     )
 
     get_on = models.DateTimeField(
@@ -576,4 +577,4 @@ class VehicleDriverDailyBind(models.Model):
     )
 
     class Meta:
-        ordering = ['vehicle', 'get_on']
+        ordering = ['vehicle', '-get_on']

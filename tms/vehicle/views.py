@@ -341,6 +341,46 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, methods=['post'], url_path='vehicle-check')
+    def vehicle_check(self, request, pk=None):
+        vehicle = self.get_object()
+        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        vehicle_check, created = m.VehicleCheckHistory.objects.get_or_create(
+            vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
+        )
+
+        items = request.data.pop('items')
+        images = request.data.pop('images', [])
+        check_type = request.data.pop('check_type')
+        data = request.data
+        data['vehicle'] = pk
+        data['driver'] = request.user.id
+        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
+            data['before_driving_checked_time'] = timezone.now()
+            data['before_driving_problems'] = data.pop('problems')
+            data['before_driving_description'] = data.pop('description')
+        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
+            data['driving_checked_time'] = timezone.now()
+            data['driving_problems'] = data.pop('problems')
+            data['driving_description'] = data.pop('description')
+        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
+            data['after_driving_checked_time'] = timezone.now()
+            data['after_driving_problems'] = data.pop('problems')
+            data['after_driving_description'] = data.pop('description')
+
+        serializer = s.VehicleCheckHistorySerializer(
+            vehicle_check,
+            data=data,
+            context={
+                'items': items, 'images': images, 'request': request, 'check_type': check_type
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['get'], url_path='daily-bind')
     def vehicle_driver_daily_bind(self, request, pk=None):
         data = request.data
@@ -356,6 +396,15 @@ class VehicleViewSet(TMSViewSet):
     def vehicle_driver_daily_unbind(self, request, pk=None):
         vehicle = self.get_object()
         bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        vehicle_check = m.VehicleCheckHistory.objects.filter(
+            vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
+        ).first()
+
+        if vehicle_check is None or vehicle_check.before_driving_checked_time is None or\
+           vehicle_check.driving_checked_time is None or vehicle_check.after_driving_checked_time is None:
+            return Response(
+                {'msg': '你没有完成车辆三检查'}, status=status.HTTP_400_BAD_REQUEST
+            )
         bind.get_off = timezone.now()
         bind.save()
 
@@ -446,7 +495,9 @@ class TireViewSet(TMSViewSet):
 
 
 class VehicleCheckHistoryViewSet(TMSViewSet):
-
+    """
+    Actually this vieweset will not be used in the future
+    """
     serializer_class = s.VehicleCheckHistorySerializer
 
     def get_queryset(self):
