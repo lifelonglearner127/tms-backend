@@ -133,6 +133,14 @@ class UserViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='company-member-list')
+    def get_short_company_members_with_pagination(self, request):
+        serializer = s.ShortCompanyMemberSerializer(
+            self.paginate_queryset(m.User.companymembers.all()),
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='staffs/short')
     def get_short_staff_users(self, request):
         serializer = s.ShortUserSerializer(
@@ -143,6 +151,14 @@ class UserViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, url_path='staff-list')
+    def get_short_staff_users_with_pagination(self, request):
+        serializer = s.ShortUserSerializer(
+            self.paginate_queryset(m.User.staffs.all()),
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path='drivers/short')
     def get_short_driver_users(self, request):
