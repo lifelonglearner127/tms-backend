@@ -206,19 +206,17 @@ class StationSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
-        if station_type == c.STATION_TYPE_LOADING_STATION:
-            for product in products:
-                product = get_object_or_404(
-                    m.Product, id=product.get('id', None)
-                )
-                station.products.add(product)
+        for product in products:
+            product = get_object_or_404(
+                m.Product, id=product.get('id', None)
+            )
+            station.products.add(product)
 
-        elif station_type == c.STATION_TYPE_UNLOADING_STATION:
-            for customer in customers:
-                customer = get_object_or_404(
-                    m.CustomerProfile, id=customer.get('id', None)
-                )
-                station.customers.add(customer)
+        for customer in customers:
+            customer = get_object_or_404(
+                m.CustomerProfile, id=customer.get('id', None)
+            )
+            station.customers.add(customer)
 
         return station
 

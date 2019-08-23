@@ -140,8 +140,7 @@ class Station(BasicContactModel):
     )
 
     customers = models.ManyToManyField(
-        CustomerProfile,
-        related_name='stations'
+        CustomerProfile
     )
 
     price = models.DecimalField(
