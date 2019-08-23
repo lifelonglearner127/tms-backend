@@ -222,7 +222,7 @@ class BasicRequestSerializer(serializers.ModelSerializer):
         ccs_data = self.context.pop('ccs', [])
         images = self.context.pop('images', [])
         detail = self.context.pop('detail')
-        instance.request.requester = requester
+        instance.requester = requester
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 

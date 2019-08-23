@@ -166,7 +166,7 @@ class BasicRequestViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        for approver in instance.request.requestapprover_set.all():
+        for approver in instance.requestapprover_set.all():
             if approver.approved:
                 return Response({
                     'msg': 'You can not update your request because it is in under approve flow'
