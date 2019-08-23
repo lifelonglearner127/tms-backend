@@ -627,18 +627,16 @@ class JobViewSet(TMSViewSet):
     def upload_loading_station_check(self, request, pk=None):
         job = self.get_object()
         images = request.data.pop('images')
+        product = get_object_or_404(Product, id=request.data.get('product').get('id'))
 
-        try:
-            loading_check = m.LoadingStationProductCheck.objects.get(job=job)
-            loading_check.product = get_object_or_404(Product, id=request.data.get('product').get('id'))
-            loading_check.weight = request.data.pop('weight')
-            loading_check.save()
-            loading_check.images.all().delete()
-        except m.LoadingStationProductCheck.DoesNotExist:
-            loading_check = m.LoadingStationProductCheck.objects.create(
-                job=job, product=get_object_or_404(Product, id=request.data.get('product').get('id')),
-                weight=request.data.pop('weight')
-            )
+        loading_check, created = m.LoadingStationProductCheck.objects.get_or_create(
+            job=job, product=product
+        )
+
+        loading_check.weight = request.data.pop('weight')
+        loading_check.save()
+
+        loading_check.images.all().delete()
 
         for image in images:
             image['loading_station'] = loading_check.id
@@ -646,33 +644,32 @@ class JobViewSet(TMSViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-        return Response(s.LoadingStationProductCheckSerializer(job.loading_check).data, status=status.HTTP_200_OK)
+        return Response(s.LoadingStationProductCheckSerializer(loading_check).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='upload-quality-check')
     def upload_quality_check(self, request, pk=None):
         job = self.get_object()
-        data = request.data
-        data['job'] = pk
 
-        branch = data.get('branch', 0)
-        weight = data.pop('weight', 0)
+        branch = request.data.get('branch', 0)
+
+        quality_check, created = m.QualityCheck.objects.get_or_create(
+            job=job, branch=branch
+        )
+        quality_check.density = request.data.pop('density')
+        quality_check.additive = request.data.pop('additive')
+        quality_check.save()
 
         job_qualitystation = job.jobstation_set.all()[1]
-        job_qualitystation_product = job_qualitystation.jobstationproduct_set.filter(
-            branch=branch
-        ).first()
 
-        job_qualitystation_product.weight = weight
-        job_qualitystation_product.save()
-
-        serializer = s.QualityCheckSerializer(
-            data=data
+        job_qualitystation_product = get_object_or_404(
+            m.JobStationProduct, job_station=job_qualitystation, branch=branch
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        job_qualitystation_product.volume = request.data.pop('volume')
+        job_qualitystation_product.man_hole = request.data.pop('man_hole')
+        job_qualitystation_product.branch_hole = request.data.pop('branch_hole')
 
         return Response(
-            serializer.data,
+            {'msg': 'Successfully uploaded'},
             status=status.HTTP_200_OK
         )
 
@@ -1072,17 +1069,20 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         weight is different from mission weight
         """
         instance = self.get_object()
-        serializer = s.JobStationProductDocumentSerializer(
-            instance,
-            data=request.data,
-            context={'request': request},
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        images = request.data.pop('images', [])
+        instance.man_hole = request.data.pop('man_hole', '')
+        instance.branch_hole = request.data.pop('branch_hole', '')
+        instance.volume = request.data.pop('volume', 0)
+        instance.save()
+
+        for image in images:
+            image['job_station_product'] = instance.id
+            serializer = s.JobStationProductDocumentSerializer(data=image)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         return Response(
-            serializer.data,
+            {'msg': 'Successfully uploaded'},
             status=status.HTTP_200_OK
         )
 

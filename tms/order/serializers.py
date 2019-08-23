@@ -383,10 +383,8 @@ class JobStationProductDocumentSerializer(serializers.ModelSerializer):
     document = Base64ImageField()
 
     class Meta:
-        model = m.JobStationProduct
-        fields = (
-            'document', 'volume'
-        )
+        model = m.JobStationProductDocument
+        fields = '__all__'
 
 
 class ShortJobStationSerializer(serializers.ModelSerializer):

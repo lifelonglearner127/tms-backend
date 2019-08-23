@@ -18,6 +18,11 @@ class JobAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.LoadingStationProductCheck)
+class LoadingStationProductCheckAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.JobStation)
 class JobStationAdmin(admin.ModelAdmin):
     pass
