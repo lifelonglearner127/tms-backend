@@ -219,6 +219,14 @@ class BasicRequestViewSet(TMSViewSet):
         serializer = s.BasicRequestSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path="me/ccs")
+    def get_my_cc_request(self, request):
+        page = self.paginate_queryset(
+            m.BasicRequest.objects.filter(ccs__id=request.user.id)
+        )
+        serializer = s.BasicRequestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class RestRequestCateogryAPIView(APIView):
 
