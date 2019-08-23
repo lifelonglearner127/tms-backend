@@ -349,7 +349,7 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['get'], url_path='daily-unbind')
     def vehicle_driver_daily_unbind(self, request, pk=None):
         vehicle = self.get_object()
-        bind = get_object_or_404(m.VehicleDriverDailyBind, vehicle=vehicle, driver=request.user)
+        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
         bind.get_off = timezone.now()
         bind.save()
 
