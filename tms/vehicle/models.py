@@ -417,7 +417,8 @@ class VehicleCheckHistory(models.Model):
 
     driver = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='my_vehicle_checks'
     )
 
     vehicle = models.ForeignKey(

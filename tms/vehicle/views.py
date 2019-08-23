@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import status
+from rest_framework import status, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -396,6 +396,10 @@ class VehicleViewSet(TMSViewSet):
     def vehicle_driver_daily_unbind(self, request, pk=None):
         vehicle = self.get_object()
         bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        if bind.get_off is not None:
+            return Response({
+                'msg': 'You alread get off this vehicle'
+            })
         vehicle_check = m.VehicleCheckHistory.objects.filter(
             vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
         ).first()
@@ -494,86 +498,14 @@ class TireViewSet(TMSViewSet):
     serializer_class = s.TireSerializer
 
 
-class VehicleCheckHistoryViewSet(TMSViewSet):
-    """
-    Actually this vieweset will not be used in the future
-    """
-    serializer_class = s.VehicleCheckHistorySerializer
-
-    def get_queryset(self):
-        return m.VehicleCheckHistory.objects.filter(
-            vehicle__id=self.kwargs['vehicle_pk']
-        )
-
-    def create(self, request, vehicle_pk=None):
-        items = request.data.pop('items')
-        images = request.data.pop('images', [])
-        check_type = request.data.pop('check_type')
-        data = request.data
-        data['vehicle'] = vehicle_pk
-        data['driver'] = request.user.id
-        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
-            data['before_driving_checked_time'] = timezone.now()
-            data['before_driving_problems'] = data.pop('problems')
-            data['before_driving_description'] = data.pop('description')
-        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
-            data['driving_checked_time'] = timezone.now()
-            data['driving_problems'] = data.pop('problems')
-            data['driving_description'] = data.pop('description')
-        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
-            data['after_driving_checked_time'] = timezone.now()
-            data['after_driving_problems'] = data.pop('problems')
-            data['after_driving_description'] = data.pop('description')
-
-        serializer = s.VehicleCheckHistorySerializer(
-            data=data,
-            context={
-                'items': items, 'images': images, 'request': request, 'check_type': check_type
-            }
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def update(self, request, vehicle_pk=None, pk=None):
-        instance = self.get_object()
-        items = request.data.pop('items')
-        images = request.data.pop('images', [])
-        check_type = request.data.pop('check_type')
-        data = request.data
-        data['vehicle'] = vehicle_pk
-        data['driver'] = request.user.id
-        if check_type == c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING:
-            data['before_driving_checked_time'] = timezone.now()
-            data['before_driving_problems'] = data.pop('problems')
-            data['before_driving_description'] = data.pop('description')
-        elif check_type == c.VEHICLE_CHECK_TYPE_DRIVING:
-            data['driving_checked_time'] = timezone.now()
-            data['driving_problems'] = data.pop('problems')
-            data['driving_description'] = data.pop('description')
-        elif check_type == c.VEHICLE_CHECK_TYPE_AFTER_DRIVING:
-            data['after_driving_checked_time'] = timezone.now()
-            data['after_driving_problems'] = data.pop('problems')
-            data['after_driving_description'] = data.pop('description')
-
-        serializer = s.VehicleCheckHistorySerializer(
-            instance, data=data,
-            context={
-                'items': items, 'images': images, 'request': request, 'check_type': check_type
-            }
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class VehicleCheckHistoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     @action(detail=False, url_path="me")
-    def me(self, request, vehicle_pk=None):
+    def get_my_check_history(self, request):
         page = self.paginate_queryset(
-            self.get_queryset().filter(driver=request.user)
+            request.user.my_vehicle_checks.all()
         )
-        serializer = s.VehicleCheckHistorySerializer(page, context={'request': request}, many=True)
+
+        serializer = s.VehicleCheckHistorySerializer(page, many=True)
+
         return self.get_paginated_response(serializer.data)
