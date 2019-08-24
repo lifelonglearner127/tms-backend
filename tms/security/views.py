@@ -1,3 +1,4 @@
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -129,3 +130,17 @@ class CompanyPolicyViewSet(TMSViewSet):
 #             serializer.data,
 #             status=status.HTTP_200_OK
 #         )
+
+
+def get_company_policy(request, policy_id):
+    policy = get_object_or_404(m.CompanyPolicy, id=policy_id, is_published=True)
+    return render(
+        request, 'security/policy.html',
+        {
+            'title': policy.title,
+            'published_on': policy.published_on,
+            'author': policy.author.name if policy.author.name else policy.author.username,
+            'policy_type': policy.get_policy_type_display,
+            'content': policy.content
+        }
+    )

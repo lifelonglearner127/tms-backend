@@ -1,0 +1,14 @@
+
+<h1>{{title}}</h1>
+<div>
+发布时间: {{ published_on | date:'Y-m-d'}}
+</div>
+<div>
+  作者: {{ author }}
+</div>
+<div>
+  适用范围: {{ policy_type }}
+</div>
+<div>
+{{content | safe}}
+</div>

@@ -10,6 +10,18 @@ from ..core.serializers import TMSChoiceField
 from ..account.serializers import ShortUserSerializer
 
 
+class ShortCompanyPolicySerializer(serializers.ModelSerializer):
+
+    published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    author = ShortUserSerializer(read_only=True)
+
+    class Meta:
+        model = m.CompanyPolicy
+        exclude = (
+            'is_published', 'content'
+        )
+
+
 class CompanyPolicySerializer(serializers.ModelSerializer):
 
     author = ShortUserSerializer(read_only=True)

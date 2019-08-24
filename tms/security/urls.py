@@ -1,4 +1,5 @@
 from django.conf.urls import url, include
+from django.urls import path
 
 from rest_framework.routers import DefaultRouter
 from .import views as v
@@ -16,5 +17,6 @@ router.register(
 # )
 
 urlpatterns = [
-    url(r'^', include(router.urls))
+    url(r'^', include(router.urls)),
+    path('apps/company-policy/<int:policy_id>', v.get_company_policy, name='app-company-policy'),
 ]

@@ -2,6 +2,7 @@ from django.db import models
 
 from ..core import constants as c
 
+from . import managers
 # models
 from ..core.models import TimeStampedModel
 from ..account.models import User
@@ -33,3 +34,7 @@ class CompanyPolicy(TimeStampedModel):
     )
 
     content = models.TextField()
+
+    objects = models.Manager()
+    published_content = managers.PublishedContentManager()
+    unpublished_content = managers.UnPublishedContentManager()
