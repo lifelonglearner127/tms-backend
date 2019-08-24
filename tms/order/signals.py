@@ -6,11 +6,18 @@ from ..core.redis import r
 
 # models
 from . import models as m
-from .tasks import calculate_job_report, notify_of_job_cancelled
+from .tasks import calculate_job_report, notify_of_job_cancelled, notify_job_changes
 
 
 @receiver(post_save, sender=m.Job)
 def updated_job(sender, instance, created, **kwargs):
+
+    if created:
+        notify_job_changes.apply_async(
+            args=[{
+                'job': instance.id
+            }]
+        )
 
     if instance.progress > c.JOB_PROGRESS_NOT_STARTED:
         r.sadd('jobs', instance.id)

@@ -35,7 +35,7 @@ from ..core.views import TMSViewSet
 
 # other
 from ..g7.interfaces import G7Interface
-from .tasks import notify_job_changes, bind_vehicle_user
+from .tasks import bind_vehicle_user
 
 
 class OrderCartViewSet(TMSViewSet):

@@ -217,8 +217,10 @@ MAP_WEB_SERVICE_API_KEY = env.str('MAP_WEB_SERVICE_API_KEY')
 
 # MapAPI Settings
 # ----------------------------------------------------------------------------
-PUSHY_SECRET_KEY = env.str('PUSHY_SECRET_KEY')
-
+ALIYUN_MOBILE_PUSH_APP_KEY = env.str('ALIYUN_MOBILE_PUSH_APP_KEY')
+ALIYUN_MOBILE_PUSH_APP_SECRET = env.str('ALIYUN_MOBILE_PUSH_APP_SECRET')
+ALIYUN_ACCESS_KEY_ID = env.str('ALIYUN_ACCESS_KEY_ID')
+ALIYUN_ACCESS_KEY_SECRET = env.str('ALIYUN_ACCESS_KEY_SECRET')
 
 # Django Channels Settings
 # ----------------------------------------------------------------------------

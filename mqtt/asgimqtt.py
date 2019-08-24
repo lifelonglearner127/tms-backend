@@ -8,12 +8,13 @@ import argparse
 import redis
 import sys
 import importlib
-import requests
 import json
 import paho.mqtt.client as paho
 import psycopg2
 from asgiref.sync import async_to_sync
 from geopy import distance
+from aliyunsdkpush.request.v20160801 import PushRequest
+from aliyunsdkcore import client
 
 
 r = redis.StrictRedis(host='localhost', port=6379, db=15)
@@ -22,7 +23,12 @@ r = redis.StrictRedis(host='localhost', port=6379, db=15)
 class Config:
     blackdots = []
     vehicles = {}
-    PUSHY_SECRET_KEY = ''
+    aliyun_client = None
+    aliyun_request = None
+    ALIYUN_MOBILE_PUSH_APP_KEY = ''
+    ALIYUN_MOBILE_PUSH_APP_SECRET = ''
+    ALIYUN_ACCESS_KEY_ID = ''
+    ALIYUN_ACCESS_KEY_SECRET = ''
     DB_URL = ''
     HOST = ''
     PORT = ''
@@ -110,8 +116,14 @@ class Config:
                 key_value = line.split('=')
                 if key_value[0] == 'DATABASE_URL':
                     cls.DB_URL = key_value[1][:-1]
-                if key_value[0] == 'PUSHY_SECRET_KEY':
-                    cls.PUSHY_SECRET_KEY = key_value[1][:-1]
+                if key_value[0] == 'ALIYUN_MOBILE_PUSH_APP_KEY':
+                    cls.ALIYUN_MOBILE_PUSH_APP_KEY = key_value[1][:-1]
+                if key_value[0] == 'ALIYUN_MOBILE_PUSH_APP_SECRET':
+                    cls.ALIYUN_MOBILE_PUSH_APP_SECRET = key_value[1][:-1]
+                if key_value[0] == 'ALIYUN_ACCESS_KEY_ID':
+                    cls.ALIYUN_ACCESS_KEY_ID = key_value[1][:-1]
+                if key_value[0] == 'ALIYUN_ACCESS_KEY_SECRET':
+                    cls.ALIYUN_ACCESS_KEY_SECRET = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_HOST':
                     cls.HOST = key_value[1][:-1]
                 elif key_value[0] == 'G7_MQTT_PORT':
@@ -131,7 +143,10 @@ class Config:
 
         if Config.DEBUG:
             print('DATABASE_URL', Config.DB_URL)
-            print('PUSHY_SECRET_KEY', Config.PUSHY_SECRET_KEY)
+            print('ALIYUN_MOBILE_PUSH_APP_KEY', Config.ALIYUN_MOBILE_PUSH_APP_KEY)
+            print('ALIYUN_MOBILE_PUSH_APP_SECRET', Config.ALIYUN_MOBILE_PUSH_APP_SECRET)
+            print('ALIYUN_ACCESS_KEY_ID', Config.ALIYUN_ACCESS_KEY_ID)
+            print('ALIYUN_ACCESS_KEY_SECRET', Config.ALIYUN_ACCESS_KEY_SECRET)
             print('G7_MQTT_HOST', Config.HOST)
             print('G7_MQTT_PORT', Config.PORT)
             print('G7_MQTT_POSITION_TOPIC', Config.TOPIC)
@@ -226,30 +241,6 @@ class Config:
                 connection.close()
                 if Config.DEBUG:
                     print('[Load Data]: Database connection closed.')
-
-
-def sendPushNotification(data, to, options):
-    apiKey = Config.PUSHY_SECRET_KEY
-
-    # Default post data to provided options or empty object
-    postData = options or {}
-
-    # Set notification payload and recipients
-    postData['to'] = to
-    postData['data'] = data
-
-    try:
-        requests.post(
-            'https://api.pushy.me/push?api_key=' + apiKey,
-            data=json.dumps(postData),
-            headers={
-                'Content-Type': 'application/json'
-            }
-        )
-    except requests.exceptions.HTTPError as e:
-        err_str = "Pushy API returned HTTP error " + str(e.code) + \
-            ": " + e.read()
-        print(err_str)
 
 
 def get_channel_layer(channel_name):
@@ -422,16 +413,12 @@ def _on_message(client, userdata, message):
                         )
 
                     if device_token:
-                        to = [device_token]
-
-                        options = {
-                            'notification': {
-                                'badge': 1,
-                                'sound': 'ping.aiff',
-                                'body': u'New job is assigned to you'
-                            }
-                        }
-                        sendPushNotification(data, to, options)
+                        title = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
+                        body = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
+                        Config.aliyun_request.set_Title(title)
+                        Config.aliyun_request.set_Body(body)
+                        Config.aliyun_request.set_TargetValue(device_token)
+                        Config.aliyun_client.do_action(Config.aliyun_request)
 
                     cursor.close()
                 except psycopg2.DatabaseError:
@@ -669,16 +656,12 @@ def _on_message(client, userdata, message):
                     )
 
                 if device_token:
-                    to = [device_token]
-
-                    options = {
-                        'notification': {
-                            'badge': 1,
-                            'sound': 'ping.aiff',
-                            'body': u'New job is assigned to you'
-                        }
-                    }
-                    sendPushNotification(data, to, options)
+                    title = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
+                    body = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
+                    Config.aliyun_request.set_Title(title)
+                    Config.aliyun_request.set_Body(body)
+                    Config.aliyun_request.set_TargetValue(device_token)
+                    Config.aliyun_client.do_action(Config.aliyun_request)
 
                 cursor.close()
             except psycopg2.DatabaseError:
@@ -749,6 +732,17 @@ if __name__ == '__main__':
     Config.TEST_MODE = args.test
     Config.read_env(args.settings)
     Config.load_data_from_db()
+
+    Config.aliyun_client = client.AcsClient(
+        Config.ALIYUN_ACCESS_KEY_ID,
+        Config.ALIYUN_ACCESS_KEY_SECRET,
+        'cn-hangzhou'
+    )
+    Config.aliyun_request = PushRequest.PushRequest()
+    Config.aliyun_request.set_AppKey(Config.ALIYUN_MOBILE_PUSH_APP_KEY)
+    Config.aliyun_request.set_Target('ALL')
+    Config.aliyun_request.set_DeviceType('ANDROID')
+    Config.aliyun_request.set_PushType('NOTICE')
 
     asgi_client = ASGIMQTTClient(
         Config.HOST, Config.PORT, Config.CLIENT_ID, Config.USERNAME,

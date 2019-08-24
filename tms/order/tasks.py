@@ -9,7 +9,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 from ..core import constants as c
-from ..core.pushy import PushyAPI
+from ..core.aliyunpush import aliyun_client, aliyun_request
 from ..core.redis import r
 
 # models
@@ -92,39 +92,22 @@ def notify_job_changes(context):
             }
         )
 
+    # TODO: now push notification api is called twice; one for driver and other for escort
+    # This would be not effeciency and there might be a solution to send bulk notification using one api call
+
     # send push notification to driver
     if job.driver.device_token:
-        to = [job.driver.device_token]
-
-        options = {
-            'notification': {
-                'badge': 1,
-                'sound': 'ping.aiff',
-                'body': u'New job is assigned to you'
-            }
-        }
-
-        # Send the push notification with Pushy
-        PushyAPI.sendPushNotification(
-            NotificationSerializer(driver_notification).data, to, options
-        )
+        aliyun_request.set_Title('New Job')
+        aliyun_request.set_Body('New Job')
+        aliyun_request.set_TargetValue(job.driver.device_token)
+        aliyun_client.do_action(aliyun_request)
 
     # send push notification to escort
     if job.escort.device_token:
-        to = [job.escort.device_token]
-
-        options = {
-            'notification': {
-                'badge': 1,
-                'sound': 'ping.aiff',
-                'body': u'New job is assigned to you'
-            }
-        }
-
-        # Send the push notification with Pushy
-        PushyAPI.sendPushNotification(
-            NotificationSerializer(escort_notification).data, to, options
-        )
+        aliyun_request.set_Title('New Job')
+        aliyun_request.set_Body('New Job')
+        aliyun_request.set_TargetValue(job.escort.device_token)
+        aliyun_client.do_action(aliyun_request)
 
 
 @app.task
@@ -288,32 +271,14 @@ def notify_of_job_cancelled(context):
 
     # send push notification to driver
     if driver.device_token:
-        to = [driver.device_token]
-
-        options = {
-            'notification': {
-                'badge': 1,
-                'sound': 'ping.aiff',
-                'body': u'New job is assigned to you'
-            }
-        }
-
-        PushyAPI.sendPushNotification(
-            NotificationSerializer(driver_notification).data, to, options
-        )
+        aliyun_request.set_Title('New Job')
+        aliyun_request.set_Body('New Job')
+        aliyun_request.set_TargetValue(driver.device_token)
+        aliyun_client.do_action(aliyun_request)
 
     # send push notification to escort
-    if driver.device_token:
-        to = [escort.device_token]
-
-        options = {
-            'notification': {
-                'badge': 1,
-                'sound': 'ping.aiff',
-                'body': u'New job is assigned to you'
-            }
-        }
-
-        PushyAPI.sendPushNotification(
-            NotificationSerializer(escort_notification).data, to, options
-        )
+    if escort.device_token:
+        aliyun_request.set_Title('New Job')
+        aliyun_request.set_Body('New Job')
+        aliyun_request.set_TargetValue(escort.device_token)
+        aliyun_client.do_action(aliyun_request)
