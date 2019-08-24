@@ -12,6 +12,7 @@ from ..account.serializers import ShortUserSerializer
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
 
+    policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     author = ShortUserSerializer(read_only=True)
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -11,11 +11,8 @@ from . import models as m
 # serializers
 from . import serializers as s
 
-# views
-from ..core.views import TMSViewSet
 
-
-class CompanyPolicyViewSet(TMSViewSet):
+class CompanyPolicyViewSet(viewsets.ModelViewSet):
 
     queryset = m.CompanyPolicy.objects.all()
     serializer_class = s.CompanyPolicySerializer
@@ -65,6 +62,12 @@ class CompanyPolicyViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, url_path="short")
+    def get_short_policies(self, request):
+        page = self.paginate_queryset(m.CompanyPolicy.published_content.all())
+        serializer = s.ShortCompanyPolicySerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="policy-options")
     def get_policy(self, request):
