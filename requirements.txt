@@ -1,4 +1,6 @@
 aioredis==1.2.0
+aliyun-python-sdk-core==2.13.5
+aliyun-python-sdk-push==3.10.1
 amqp==2.5.0
 asgiref==3.1.2
 asn1crypto==0.24.0
@@ -40,6 +42,7 @@ idna==2.8
 incremental==17.5.0
 itypes==1.1.0
 Jinja2==2.10.1
+jmespath==0.9.4
 jsonfield==2.0.2
 kombu==4.6.3
 MarkupSafe==1.1.1
