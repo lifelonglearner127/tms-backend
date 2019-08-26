@@ -11,6 +11,7 @@ from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer,
     DriverAppUserSerializer
 )
+from ..vehicle.serializers import ShortVehicleSerializer
 
 
 class ShortDepartmentSerializer(serializers.ModelSerializer):
@@ -85,7 +86,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
 
     def get_bind_vehicle(self, instance):
         bind = VehicleDriverDailyBind.objects.filter(driver=instance.user, get_off=None).first()
-        ret = bind.vehicle.plate_num if bind else ''
+        ret = ShortVehicleSerializer(bind.vehicle).data if bind else None
         return ret
 
 
