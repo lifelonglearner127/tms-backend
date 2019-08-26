@@ -400,6 +400,9 @@ class JobStationProduct(models.Model):
         max_length=100
     )
 
+    class Meta:
+        ordering = ['job_station', 'branch']
+
 
 class JobStationProductDocument(models.Model):
 
