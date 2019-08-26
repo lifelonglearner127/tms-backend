@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from ..core import constants as c
 
@@ -46,8 +47,7 @@ class Question(TimeStampedModel):
         max_length=100
     )
 
-    question_type = models.CharField(
-        max_length=1,
+    question_type = models.PositiveIntegerField(
         choices=c.QUESTION_TYPE,
         default=c.QUESTION_TYPE_BOOLEN
     )
@@ -56,22 +56,15 @@ class Question(TimeStampedModel):
 
     point = models.PositiveIntegerField()
 
+    choices = ArrayField(
+        models.TextField()
+    )
+
+    answers = ArrayField(
+        models.PositiveIntegerField()
+    )
+
     # this field is only used in case of the question is boolean question
-    is_correct = models.BooleanField(
-        default=False
-    )
-
-
-class Answer(models.Model):
-
-    question = models.ForeignKey(
-        Question,
-        on_delete=models.CASCADE,
-        related_name='answers'
-    )
-
-    anwser = models.TextField()
-
     is_correct = models.BooleanField(
         default=False
     )
@@ -136,25 +129,6 @@ class TestResultQuestion(models.Model):
         default=False
     )
 
-    answer = models.ManyToManyField(
-        Answer,
-        through='TestResultQuestionAnswer',
-        through_fields=('test_result_question', 'answer')
-    )
-
-
-class TestResultQuestionAnswer(models.Model):
-
-    test_result_question = models.ForeignKey(
-        TestResultQuestion,
-        on_delete=models.CASCADE
-    )
-
-    answer = models.ForeignKey(
-        Answer,
-        on_delete=models.CASCADE
-    )
-
-    is_correct = models.BooleanField(
-        default=False
+    answers = ArrayField(
+        models.PositiveIntegerField()
     )

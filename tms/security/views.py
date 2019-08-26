@@ -140,35 +140,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     queryset = m.Question.objects.all()
     serializer_class = s.QuestionSerializer
 
-    def create(self, request):
-        context = {
-            'answers': request.data.pop('answers')
-        }
-        serializer = self.serializer_class(
-            data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    def update(self, request, pk=None):
-        instance = self.get_object()
-        context = {
-            'answers': request.data.pop('answers')
-        }
-        serializer = self.serializer_class(
-            instance, data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
 
 class TestViewSet(viewsets.ModelViewSet):
 
