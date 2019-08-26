@@ -80,7 +80,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.StaffProfile
         fields = (
-            'id', 'user', 'department', 'position'
+            'id', 'user', 'department', 'position', 'bind_vehicle'
         )
 
     def get_bind_vehicle(self, instance):
