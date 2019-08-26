@@ -77,3 +77,86 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Answer
+        exclude = ('question', )
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+
+    question_type = TMSChoiceField(choices=c.QUESTION_TYPE)
+    answers = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
+
+    class Meta:
+        model = m.Question
+        fields = '__all__'
+
+    def create(self, validated_data):
+        answers = self.context.get('answers', [])
+        question = m.Question.objects.create(**validated_data)
+
+        for answer in answers:
+            m.Answer.objects.create(
+                question=question, **answer
+            )
+
+        return question
+
+    def update(self, instance, validated_data):
+        answers = self.context.get('answers', [])
+
+        if instance.question_type in [c.QUESTION_TYPE_SINGLE_CHOICE, c.QUESTION_TYPE_MULTIPLE_CHOICE]:
+            instance.answers.all().delete()
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        for answer in answers:
+            m.Answer.objects.create(
+                question=instance, **answer
+            )
+
+        instance.save()
+        return instance
+
+    def get_answers(self, instance):
+        ret = []
+        for answer in instance.answers:
+            ret.append(AnswerSerializer(answer).data)
+
+        return ret
+
+
+class ShortTestResult(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.TestResult
+        exclude = (
+            'questions'
+        )
+
+
+class TestCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Test
+        fields = '__all__'
+
+
+class TestSerializer(serializers.ModelSerializer):
+
+    questions = QuestionSerializer(many=True)
+    appliants = ShortTestResult(many=True)
+
+    class Meta:
+        model = m.Test
+        fields = (
+            'id', 'questions', 'appliants'
+        )

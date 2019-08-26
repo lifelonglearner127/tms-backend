@@ -10,6 +10,16 @@ router.register(
     v.CompanyPolicyViewSet,
     base_name='company-policy'
 )
+router.register(
+    r'questions',
+    v.QuestionViewSet,
+    base_name='questions'
+)
+router.register(
+    r'tests',
+    v.TestViewSet,
+    base_name='tests'
+)
 # router.register(
 #     r'security-knowledge',
 #     v.SecurityKnowledgeViewSet,

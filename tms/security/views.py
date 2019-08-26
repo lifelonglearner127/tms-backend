@@ -135,6 +135,73 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
 #         )
 
 
+class QuestionViewSet(viewsets.ModelViewSet):
+
+    queryset = m.Question.objects.all()
+    serializer_class = s.QuestionSerializer
+
+    def create(self, request):
+        context = {
+            'answers': request.data.pop('answers')
+        }
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'answers': request.data.pop('answers')
+        }
+        serializer = self.serializer_class(
+            instance, data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class TestViewSet(viewsets.ModelViewSet):
+
+    queryset = m.Test.objects.all()
+    serializer_class = s.TestSerializer
+
+    def create(self, request):
+        questions = request.data.pop('questions', [])
+        applicants = request.data.pop('appliants', [])
+        questions = [x['id'] for x in questions]
+        appliants = [x['id'] for x in applicants]
+
+        serializer = s.TestCreateSerializer(
+            data={
+                'questions': questions,
+                'appliants': appliants
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        pass
+
+    @action(detail=False, url_path="my-tests")
+    def me(self, request, pk=None):
+        pass
+
+
 def get_company_policy(request, policy_id):
     policy = get_object_or_404(m.CompanyPolicy, id=policy_id, is_published=True)
     return render(
