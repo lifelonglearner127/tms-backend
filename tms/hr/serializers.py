@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from . import models as m
 from ..account.models import UserPermission
+from ..vehicle.models import VehicleDriverDailyBind
 from ..core import constants as c
 
 # serializers
@@ -74,12 +75,18 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
     department = ShortDepartmentSerializer(read_only=True)
     position = ShortPositionSerializer(read_only=True)
     user = DriverAppUserSerializer(read_only=True)
+    bind_vehicle = serializers.SerializerMethodField()
 
     class Meta:
         model = m.StaffProfile
         fields = (
             'id', 'user', 'department', 'position'
         )
+
+    def get_bind_vehicle(self, instance):
+        bind = VehicleDriverDailyBind.objects.filter(driver=instance.user, get_off=None).first()
+        ret = bind.vehicle.plate_num if bind else ''
+        return ret
 
 
 class StaffProfileSerializer(serializers.ModelSerializer):
