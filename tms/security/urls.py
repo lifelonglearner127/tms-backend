@@ -16,7 +16,7 @@ router.register(
     base_name='questions'
 )
 router.register(
-    r'tests',
+    r'security/tests',
     v.TestViewSet,
     base_name='tests'
 )

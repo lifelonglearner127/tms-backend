@@ -174,6 +174,7 @@ class StaffProfile(TimeStampedModel):
     available_drivers = managers.AvailableDrivers()
     inwork_escorts = managers.InWorkEscorts()
     available_escorts = managers.AvailableEscorts()
+    wheels = managers.WheelUserManager()
 
     def __str__(self):
         return '{}-{}\'s profile'.format(

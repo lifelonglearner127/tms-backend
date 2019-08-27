@@ -72,14 +72,25 @@ class Question(TimeStampedModel):
 
 class Test(TimeStampedModel):
 
+    name = models.CharField(
+        max_length=100
+    )
+
+    start_time = models.DateTimeField()
+
+    finish_time = models.DateTimeField()
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
     questions = models.ManyToManyField(
         Question
     )
 
     appliants = models.ManyToManyField(
-        User,
-        through='TestResult',
-        through_fields=('test', 'appliant')
+        User
     )
 
 

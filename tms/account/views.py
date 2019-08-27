@@ -182,6 +182,14 @@ class UserViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="wheels/short")
+    def get_wheels_users(self, request):
+        serializer = s.ShortWheelUserWithDepartmentSerializer(
+            self.paginate_queryset(m.User.wheels.all()),
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='customers/short')
     def get_short_customer_users(self, request):
         serializer = s.ShortUserSerializer(

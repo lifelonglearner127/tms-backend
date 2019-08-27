@@ -37,6 +37,16 @@ class EscortUserManager(models.Manager):
         return super().get_queryset().filter(role=c.USER_ROLE_ESCORT)
 
 
+class WheelUserManager(models.Manager):
+    """
+    Escort Model Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(role__in=[
+            c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+        ])
+
+
 class CustomerUserManager(models.Manager):
     """
     Customer Model Manager

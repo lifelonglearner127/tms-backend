@@ -61,3 +61,13 @@ class AvailableEscorts(models.Manager):
             user__role=c.USER_ROLE_ESCORT,
             status=c.WORK_STATUS_AVAILABLE
         )
+
+
+class WheelUserManager(models.Manager):
+    """
+    Manager for getting available escorts
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user__role__in=[c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]
+        )

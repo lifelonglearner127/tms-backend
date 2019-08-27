@@ -199,6 +199,27 @@ class ShortCompanyMemberSerializer(serializers.ModelSerializer):
         return ret
 
 
+class ShortWheelUserWithDepartmentSerializer(serializers.ModelSerializer):
+
+    department = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name', 'department'
+        )
+
+    def get_department(self, instance):
+        ret = {}
+        if instance.profile is not None:
+            ret = {
+                'id': instance.profile.department.id,
+                'name': instance.profile.department.name
+            }
+
+        return ret
+
+
 class MainUserSerializer(serializers.ModelSerializer):
     """
     Serializer for User's main data

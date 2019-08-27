@@ -7,7 +7,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import ShortUserSerializer, ShortWheelUserWithDepartmentSerializer
 
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
@@ -79,6 +79,20 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
         return instance
 
 
+class ShortQuestionSerializer(serializers.ModelSerializer):
+
+    question_type = TMSChoiceField(choices=c.QUESTION_TYPE)
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
+
+    class Meta:
+        model = m.Question
+        fields = (
+            'id', 'question_type', 'title', 'created'
+        )
+
+
 class QuestionSerializer(serializers.ModelSerializer):
 
     question_type = TMSChoiceField(choices=c.QUESTION_TYPE)
@@ -100,20 +114,33 @@ class ShortTestResult(serializers.ModelSerializer):
         )
 
 
-class TestCreateSerializer(serializers.ModelSerializer):
+class TestSerializer(serializers.ModelSerializer):
+
+    test_count = serializers.SerializerMethodField()
+    appliant_count = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Test
         fields = '__all__'
 
+    def get_test_count(self, instance):
+        return instance.questions.all().count()
 
-class TestSerializer(serializers.ModelSerializer):
+    def get_appliant_count(self, instance):
+        return instance.appliants.all().count()
 
-    questions = QuestionSerializer(many=True)
-    appliants = ShortTestResult(many=True)
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['questions'] = ShortQuestionSerializer(instance.questions.all(), many=True).data
+        ret['appliants'] = ShortWheelUserWithDepartmentSerializer(instance.appliants.all(), many=True).data
+        return ret
 
-    class Meta:
-        model = m.Test
-        fields = (
-            'id', 'questions', 'appliants'
-        )
+
+# class TestSerializer(serializers.ModelSerializer):
+
+#     questions = QuestionSerializer(many=True)
+#     appliants = ShortTestResult(many=True)
+
+#     class Meta:
+#         model = m.Test
+#         fields = '__all__'

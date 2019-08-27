@@ -147,6 +147,7 @@ class User(AbstractBaseUser):
     staffs = managers.StaffUserManager()
     drivers = managers.DriverUserManager()
     escorts = managers.EscortUserManager()
+    wheels = managers.WheelUserManager()
     customers = managers.CustomerUserManager()
     companymembers = managers.CompanyMemberUserManager()
 

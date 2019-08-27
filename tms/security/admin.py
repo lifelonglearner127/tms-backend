@@ -13,6 +13,11 @@ class QuestionAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.Test)
+class TestAdmin(admin.ModelAdmin):
+    pass
+
+
 # @admin.register(m.SecurityKnowledge)
 # class SecurityKnowledgeAdmin(admin.ModelAdmin):
 #     pass

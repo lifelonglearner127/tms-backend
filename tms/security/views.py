@@ -140,33 +140,39 @@ class QuestionViewSet(viewsets.ModelViewSet):
     queryset = m.Question.objects.all()
     serializer_class = s.QuestionSerializer
 
+    @action(detail=False, url_path="short")
+    def get_short_list(self, request):
+        page = self.paginate_queryset(m.Question.objects.all())
+        serializer = s.ShortQuestionSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class TestViewSet(viewsets.ModelViewSet):
 
     queryset = m.Test.objects.all()
     serializer_class = s.TestSerializer
 
-    def create(self, request):
-        questions = request.data.pop('questions', [])
-        applicants = request.data.pop('appliants', [])
-        questions = [x['id'] for x in questions]
-        appliants = [x['id'] for x in applicants]
+    # def create(self, request):
+    #     questions = request.data.pop('questions', [])
+    #     applicants = request.data.pop('appliants', [])
+    #     questions = [x['id'] for x in questions]
+    #     appliants = [x['id'] for x in applicants]
 
-        serializer = s.TestCreateSerializer(
-            data={
-                'questions': questions,
-                'appliants': appliants
-            }
-        )
+    #     serializer = s.TestCreateSerializer(
+    #         data={
+    #             'questions': questions,
+    #             'appliants': appliants
+    #         }
+    #     )
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED
-        )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(
+    #         serializer.data, status=status.HTTP_201_CREATED
+    #     )
 
-    def update(self, request, pk=None):
-        pass
+    # def update(self, request, pk=None):
+    #     pass
 
     @action(detail=False, url_path="my-tests")
     def me(self, request, pk=None):
