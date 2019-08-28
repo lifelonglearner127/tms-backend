@@ -358,3 +358,12 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class CustomerAppProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.CustomerProfile
+        fields = (
+            'id', 'name', 'contact', 'mobile'
+        )

@@ -217,3 +217,34 @@ class CustomerProfileViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        serializer = s.CustomerAppProfileSerializer(
+            request.user.customer_profile
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['post'], url_path='update-me')
+    def update_me(self, request):
+        customer_profile = request.user.customer_profile
+        if request.data.get('name', None) is not None:
+            customer_profile.name = request.data.get('name')
+
+        if request.data.get('contact', None) is not None:
+            customer_profile.contact = request.data.get('contact')
+
+        if request.data.get('mobile', None) is not None:
+            customer_profile.mobile = request.data.get('mobile')
+
+        if request.data.get('address', None) is not None:
+            customer_profile.address = request.data.get('address')
+
+        customer_profile.save()
+        return Response(
+            s.CustomerAppProfileSerializer(customer_profile).data,
+            status=status.HTTP_200_OK
+        )
