@@ -505,7 +505,21 @@ class VehicleCheckHistoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet)
         page = self.paginate_queryset(
             request.user.my_vehicle_checks.all()
         )
+        context = {}
+        bind = m.VehicleDriverDailyBind.objects.filter(driver=request.user).first()
+        if bind is not None and bind.get_off is None:
+            context = {
+                'bind': True,
+                'get_on_time': bind.get_on
+            }
+        elif bind is not None and bind.get_off is not None:
+            context = {
+                'bind': False
+            }
 
-        serializer = s.VehicleCheckHistorySerializer(page, many=True)
+        serializer = s.VehicleCheckHistorySerializer(
+            page, many=True,
+            context=context
+        )
 
         return self.get_paginated_response(serializer.data)

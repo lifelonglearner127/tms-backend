@@ -189,6 +189,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     before_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     after_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    is_readonly = serializers.SerializerMethodField()
 
     class Meta:
         model = m.VehicleCheckHistory
@@ -306,6 +307,16 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             )
 
         return ret
+
+    def get_is_readonly(self, instance):
+        if not self.context.get('bind', False):
+            return True
+
+        get_on_time = self.context.get('get_on_time')
+        if instance.before_driving_checked_time < get_on_time:
+            return True
+        else:
+            return False
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

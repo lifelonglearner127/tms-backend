@@ -190,11 +190,11 @@ class RequestApprover(models.Model):
     )
 
     approved = models.BooleanField(
-        default=False
+        null=True, blank=True
     )
 
     approved_time = models.DateTimeField(
-        auto_now=True
+        null=True, blank=True
     )
 
     step = models.PositiveIntegerField(

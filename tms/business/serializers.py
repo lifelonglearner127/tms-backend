@@ -154,6 +154,9 @@ class BasicRequestSerializer(serializers.ModelSerializer):
     )
     detail = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    days = serializers.SerializerMethodField()
+    missions = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = m.BasicRequest
@@ -291,6 +294,23 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             )
 
         return ret
+
+    def get_days(self, instance):
+        if instance.request_type == c.REQUEST_TYPE_REST:
+            return (instance.rest_request.to_date - instance.rest_request.from_date).days
+        return None
+
+    def get_missions(self, instance):
+        return 0
+
+    def get_status(self, instance):
+        if instance.approved is True:
+            return '审批完'
+        else:
+            if instance.requestapprover_set.filter(approved=False).exists():
+                return '审批拒绝'
+            else:
+                return '审批中'
 
 
 # class RestRequestSerializer(serializers.ModelSerializer):

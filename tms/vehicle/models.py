@@ -578,4 +578,4 @@ class VehicleDriverDailyBind(models.Model):
     )
 
     class Meta:
-        ordering = ['vehicle', '-get_on']
+        ordering = ['-get_on', 'vehicle']
