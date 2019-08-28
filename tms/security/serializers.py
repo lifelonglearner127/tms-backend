@@ -114,6 +114,15 @@ class ShortTestResult(serializers.ModelSerializer):
         )
 
 
+class ShortTestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Test
+        fields = (
+            'id', 'name', 'start_time', 'finish_time'
+        )
+
+
 class TestSerializer(serializers.ModelSerializer):
 
     test_count = serializers.SerializerMethodField()

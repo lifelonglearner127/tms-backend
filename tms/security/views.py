@@ -176,7 +176,9 @@ class TestViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="my-tests")
     def me(self, request, pk=None):
-        pass
+        page = self.paginate_queryset(m.Test.objects.filter(appliants=request.user))
+        serializer = s.ShortTestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 def get_company_policy(request, policy_id):
