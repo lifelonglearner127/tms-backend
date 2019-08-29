@@ -1,10 +1,10 @@
 {% if is_finished %}
-  {{ result }}
+  {{ point }} / {{ full_point }}
 {% else %}
   {% if not is_started %}
   <a href="{% url 'security:app-test' test.id %}?start=1&username={{username}}&token={{token}}">Start Test</a>
   {% else %}
-    <form action="{% url 'security:answer-question' test.id question.id %}?start=1&username={{username}}&token={{token}}" method="post" onsubmit="return validateForm()">
+    <form action="{% url 'security:answer-question' test.id question.id %}?&username={{username}}&token={{token}}" method="post" onsubmit="return validateForm()">
       {% csrf_token %}
       <h3>{{ question.question | safe }}</h3>
       {% if question.question_type == 0 %}

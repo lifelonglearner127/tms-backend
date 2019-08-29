@@ -239,12 +239,12 @@ def get_test_template(request, test_id):
                             }
                         )
                     else:
-                        result = 5
                         return render(
                             request, 'security/test.html',
                             {
                                 'is_finished': True,
-                                'result': result
+                                'full_point': test_result.full_point,
+                                'point': test_result.point
                             }
                         )
 
@@ -275,20 +275,42 @@ def answer_question(request, test_id, question_id):
     question = get_object_or_404(m.Question, id=question_id)
     test_result, created = m.TestResult.objects.get_or_create(appliant=appliant, test=test)
 
+    if created:
+        full_point = 0
+        for test_question in test.questions.all():
+            full_point += test_question.point
+        test_result.full_point = full_point
+        test_result.save()
+
     if question.question_type == c.QUESTION_TYPE_BOOLEN:
         is_correct = True if request.POST['answers'] == '1' else False
+        if question.is_correct == is_correct:
+            test_result.point += question.point
+            test_result.save()
+
         m.TestQuestionResult.objects.create(
             test_result=test_result,
             question=question,
             is_correct=is_correct
         )
     elif question.question_type == c.QUESTION_TYPE_SINGLE_CHOICE:
+        answers = [int(i) for i in request.POST.getlist('answers')]
+        if answers == question.answers:
+            test_result.point += question.point
+            test_result.save()
+
         m.TestQuestionResult.objects.create(
             test_result=test_result,
             question=question,
-            answers=request.POST.getlist('answers')
+            answers=answers
         )
     elif question.question_type == c.QUESTION_TYPE_MULTIPLE_CHOICE:
+        answers = [int(i) for i in request.POST.getlist('answers')]
+        # Not sure how to mark when multiple choice problems
+        if answers == question.answers:
+            test_result.point += question.point
+            test_result.save()
+
         m.TestQuestionResult.objects.create(
             test_result=test_result,
             question=question,

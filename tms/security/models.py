@@ -106,6 +106,10 @@ class TestResult(models.Model):
         on_delete=models.CASCADE
     )
 
+    full_point = models.PositiveIntegerField(
+        default=0
+    )
+
     point = models.PositiveIntegerField(
         default=0
     )
