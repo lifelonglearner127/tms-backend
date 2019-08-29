@@ -20,6 +20,9 @@ router.register(
     r'job-report', v.JobReportViewSet, base_name='job-report'
 )
 router.register(
+    r'order-report', v.OrderReportViewSet, base_name='order-report'
+)
+router.register(
     r'vehicle-binds', v.VehicleUserBindViewSet, base_name='vehicle-user-binds'
 )
 

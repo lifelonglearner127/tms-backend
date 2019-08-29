@@ -99,6 +99,14 @@ class Order(TimeStampedModel):
     from_internal = managers.InternalOrderManager()
     from_customer = managers.CustomerOrderManager()
 
+    @property
+    def total_weight(self, instance):
+        weight = 0
+        for product in instance.orderproduct_set.all():
+            weight += product.weight
+
+        return weight
+
     def __str__(self):
         return self.alias
 
@@ -141,6 +149,28 @@ class OrderProduct(models.Model):
     is_pump = models.BooleanField(
         default=False
     )
+
+
+class OrderReport(models.Model):
+
+    customer = models.ForeignKey(
+        CustomerProfile,
+        on_delete=models.CASCADE,
+        related_name='monthly_reports'
+    )
+
+    month = MonthField()
+
+    orders = models.PositiveIntegerField(
+        default=0
+    )
+
+    weights = models.FloatField(
+        default=0
+    )
+
+    class Meta:
+        ordering = ('month', )
 
 
 class Job(models.Model):

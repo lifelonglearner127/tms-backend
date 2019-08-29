@@ -1002,3 +1002,25 @@ class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
             )
 
         return ret
+
+
+class CustomerAppOrderReportSerializer(serializers.ModelSerializer):
+
+    year = serializers.CharField(source='month.year')
+    month = serializers.CharField(source='month.month')
+
+    class Meta:
+        model = m.OrderReport
+        fields = (
+            'year', 'month', 'orders', 'weights'
+        )
+
+
+class OrderReportSerializer(serializers.ModelSerializer):
+
+    year = serializers.CharField(source='month.year')
+    month = serializers.CharField(source='month.month')
+
+    class Meta:
+        model = m.OrderReport
+        fields = '__all__'

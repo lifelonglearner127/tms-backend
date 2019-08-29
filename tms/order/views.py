@@ -1099,8 +1099,7 @@ class JobReportViewSet(viewsets.ModelViewSet):
         )
         serializer = s.DriverJobReportSerializer(
             page,
-            many=True,
-            context={'request': request}
+            many=True
         )
         return self.get_paginated_response(serializer.data)
 
@@ -1108,6 +1107,23 @@ class JobReportViewSet(viewsets.ModelViewSet):
             request.user.report.all()
         )
         return request.user
+
+
+class OrderReportViewSet(viewsets.ModelViewSet):
+
+    queryset = m.OrderReport.objects.all()
+    serializer_class = s.CustomerAppOrderReportSerializer
+
+    @action(detail=False, url_path='me')
+    def me(self, request):
+        page = self.paginate_queryset(
+            request.user.customer_profile.monthly_reports.all()
+        )
+        serializer = s.CustomerAppOrderReportSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class VehicleUserBindViewSet(TMSViewSet):

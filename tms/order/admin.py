@@ -13,6 +13,11 @@ class OrderProductAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.OrderReport)
+class OrderReportProductAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.Job)
 class JobAdmin(admin.ModelAdmin):
     pass

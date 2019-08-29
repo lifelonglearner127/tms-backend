@@ -1,6 +1,7 @@
 """
 todo: code optimization, sending notification logic was used in multiple places
 """
+import datetime
 import json
 import month
 from django.shortcuts import get_object_or_404
@@ -122,6 +123,25 @@ def calculate_job_report(context):
     ).exists():
         job.order.status = c.ORDER_STATUS_COMPLETE
         job.order.save()
+
+        order_year = job.order.created_on.year
+        order_month = job.order.created_on.month
+
+        try:
+            order_report = m.OrderReport.objects.get(
+                customer=job.order.customer,
+                month=month.Month(order_year, order_month)
+            )
+            order_report.orders += 1
+            order_report.weight += job.order.total_weight
+            order_report.save()
+        except m.OrderReport.DoesNotExist:
+            m.OrderReport.objects.create(
+                customer=job.order.customer,
+                month=month.Month(order_year, order_month),
+                orders=1,
+                weight=job.order.total_weight
+            )
 
     # unbind vehicle, driver, escort
     if not m.VehicleUserBind.binds_by_admin.filter(
@@ -282,3 +302,19 @@ def notify_of_job_cancelled(context):
         aliyun_request.set_Body('New Job')
         aliyun_request.set_TargetValue(escort.device_token)
         aliyun_client.do_action(aliyun_request)
+
+
+@app.task
+def update_monthly_report():
+    print('aaa')
+    time = datetime.datetime.now()
+    for user in User.objects.all():
+        if user.role in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+            if not m.JobReport.objects.filter(driver=user, month=month.Month(time.year, time.month)).exists():
+                m.JobReport.objects.create(driver=user, month=month.Month(time.year, time.month))
+
+        elif user.role == c.USER_ROLE_CUSTOMER:
+            if not m.OrderReport.objects.filter(
+                customer=user.customer_profile, month=month.Month(time.year, time.month)
+            ).exists():
+                m.OrderReport.objects.create(customer=user.customer_profile, month=month.Month(time.year, time.month))

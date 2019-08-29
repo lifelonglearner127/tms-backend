@@ -9,7 +9,9 @@ User=root
 Group=root
 WorkingDirectory=/root/Projects/tms-backend
 Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
+Type=oneshot
 ExecStart=/root/.virtualenvs/tms-backend/bin/celery worker -A config
+ExecStartPost=/root/.virtualenvs/tms-backend/bin/celery -A config beat
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 Restart=always
