@@ -1,4 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+import jwt
+from django.conf import settings
+from django.http import Http404
+from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +11,7 @@ from ..core import constants as c
 
 # models
 from . import models as m
+from ..account.models import User
 
 # serializers
 from . import serializers as s
@@ -192,4 +197,104 @@ def get_company_policy(request, policy_id):
             'policy_type': policy.get_policy_type_display,
             'content': policy.content
         }
+    )
+
+
+def get_test_template(request, test_id):
+    if request.method == 'GET':
+        options = {
+            'verify_exp': False
+        }
+        try:
+            token = request.GET.get('token')
+            username = request.GET.get('username')
+            payload = jwt.decode(token, settings.SECRET_KEY, options=options)
+            if username == payload.get('username'):
+                test = get_object_or_404(m.Test, id=test_id)
+                appliant = get_object_or_404(User, username=username)
+                is_start = request.GET.get('start', False)
+
+                if is_start or m.TestResult.objects.filter(test=test, appliant=appliant).exists():
+                    try:
+                        test_result = m.TestResult.objects.get(test=test, appliant=appliant)
+                        next_question = None
+                        for question in test.questions.all():
+                            if question in test_result.questions.all():
+                                continue
+                            next_question = question
+                            break
+                    except m.TestResult.DoesNotExist:
+                        next_question = test.questions.all().first()
+
+                    if next_question is not None:
+                        return render(
+                            request, 'security/test.html',
+                            {
+                                'is_started': True,
+                                'is_finished': False,
+                                'test': test,
+                                'username': username,
+                                'token': token,
+                                'question': next_question
+                            }
+                        )
+                    else:
+                        result = 5
+                        return render(
+                            request, 'security/test.html',
+                            {
+                                'is_finished': True,
+                                'result': result
+                            }
+                        )
+
+                else:
+                    return render(
+                        request, 'security/test.html',
+                        {
+                            'is_started': False,
+                            'is_finished': False,
+                            'test': test,
+                            'username': username,
+                            'token': token
+                        }
+                    )
+            else:
+                raise Http404
+        except jwt.DecodeError:
+            raise Http404
+    elif request.method == 'POST':
+        return redirect('')
+
+
+def answer_question(request, test_id, question_id):
+    username = request.POST['username']
+    token = request.GET.get('token')
+    test = get_object_or_404(m.Test, id=test_id)
+    appliant = get_object_or_404(User, username=username)
+    question = get_object_or_404(m.Question, id=question_id)
+    test_result, created = m.TestResult.objects.get_or_create(appliant=appliant, test=test)
+
+    if question.question_type == c.QUESTION_TYPE_BOOLEN:
+        is_correct = True if request.POST['is_correct'] == '1' else False
+        m.TestQuestionResult.objects.create(
+            test_result=test_result,
+            question=question,
+            is_correct=is_correct
+        )
+    elif question.question_type == c.QUESTION_TYPE_SINGLE_CHOICE:
+        m.TestQuestionResult.objects.create(
+            test_result=test_result,
+            question=question,
+            answers=request.POST.getlist('answers')
+        )
+    elif question.question_type == c.QUESTION_TYPE_MULTIPLE_CHOICE:
+        m.TestQuestionResult.objects.create(
+            test_result=test_result,
+            question=question,
+            answers=request.POST.getlist('answers')
+        )
+
+    return redirect(
+        reverse('security:app-test', args=[test_id]) + '?username=' + username + '&token=' + token
     )

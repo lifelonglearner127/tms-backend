@@ -29,4 +29,6 @@ router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     path('apps/company-policy/<int:policy_id>', v.get_company_policy, name='app-company-policy'),
+    path('apps/tests/<int:test_id>/', v.get_test_template, name='app-test'),
+    path('apps/tests/<int:test_id>/<int:question_id>/vote/', v.answer_question, name='answer-question'),
 ]

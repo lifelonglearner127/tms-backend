@@ -18,6 +18,15 @@ class TestAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.TestResult)
+class TestResultAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.TestQuestionResult)
+class TestQuestionResultAdmin(admin.ModelAdmin):
+    pass
+
 # @admin.register(m.SecurityKnowledge)
 # class SecurityKnowledgeAdmin(admin.ModelAdmin):
 #     pass

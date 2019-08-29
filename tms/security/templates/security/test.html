@@ -1,0 +1,26 @@
+{% if is_finished %}
+  {{ result }}
+{% else %}
+  {% if not is_started %}
+  <a href="{% url 'security:app-test' test.id %}?start=1&username={{username}}&token={{token}}">Start Test</a>
+  {% else %}
+    <form action="{% url 'security:answer-question' test.id question.id %}?start=1&username={{username}}&token={{token}}" method="post">
+      {% csrf_token %}
+      <h3>{{ question.question | safe }}</h3>
+      {% if question.question_type == 0 %}
+        <input type="radio" name="is_correct" value="1">True
+        <input type="radio" name="is_correct" value="0">False
+      {% elif question.question_type == 1 %}
+        {% for choice in question.choices %}
+          <input type="radio" name="answers" value="{{ forloop.counter0 }}"> {{ choice }} <br>
+        {% endfor %}
+      {% else %}
+        {% for choice in question.choices %}
+          <input type="checkbox" name="answers" value="{{ forloop.counter0 }}"> {{ choice }} <br>
+        {% endfor %}
+      {% endif %}
+      <input type="hidden" name="username" value="{{username}}">
+      <input type="submit" value="Vote">
+    </form>
+  {% endif %}
+{% endif %}

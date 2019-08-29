@@ -120,11 +120,11 @@ class TestResult(models.Model):
 
     questions = models.ManyToManyField(
         Question,
-        through='TestResultQuestion'
+        through='TestQuestionResult'
     )
 
 
-class TestResultQuestion(models.Model):
+class TestQuestionResult(models.Model):
 
     test_result = models.ForeignKey(
         TestResult,
@@ -137,9 +137,11 @@ class TestResultQuestion(models.Model):
     )
 
     is_correct = models.BooleanField(
-        default=False
+        null=True, blank=True
     )
 
     answers = ArrayField(
-        models.PositiveIntegerField()
+        models.PositiveIntegerField(),
+        null=True,
+        blank=True
     )
