@@ -116,11 +116,18 @@ class ShortTestResult(serializers.ModelSerializer):
 
 class ShortTestSerializer(serializers.ModelSerializer):
 
+    test_count = serializers.SerializerMethodField()
+    start_time = serializers.DateTimeField(format='%Y/%m/%d')
+    finish_time = serializers.DateTimeField(format='%Y/%m/%d')
+
     class Meta:
         model = m.Test
         fields = (
-            'id', 'name', 'start_time', 'finish_time'
+            'id', 'name', 'start_time', 'finish_time', 'test_count'
         )
+
+    def get_test_count(self, instance):
+        return instance.questions.all().count()
 
 
 class TestSerializer(serializers.ModelSerializer):
