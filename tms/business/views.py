@@ -227,6 +227,22 @@ class BasicRequestViewSet(TMSViewSet):
         serializer = s.BasicRequestSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path="rest-request/categories")
+    def get_rest_request_categories(self, request):
+        page = self.paginate_queryset(
+            [{'value': x, 'text': y} for (x, y) in c.REST_REQUEST_CATEGORY]
+        )
+        serializer = ChoiceSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path="vehicle-request/categories")
+    def get_vehicle_repaire_request_categories(self, request):
+        page = self.paginate_queryset(
+            [{'value': x, 'text': y} for (x, y) in c.VEHICLE_REPAIR_REQUEST_CATEGORY]
+        )
+        serializer = ChoiceSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class RestRequestCateogryAPIView(APIView):
 
