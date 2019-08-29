@@ -9,7 +9,7 @@ from ..core import constants as c
 # serializers
 from ..account.serializers import (
     ShortUserSerializer, MainUserSerializer, UserSerializer,
-    DriverAppUserSerializer
+    DriverAppUserSerializer, CustomerAppUserSerializer
 )
 from ..vehicle.serializers import ShortVehicleSerializer
 
@@ -362,8 +362,10 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
 class CustomerAppProfileSerializer(serializers.ModelSerializer):
 
+    user = CustomerAppUserSerializer(read_only=True)
+
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'name', 'contact', 'mobile'
+            'id', 'user', 'name', 'contact', 'mobile'
         )

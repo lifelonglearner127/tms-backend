@@ -231,11 +231,6 @@ class CustomerProfileViewSet(TMSViewSet):
     @action(detail=False, methods=['post'], url_path='update-me')
     def update_me(self, request):
         customer_profile = request.user.customer_profile
-        if request.data.get('name', None) is not None:
-            customer_profile.name = request.data.get('name')
-
-        if request.data.get('contact', None) is not None:
-            customer_profile.contact = request.data.get('contact')
 
         if request.data.get('mobile', None) is not None:
             customer_profile.mobile = request.data.get('mobile')

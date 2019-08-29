@@ -240,6 +240,15 @@ class DriverAppUserSerializer(serializers.ModelSerializer):
         )
 
 
+class CustomerAppUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'username',
+        )
+
+
 class ShortUserPermissionSerializer(serializers.ModelSerializer):
 
     class Meta:
