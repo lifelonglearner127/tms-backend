@@ -8,6 +8,11 @@ class ETCCardAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.ETCCardChargeHistory)
+class ETCCardChargeHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.FuelCard)
 class FuelCardAdmin(admin.ModelAdmin):
     pass

@@ -1,3 +1,4 @@
+from django.utils.timezone import localdate
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -61,9 +62,15 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         card = self.validated_data['card']
+        current_balance = card.balance
+
+        if 'charged_on' not in validated_data:
+            validated_data['charged_on'] = localdate()
 
         charge_history = m.ETCCardChargeHistory.objects.create(
-            previous_amount=card.balance, **validated_data
+            previous_amount=current_balance,
+            after_amount=current_balance + float(validated_data['charged_amount']),
+            **validated_data
         )
         card.balance += float(validated_data['charged_amount'])
         card.save()

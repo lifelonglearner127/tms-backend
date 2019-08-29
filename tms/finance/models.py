@@ -75,9 +75,22 @@ class ETCCardChargeHistory(models.Model):
         default=0
     )
 
+    after_amount = models.FloatField(
+        default=0
+    )
+
     charged_on = models.DateField(
+        null=True, blank=True
+    )
+
+    created_on = models.DateTimeField(
         auto_now_add=True
     )
+
+    class Meta:
+        ordering = [
+            '-charged_on', '-created_on'
+        ]
 
 
 class ETCCardUsageHistory(models.Model):
@@ -140,6 +153,9 @@ class FuelCardChargeHistory(models.Model):
     )
 
     charged_on = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-charged_on']
 
 
 class FuelCardUsageHistory(models.Model):
