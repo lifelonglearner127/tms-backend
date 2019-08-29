@@ -276,7 +276,7 @@ def answer_question(request, test_id, question_id):
     test_result, created = m.TestResult.objects.get_or_create(appliant=appliant, test=test)
 
     if question.question_type == c.QUESTION_TYPE_BOOLEN:
-        is_correct = True if request.POST['is_correct'] == '1' else False
+        is_correct = True if request.POST['answers'] == '1' else False
         m.TestQuestionResult.objects.create(
             test_result=test_result,
             question=question,
