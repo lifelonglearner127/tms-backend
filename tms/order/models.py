@@ -170,7 +170,7 @@ class OrderReport(models.Model):
     )
 
     class Meta:
-        ordering = ('month', )
+        ordering = ('-month', )
 
 
 class Job(models.Model):
@@ -479,7 +479,7 @@ class JobReport(models.Model):
         return '{}\'s {} report'.format(self.driver, self.month)
 
     class Meta:
-        ordering = ('month', )
+        ordering = ('-month', )
 
 
 class VehicleUserBind(TimeStampedModel):
