@@ -10,6 +10,7 @@ from ..core import constants as c
 # models
 from . import models as m
 from ..order.models import VehicleUserBind, Job
+from ..finance.models import ETCCard
 
 # serializer
 from . import serializers as s
@@ -418,11 +419,17 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['get'], url_path="etccard")
     def get_equipped_etccard(self, request, pk=None):
         vehicle = self.get_object()
-        ret = None
-        if vehicle.etccard is not None:
-            ret = DriverAppETCCardSerializer(vehicle.etccard).data
-
-        return Response(ret, status=status.HTTP_200_OK)
+        try:
+            card = ETCCard.objects.get(vehicle=vehicle)
+            return Response(
+                DriverAppETCCardSerializer(card).data,
+                status=status.HTTP_200_OK
+            )
+        except ETCCard.DoesNotExist:
+            return Response(
+                {'msg': 'This vehicle does not have etc card'},
+                status=status.HTTP_200_OK
+            )
 
 
 class VehicleCheckItemViewSet(TMSViewSet):
