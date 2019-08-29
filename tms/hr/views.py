@@ -240,8 +240,9 @@ class CustomerProfileViewSet(TMSViewSet):
         if request.data.get('mobile', None) is not None:
             customer_profile.mobile = request.data.get('mobile')
 
-        if request.data.get('address', None) is not None:
-            customer_profile.address = request.data.get('address')
+        if request.data.get('password', None) is not None:
+            request.user.set_password(request.data.get('password'))
+            request.user.save()
 
         customer_profile.save()
         return Response(
