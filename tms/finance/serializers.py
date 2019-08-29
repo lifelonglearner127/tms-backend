@@ -1,4 +1,4 @@
-from django.utils.timezone import localdate
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -29,6 +29,15 @@ class ShortETCCardSerializer(serializers.ModelSerializer):
         model = m.ETCCard
         fields = (
             'id', 'number'
+        )
+
+
+class DriverAppETCCardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.ETCCard
+        fields = (
+            'id', 'number', 'balance'
         )
 
 
@@ -65,7 +74,7 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
         current_balance = card.balance
 
         if 'charged_on' not in validated_data:
-            validated_data['charged_on'] = localdate()
+            validated_data['charged_on'] = timezone.localdate()
 
         charge_history = m.ETCCardChargeHistory.objects.create(
             previous_amount=current_balance,
@@ -85,6 +94,15 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
         return ret
 
 
+class ETCCardDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.ETCCardUsageDocument
+        fields = '__all__'
+
+
 class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
 
     card = ETCCardSerializer()
@@ -92,6 +110,27 @@ class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = m.ETCCardUsageHistory
         fields = '__all__'
+
+    def create(self, validated_data):
+        etc_usage = m.ETCCardUsageHistory.objects.create(
+            driver=self.context.get('user'),
+            paid_on=timezone.now(),
+            **validated_data
+        )
+        etc_usage.card.balance -= validated_data['amount']
+        etc_usage.card.save()
+
+        images = self.context.get('images')
+        for image in images:
+            image['etc_usage'] = etc_usage.id
+            serializer = ETCCardDocumentSerializer(
+                data=image,
+                context={'request': self.context.get('request')}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return etc_usage
 
     def to_internal_value(self, data):
         ret = data

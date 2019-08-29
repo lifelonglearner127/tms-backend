@@ -54,9 +54,10 @@ class BaseCard(models.Model):
 
 class ETCCard(BaseCard):
 
-    vehicle = models.ForeignKey(
+    vehicle = models.OneToOneField(
         Vehicle,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='etccard'
     )
 
 
@@ -100,15 +101,47 @@ class ETCCardUsageHistory(models.Model):
         on_delete=models.CASCADE
     )
 
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
     amount = models.FloatField(
         default=0
     )
 
     address = models.CharField(
-        max_length=200
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
+    description = models.TextField(
+        null=True, blank=True
     )
 
     paid_on = models.DateTimeField()
+
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = [
+            '-paid_on', '-created_on',
+        ]
+
+
+class ETCCardUsageDocument(models.Model):
+
+    etc_usage = models.ForeignKey(
+        ETCCardUsageHistory,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    document = models.ImageField()
 
 
 class FuelCard(BaseCard):
@@ -121,7 +154,7 @@ class FuelCard(BaseCard):
         related_name='children'
     )
 
-    vehicle = models.ForeignKey(
+    vehicle = models.OneToOneField(
         Vehicle,
         on_delete=models.SET_NULL,
         null=True,

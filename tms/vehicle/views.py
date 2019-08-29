@@ -14,6 +14,7 @@ from ..order.models import VehicleUserBind, Job
 # serializer
 from . import serializers as s
 from ..core.serializers import ChoiceSerializer
+from ..finance.serializers import DriverAppETCCardSerializer
 
 # views
 from ..core.views import TMSViewSet, ApproveViewSet
@@ -413,6 +414,15 @@ class VehicleViewSet(TMSViewSet):
         bind.save()
 
         return Response(s.VehicleDriverDailyBindSerializer(bind).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path="etccard")
+    def get_equipped_etccard(self, request, pk=None):
+        vehicle = self.get_object()
+        ret = None
+        if vehicle.etccard is not None:
+            ret = DriverAppETCCardSerializer(vehicle.etccard).data
+
+        return Response(ret, status=status.HTTP_200_OK)
 
 
 class VehicleCheckItemViewSet(TMSViewSet):

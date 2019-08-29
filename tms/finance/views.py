@@ -36,6 +36,20 @@ class ETCCardUsageHistoryViewSet(TMSViewSet):
     queryset = m.ETCCardUsageHistory.objects.all()
     serializer_class = s.ETCCardUsageHistorySerializer
 
+    def create(self, request):
+        context = {
+            'user': request.user,
+            'images': request.data.pop('images'),
+            'request': request
+        }
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class FuelCardViewSet(TMSViewSet):
 
