@@ -106,6 +106,9 @@ class ETCCardDocumentSerializer(serializers.ModelSerializer):
 class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
 
     card = ETCCardSerializer()
+    paid_on = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
 
     class Meta:
         model = m.ETCCardUsageHistory

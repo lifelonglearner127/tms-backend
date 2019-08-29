@@ -13,6 +13,16 @@ class ETCCardChargeHistoryAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.ETCCardUsageHistory)
+class ETCCardUsageHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.ETCCardUsageDocument)
+class ETCCardUsageDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.FuelCard)
 class FuelCardAdmin(admin.ModelAdmin):
     pass
