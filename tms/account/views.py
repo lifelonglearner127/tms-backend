@@ -184,7 +184,7 @@ class UserViewSet(TMSViewSet):
 
     @action(detail=False, url_path="wheels/short")
     def get_wheels_users(self, request):
-        serializer = s.ShortWheelUserWithDepartmentSerializer(
+        serializer = s.ShortUserWithDepartmentSerializer(
             self.paginate_queryset(m.User.wheels.all()),
             many=True
         )

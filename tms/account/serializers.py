@@ -199,7 +199,7 @@ class ShortCompanyMemberSerializer(serializers.ModelSerializer):
         return ret
 
 
-class ShortWheelUserWithDepartmentSerializer(serializers.ModelSerializer):
+class ShortUserWithDepartmentSerializer(serializers.ModelSerializer):
 
     department = serializers.SerializerMethodField()
 

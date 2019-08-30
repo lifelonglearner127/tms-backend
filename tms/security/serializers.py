@@ -7,7 +7,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import ShortUserSerializer, ShortWheelUserWithDepartmentSerializer
+from ..account.serializers import ShortUserSerializer, ShortUserWithDepartmentSerializer
 
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
@@ -148,15 +148,35 @@ class TestSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['questions'] = ShortQuestionSerializer(instance.questions.all(), many=True).data
-        ret['appliants'] = ShortWheelUserWithDepartmentSerializer(instance.appliants.all(), many=True).data
+        ret['appliants'] = ShortUserWithDepartmentSerializer(instance.appliants.all(), many=True).data
         return ret
 
 
-# class TestSerializer(serializers.ModelSerializer):
+class SecurityLibrarySerializer(serializers.ModelSerializer):
+    pass
 
-#     questions = QuestionSerializer(many=True)
-#     appliants = ShortTestResult(many=True)
 
-#     class Meta:
-#         model = m.Test
-#         fields = '__all__'
+class SecurityLibraryAttachmentsSerializer(serializers.ModelSerializer):
+    pass
+
+
+class ShortSecurityLearningProgramSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.SecurityLearningProgram
+        exclude = (
+            'description',
+            'audiences',
+        )
+
+
+class SecurityLearningProgramSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.SecurityLearningProgram
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['audiences'] = ShortUserWithDepartmentSerializer(instance.audiences.all(), many=True).data
+        return ret

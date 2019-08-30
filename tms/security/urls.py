@@ -20,6 +20,11 @@ router.register(
     v.TestViewSet,
     base_name='tests'
 )
+router.register(
+    r'security/programs',
+    v.SecurityLearningProgramViewSet,
+    base_name='programs'
+)
 # router.register(
 #     r'security-knowledge',
 #     v.SecurityKnowledgeViewSet,

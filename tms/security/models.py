@@ -7,6 +7,7 @@ from . import managers
 # models
 from ..core.models import TimeStampedModel
 from ..account.models import User
+from ..hr.models import Department
 
 
 class CompanyPolicy(TimeStampedModel):
@@ -148,4 +149,68 @@ class TestQuestionResult(models.Model):
         models.PositiveIntegerField(),
         null=True,
         blank=True
+    )
+
+
+class SecurityLibrary(TimeStampedModel):
+
+    title = models.CharField(
+        max_length=200
+    )
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    is_all = models.BooleanField(
+        default=False
+    )
+
+    departments = models.ManyToManyField(
+        Department
+    )
+
+    is_published = models.BooleanField(
+        default=False
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
+class SecurityLibraryAttachments(models.Model):
+
+    library = models.ForeignKey(
+        SecurityLibrary,
+        on_delete=models.CASCADE
+    )
+
+    attachment = models.FileField()
+
+
+class SecurityLearningProgram(models.Model):
+
+    name = models.CharField(
+        max_length=200
+    )
+
+    start_time = models.DateTimeField()
+
+    finish_time = models.DateTimeField()
+
+    place = models.CharField(
+        max_length=200
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True,
+    )
+
+    audiences = models.ManyToManyField(
+        User
     )

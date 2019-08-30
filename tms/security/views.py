@@ -158,32 +158,22 @@ class TestViewSet(viewsets.ModelViewSet):
     queryset = m.Test.objects.all()
     serializer_class = s.TestSerializer
 
-    # def create(self, request):
-    #     questions = request.data.pop('questions', [])
-    #     applicants = request.data.pop('appliants', [])
-    #     questions = [x['id'] for x in questions]
-    #     appliants = [x['id'] for x in applicants]
-
-    #     serializer = s.TestCreateSerializer(
-    #         data={
-    #             'questions': questions,
-    #             'appliants': appliants
-    #         }
-    #     )
-
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(
-    #         serializer.data, status=status.HTTP_201_CREATED
-    #     )
-
-    # def update(self, request, pk=None):
-    #     pass
-
     @action(detail=False, url_path="my-tests")
-    def me(self, request, pk=None):
+    def me(self, request):
         page = self.paginate_queryset(m.Test.objects.filter(appliants=request.user))
         serializer = s.ShortTestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class SecurityLearningProgramViewSet(viewsets.ModelViewSet):
+
+    queryset = m.SecurityLearningProgram.objects.all()
+    serializer_class = s.SecurityLearningProgramSerializer
+
+    @action(detail=False, url_path="my-program")
+    def me(self, request):
+        page = self.paginate_queryset(m.SecurityLearningProgram.objects.filter(audiences=request.user))
+        serializer = s.ShortSecurityLearningProgramSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
 
