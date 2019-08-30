@@ -77,7 +77,7 @@ class OutTransactionSerializer(serializers.ModelSerializer):
 
         try:
             recipient = m.User.objects.get(pk=recipient_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'recipient': 'Recipient data is missing'
             })
@@ -102,7 +102,7 @@ class OutTransactionSerializer(serializers.ModelSerializer):
 
         try:
             recipient = m.User.objects.get(pk=recipient_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'recipient': 'Recipient data is missing'
             })
@@ -162,7 +162,7 @@ class WarehouseProductSerializer(serializers.ModelSerializer):
 
         try:
             assignee = m.User.objects.get(id=assignee_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'asignee': 'Assignee data is missing'
             })
@@ -183,7 +183,7 @@ class WarehouseProductSerializer(serializers.ModelSerializer):
 
         try:
             assignee = m.User.objects.get(id=assignee_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'asignee': 'Assignee data is missing'
             })

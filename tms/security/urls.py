@@ -25,6 +25,12 @@ router.register(
     v.SecurityLearningProgramViewSet,
     base_name='programs'
 )
+router.register(
+    r'security/libraries',
+    v.SecurityLibraryViewSet,
+    base_name='libraries'
+)
+
 # router.register(
 #     r'security-knowledge',
 #     v.SecurityKnowledgeViewSet,

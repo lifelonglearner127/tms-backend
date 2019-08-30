@@ -27,6 +27,7 @@ class TestResultAdmin(admin.ModelAdmin):
 class TestQuestionResultAdmin(admin.ModelAdmin):
     pass
 
-# @admin.register(m.SecurityKnowledge)
-# class SecurityKnowledgeAdmin(admin.ModelAdmin):
-#     pass
+
+@admin.register(m.SecurityLibrary)
+class SecurityLibraryAdmin(admin.ModelAdmin):
+    pass

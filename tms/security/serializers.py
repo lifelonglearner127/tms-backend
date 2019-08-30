@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from ..core import constants as c
@@ -8,6 +9,7 @@ from . import models as m
 # serializers
 from ..core.serializers import TMSChoiceField
 from ..account.serializers import ShortUserSerializer, ShortUserWithDepartmentSerializer
+from ..hr.serializers import ShortDepartmentSerializer
 
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
@@ -47,7 +49,7 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
 
         try:
             author = m.User.staffs.get(id=author_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'author': 'Such user does not exits'
             })
@@ -66,7 +68,7 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
 
         try:
             author = m.User.staffs.get(id=author_data.get('id'))
-        except m.User.DoesNotExists:
+        except m.User.DoesNotExist:
             raise serializers.ValidationError({
                 'author': 'Such user does not exits'
             })
@@ -153,11 +155,60 @@ class TestSerializer(serializers.ModelSerializer):
 
 
 class SecurityLibrarySerializer(serializers.ModelSerializer):
-    pass
+
+    author = ShortUserSerializer(read_only=True)
+    departments = ShortDepartmentSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = m.SecurityLibrary
+        fields = '__all__'
+
+    def create(self, validated_data):
+        author_data = self.context.get('author')
+        departments_data = self.context.get('departments', [])
+        try:
+            author = m.User.objects.get(id=author_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'author': 'cannot find such user'
+            })
+
+        library = m.SecurityLibrary.objects.create(
+            author=author,
+            **validated_data
+        )
+        for department_data in departments_data:
+            department = get_object_or_404(m.Department, id=department_data.get('id', None))
+            library.departments.add(department)
+        return library
+
+    def update(self, instance, validated_data):
+        author_data = self.context.get('author')
+        departments_data = self.context.get('departments', [])
+        try:
+            author = m.User.objects.get(id=author_data.get('id', None))
+        except m.User.DoesNotExist:
+            raise serializers.ValidationError({
+                'author': 'cannot find such user'
+            })
+        instance.author = author
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.departments.clear()
+        for department_data in departments_data:
+            department = get_object_or_404(m.Department, id=department_data.get('id', None))
+            instance.departments.add(department)
+
+        instance.save()
+        return instance
 
 
 class SecurityLibraryAttachmentsSerializer(serializers.ModelSerializer):
-    pass
+
+    class Meta:
+        model = m.SecurityLibraryAttachment
+        fields = '__all__'
 
 
 class ShortSecurityLearningProgramSerializer(serializers.ModelSerializer):

@@ -177,6 +177,42 @@ class SecurityLearningProgramViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
 
+class SecurityLibraryViewSet(viewsets.ModelViewSet):
+
+    queryset = m.SecurityLibrary.objects.all()
+    serializer_class = s.SecurityLibrarySerializer
+
+    def create(self, request):
+        context = {
+            'author': request.data.pop('author'),
+            'departments': request.data.pop('departments')
+        }
+        serializer = s.SecurityLibrarySerializer(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'author': request.data.pop('author'),
+            'departments': request.data.pop('departments')
+        }
+        serializer = s.SecurityLibrarySerializer(
+            instance, data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
+
+
 def get_company_policy(request, policy_id):
     policy = get_object_or_404(m.CompanyPolicy, id=policy_id, is_published=True)
     return render(

@@ -182,17 +182,18 @@ class SecurityLibrary(TimeStampedModel):
     )
 
 
-class SecurityLibraryAttachments(models.Model):
+class SecurityLibraryAttachment(models.Model):
 
     library = models.ForeignKey(
         SecurityLibrary,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='attachments'
     )
 
     attachment = models.FileField()
 
 
-class SecurityLearningProgram(models.Model):
+class SecurityLearningProgram(TimeStampedModel):
 
     name = models.CharField(
         max_length=200
