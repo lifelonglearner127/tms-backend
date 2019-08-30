@@ -1,14 +1,67 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      h1 {
+        text-align: center;
+        margin: 10px 0;
+        font-size: 30px;
+        padding: 10px;
+      }
+      .sub_wrap {
+        padding: 1.5em 0;
+        padding: 10px;
+        border-top: 1px solid #000000;
+        border-bottom: 1px solid #000000;
+        font-size: 1em;
+      }
+      .sub_wrap span {
+        font-weight: bold;
+        font-size: 1em;
+      }
+      .sub_content {
+        font-size: 0.8em;
+        clear: both;
+        padding: 10px 10px 10px 0;
+      }
+      .sub_wrap div {
+        float: none;
+      }
+      .clear {
+        clear: both;
+      }
+      @media screen and (min-width: 767px) {
+        .sub_wrap div {
+          float: left;
+          margin-right: 20px;
+        }
+        .sub_wrap div:first-child {
+          margin-left: 15px;
+        }
+        .clear {
+          clear: both;
+          float: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <div class="sub_wrap">
+      <div>
+        <span>发布时间</span>: {{ published_on | date:'Y-m-d'}}
+      </div>
+      <div>
+        <span>作者</span>: {{ author }}
+      </div>
+      <div>
+        <span>适用范围</span>: {{ policy_type }}
+      </div>
+      <div class="clear"></div>
+    </div>
 
-<h1>{{title}}</h1>
-<div>
-发布时间: {{ published_on | date:'Y-m-d'}}
-</div>
-<div>
-  作者: {{ author }}
-</div>
-<div>
-  适用范围: {{ policy_type }}
-</div>
-<div>
-{{content | safe}}
-</div>
+    <div class="sub_content">
+    {{content | safe}}
+    </div>
+  </body>
+</html>
