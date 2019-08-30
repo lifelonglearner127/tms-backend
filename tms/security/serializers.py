@@ -107,15 +107,6 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ShortTestResult(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.TestResult
-        exclude = (
-            'questions'
-        )
-
-
 class ShortTestSerializer(serializers.ModelSerializer):
 
     test_count = serializers.SerializerMethodField()
@@ -152,6 +143,42 @@ class TestSerializer(serializers.ModelSerializer):
         ret['questions'] = ShortQuestionSerializer(instance.questions.all(), many=True).data
         ret['appliants'] = ShortUserWithDepartmentSerializer(instance.appliants.all(), many=True).data
         return ret
+
+
+class ShortTestResult(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.TestResult
+        exclude = (
+            'questions'
+        )
+
+
+class TestQuestionResultSerializer(serializers.ModelSerializer):
+
+    question = QuestionSerializer()
+
+    class Meta:
+        model = m.TestQuestionResult
+        exclude = (
+            'test_result',
+        )
+
+
+class TestResultSerializer(serializers.ModelSerializer):
+
+    test = ShortTestSerializer()
+    appliant = ShortUserSerializer()
+    questions = TestQuestionResultSerializer(
+        source='testquestionresult_set', many=True
+    )
+
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    finished_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+
+    class Meta:
+        model = m.TestResult
+        fields = '__all__'
 
 
 class SecurityLibrarySerializer(serializers.ModelSerializer):

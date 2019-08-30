@@ -165,6 +165,12 @@ class TestViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
 
+class TestResultViewSet(viewsets.ModelViewSet):
+
+    queryset = m.TestResult.objects.all()
+    serializer_class = s.TestResultSerializer
+
+
 class SecurityLearningProgramViewSet(viewsets.ModelViewSet):
 
     queryset = m.SecurityLearningProgram.objects.all()

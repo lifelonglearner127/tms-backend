@@ -21,6 +21,11 @@ router.register(
     base_name='tests'
 )
 router.register(
+    r'security/test-results',
+    v.TestResultViewSet,
+    base_name='test-results'
+)
+router.register(
     r'security/programs',
     v.SecurityLearningProgramViewSet,
     base_name='programs'
