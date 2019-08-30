@@ -330,7 +330,7 @@ class FuelCardUsageHistorySerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         ret = data
         if 'card' in data:
-            ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'])
+            ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'], is_child=True)
 
         return ret
 
