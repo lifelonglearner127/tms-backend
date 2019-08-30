@@ -1,44 +1,166 @@
-{% if is_finished %}
-  {{ point }} / {{ full_point }}
-{% else %}
-  {% if not is_started %}
-  <a href="{% url 'security:app-test' test.id %}?start=1&username={{username}}&token={{token}}">Start Test</a>
-  {% else %}
-    <form action="{% url 'security:answer-question' test.id question.id %}?&username={{username}}&token={{token}}" method="post" onsubmit="return validateForm()">
-      {% csrf_token %}
-      <h3>{{ question.question | safe }}</h3>
-      {% if question.question_type == 0 %}
-        <input type="radio" name="answers" value="1">True
-        <input type="radio" name="answers" value="0">False
-      {% elif question.question_type == 1 %}
-        {% for choice in question.choices %}
-          <input type="radio" name="answers" value="{{ forloop.counter0 }}"> {{ choice }} <br>
-        {% endfor %}
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 15px;
+        font-weight: bold;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+      .start_wrap {
+        text-align: center;
+        height: 100vh;
+      }
+      .start_btn {
+        color: #fff;
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+        position: relative;
+        top: 50%;
+      }
+      .submit_btn {
+        color: #fff;
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+      }
+      form {
+        position: relative;
+        top: 20%;
+      }
+      h3 {
+        font-size: 20px;
+      }
+      .result_h3 {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .error_msg {
+        color: red;
+        font-size: 12px;
+        padding: 0;
+        margin: 0;
+        margin-bottom: 5px;
+      }
+      label {
+        font-size: 18px;
+      }
+      span {
+        font-weight: bold;
+      }
+      hr.dashed-style {
+        border-style: dashed;
+      }
+      hr.double-style {
+        border-style: double;
+      }
+      hr:last-child {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    {% if is_finished %}
+    <h3 class="result_h3">测试结果</h3>
+    <hr class="double-style"/>
+    <div><span>考试时间</span>：{{ started_on | date:'Y-m-d' }}</div>
+    <div><span>完成时间</span>: {{ finished_on | date:'Y-m-d' }}</div>
+    <div><span>考试分数</span>: {{ point }} / {{ full_point }}</div>
+    <hr class="double-style"/>
+    <div>
+      {% for result in results %}
+        {{ result.question.question | safe }}
+        {% if result.question.question_type == 0 %}
+          {% if result.is_correct %}
+            <div><input type="radio" name="options" value="1" id="answer1" checked disabled><label for="answer1">&nbsp;True</label></div>
+            <div><input type="radio" name="options" value="0" id="answer2" disabled><label for="answer2">&nbsp;False</label></div>
+          {% else %}
+            <div><input type="radio" name="options" value="1" id="answer1" disabled><label for="answer1">&nbsp;True</label></div>
+            <div><input type="radio" name="options" value="0" id="answer2" checked disabled><label for="answer2">&nbsp;False</label></div>
+          {% endif %}
+        {% elif result.question.question_type == 1 %}
+          {% for choice in result.question.choices %}
+            {% if forloop.counter0 in result.answers %}
+              <div><input type="radio" name="answers" value="{{ forloop.counter0 }}" id="single{{ forloop.counter0 }}" checked disabled><label for="single{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% else %}
+              <div><input type="radio" name="answers" value="{{ forloop.counter0 }}" id="single{{ forloop.counter0 }}" disabled><label for="single{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {% for choice in result.question.choices %}
+            {% if forloop.counter0 in result.answers %}
+              <div><input type="checkbox" name="answers" value="{{ forloop.counter0 }}" id="multiple{{ forloop.counter0 }}" checked disabled><label for="multiple{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% else %}
+              <div><input type="checkbox" name="answers" value="{{ forloop.counter0 }}" id="multiple{{ forloop.counter0 }}" disabled><label for="multiple{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        <hr class="dashed-style"/>
+      {% endfor %}
+    </div>
+    {% else %}
+      {% if not is_started %}
+      <div class="start_wrap">
+        <a class="btn start_btn" href="{% url 'security:app-test' test.id %}?start=1&username={{username}}&token={{token}}">Start Test</a>
+      </div>
       {% else %}
-        {% for choice in question.choices %}
-          <input type="checkbox" name="answers" value="{{ forloop.counter0 }}"> {{ choice }} <br>
-        {% endfor %}
+        <form action="{% url 'security:answer-question' test.id question.id %}?&username={{username}}&token={{token}}" method="post" onsubmit="return validateForm()">
+          {% csrf_token %}
+          <h3>{{ question.question | safe }}</h3>
+          {% if question.question_type == 0 %}
+            <div><input type="radio" name="answers" value="1" id="answer1"><label for="answer1">&nbsp;True</label></div>
+            <div><input type="radio" name="answers" value="0" id="answer2"><label for="answer2">&nbsp;False</label></div>
+          {% elif question.question_type == 1 %}
+            {% for choice in question.choices %}
+              <div><input type="radio" name="answers" value="{{ forloop.counter0 }}" id="single{{ forloop.counter0 }}"><label for="single{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% endfor %}
+          {% else %}
+            {% for choice in question.choices %}
+            <div><input type="checkbox" name="answers" value="{{ forloop.counter0 }}" id="multiple{{ forloop.counter0 }}"><label for="multiple{{ forloop.counter0}}">&nbsp;{{ choice }}</label></div>
+            {% endfor %}
+          {% endif %}
+          <br />
+          <p id="error-msg" class="error_msg"></p>
+          <input type="hidden" name="username" value="{{username}}">
+          <input class="btn submit_btn" type="submit" value="Vote">
+        </form>
       {% endif %}
-      <p id="error-msg"></p>
-      <input type="hidden" name="username" value="{{username}}">
-      <input type="submit" value="Vote">
-    </form>
-  {% endif %}
-{% endif %}
+    {% endif %}
+    <script>
+      function validateForm() {
+        var checkboxes = document.getElementsByName("answers");
+        var numberOfCheckedItems = 0;
+        for(var i = 0; i < checkboxes.length; i++)
+        {
+          if(checkboxes[i].checked)
+            numberOfCheckedItems++;
+        }
+        if (numberOfCheckedItems == 0) {
+          document.getElementById('error-msg').innerHTML = '请选择一个选项';
+          return false;
+        }
+        return true
+      }
+    </script>
+  </body>
+</html>
 
-<script>
-function validateForm() {
-  var checkboxes = document.getElementsByName("answers");
-  var numberOfCheckedItems = 0;
-  for(var i = 0; i < checkboxes.length; i++)
-  {
-    if(checkboxes[i].checked)
-      numberOfCheckedItems++;
-  }
-  if (numberOfCheckedItems == 0) {
-    document.getElementById('error-msg').innerHTML = '请选择一个选项';
-    return false;
-  }
-  return true
-}
-</script>
+
+
+

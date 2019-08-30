@@ -1,4 +1,5 @@
 import jwt
+from django.utils import timezone
 from django.conf import settings
 from django.http import Http404
 from django.urls import reverse
@@ -243,8 +244,11 @@ def get_test_template(request, test_id):
                             request, 'security/test.html',
                             {
                                 'is_finished': True,
+                                'started_on': test_result.started_on,
+                                'finished_on': test_result.finished_on,
                                 'full_point': test_result.full_point,
-                                'point': test_result.point
+                                'point': test_result.point,
+                                'results': test_result.testquestionresult_set.all()
                             }
                         )
 
@@ -280,6 +284,7 @@ def answer_question(request, test_id, question_id):
         for test_question in test.questions.all():
             full_point += test_question.point
         test_result.full_point = full_point
+        test_result.started_on = timezone.now()
         test_result.save()
 
     if question.question_type == c.QUESTION_TYPE_BOOLEN:
@@ -316,6 +321,10 @@ def answer_question(request, test_id, question_id):
             question=question,
             answers=request.POST.getlist('answers')
         )
+
+    if test_result.questions.all().count() == test_result.test.questions.all().count():
+        test_result.finished_on = timezone.now()
+        test_result.save()
 
     return redirect(
         reverse('security:app-test', args=[test_id]) + '?username=' + username + '&token=' + token
