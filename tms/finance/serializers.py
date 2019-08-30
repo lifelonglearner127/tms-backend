@@ -73,6 +73,7 @@ class ETCCardSerializer(serializers.ModelSerializer):
 class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
 
     card = ETCCardSerializer()
+    charged_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
 
     class Meta:
         model = m.ETCCardChargeHistory
@@ -83,7 +84,7 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
         current_balance = card.balance
 
         if 'charged_on' not in validated_data:
-            validated_data['charged_on'] = timezone.localdate()
+            validated_data['charged_on'] = timezone.now()
 
         charge_history = m.ETCCardChargeHistory.objects.create(
             previous_amount=current_balance,
@@ -241,20 +242,10 @@ class FuelCardSerializer(serializers.ModelSerializer):
         return instance
 
 
-class FuelCardDataViewSerializer(serializers.ModelSerializer):
-
-    department = ShortDepartmentSerializer()
-    vehicle = ShortVehicleSerializer()
-    master = ShortFuelCardSerializer()
-
-    class Meta:
-        model = m.FuelCard
-        fields = '__all__'
-
-
 class FuelCardChargeHistorySerializer(serializers.ModelSerializer):
 
     card = FuelCardSerializer()
+    charged_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
 
     class Meta:
         model = m.FuelCardChargeHistory
@@ -265,7 +256,7 @@ class FuelCardChargeHistorySerializer(serializers.ModelSerializer):
         current_balance = card.balance
 
         if 'charged_on' not in validated_data:
-            validated_data['charged_on'] = timezone.localdate()
+            validated_data['charged_on'] = timezone.now()
 
         charge_history = m.FuelCardChargeHistory.objects.create(
             previous_amount=current_balance,
