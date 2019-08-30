@@ -10,12 +10,12 @@ from ..core import constants as c
 # models
 from . import models as m
 from ..order.models import VehicleUserBind, Job
-from ..finance.models import ETCCard
+from ..finance.models import ETCCard, FuelCard
 
 # serializer
 from . import serializers as s
 from ..core.serializers import ChoiceSerializer
-from ..finance.serializers import DriverAppETCCardSerializer
+from ..finance.serializers import DriverAppETCCardSerializer, DriverAppFuelCardSerializer
 
 # views
 from ..core.views import TMSViewSet, ApproveViewSet
@@ -428,6 +428,21 @@ class VehicleViewSet(TMSViewSet):
         except ETCCard.DoesNotExist:
             return Response(
                 {'msg': 'This vehicle does not have etc card'},
+                status=status.HTTP_200_OK
+            )
+
+    @action(detail=True, methods=['get'], url_path="fuelcard")
+    def get_equipped_fuelcard(self, request, pk=None):
+        vehicle = self.get_object()
+        try:
+            card = FuelCard.objects.get(vehicle=vehicle)
+            return Response(
+                DriverAppFuelCardSerializer(card).data,
+                status=status.HTTP_200_OK
+            )
+        except FuelCard.DoesNotExist:
+            return Response(
+                {'msg': 'This vehicle does not have fuel card'},
                 status=status.HTTP_200_OK
             )
 

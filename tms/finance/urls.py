@@ -31,6 +31,16 @@ router.register(
     base_name='fuel-card'
 )
 router.register(
+    r'fuel-charges',
+    v.FuelCardChargeHistoryViewSet,
+    base_name='fuel-charges'
+)
+router.register(
+    r'fuel-usages',
+    v.FuelCardUsageHistoryViewSet,
+    base_name='fuel-usages'
+)
+router.register(
     r'bills',
     v.BillViewSet,
     base_name='bill'

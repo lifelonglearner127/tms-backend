@@ -28,6 +28,21 @@ class FuelCardAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.FuelCardChargeHistory)
+class FuelCardChargeHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.FuelCardUsageHistory)
+class FuelCardUsageHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.FuelCardUsageDocument)
+class FuelCardUsageDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.OrderPayment)
 class OrderPaymentAdmin(admin.ModelAdmin):
     pass

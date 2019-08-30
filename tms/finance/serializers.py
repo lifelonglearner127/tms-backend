@@ -41,6 +41,15 @@ class DriverAppETCCardSerializer(serializers.ModelSerializer):
         )
 
 
+class DriverAppFuelCardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.FuelCard
+        fields = (
+            'id', 'number', 'balance'
+        )
+
+
 class ETCCardSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
@@ -241,6 +250,89 @@ class FuelCardDataViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.FuelCard
         fields = '__all__'
+
+
+class FuelCardChargeHistorySerializer(serializers.ModelSerializer):
+
+    card = FuelCardSerializer()
+
+    class Meta:
+        model = m.FuelCardChargeHistory
+        fields = '__all__'
+
+    def create(self, validated_data):
+        card = self.validated_data['card']
+        current_balance = card.balance
+
+        if 'charged_on' not in validated_data:
+            validated_data['charged_on'] = timezone.localdate()
+
+        charge_history = m.FuelCardChargeHistory.objects.create(
+            previous_amount=current_balance,
+            after_amount=current_balance + float(validated_data['charged_amount']),
+            **validated_data
+        )
+        card.balance += float(validated_data['charged_amount'])
+        card.save()
+
+        return charge_history
+
+    def to_internal_value(self, data):
+        ret = data
+        if 'card' in data:
+            ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'])
+
+        return ret
+
+
+class FuelCardDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.FuelCardUsageDocument
+        fields = '__all__'
+
+
+class FuelCardUsageHistorySerializer(serializers.ModelSerializer):
+
+    card = FuelCardSerializer()
+    driver = ShortUserSerializer(read_only=True)
+    paid_on = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+
+    class Meta:
+        model = m.FuelCardUsageHistory
+        fields = '__all__'
+
+    def create(self, validated_data):
+        fuel_usage = m.FuelCardUsageHistory.objects.create(
+            driver=self.context.get('user'),
+            paid_on=timezone.now(),
+            **validated_data
+        )
+        fuel_usage.card.balance -= validated_data['total_price']
+        fuel_usage.card.save()
+
+        images = self.context.get('images')
+        for image in images:
+            image['fuel_usage'] = fuel_usage.id
+            serializer = FuelCardDocumentSerializer(
+                data=image,
+                context={'request': self.context.get('request')}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return fuel_usage
+
+    def to_internal_value(self, data):
+        ret = data
+        if 'card' in data:
+            ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'])
+
+        return ret
 
 
 # class BillSubCategoyChoiceField(serializers.Field):

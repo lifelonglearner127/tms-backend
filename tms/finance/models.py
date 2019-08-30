@@ -121,7 +121,9 @@ class ETCCardUsageHistory(models.Model):
         null=True, blank=True
     )
 
-    paid_on = models.DateTimeField()
+    paid_on = models.DateTimeField(
+        null=True, blank=True
+    )
 
     created_on = models.DateTimeField(
         auto_now_add=True
@@ -185,20 +187,48 @@ class FuelCardChargeHistory(models.Model):
         default=0
     )
 
-    charged_on = models.DateTimeField()
+    after_amount = models.FloatField(
+        default=0
+    )
+
+    charged_on = models.DateTimeField(
+        null=True, blank=True
+    )
+
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
-        ordering = ['-charged_on']
+        ordering = ['-charged_on', '-created_on']
 
 
 class FuelCardUsageHistory(models.Model):
 
     card = models.ForeignKey(
-        ETCCard,
+        FuelCard,
         on_delete=models.CASCADE
     )
 
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    oil_station = models.CharField(
+        max_length=200
+    )
+
+    unit_price = models.FloatField(
+        default=0
+    )
+
     amount = models.FloatField(
+        default=0
+    )
+
+    total_price = models.FloatField(
         default=0
     )
 
@@ -206,7 +236,33 @@ class FuelCardUsageHistory(models.Model):
         max_length=200
     )
 
-    paid_on = models.DateTimeField()
+    description = models.TextField(
+        null=True, blank=True
+    )
+
+    paid_on = models.DateTimeField(
+        null=True, blank=True
+    )
+
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = [
+            '-paid_on', '-created_on',
+        ]
+
+
+class FuelCardUsageDocument(models.Model):
+
+    fuel_usage = models.ForeignKey(
+        FuelCardUsageHistory,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    document = models.ImageField()
 
 
 class OrderPayment(models.Model):
