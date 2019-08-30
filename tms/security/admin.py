@@ -31,3 +31,8 @@ class TestQuestionResultAdmin(admin.ModelAdmin):
 @admin.register(m.SecurityLibrary)
 class SecurityLibraryAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.SecurityLibraryAttachment)
+class SecurityLibraryAttachmentAdmin(admin.ModelAdmin):
+    pass

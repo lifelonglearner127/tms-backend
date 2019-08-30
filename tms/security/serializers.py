@@ -181,10 +181,30 @@ class TestResultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortSecurityLibraryAttachmentSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='attachment.name')
+    size = serializers.CharField(source='attachment.size')
+
+    class Meta:
+        model = m.SecurityLibraryAttachment
+        fields = (
+            'id', 'attachment', 'name', 'size'
+        )
+
+
+class SecurityLibraryAttachmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.SecurityLibraryAttachment
+        fields = '__all__'
+
+
 class SecurityLibrarySerializer(serializers.ModelSerializer):
 
     author = ShortUserSerializer(read_only=True)
     departments = ShortDepartmentSerializer(read_only=True, many=True)
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = m.SecurityLibrary
@@ -230,12 +250,15 @@ class SecurityLibrarySerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def get_attachments(self, instance):
+        ret = []
+        for attachment in instance.attachments.all():
+            ret.append(ShortSecurityLibraryAttachmentSerializer(
+                attachment,
+                context={'request': self.context.get('request')}
+            ).data)
 
-class SecurityLibraryAttachmentsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.SecurityLibraryAttachment
-        fields = '__all__'
+        return ret
 
 
 class ShortSecurityLearningProgramSerializer(serializers.ModelSerializer):

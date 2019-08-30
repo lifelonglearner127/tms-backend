@@ -5,6 +5,9 @@ from django.http import Http404
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import status, viewsets
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -215,8 +218,49 @@ class SecurityLibraryViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED
+            serializer.data, status=status.HTTP_200_OK
         )
+
+    @action(detail=True, url_path="attachments")
+    def get_attachments(self, request, pk=None):
+        instance = self.get_object()
+        return Response(
+            s.ShortSecurityLibraryAttachmentSerializer(instance.attachments.all(), many=True).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class SecurityLibraryAttachmentUploadView(APIView):
+    parser_classes = [MultiPartParser, ]
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = {}
+        data['library'] = request.data.pop('library')[0]
+        try:
+            library = m.SecurityLibrary.objects.get(id=data['library'])
+            m.SecurityLibraryAttachment.objects.filter(
+                library=library
+            ).delete()
+        except m.SecurityLibrary.DoesNotExist:
+            pass
+
+        for _, data_file in request.data.items():
+            data['attachment'] = data_file
+            serializer = s.SecurityLibraryAttachmentSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return Response({
+            'msg': 'Successfully uploaded'
+        }, status=status.HTTP_200_OK)
+
+
+class SecurityLibraryAttachmentDeleteView(APIView):
+
+    def delete(self, request, pk, format=None):
+        instance = get_object_or_404(m.SecurityLibraryAttachment, id=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def get_company_policy(request, policy_id):
