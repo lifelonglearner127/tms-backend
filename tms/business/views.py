@@ -151,7 +151,8 @@ class BasicRequestViewSet(TMSViewSet):
             'approvers': request.data.pop('approvers', []),
             'ccs': request.data.pop('ccs', []),
             'images': request.data.pop('images', []),
-            'detail': request.data.pop('detail')
+            'detail': request.data.pop('detail'),
+            'request': request
         }
 
         serializer = self.serializer_class(data=request.data, context=context)
@@ -182,7 +183,8 @@ class BasicRequestViewSet(TMSViewSet):
             'requester': requester,
             'approvers': request.data.pop('approvers', []),
             'ccs': request.data.pop('ccs', []),
-            'detail': request.data.pop('detail')
+            'detail': request.data.pop('detail'),
+            'request': request
         }
 
         serializer = self.serializer_class(instance, data=request.data, context=context, partial=True)
@@ -200,7 +202,13 @@ class BasicRequestViewSet(TMSViewSet):
         page = self.paginate_queryset(
             request.user.my_requests.all()
         )
-        serializer = s.BasicRequestSerializer(page, many=True)
+        serializer = s.BasicRequestSerializer(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="me/approved")
@@ -208,7 +216,13 @@ class BasicRequestViewSet(TMSViewSet):
         page = self.paginate_queryset(
             request.user.my_requests.filter(approved=True)
         )
-        serializer = s.BasicRequestSerializer(page, many=True)
+        serializer = s.BasicRequestSerializer(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="me/unapproved")
@@ -216,7 +230,13 @@ class BasicRequestViewSet(TMSViewSet):
         page = self.paginate_queryset(
             request.user.my_requests.filter(approved=False)
         )
-        serializer = s.BasicRequestSerializer(page, many=True)
+        serializer = s.BasicRequestSerializer(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="me/ccs")
@@ -224,7 +244,13 @@ class BasicRequestViewSet(TMSViewSet):
         page = self.paginate_queryset(
             m.BasicRequest.objects.filter(ccs__id=request.user.id)
         )
-        serializer = s.BasicRequestSerializer(page, many=True)
+        serializer = s.BasicRequestSerializer(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="rest-request/categories")
