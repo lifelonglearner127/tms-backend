@@ -3,8 +3,11 @@ from django.contrib.postgres.fields import ArrayField
 
 from . import managers
 from ..core import constants as c
-from ..core.models import TimeStampedModel, ApprovedModel
+
+# models
+from ..core.models import TimeStampedModel
 from ..account.models import User
+from ..info.models import Station
 
 
 class Vehicle(TimeStampedModel):
@@ -354,30 +357,62 @@ class FuelConsumption(TimeStampedModel):
     )
 
 
-class VehicleMaintenanceRequest(ApprovedModel):
+class VehicleMaintenanceHistory(TimeStampedModel):
 
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE
     )
 
-    requester = models.ForeignKey(
+    category = models.PositiveIntegerField(
+        choices=c.VEHICLE_MAINTENANCE_CATEGORY,
+        default=c.VEHICLE_MAINTENANCE_CATEGORY_WHEEL
+    )
+
+    maintenance_date = models.DateField()
+
+    assignee = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True
     )
 
-    category = models.CharField(
-        max_length=1,
-        choices=c.VEHICLE_MAINTENANCE
+    station = models.ForeignKey(
+        Station,
+        on_delete=models.SET_NULL,
+        null=True
     )
 
-    maintenance_from = models.DateField()
+    total_cost = models.FloatField(
+        default=0
+    )
 
-    maintenance_to = models.DateField()
+    mileage = models.FloatField(
+        default=0
+    )
 
-    class Meta:
-        ordering = ['approved', '-approved_time', '-request_time']
-        unique_together = ['vehicle', 'approved']
+    accessories_fee = models.FloatField(
+        default=0
+    )
+
+    work_fee = models.FloatField(
+        default=0
+    )
+
+    ticket_type = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    tax_rate = models.FloatField(
+        default=0
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
 
 
 class VehicleCheckItem(TimeStampedModel):

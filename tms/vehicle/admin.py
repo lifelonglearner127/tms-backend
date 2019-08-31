@@ -13,11 +13,6 @@ class VehicleDriverDailyBindAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.VehicleMaintenanceRequest)
-class VehicleMaintenanceRequestAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.VehicleCheckDocument)
 class VehicleCheckDocumentAdmin(admin.ModelAdmin):
     pass

@@ -7,6 +7,8 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
+from ..account.serializers import ShortUserSerializer
+from ..info.serializers import StationNameSerializer
 
 
 class FuelConsumptionSerializer(serializers.ModelSerializer):
@@ -81,24 +83,6 @@ class VehiclePositionSerializer(serializers.Serializer):
 
     def get_speed(self, obj):
         return [int(obj['data']['loc']['speed'])]
-
-
-class VehicleMaintenanceRequestSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.VehicleMaintenanceRequest
-        fields = '__all__'
-
-    def validate(self, data):
-        maintenance_from = data.get('maintenance_from', None)
-        maintenance_to = data.get('maintenance_to', None)
-
-        if maintenance_from > maintenance_to:
-            raise serializers.ValidationError({
-                'maintenance_to': 'Error'
-            })
-
-        return data
 
 
 class VehicleStatusSerializer(serializers.Serializer):
@@ -348,3 +332,52 @@ class VehicleDriverDailyBindSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.VehicleDriverDailyBind
         fields = '__all__'
+
+
+class VehicleMaintenanceHistorySerializer(serializers.ModelSerializer):
+
+    category = TMSChoiceField(choices=c.VEHICLE_MAINTENANCE_CATEGORY)
+    vehicle = ShortVehicleSerializer(read_only=True)
+    assignee = ShortUserSerializer(read_only=True)
+    station = StationNameSerializer(read_only=True)
+
+    class Meta:
+        model = m.VehicleMaintenanceHistory
+        fields = '__all__'
+
+    def create(self, validated_data):
+        vehicle = get_object_or_404(
+            m.Vehicle, id=self.context['vehicle']['id']
+        )
+        assignee = get_object_or_404(
+            m.User, id=self.context['assignee']['id']
+        )
+        station = get_object_or_404(
+            m.Station, id=self.context['station']['id']
+        )
+        return m.VehicleMaintenanceHistory.objects.create(
+            vehicle=vehicle,
+            assignee=assignee,
+            station=station,
+            **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        vehicle = get_object_or_404(
+            m.Vehicle, id=self.context['vehicle']['id']
+        )
+        assignee = get_object_or_404(
+            m.User, id=self.context['assignee']['id']
+        )
+        station = get_object_or_404(
+            m.Station, id=self.context['station']['id']
+        )
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.vehicle = vehicle
+        instance.assignee = assignee
+        instance.station = station
+        instance.save()
+        return instance

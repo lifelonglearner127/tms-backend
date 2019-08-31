@@ -21,11 +21,6 @@ router.register(
     base_name='tires'
 )
 router.register(
-    r'vehicle-maintenances',
-    v.VehicleMaintenanceRequestViewSet,
-    base_name='vehicle-maintenances'
-)
-router.register(
     r'vehicle-check-items',
     v.VehicleCheckItemViewSet,
     base_name='vehicle-check-items'
@@ -34,6 +29,11 @@ router.register(
     r'vehicle-check-history',
     v.VehicleCheckHistoryViewSet,
     base_name='vehicle-check-history'
+)
+router.register(
+    r'vehicle-maintenance-history',
+    v.VehicleMaintenanceHistoryViewSet,
+    base_name='vehicle-maintenance-history'
 )
 
 urlpatterns = [

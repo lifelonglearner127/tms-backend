@@ -486,38 +486,6 @@ class VehicleCheckItemViewSet(TMSViewSet):
         )
 
 
-class VehicleMaintenanceRequestViewSet(ApproveViewSet):
-
-    queryset = m.VehicleMaintenanceRequest.objects.all()
-    serializer_class = s.VehicleMaintenanceRequestSerializer
-
-    def create(self, request):
-        data = request.data
-        data['requester'] = request.user.profile.id
-        serializer = self.serializer_class(
-            data=request.data
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    @action(detail=False, url_path="categories")
-    def get_vehicle_models(self, request):
-        serializer = ChoiceSerializer(
-            [{'value': x, 'text': y} for (x, y) in c.VEHICLE_MAINTENANCE],
-            many=True
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-
 class FuelConsumptionViewSet(TMSViewSet):
 
     queryset = m.FuelConsumption.objects.all()
@@ -555,3 +523,50 @@ class VehicleCheckHistoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet)
         )
 
         return self.get_paginated_response(serializer.data)
+
+
+class VehicleMaintenanceHistoryViewSet(TMSViewSet):
+
+    queryset = m.VehicleMaintenanceHistory.objects.all()
+    serializer_class = s.VehicleMaintenanceHistorySerializer
+
+    def create(self, request):
+        context = {
+            'vehicle': request.data.pop('vehicle'),
+            'assignee': request.data.pop('assignee'),
+            'station': request.data.pop('station'),
+        }
+        serializer = s.VehicleMaintenanceHistorySerializer(
+            data=request.data,
+            context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'vehicle': request.data.pop('vehicle'),
+            'assignee': request.data.pop('assignee'),
+            'station': request.data.pop('station'),
+        }
+        serializer = s.VehicleMaintenanceHistorySerializer(
+            instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
