@@ -166,7 +166,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
         source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
     )
-
+    total_problems = serializers.SerializerMethodField()
     before_driving_images = serializers.SerializerMethodField()
     driving_images = serializers.SerializerMethodField()
     after_driving_images = serializers.SerializerMethodField()
@@ -174,6 +174,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     after_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     is_readonly = serializers.SerializerMethodField()
+    updated = serializers.DateTimeField(format='%Y-%m-%d', required=False)
 
     class Meta:
         model = m.VehicleCheckHistory
@@ -302,8 +303,16 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
         else:
             return False
 
+    def get_total_problems(self, instance):
+        return instance.before_driving_problems + instance.driving_problems + instance.after_driving_problems
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        ret['vehicle'] = {
+            'id': instance.vehicle.id,
+            'plate_num': instance.vehicle.plate_num
+        }
+
         ret['before'] = {
             'items': ret.pop('before_driving_checked_items'),
             'problems': ret.pop('before_driving_problems'),

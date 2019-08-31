@@ -448,7 +448,7 @@ class VehicleCheckItem(TimeStampedModel):
     after_driving_check_items = managers.AfterDrivingCheckItemsManager()
 
 
-class VehicleCheckHistory(models.Model):
+class VehicleCheckHistory(TimeStampedModel):
 
     driver = models.ForeignKey(
         User,
@@ -614,3 +614,69 @@ class VehicleDriverDailyBind(models.Model):
 
     class Meta:
         ordering = ['-get_on', 'vehicle']
+
+
+# class VehicleTire(TimeStampedModel):
+
+#     vehicle = models.ForeignKey(
+#         Vehicle,
+#         on_delete=models.CASCADE
+#     )
+
+#     position = models.PositiveIntegerField(
+#         default=0
+#     )
+
+#     class Meta:
+#         unique_together = [
+#             'vehicle', 'position'
+#         ]
+
+
+# class TireManagementHistory(TimeStampedModel):
+
+#     vehicle_tire = models.ForeignKey(
+#         VehicleTire,
+#         on_delete=models.CASCADE
+#     )
+
+#     installed_on = models.DateTimeField()
+
+#     previous_mileage = models.PositiveIntegerField(
+#         default=0
+#     )
+
+#     mileage_limit = models.PositiveIntegerField(
+#         default=0
+#     )
+
+#     brand = models.CharField(
+#         max_length=100
+#     )
+
+#     model = models.CharField(
+#         max_length=100
+#     )
+
+#     tire_type = models.CharField(
+#         max_length=100
+#     )
+
+#     tread_depth = models.FloatField(
+#         default=0
+#     )
+
+#     manufacturer = models.CharField(
+#         max_length=100
+#     )
+
+#     contact_number = models.CharField(
+#         max_length=100
+#     )
+
+#     class Meta:
+#         ordering = [
+#             '-updated',
+#             'vehicle',
+#             'position'
+#         ]
