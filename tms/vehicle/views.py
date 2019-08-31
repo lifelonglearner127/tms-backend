@@ -517,6 +517,7 @@ class VehicleCheckHistoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet)
                 'bind': False
             }
 
+        context['request'] = request
         serializer = s.VehicleCheckHistorySerializer(
             page, many=True,
             context=context
