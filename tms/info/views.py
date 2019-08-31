@@ -132,13 +132,13 @@ class StationViewSet(TMSViewSet):
         return queryset
 
     def create(self, request):
-        products = request.data.pop('products', None)
+        products = request.data.pop('products', [])
         if request.user.role == c.USER_ROLE_CUSTOMER:
             customers = [{
                 'id': request.user.customer_profile.id
             }]
         else:
-            customers = request.data.pop('customers', None)
+            customers = request.data.pop('customers', [])
 
         serializer = s.StationSerializer(
             data=request.data,
@@ -157,13 +157,13 @@ class StationViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         instance = self.get_object()
-        products = request.data.pop('products', None)
+        products = request.data.pop('products', [])
         if request.user.role == c.USER_ROLE_CUSTOMER:
             customers = [{
                 'id': request.user.customer_profile.id
             }]
         else:
-            customers = request.data.pop('customers', None)
+            customers = request.data.pop('customers', [])
 
         serializer = s.StationSerializer(
             instance,
@@ -182,7 +182,7 @@ class StationViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False)
+    @action(detail=False, url_path='short')
     def short(self, request):
         station_type = self.request.query_params.get('type', None)
         if station_type in [
@@ -194,6 +194,31 @@ class StationViewSet(TMSViewSet):
             queryset = self.get_queryset()
 
         serializer = s.ShortStationSerializer(queryset, many=True)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+        return queryset
+
+    @action(detail=False, url_path='short/names')
+    def get_station_names(self, request):
+        station_type = self.request.query_params.get('type', None)
+        if station_type in [
+            c.STATION_TYPE_LOADING_STATION,
+            c.STATION_TYPE_UNLOADING_STATION,
+            c.STATION_TYPE_QUALITY_STATION,
+            c.STATION_TYPE_OIL_STATION,
+            c.STATION_TYPE_BLACK_DOT,
+            c.STATION_TYPE_PARKING_STATION,
+            c.STATION_TYPE_REPAIR_STATION,
+        ]:
+            queryset = m.Station.objects.filter(station_type=station_type)
+        else:
+            queryset = self.get_queryset()
+
+        serializer = s.StationNameSerializer(queryset, many=True)
 
         return Response(
             serializer.data,

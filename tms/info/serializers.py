@@ -118,6 +118,15 @@ class AlarmSettingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StationNameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id', 'name'
+        )
+
+
 class ShortStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Loading Station
@@ -178,8 +187,8 @@ class StationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        products = self.context.get('products', None)
-        customers = self.context.get('customers', None)
+        products = self.context.get('products', [])
+        customers = self.context.get('customers', [])
         station_type = validated_data.get('station_type', None)
 
         # validation if the station name exists already
@@ -191,13 +200,12 @@ class StationSerializer(serializers.ModelSerializer):
                 'name': 'Already existts'
             })
 
-        if station_type == c.STATION_TYPE_LOADING_STATION and products is None:
+        if station_type == c.STATION_TYPE_LOADING_STATION and len(products):
             raise serializers.ValidationError({
                 'product': 'Product data is missing'
             })
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION\
-           and customers is None:
+        if station_type == c.STATION_TYPE_UNLOADING_STATION and len(customers):
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
             })
@@ -221,8 +229,8 @@ class StationSerializer(serializers.ModelSerializer):
         return station
 
     def update(self, instance, validated_data):
-        products = self.context.get('products', None)
-        customer = self.context.get('customer', None)
+        products = self.context.get('products', [])
+        customers = self.context.get('customer', [])
         station_type = validated_data.get('station_type', None)
 
         # validation if the station name exists already
@@ -234,13 +242,12 @@ class StationSerializer(serializers.ModelSerializer):
                 'name': 'Already existts'
             })
 
-        if station_type == c.STATION_TYPE_LOADING_STATION and products is None:
+        if station_type == c.STATION_TYPE_LOADING_STATION and len(products):
             raise serializers.ValidationError({
                 'product': 'Product data is missing'
             })
 
-        if station_type == c.STATION_TYPE_UNLOADING_STATION\
-           and customer is None:
+        if station_type == c.STATION_TYPE_UNLOADING_STATIO and len(customers):
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
             })
@@ -248,23 +255,19 @@ class StationSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if customer is not None:
-            try:
-                customer = CustomerProfile.objects.get(
-                    id=customer.get('id', None)
-                )
-            except CustomerProfile.DoesNotExist:
-                customer = None
+        instance.products.clear()
+        for product in products:
+            product = get_object_or_404(
+                m.Product, id=product.get('id', None)
+            )
+            instance.products.add(product)
 
-        instance.customer = customer
-
-        if station_type == c.STATION_TYPE_LOADING_STATION:
-            instance.products.clear()
-            for product in products:
-                product = get_object_or_404(
-                    m.Product, id=product.get('id', None)
-                )
-                instance.products.add(product)
+        instance.customers.clear()
+        for customer in customers:
+            customer = get_object_or_404(
+                m.CustomerProfile, id=customer.get('id', None)
+            )
+            instance.customers.add(customer)
 
         instance.save()
         return instance
