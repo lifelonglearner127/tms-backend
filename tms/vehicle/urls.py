@@ -40,6 +40,12 @@ router.register(
     v.VehicleTireViewSet,
     base_name='vehicle-tires'
 )
+router.register(
+    r'vehicle-tires-change-history',
+    v.TireManagementHistoryViewSet,
+    base_name='vehicle-tires'
+)
+
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]

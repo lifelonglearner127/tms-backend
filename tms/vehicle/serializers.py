@@ -408,6 +408,24 @@ class ShortTireManagementHistorySerializer(serializers.ModelSerializer):
         )
 
 
+class ShortVehicleTireSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+
+    class Meta:
+        model = m.VehicleTire
+        fields = '__all__'
+
+
+class TireManagementHistoryDataViewSerializer(serializers.ModelSerializer):
+
+    vehicle_tire = ShortVehicleTireSerializer()
+
+    class Meta:
+        model = m.TireManagementHistory
+        fields = '__all__'
+
+
 class VehicleTireSerializer(serializers.ModelSerializer):
 
     current_tire = serializers.SerializerMethodField()

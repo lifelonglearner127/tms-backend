@@ -650,3 +650,9 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class TireManagementHistoryViewSet(viewsets.ModelViewSet):
+
+    queryset = m.TireManagementHistory.objects.all()
+    serializer_class = s.TireManagementHistoryDataViewSerializer
