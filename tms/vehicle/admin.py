@@ -36,3 +36,13 @@ class VehicleDrivingItemCheckAdmin(admin.ModelAdmin):
 @admin.register(m.VehicleAfterDrivingItemCheck)
 class VehicleAfterDrivingItemCheckAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.VehicleTire)
+class VehicleTireAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.TireManagementHistory)
+class TireManagementHistoryAdmin(admin.ModelAdmin):
+    pass

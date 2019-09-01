@@ -390,3 +390,42 @@ class VehicleMaintenanceHistorySerializer(serializers.ModelSerializer):
         instance.station = station
         instance.save()
         return instance
+
+
+class TireManagementHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.TireManagementHistory
+        fields = '__all__'
+
+
+class ShortTireManagementHistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.TireManagementHistory
+        exclude = (
+            'vehicle_tire',
+        )
+
+
+class VehicleTireSerializer(serializers.ModelSerializer):
+
+    current_tire = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.VehicleTire
+        fields = '__all__'
+
+    def get_current_tire(self, instance):
+        if instance.history.first() is not None:
+            return ShortTireManagementHistorySerializer(instance.history.first()).data
+        else:
+            return None
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['vehicle'] = {
+            'id': instance.vehicle.id,
+            'plate_num': instance.vehicle.plate_num
+        }
+        return ret

@@ -616,67 +616,66 @@ class VehicleDriverDailyBind(models.Model):
         ordering = ['-get_on', 'vehicle']
 
 
-# class VehicleTire(TimeStampedModel):
+class VehicleTire(TimeStampedModel):
 
-#     vehicle = models.ForeignKey(
-#         Vehicle,
-#         on_delete=models.CASCADE
-#     )
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
 
-#     position = models.PositiveIntegerField(
-#         default=0
-#     )
+    position = models.PositiveIntegerField(
+        default=0
+    )
 
-#     class Meta:
-#         unique_together = [
-#             'vehicle', 'position'
-#         ]
+    class Meta:
+        unique_together = [
+            'vehicle', 'position'
+        ]
 
 
-# class TireManagementHistory(TimeStampedModel):
+class TireManagementHistory(TimeStampedModel):
 
-#     vehicle_tire = models.ForeignKey(
-#         VehicleTire,
-#         on_delete=models.CASCADE
-#     )
+    vehicle_tire = models.ForeignKey(
+        VehicleTire,
+        on_delete=models.CASCADE,
+        related_name='history'
+    )
 
-#     installed_on = models.DateTimeField()
+    installed_on = models.DateField()
 
-#     previous_mileage = models.PositiveIntegerField(
-#         default=0
-#     )
+    mileage = models.PositiveIntegerField(
+        default=0
+    )
 
-#     mileage_limit = models.PositiveIntegerField(
-#         default=0
-#     )
+    mileage_limit = models.PositiveIntegerField(
+        default=0
+    )
 
-#     brand = models.CharField(
-#         max_length=100
-#     )
+    brand = models.CharField(
+        max_length=100
+    )
 
-#     model = models.CharField(
-#         max_length=100
-#     )
+    model = models.CharField(
+        max_length=100
+    )
 
-#     tire_type = models.CharField(
-#         max_length=100
-#     )
+    tire_type = models.CharField(
+        max_length=100
+    )
 
-#     tread_depth = models.FloatField(
-#         default=0
-#     )
+    tread_depth = models.FloatField(
+        default=0
+    )
 
-#     manufacturer = models.CharField(
-#         max_length=100
-#     )
+    manufacturer = models.CharField(
+        max_length=100
+    )
 
-#     contact_number = models.CharField(
-#         max_length=100
-#     )
+    contact_number = models.CharField(
+        max_length=100
+    )
 
-#     class Meta:
-#         ordering = [
-#             '-updated',
-#             'vehicle',
-#             'position'
-#         ]
+    class Meta:
+        ordering = [
+            '-installed_on',
+        ]

@@ -35,7 +35,11 @@ router.register(
     v.VehicleMaintenanceHistoryViewSet,
     base_name='vehicle-maintenance-history'
 )
-
+router.register(
+    r'vehicle-tires',
+    v.VehicleTireViewSet,
+    base_name='vehicle-tires'
+)
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]

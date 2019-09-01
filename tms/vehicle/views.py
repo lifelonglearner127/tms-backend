@@ -571,3 +571,82 @@ class VehicleMaintenanceHistoryViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class VehicleTireViewSet(viewsets.ModelViewSet):
+
+    serializer_class = s.VehicleTireSerializer
+    queryset = m.VehicleTire.objects.all()
+
+    def create(self, request):
+        vehicle_data = request.data.pop('vehicle', None)
+        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
+        position = request.data.pop('position', 0)
+        if m.VehicleTire.objects.filter(vehicle=vehicle, position=position).exists():
+            raise s.serializers.ValidationError({
+                'vehicle': 'Already exists'
+            })
+
+        vehicle_tire = m.VehicleTire.objects.create(
+            vehicle=vehicle,
+            position=position
+        )
+        data = request.data.pop('current_tire')
+        data['vehicle_tire'] = vehicle_tire.id
+        serializer = s.TireManagementHistorySerializer(
+            data=data
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            self.serializer_class(vehicle_tire).data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        vehicle_data = request.data.pop('vehicle', None)
+        vehicle = get_object_or_404(m.Vehicle, id=vehicle_data.get('id', None))
+        position = request.data.pop('position', 0)
+        if m.VehicleTire.objects.exclude(id=pk).filter(vehicle=vehicle, position=position).exists():
+            raise s.serializers.ValidationError({
+                'vehicle': 'Already exists'
+            })
+
+        instance.position = position
+        instance.vehicle = vehicle
+        instance.save()
+
+        data = request.data.pop('current_tire')
+        data['vehicle_tire'] = instance.id
+        current_tire = instance.history.first()
+        if current_tire is not None:
+            serializer = s.TireManagementHistorySerializer(
+                current_tire,
+                data=data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return Response(
+            self.serializer_class(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='change')
+    def change_tire(self, request, pk=None):
+        data = request.data
+        data['vehicle_tire'] = pk
+        serializer = s.TireManagementHistorySerializer(
+            data=data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
