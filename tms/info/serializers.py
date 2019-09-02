@@ -230,7 +230,7 @@ class StationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         products = self.context.get('products', [])
-        customers = self.context.get('customer', [])
+        customers = self.context.get('customers', [])
         station_type = validated_data.get('station_type', None)
 
         # validation if the station name exists already
