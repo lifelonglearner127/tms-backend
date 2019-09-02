@@ -278,7 +278,7 @@ class Route(TimeStampedModel):
 
     @property
     def stations(self):
-        points = Station.workstations.filter(id__in=self.path)
+        points = Station.objects.filter(id__in=self.path)
         points = dict([(point.id, point) for point in points])
         return [points[id] for id in self.path]
 
