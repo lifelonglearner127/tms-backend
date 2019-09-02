@@ -118,45 +118,48 @@ class VehicleViewSet(TMSViewSet):
         ret = []
 
         for vehicle in m.Vehicle.objects.all():
-            if vehicle.status == c.VEHICLE_STATUS_AVAILABLE:
-                status = 'No Job'
-                try:
-                    bind = VehicleUserBind.objects.get(vehicle=vehicle)
-                    driver = bind.driver.name
-                except VehicleUserBind.DoesNotExist:
-                    driver = 'No driver'
-            elif vehicle.status == c.VEHICLE_STATUS_INWORK:
-                driver = vehicle.bind.driver.name
-                job = Job.objects.filter(vehicle=vehicle, progress__gt=1)
-
-                if job.progress == 2:
-                    status = '赶往装货地'
-                elif job.progress == 3:
-                    status = '等待装货'
-                elif job.progress == 4:
-                    status = '装货中'
-                elif job.progress == 5:
-                    status = '装货完成'
-                elif job.progress == 6:
-                    status = '赶往质检'
-                elif job.progress == 7:
-                    status = '等待质检'
-                elif job.progress == 8:
-                    status = '质检中'
-                elif job.progress == 9:
-                    status = '质检完成'
-                elif (job.progress - 10) % 4 == 0:
-                    status = '赶往卸货'
-                elif (job.progress - 10) % 4 == 1:
-                    status = '等待卸货'
-                elif (job.progress - 10) % 4 == 2:
-                    status = '卸货中'
-                elif (job.progress - 10) % 4 == 3:
-                    status = '卸货完成'
+            bind = m.VehicleDriverDailyBind.objects.filter(
+                vehicle=vehicle,
+                get_off=None
+            ).first()
+            if bind is not None:
+                driver = bind.driver.name
+            else:
+                driver = 'No driver'
+            if vehicle.status == c.VEHICLE_STATUS_INWORK:
+                job = Job.objects.filter(vehicle=vehicle, progress__gt=1).first()
+                if job is not None:
+                    if job.progress == 2:
+                        status = '赶往装货地'
+                    elif job.progress == 3:
+                        status = '等待装货'
+                    elif job.progress == 4:
+                        status = '装货中'
+                    elif job.progress == 5:
+                        status = '装货完成'
+                    elif job.progress == 6:
+                        status = '赶往质检'
+                    elif job.progress == 7:
+                        status = '等待质检'
+                    elif job.progress == 8:
+                        status = '质检中'
+                    elif job.progress == 9:
+                        status = '质检完成'
+                    elif (job.progress - 10) % 4 == 0:
+                        status = '赶往卸货'
+                    elif (job.progress - 10) % 4 == 1:
+                        status = '等待卸货'
+                    elif (job.progress - 10) % 4 == 2:
+                        status = '卸货中'
+                    elif (job.progress - 10) % 4 == 3:
+                        status = '卸货完成'
+                else:
+                    status = 'Wrong Status'
 
             elif vehicle.status == c.VEHICLE_STATUS_REPAIR:
-                driver = 'No driver'
                 status = 'Repairing'
+            else:
+                status = 'No job'
 
             ret.append({
                 'plate_num': vehicle.plate_num,

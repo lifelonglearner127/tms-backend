@@ -35,7 +35,6 @@ from ..core.views import TMSViewSet
 
 # other
 from ..g7.interfaces import G7Interface
-from .tasks import bind_vehicle_user
 
 
 class OrderCartViewSet(TMSViewSet):
@@ -900,11 +899,16 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
             last_progress_finished_on = None
-            bind_vehicle_user.apply_async(
-                args=[{
-                    'job': job.id
-                }]
-            )
+
+            # set the vehicle status to in-work
+            job.vehicle.status = c.VEHICLE_STATUS_INWORK
+            job.vehicle.save()
+
+            # set the driver & escrot to in-work
+            job.driver.profile.status = c.WORK_STATUS_DRIVING
+            job.escort.profile.status = c.WORK_STATUS_DRIVING
+            job.driver.profile.save()
+            job.escort.profile.save()
         else:
             current_station = job.jobstation_set.filter(
                 is_completed=False
