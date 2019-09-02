@@ -43,9 +43,8 @@ class Product(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    price = models.DecimalField(
-        max_digits=c.PRICE_MAX_DIGITS,
-        decimal_places=c.PRICE_DECIMAL_PLACES
+    price = models.FloatField(
+        default=0
     )
 
     unit_weight = models.PositiveIntegerField(
@@ -143,11 +142,8 @@ class Station(BasicContactModel):
         CustomerProfile
     )
 
-    price = models.DecimalField(
-        max_digits=5,
-        decimal_places=1,
-        null=True,
-        blank=True
+    price = models.FloatField(
+        default=0
     )
 
     working_time = models.PositiveIntegerField(

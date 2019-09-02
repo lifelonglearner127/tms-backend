@@ -272,9 +272,8 @@ class OrderPayment(models.Model):
         on_delete=models.CASCADE
     )
 
-    amount = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    amount = models.FloatField(
+        default=0
     )
 
     is_complete = models.BooleanField(

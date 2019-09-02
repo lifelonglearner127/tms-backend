@@ -42,14 +42,12 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    total_load = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    total_load = models.FloatField(
+        default=0
     )
 
-    actual_load = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    actual_load = models.FloatField(
+        default=0
     )
 
     model_2 = models.CharField(
@@ -79,14 +77,12 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    total_load_2 = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    total_load_2 = models.FloatField(
+        default=0
     )
 
-    actual_load_2 = models.DecimalField(
-        max_digits=c.WEIGHT_MAX_DIGITS,
-        decimal_places=c.WEIGHT_DECIMAL_PLACES
+    actual_load_2 = models.FloatField(
+        default=0
     )
 
     affiliation_unit = models.CharField(
