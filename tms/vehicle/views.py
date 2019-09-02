@@ -673,7 +673,8 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
                 if middle_datetime == to_datetime:
                     break
 
-            data['mileage'] = total_mileage
+            vehicle_tire.current_tire.mileage = total_mileage
+            vehicle_tire.current_tire.save()
 
         serializer = s.TireManagementHistorySerializer(
             data=data
