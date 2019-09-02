@@ -145,7 +145,7 @@ class ShortStationPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Station
         fields = (
-            'lnglat',
+            'lnglat', 'station_type'
         )
 
     def get_lnglat(self, obj):
