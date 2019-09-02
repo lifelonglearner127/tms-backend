@@ -366,7 +366,7 @@ class RouteSerializer(serializers.ModelSerializer):
         paths = dict([(point.id, point) for point in paths])
 
         ret['path'] = StationPointSerializer(
-            [paths[id] for id in paths],
+            [paths[id] for id in instance.path],
             many=True
         ).data
 
