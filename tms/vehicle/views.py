@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, mixins, viewsets
@@ -640,8 +640,41 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='change')
     def change_tire(self, request, pk=None):
+        vehicle_tire = self.get_object()
         data = request.data
         data['vehicle_tire'] = pk
+
+        if vehicle_tire.current_tire is not None and vehicle_tire.current_tire.installed_on is not None:
+            plate_num = vehicle_tire.vehicle.plate_num
+            from_datetime = vehicle_tire.current_tire.installed_on
+            middle_datetime = from_datetime
+            to_datetime = timezone.now()
+            total_mileage = 0
+
+            while True:
+                if to_datetime > from_datetime + timedelta(days=30):
+                    middle_datetime = from_datetime + timedelta(days=30)
+                else:
+                    middle_datetime = to_datetime
+
+                queries = {
+                    'plate_num': plate_num,
+                    'from': from_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                    'to': middle_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                }
+                ret = G7Interface.call_g7_http_interface(
+                    'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                    queries=queries
+                )
+                if ret is not None:
+                    total_mileage += ret.get('total_mileage', 0) / (100 * 1000)   # calculated in km
+
+                from_datetime = middle_datetime
+                if middle_datetime == to_datetime:
+                    break
+
+            data['mileage'] = total_mileage
+
         serializer = s.TireManagementHistorySerializer(
             data=data
         )

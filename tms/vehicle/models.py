@@ -623,6 +623,10 @@ class VehicleTire(TimeStampedModel):
         default=0
     )
 
+    @property
+    def current_tire(self):
+        return self.history.first()
+
     class Meta:
         unique_together = [
             'vehicle', 'position'
@@ -637,13 +641,14 @@ class TireManagementHistory(TimeStampedModel):
         related_name='history'
     )
 
-    installed_on = models.DateField()
+    installed_on = models.DateTimeField()
 
-    mileage = models.PositiveIntegerField(
-        default=0
+    mileage = models.FloatField(
+        null=True,
+        blank=True
     )
 
-    mileage_limit = models.PositiveIntegerField(
+    mileage_limit = models.FloatField(
         default=0
     )
 

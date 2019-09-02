@@ -1,3 +1,5 @@
+from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..core import constants as c
@@ -9,6 +11,9 @@ from . import models as m
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..info.serializers import StationNameSerializer
+
+# other
+from ..g7.interfaces import G7Interface
 
 
 class FuelConsumptionSerializer(serializers.ModelSerializer):
@@ -401,11 +406,47 @@ class TireManagementHistorySerializer(serializers.ModelSerializer):
 
 class ShortTireManagementHistorySerializer(serializers.ModelSerializer):
 
+    mileage = serializers.SerializerMethodField()
+
     class Meta:
         model = m.TireManagementHistory
         exclude = (
             'vehicle_tire',
         )
+
+    def get_mileage(self, instance):
+        if instance.mileage is not None:
+            return instance.mileage
+        else:
+            plate_num = instance.vehicle_tire.vehicle.plate_num
+            from_datetime = instance.installed_on
+            middle_datetime = from_datetime
+            to_datetime = timezone.now()
+            total_mileage = 0
+            while True:
+                if to_datetime > from_datetime + timedelta(days=30):
+                    middle_datetime = from_datetime + timedelta(days=30)
+                else:
+                    middle_datetime = to_datetime
+
+                queries = {
+                    'plate_num': plate_num,
+                    'from': from_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                    'to': middle_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                }
+                data = G7Interface.call_g7_http_interface(
+                    'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                    queries=queries
+                )
+                if data is not None:
+                    total_mileage += data.get('total_mileage', 0) / (100 * 1000)   # calculated in km
+
+                from_datetime = middle_datetime
+
+                if middle_datetime == to_datetime:
+                    break
+
+            return total_mileage
 
 
 class ShortVehicleTireSerializer(serializers.ModelSerializer):
