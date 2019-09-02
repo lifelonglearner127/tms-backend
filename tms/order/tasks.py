@@ -124,8 +124,8 @@ def calculate_job_report(context):
         job.order.status = c.ORDER_STATUS_COMPLETE
         job.order.save()
 
-        order_year = job.order.created_on.year
-        order_month = job.order.created_on.month
+        order_year = job.order.created.year
+        order_month = job.order.created.month
 
         try:
             order_report = m.OrderReport.objects.get(
@@ -291,15 +291,15 @@ def notify_of_job_cancelled(context):
 
     # send push notification to driver
     if driver.device_token:
-        aliyun_request.set_Title('New Job')
-        aliyun_request.set_Body('New Job')
+        aliyun_request.set_Title('Cancel Job')
+        aliyun_request.set_Body('Cancel Job')
         aliyun_request.set_TargetValue(driver.device_token)
         aliyun_client.do_action(aliyun_request)
 
     # send push notification to escort
     if escort.device_token:
-        aliyun_request.set_Title('New Job')
-        aliyun_request.set_Body('New Job')
+        aliyun_request.set_Title('Cancel Job')
+        aliyun_request.set_Body('Cancel Job')
         aliyun_request.set_TargetValue(escort.device_token)
         aliyun_client.do_action(aliyun_request)
 

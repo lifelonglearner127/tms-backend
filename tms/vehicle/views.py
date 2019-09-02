@@ -119,10 +119,9 @@ class VehicleViewSet(TMSViewSet):
 
         for vehicle in m.Vehicle.objects.all():
             bind = m.VehicleDriverDailyBind.objects.filter(
-                vehicle=vehicle,
-                get_off=None
+                vehicle=vehicle
             ).first()
-            if bind is not None:
+            if bind is not None and bind.get_off is None:
                 driver = bind.driver.name
             else:
                 driver = 'No driver'
