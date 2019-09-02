@@ -140,7 +140,7 @@ def calculate_job_report(context):
                 customer=job.order.customer,
                 month=month.Month(order_year, order_month),
                 orders=1,
-                weight=job.order.total_weight
+                weights=job.order.total_weight
             )
 
     # unbind vehicle, driver, escort
@@ -306,7 +306,6 @@ def notify_of_job_cancelled(context):
 
 @app.task
 def update_monthly_report():
-    print('aaa')
     time = datetime.datetime.now()
     for user in User.objects.all():
         if user.role in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:

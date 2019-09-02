@@ -100,9 +100,9 @@ class Order(TimeStampedModel):
     from_customer = managers.CustomerOrderManager()
 
     @property
-    def total_weight(self, instance):
+    def total_weight(self):
         weight = 0
-        for product in instance.orderproduct_set.all():
+        for product in self.orderproduct_set.all():
             weight += product.weight
 
         return weight
