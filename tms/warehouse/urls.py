@@ -9,6 +9,16 @@ router.register(
     v.WarehouseProductViewSet,
     base_name='product'
 )
+router.register(
+    r'in-transactions-history',
+    v.InTransactionHistoryViewSet,
+    base_name='in-transaction-history'
+)
+router.register(
+    r'out-transactions-history',
+    v.OutTransactionHistoryViewSet,
+    base_name='out-transaction-history'
+)
 
 # # /products/{product_pk}/in_transactions
 # # /products/{product_pk}/in_transactions/{pk}

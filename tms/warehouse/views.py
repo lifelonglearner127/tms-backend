@@ -54,6 +54,12 @@ class WarehouseProductViewSet(TMSViewSet):
         )
 
 
+class InTransactionHistoryViewSet(TMSViewSet):
+
+    queryset = m.InTransaction.objects.all()
+    serializer_class = s.InTransactionSerializer
+
+
 class InTransactionViewSet(TMSViewSet):
 
     serializer_class = s.InTransactionSerializer
@@ -98,6 +104,12 @@ class InTransactionViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class OutTransactionHistoryViewSet(TMSViewSet):
+
+    queryset = m.OutTransaction.objects.all()
+    serializer_class = s.OutTransactionSerializer
 
 
 class OutTransactionViewSet(TMSViewSet):
