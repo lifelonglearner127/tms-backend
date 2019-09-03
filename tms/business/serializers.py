@@ -304,13 +304,15 @@ class BasicRequestSerializer(serializers.ModelSerializer):
         return 0
 
     def get_status(self, instance):
-        if instance.approved is True:
+        if instance.is_cancelled:
+            return '取消审批'
+
+        if instance.approved is None:
+            return '审批中'
+        elif instance.approved is True:
             return '审批完'
-        else:
-            if instance.requestapprover_set.filter(approved=False).exists():
-                return '审批拒绝'
-            else:
-                return '审批中'
+        elif instance.approved is False:
+            return '审批拒绝'
 
 
 # class RestRequestSerializer(serializers.ModelSerializer):
