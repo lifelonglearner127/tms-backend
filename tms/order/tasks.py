@@ -27,6 +27,45 @@ channel_layer = get_channel_layer()
 
 
 @app.task
+def notify_order_changes(context):
+    order = get_object_or_404(m.Order, id=context['order'])
+    customer = get_object_or_404(User, id=context['customer_user_id'])
+    message = {
+        "created": order.created.strftime('%Y-%m-%d'),
+        "products": []
+    }
+
+    for order_product in order.orderproduct_set.all():
+        message['products'].append({
+            'product': order_product.product.name,
+            'weight': order_product.weight
+        })
+    customer_notification = Notification.objects.create(
+        user=customer,
+        msg_type=c.CUSTOMER_NOTIFICATION_NEW_ORDER,
+        message=message
+    )
+
+    if customer.channel_name:
+        async_to_sync(channel_layer.send)(
+            customer.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(customer_notification).data
+                )
+            }
+        )
+
+    # send push notification to escort
+    if customer.device_token:
+        aliyun_request.set_Title('Cancel Job')
+        aliyun_request.set_Body('Cancel Job')
+        aliyun_request.set_TargetValue(escort.device_token)
+        aliyun_client.do_action(aliyun_request)
+
+
+@app.task
 def notify_job_changes(context):
     """
     Send notificatio when a new job is created
@@ -47,6 +86,7 @@ def notify_job_changes(context):
         "stations": []
     }
 
+    stations = []
     for job_station in job.jobstation_set.all():
         products = []
         for jobstationproduct in job_station.jobstationproduct_set.all():
@@ -54,11 +94,12 @@ def notify_job_changes(context):
                       str(jobstationproduct.mission_weight) + ')'
             products.append(product)
 
-        message['stations'].append({
+        stations.append({
             'station': job_station.station.address,
             'products': ', '.join(products)
         })
 
+    message['stations'] = stations
     driver_notification = Notification.objects.create(
         user=job.driver,
         message=message,
@@ -93,6 +134,36 @@ def notify_job_changes(context):
             }
         )
 
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "driver": {
+            "name": job.driver.name,
+            "mobile": job.driver.mobile
+        },
+        "escort": {
+            "name": job.escort.name,
+            "mobile": job.escort.mobile
+        }
+    }
+    message['stations'] = stations
+
+    customer_notification = Notification.objects.create(
+        user=job.order.customer.user,
+        message=message,
+        msg_type=c.CUSTOMER_NOTIFICATION_NEW_ARRANGEMENT
+    )
+
+    if job.order.customer.user.channel_name:
+        async_to_sync(channel_layer.send)(
+            job.order.customer.user.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(customer_notification).data
+                )
+            }
+        )
+
     # TODO: now push notification api is called twice; one for driver and other for escort
     # This would be not effeciency and there might be a solution to send bulk notification using one api call
 
@@ -105,6 +176,12 @@ def notify_job_changes(context):
 
     # send push notification to escort
     if job.escort.device_token:
+        aliyun_request.set_Title('New Job')
+        aliyun_request.set_Body('New Job')
+        aliyun_request.set_TargetValue(job.escort.device_token)
+        aliyun_client.do_action(aliyun_request)
+
+    if job.order.customer.user.device_token:
         aliyun_request.set_Title('New Job')
         aliyun_request.set_Body('New Job')
         aliyun_request.set_TargetValue(job.escort.device_token)

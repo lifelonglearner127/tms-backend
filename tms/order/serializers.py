@@ -21,6 +21,7 @@ from ..info.serializers import (
 )
 from ..info.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
+from .tasks import notify_order_changes
 
 
 class OrderCartSerializer(serializers.ModelSerializer):
@@ -257,6 +258,12 @@ class OrderSerializer(serializers.ModelSerializer):
                 order=order, product=product, **order_product_data
             )
 
+        notify_order_changes.apply_async(
+            args=[{
+                'order': order.id,
+                'customer_user_id': order.customer.user.id
+            }]
+        )
         return order
 
     def update(self, instance, validated_data):
