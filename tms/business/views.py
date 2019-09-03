@@ -139,6 +139,17 @@ class BasicRequestViewSet(TMSViewSet):
     queryset = m.BasicRequest.objects.all()
     serializer_class = s.BasicRequestSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        request_type = self.request.query_params.get('type', None)
+        if request_type == c.REQUEST_TYPE_REST:
+            queryset = queryset.filter(request_type=c.REQUEST_TYPE_REST)
+
+        if request_type == c.REQUEST_TYPE_VEHICLE_REPAIR:
+            queryset = queryset.filter(request_type=c.REQUEST_TYPE_VEHICLE_REPAIR)
+
+        return queryset
+
     def create(self, request):
         requester = request.data.pop('requester', None)
         if requester is not None:
@@ -194,6 +205,17 @@ class BasicRequestViewSet(TMSViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="unapproved-requests")
+    def get_unapproved_requests(self, request):
+        return Response(
+            s.BasicRequestSerializer(
+                m.BasicRequest.unapproved_requests.all(),
+                many=True,
+                context={'request': request}
+            ).data,
             status=status.HTTP_200_OK
         )
 
