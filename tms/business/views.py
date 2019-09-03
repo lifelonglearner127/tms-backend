@@ -219,8 +219,55 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="my-unapproved-requests")
+    def get_my_manageable_requests(self, request):
+        return Response(
+            s.BasicRequestSerializer(
+                m.BasicRequest.objects.filter(approvers=request.user),
+                many=True,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="my-approved-requests")
+    def get_my_manageable_approved_requests(self, request):
+        return Response(
+            s.BasicRequestSerializer(
+                m.BasicRequest.objects.filter(approvers=request.user, approved=True),
+                many=True,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="my-declined-requests")
+    def get_my_manageable_declined_requests(self, request):
+        return Response(
+            s.BasicRequestSerializer(
+                m.BasicRequest.objects.filter(approvers=request.user, approved=False),
+                many=True,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path="my-unapproved-requests")
+    def get_my_manageable_unapproved_requests(self, request):
+        return Response(
+            s.BasicRequestSerializer(
+                m.BasicRequest.objects.filter(approvers=request.user, approved=None),
+                many=True,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path="me")
     def get_my_requests(self, request):
+        """
+        Get my request; used in driver app
+        """
         page = self.paginate_queryset(
             request.user.my_requests.all()
         )
@@ -235,6 +282,9 @@ class BasicRequestViewSet(TMSViewSet):
 
     @action(detail=False, url_path="me/approved")
     def get_my_approved_requests(self, request):
+        """
+        Get my approved request; used in driver app
+        """
         page = self.paginate_queryset(
             request.user.my_requests.filter(approved=True)
         )
@@ -249,6 +299,9 @@ class BasicRequestViewSet(TMSViewSet):
 
     @action(detail=False, url_path="me/unapproved")
     def get_my_unapproved_request(self, request):
+        """
+        Get my unapproved request; used in driver app
+        """
         page = self.paginate_queryset(
             request.user.my_requests.filter(approved=False)
         )
@@ -263,6 +316,9 @@ class BasicRequestViewSet(TMSViewSet):
 
     @action(detail=False, url_path="me/ccs")
     def get_my_cc_request(self, request):
+        """
+        Get the request that I was chosen as cc; used in driver app
+        """
         page = self.paginate_queryset(
             m.BasicRequest.objects.filter(ccs__id=request.user.id)
         )

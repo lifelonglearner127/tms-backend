@@ -18,6 +18,53 @@ from ..account.models import User
 channel_layer = get_channel_layer()
 
 
+@receiver(post_save, sender=m.VehicleRepairRequest)
+def notify_vehicle_request(sender, instance, created, **kwargs):
+    if created:
+        message_type = c.NOTIFICATION_VEHICLE_REPAIR_REQUEST
+        message = '{} request a {} repair rest'.format(
+            instance.request.requester.name,
+            instance.vehicle.plate_num,
+        )
+
+        for approver in instance.request.approvers.all():
+            if approver.channel_name:
+                async_to_sync(channel_layer.send)(
+                    approver.channel_name,
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': message_type,
+                            'message': message
+                        })
+                    }
+                )
+
+
+@receiver(post_save, sender=m.RestRequest)
+def notify_rest_request(sender, instance, created, **kwargs):
+    if created:
+        message_type = c.NOTIFICATION_REST_REQUEST
+        message = '{} request a rest from {} to {}'.format(
+            instance.request.requester.name,
+            instance.from_date.strftime('%Y-%m-%d'),
+            instance.to_date.strftime('%Y-%m-%d'),
+        )
+
+        for approver in instance.request.approvers.all():
+            if approver.channel_name:
+                async_to_sync(channel_layer.send)(
+                    approver.channel_name,
+                    {
+                        'type': 'notify',
+                        'data': json.dumps({
+                            'msg_type': message_type,
+                            'message': message
+                        })
+                    }
+                )
+
+
 # @receiver(post_save, sender=m.ParkingRequest)
 # def notify_parking_request(sender, instance, created, **kwargs):
 #     """

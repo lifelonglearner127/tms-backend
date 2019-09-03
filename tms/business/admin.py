@@ -18,6 +18,16 @@ class VehicleRepairRequestAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.RequestApprover)
+class RequestApproverAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.RequestCC)
+class RequestCCAdmin(admin.ModelAdmin):
+    pass
+
+
 # @admin.register(m.ParkingRequest)
 # class ParkingRequestAdmin(admin.ModelAdmin):
 #     pass
