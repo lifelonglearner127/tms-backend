@@ -132,6 +132,14 @@ class OrderViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         serializer_instance = self.get_object()
+        if serializer_instance.status == c.ORDER_STATUS_COMPLETE:
+            return Response(
+                {
+                    'msg': 'Already finished'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         data = request.data
         context = {
             'products': request.data.pop('products')
@@ -361,6 +369,13 @@ class JobViewSet(TMSViewSet):
 
     def create(self, request):
         order = get_object_or_404(m.Order, id=request.data.pop('order', None))
+        if order.status == c.ORDER_STATUS_COMPLETE:
+            return Response(
+                {
+                    'msg': 'Already finished'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         order_products = []
         for order_product in order.orderproduct_set.all():
