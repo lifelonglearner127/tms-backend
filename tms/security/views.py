@@ -237,13 +237,13 @@ class SecurityLibraryAttachmentUploadView(APIView):
     def post(self, request):
         data = {}
         data['library'] = request.data.pop('library')[0]
-        try:
-            library = m.SecurityLibrary.objects.get(id=data['library'])
-            m.SecurityLibraryAttachment.objects.filter(
-                library=library
-            ).delete()
-        except m.SecurityLibrary.DoesNotExist:
-            pass
+        # try:
+        #     library = m.SecurityLibrary.objects.get(id=data['library'])
+        #     m.SecurityLibraryAttachment.objects.filter(
+        #         library=library
+        #     ).delete()
+        # except m.SecurityLibrary.DoesNotExist:
+        #     pass
 
         for _, data_file in request.data.items():
             data['attachment'] = data_file
