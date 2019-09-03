@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
@@ -208,6 +209,128 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve_request(self, request, pk=None):
+        basic_request = self.get_object()
+        if basic_request.approved is True:
+            return Response(
+                {
+                    'msg': 'Already approved'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        elif basic_request.approved is False:
+            return Response(
+                {
+                    'msg': 'Already declined'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        request_approver = basic_request.requestapprover_set.filter(approver=request.user).first()
+
+        if request_approver is None:
+            return Response(
+                {
+                    'msg': 'Cannot approve this request'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if basic_request.requestapprover_set.filter(step__lt=request_approver.step, approved=None).exists():
+            return Response(
+                {
+                    'msg': 'You cannot approve this request until previous steps are approved'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        request_approver.approved = True
+        request_approver.description = request.data.pop('description')
+        request_approver.approved_time = timezone.now()
+        request_approver.save()
+
+        if not basic_request.requestapprover_set.filter(approved=False).exists():
+            basic_request.approved = True
+            basic_request.save()
+
+        return Response(
+            s.BasicRequestSerializer(basic_request).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='decline')
+    def decline_request(self, request, pk=None):
+        basic_request = self.get_object()
+
+        if basic_request.approved is True:
+            return Response(
+                {
+                    'msg': 'Already approved'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        elif basic_request.approved is False:
+            return Response(
+                {
+                    'msg': 'Already declined'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        request_approver = basic_request.requestapprover_set.filter(approver=request.user).first()
+
+        if request_approver is None:
+            return Response(
+                {
+                    'msg': 'Cannot decline this request'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if basic_request.requestapprover_set.filter(step__lt=request_approver.step, approved=None).exists():
+            return Response(
+                {
+                    'msg': 'You cannot decline this request until previous steps are approved'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        request_approver.approved = False
+        request_approver.description = request.data.pop('description')
+        request_approver.approved_time = timezone.now()
+        request_approver.save()
+
+        basic_request.approved = False
+        basic_request.save()
+
+        return Response(
+            s.BasicRequestSerializer(basic_request).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='cancel')
+    def cancel_my_request(self, request, pk=None):
+        basic_request = self.get_object()
+        if basic_request.requester == request.user:
+            return Response(
+                {
+                    'msg': 'Cannot cancel the request'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        basic_request.is_cancelled = True
+        basic_request.save()
+        return Response(
+            {
+                'msg': 'Successfully cancelled'
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path="unapproved-requests")
     def get_unapproved_requests(self, request):
         return Response(
@@ -219,7 +342,7 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="my-unapproved-requests")
+    @action(detail=False, url_path="get-my-manageable-requests")
     def get_my_manageable_requests(self, request):
         return Response(
             s.BasicRequestSerializer(
@@ -230,7 +353,7 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="my-approved-requests")
+    @action(detail=False, url_path="get-my-manageable-approved-requests")
     def get_my_manageable_approved_requests(self, request):
         return Response(
             s.BasicRequestSerializer(
@@ -241,7 +364,7 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="my-declined-requests")
+    @action(detail=False, url_path="get-my-manageable-declined-requests")
     def get_my_manageable_declined_requests(self, request):
         return Response(
             s.BasicRequestSerializer(
@@ -252,8 +375,8 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="my-unapproved-requests")
-    def get_my_manageable_unapproved_requests(self, request):
+    @action(detail=False, url_path="get-my-manageable-waiting-requests")
+    def get_my_manageable_waiting_requests(self, request):
         return Response(
             s.BasicRequestSerializer(
                 m.BasicRequest.objects.filter(approvers=request.user, approved=None),

@@ -132,12 +132,22 @@ class BasicRequest(models.Model):
     )
 
     approved = models.BooleanField(
-        default=False
+        null=True,
+        blank=True
     )
 
     approved_time = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    is_cancelled = models.BooleanField(
+        default=False
+    )
+
+    cancelled_time = models.DateTimeField(
+        null=True,
+        blank=True,
     )
 
     description = models.TextField(
@@ -160,6 +170,8 @@ class BasicRequest(models.Model):
     )
 
     objects = models.Manager()
+    active_requests = managers.ActiveRequestsManager()
+    cancelled_requests = managers.CancelledRequestsManager()
     approved_requests = managers.ApprovedRequestsManager()
     unapproved_requests = managers.UnApprovedRequestsManager()
 
@@ -204,6 +216,12 @@ class RequestApprover(models.Model):
     description = models.TextField(
         null=True, blank=True
     )
+
+    class Meta:
+        ordering = [
+            'request',
+            'step',
+        ]
 
 
 class RequestCC(models.Model):
