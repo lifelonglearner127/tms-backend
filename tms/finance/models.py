@@ -11,6 +11,25 @@ from ..vehicle.models import Vehicle
 
 class BaseCard(models.Model):
 
+    master = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
+
+    vehicle = models.OneToOneField(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    is_child = models.BooleanField(
+        default=False
+    )
+
     issue_company = models.CharField(
         max_length=100
     )
@@ -47,18 +66,17 @@ class BaseCard(models.Model):
         blank=True
     )
 
+    objects = models.Manager()
+    masters = managers.MasterCards()
+    children = managers.ChildernCards()
+
     class Meta:
         abstract = True
         ordering = ['-last_charge_date']
 
 
 class ETCCard(BaseCard):
-
-    vehicle = models.OneToOneField(
-        Vehicle,
-        on_delete=models.CASCADE,
-        related_name='etccard'
-    )
+    pass
 
 
 class ETCCardChargeHistory(models.Model):
@@ -147,29 +165,7 @@ class ETCCardUsageDocument(models.Model):
 
 
 class FuelCard(BaseCard):
-
-    master = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='children'
-    )
-
-    vehicle = models.OneToOneField(
-        Vehicle,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
-    is_child = models.BooleanField(
-        default=False
-    )
-
-    objects = models.Manager()
-    masters = managers.FuelMasterCards()
-    children = managers.FuelChildernCards()
+    pass
 
 
 class FuelCardChargeHistory(models.Model):

@@ -31,13 +31,13 @@ class SleepBillManager(models.Manager):
         )
 
 
-class FuelMasterCards(models.Manager):
+class MasterCards(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(is_child=False)
 
 
-class FuelChildernCards(models.Manager):
+class ChildernCards(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(is_child=True)

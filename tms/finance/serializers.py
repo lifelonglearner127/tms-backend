@@ -52,22 +52,82 @@ class DriverAppFuelCardSerializer(serializers.ModelSerializer):
 
 class ETCCardSerializer(serializers.ModelSerializer):
 
-    vehicle = ShortVehicleSerializer()
-    department = ShortDepartmentSerializer()
+    master = ShortETCCardSerializer(read_only=True)
+    vehicle = ShortVehicleSerializer(read_only=True)
+    department = ShortDepartmentSerializer(read_only=True)
 
     class Meta:
         model = m.ETCCard
         fields = '__all__'
 
-    def to_internal_value(self, data):
-        ret = data
-        if 'vehicle' in data:
-            ret['vehicle'] = get_object_or_404(Vehicle, id=data['vehicle']['id'])
+    def create(self, validated_data):
+        master_data = self.context.get('master', None)
+        department_data = self.context.get('department', None)
+        vehicle_data = self.context.get('vehicle', None)
 
-        if 'department' in data:
-            ret['department'] = get_object_or_404(Department, id=data['department']['id'])
+        if department_data is None:
+            raise serializers.ValidationError({
+                'department': 'department data is missing'
+            })
+        department = Department.objects.get(id=department_data.get('id'))
+        master = None
+        vehicle = None
 
-        return ret
+        if validated_data['is_child']:
+            if master_data is None:
+                raise serializers.ValidationError({
+                    'master': 'master data is missing'
+                })
+            else:
+                master = m.ETCCard.masters.get(id=master_data.get('id'))
+
+            if vehicle_data is None:
+                raise serializers.ValidationError({
+                    'vehicle': 'vehicle data is missing'
+                })
+            else:
+                vehicle = Vehicle.objects.get(id=vehicle_data.get('id', None))
+
+        return m.ETCCard.objects.create(
+            master=master, vehicle=vehicle, department=department, **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        master_data = self.context.get('master', None)
+        department_data = self.context.get('department', None)
+        vehicle_data = self.context.get('vehicle', None)
+
+        if department_data is None:
+            raise serializers.ValidationError({
+                'department': 'department data is missing'
+            })
+        department = Department.objects.get(id=department_data.get('id'))
+        master = None
+        vehicle = None
+
+        if validated_data['is_child']:
+            if master_data is None:
+                raise serializers.ValidationError({
+                    'master': 'master data is missing'
+                })
+            else:
+                master = m.ETCCard.masters.get(id=master_data.get('id'))
+
+            if vehicle_data is None:
+                raise serializers.ValidationError({
+                    'vehicle': 'vehicle data is missing'
+                })
+            else:
+                vehicle = Vehicle.objects.get(id=vehicle_data.get('id', None))
+
+        instance.master = master
+        instance.department = department
+        instance.vehicle = vehicle
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
 
 
 class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
@@ -78,30 +138,6 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = m.ETCCardChargeHistory
         fields = '__all__'
-
-    def create(self, validated_data):
-        card = self.validated_data['card']
-        current_balance = card.balance
-
-        if 'charged_on' not in validated_data:
-            validated_data['charged_on'] = timezone.now()
-
-        charge_history = m.ETCCardChargeHistory.objects.create(
-            previous_amount=current_balance,
-            after_amount=current_balance + float(validated_data['charged_amount']),
-            **validated_data
-        )
-        card.balance += float(validated_data['charged_amount'])
-        card.save()
-
-        return charge_history
-
-    def to_internal_value(self, data):
-        ret = data
-        if 'card' in data:
-            ret['card'] = get_object_or_404(m.ETCCard, id=data['card']['id'])
-
-        return ret
 
 
 class ETCCardDocumentSerializer(serializers.ModelSerializer):

@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -23,6 +24,80 @@ class ETCCardViewSet(TMSViewSet):
     queryset = m.ETCCard.objects.all()
     serializer_class = s.ETCCardSerializer
     short_serializer_class = s.ShortETCCardSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        card_type = self.request.query_params.get('type', None)
+        if card_type == 'master':
+            queryset = queryset.filter(is_child=False)
+        elif card_type == 'child':
+            queryset = queryset.filter(is_child=True)
+
+        return queryset
+
+    def create(self, request):
+        context = {
+            'master': request.data.pop('master'),
+            'vehicle': request.data.pop('vehicle'),
+            'department': request.data.pop('department')
+        }
+        serializer = s.ETCCardSerializer(
+            data=request.data, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        context = {
+            'master': request.data.pop('master'),
+            'vehicle': request.data.pop('vehicle'),
+            'department': request.data.pop('department')
+        }
+        serializer = s.ETCCardSerializer(
+            instance, data=request.data, context=context, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, url_path="master")
+    def get_master_cards(self, request):
+        serializer = s.ShortETCCardSerializer(
+            self.queryset.filter(is_child=False), many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='charge')
+    def charge_card(self, request, pk=None):
+        card = self.get_object()
+        current_balance = card.balance
+        charged_amount = float(request.data.get('charged_amount', 0))
+        m.ETCCardChargeHistory.objects.create(
+            card=card,
+            previous_amount=current_balance,
+            charged_amount=charged_amount,
+            after_amount=current_balance + charged_amount,
+            charged_on=timezone.now()
+        )
+        card.balance += charged_amount
+        card.save()
+
+        if card.is_child:
+            card.master.balance -= charged_amount
+            card.master.save()
+
+        return Response(
+            s.ETCCardSerializer(card).data,
+            status=status.HTTP_200_OK
+        )
 
 
 class ETCCardChargeHistoryViewSet(TMSViewSet):
@@ -104,6 +179,30 @@ class FuelCardViewSet(TMSViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='charge')
+    def charge_card(self, request, pk=None):
+        card = self.get_object()
+        current_balance = card.balance
+        charged_amount = float(request.data.get('charged_amount', 0))
+        m.FuelCardChargeHistory.objects.create(
+            card=card,
+            previous_amount=current_balance,
+            charged_amount=charged_amount,
+            after_amount=current_balance + charged_amount,
+            charged_on=timezone.now()
+        )
+        card.balance += charged_amount
+        card.save()
+
+        if card.is_child:
+            card.master.balance -= charged_amount
+            card.master.save()
+
+        return Response(
+            s.FuelCardSerializer(card).data,
             status=status.HTTP_200_OK
         )
 
