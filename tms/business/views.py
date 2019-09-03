@@ -314,7 +314,7 @@ class BasicRequestViewSet(TMSViewSet):
     @action(detail=True, url_path='cancel')
     def cancel_my_request(self, request, pk=None):
         basic_request = self.get_object()
-        if basic_request.requester == request.user:
+        if basic_request.requester != request.user:
             return Response(
                 {
                     'msg': 'Cannot cancel the request'
@@ -323,6 +323,7 @@ class BasicRequestViewSet(TMSViewSet):
             )
 
         basic_request.is_cancelled = True
+        basic_request.cancelled_time = timezone.now()
         basic_request.save()
         return Response(
             {
