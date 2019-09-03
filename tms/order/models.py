@@ -263,8 +263,8 @@ class Job(models.Model):
     )
 
     @property
-    def loading_station(self, instance):
-        return instance.stations.all()[0]
+    def loading_station(self):
+        return self.stations.all()[0]
 
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()

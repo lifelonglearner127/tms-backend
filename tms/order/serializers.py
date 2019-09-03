@@ -17,7 +17,7 @@ from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer
 from ..info.serializers import (
-    ShortStationSerializer, ShortProductSerializer
+    ShortStationSerializer, StationNameTypeSerializer, ShortProductSerializer
 )
 from ..info.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
@@ -378,6 +378,17 @@ class JobStationProductSerializer(serializers.ModelSerializer):
         )
 
 
+class ShortJobStationProductDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.JobStationProductDocument
+        exclude = (
+            'job_station_product',
+        )
+
+
 class JobStationProductDocumentSerializer(serializers.ModelSerializer):
 
     document = Base64ImageField()
@@ -430,7 +441,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'loading_station',
-            'quality_station', 'due_time', 'route', 'branches',
+            'quality_station', 'is_same_station', 'due_time', 'route', 'branches',
             'branch_options'
         )
 
@@ -718,48 +729,95 @@ class JobDocumentSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    bills_by_category = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order', 'vehicle', 'bills_by_category'
+            'id', 'order', 'vehicle', 'documents'
         )
 
-    def get_bills_by_category(self, instance):
-        ret = {}
-        bills = instance.bills.all()
-        for bill in bills:
-            category = bill.category
-            if category in ret:
-                ret[category]['total_cost'] += bill.cost
+    def get_documents(self, instance):
+        ret = []
+        ret.append({
+            'station': StationNameTypeSerializer(instance.loading_station).data,
+            'products': []
+        })
+        for loading_check in instance.loading_checks.all():
+            ret[0]['products'].append({
+                'product': ShortProductSerializer(loading_check.product).data,
+                'images': ShortLoadingStationDocumentSerializer(
+                    loading_check.images.all(), many=True, context={'request': self.context.get('request')}
+                ).data
+            })
 
-                if category == c.BILL_FROM_OIL_STATION:
-                    sub_categories = c.OIL_BILL_SUB_CATEGORY
-                elif category == c.BILL_FROM_TRAFFIC:
-                    sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
-                elif category == c.BILL_FROM_OTHER:
-                    sub_categories == c.OTHER_BILL_SUB_CATEGORY
+        quality_station = m.JobStation.objects.get(job=instance, step=1)
+        ret.append({
+            'station': StationNameTypeSerializer(quality_station.station).data,
+            'products': []
+        })
+        for quality_check in instance.quality_checks.all():
+            quality_product = m.JobStationProduct.objects.get(
+                job_station=quality_station,
+                branch=quality_check.branch
+            )
+            ret[1]['products'].append({
+                'branch': quality_check.branch,
+                'product': ShortProductSerializer(quality_product.product).data,
+                'images': ShortJobStationProductDocumentSerializer(
+                    quality_product.images.all(), many=True, context={'request': self.context.get('request')}
+                ).data
+            })
 
-                sub_category = bill.sub_category
-                if sub_category in ret[category]['documents']:
-                    ret[category]['documents'][sub_category].append({
-                        'cost': bill.cost
-                    })
-                else:
-                    ret[category]['documents'][sub_category] = [{
-                        'cost': bill.cost
-                    }]
-            else:
-                ret[category] = {
-                    'total_cost': bill.cost,
-                    'documents': {
-                        bill.sub_category: [{
-                            'cost': bill.cost
-                        }]
-                    }
-                }
+        index = 2
+        for job_station in instance.jobstation_set.all()[2:]:
+            ret.append({
+                'station': StationNameTypeSerializer(job_station.station).data,
+                'products': []
+            })
+
+            for job_station_product in job_station.jobstationproduct_set.all():
+                ret[index]['products'].append({
+                    'branch': job_station_product.branch,
+                    'product': ShortProductSerializer(job_station_product.product).data,
+                    'images': ShortJobStationProductDocumentSerializer(
+                        job_station_product.images.all(), many=True, context={'request': self.context.get('request')}
+                    ).data
+                })
         return ret
+        # ret = {}
+        # bills = instance.bills.all()
+        # for bill in bills:
+        #     category = bill.category
+        #     if category in ret:
+        #         ret[category]['total_cost'] += bill.cost
+
+        #         if category == c.BILL_FROM_OIL_STATION:
+        #             sub_categories = c.OIL_BILL_SUB_CATEGORY
+        #         elif category == c.BILL_FROM_TRAFFIC:
+        #             sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
+        #         elif category == c.BILL_FROM_OTHER:
+        #             sub_categories == c.OTHER_BILL_SUB_CATEGORY
+
+        #         sub_category = bill.sub_category
+        #         if sub_category in ret[category]['documents']:
+        #             ret[category]['documents'][sub_category].append({
+        #                 'cost': bill.cost
+        #             })
+        #         else:
+        #             ret[category]['documents'][sub_category] = [{
+        #                 'cost': bill.cost
+        #             }]
+        #     else:
+        #         ret[category] = {
+        #             'total_cost': bill.cost,
+        #             'documents': {
+        #                 bill.sub_category: [{
+        #                     'cost': bill.cost
+        #                 }]
+        #             }
+        #         }
+        # return ret
 
 
 class JobTimeDurationSerializer(serializers.ModelSerializer):

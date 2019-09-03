@@ -127,6 +127,15 @@ class StationNameSerializer(serializers.ModelSerializer):
         )
 
 
+class StationNameTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id', 'name', 'station_type'
+        )
+
+
 class ShortStationSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Loading Station

@@ -396,6 +396,7 @@ class JobViewSet(TMSViewSet):
         job_index = 0
 
         for job_data in jobs_data:
+            job_data['total_weight'] = 0
             # check if the loading, quality, unloading stations is in route
             route_data = job_data.get('route', None)
             if route_data is None:
@@ -490,6 +491,8 @@ class JobViewSet(TMSViewSet):
                 branch_mission_weight = float(
                     branch_data.get('mission_weight')
                 )
+
+                job_data['total_weight'] += branch_mission_weight
 
                 # check if the branch mission weight exceed vehicle branch load
                 if job_data['vehicle'].branches[branch_id] < float(branch_data.get('mission_weight')):
@@ -593,6 +596,7 @@ class JobViewSet(TMSViewSet):
                 driver=job_data['driver'],
                 escort=job_data['escort'],
                 route=job_data['route'],
+                total_weight=job_data['total_weight'],
                 is_same_station=job_data['is_same_station']
             )
 
@@ -628,9 +632,6 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    def list(self, request):
-        pass
-
     def retrieve(self, request, pk=None):
         pass
 
@@ -663,7 +664,7 @@ class JobViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='upload-quality-check')
     def upload_quality_check(self, request, pk=None):
         job = self.get_object()
-
+        images = request.data.pop('images')
         branch = request.data.get('branch', 0)
 
         quality_check, created = m.QualityCheck.objects.get_or_create(
@@ -681,6 +682,12 @@ class JobViewSet(TMSViewSet):
         job_qualitystation_product.volume = request.data.pop('volume')
         job_qualitystation_product.man_hole = request.data.pop('man_hole')
         job_qualitystation_product.branch_hole = request.data.pop('branch_hole')
+
+        for image in images:
+            image['job_station_product'] = job_qualitystation_product.id
+            serializer = s.JobStationProductDocumentSerializer(data=image)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         return Response(
             {'msg': 'Successfully uploaded'},
@@ -802,8 +809,8 @@ class JobViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path='documents')
-    def get_documents(self, request):
+    @action(detail=False, url_path='job-documents')
+    def get_all_documents(self, request):
         page = self.paginate_queryset(
             m.Job.completed_jobs.all()
         )
@@ -813,6 +820,18 @@ class JobViewSet(TMSViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, url_path='documents')
+    def get_documents(self, request, pk=None):
+        job = self.get_object()
+        serializer = s.JobDocumentSerializer(
+            job,
+            context={'request': request}
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, url_path='time')
     def get_time(self, request):
