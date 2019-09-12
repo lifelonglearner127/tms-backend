@@ -17,7 +17,8 @@ from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer
 from ..info.serializers import (
-    ShortStationSerializer, StationNameTypeSerializer, ShortProductSerializer
+    ShortStationSerializer, StationNameTypeSerializer, ShortProductSerializer, ShortStationProductionSerializer,
+    ShortStationInfoSerializer
 )
 from ..info.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
@@ -502,6 +503,18 @@ class JobAdminSerializer(serializers.ModelSerializer):
         return branches
 
 
+class JobUnloadingStationProductSerializer(serializers.Field):
+
+    def to_representation(self, instance):
+        return {
+            'total_mileage': instance.total_mileage,
+            'highway_mileage': instance.highway_mileage,
+            'normalway_mileage': instance.normalway_mileage,
+            'empty_mileage': instance.empty_mileage,
+            'heavy_mileage':  instance.heavy_mileage
+        }
+
+
 class JobSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
@@ -510,6 +523,8 @@ class JobSerializer(serializers.ModelSerializer):
     loading_station = serializers.SerializerMethodField()
     quality_station = serializers.SerializerMethodField()
     unloading_stations = serializers.SerializerMethodField()
+    unloading_stations_product = serializers.SerializerMethodField()
+    stations_info = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
 
     class Meta:
@@ -517,7 +532,10 @@ class JobSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'vehicle', 'driver', 'escort', 'loading_station',
             'quality_station', 'unloading_stations', 'total_weight',
-            'mileage'
+            'mileage', 'started_on', 'turnover', 'stations',
+            'unloading_stations_consume_weight',
+            'road_duration', 'operating_efficiency', 'drained_oil',
+            'unloading_stations_product', 'stations_info'
         )
 
     def get_loading_station(self, instance):
@@ -533,6 +551,17 @@ class JobSerializer(serializers.ModelSerializer):
     def get_unloading_stations(self, instance):
         return ShortStationSerializer(
             instance.stations.all()[2:], many=True
+        ).data
+
+    def get_unloading_stations_product(self, instance):
+        
+        return ShortStationProductionSerializer(
+            instance.unloading_stations_product, many=True
+        ).data
+
+    def get_stations_info(self, instance):
+        return ShortStationInfoSerializer(
+            instance.stations_info, many=True
         ).data
 
 

@@ -18,7 +18,6 @@ from ..core import constants as c
 from ..core.permissions import (
     IsDriverOrEscortUser, IsCustomerUser, OrderPermission
 )
-from . import permissions as p
 
 # models
 from . import models as m
@@ -186,7 +185,6 @@ class OrderViewSet(TMSViewSet):
             order.jobs.all(),
             many=True
         )
-
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
