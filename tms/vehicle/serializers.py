@@ -303,9 +303,12 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             return True
 
         get_on_time = self.context.get('get_on_time')
-        if instance.before_driving_checked_time < get_on_time:
-            return True
-        else:
+        try:
+            if instance.before_driving_checked_time < get_on_time:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def get_total_problems(self, instance):
