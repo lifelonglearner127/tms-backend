@@ -360,6 +360,8 @@ class FuelCardUsageHistorySerializer(serializers.ModelSerializer):
         ret = data
         if 'card' in data:
             ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'], is_child=True)
+        if 'oil_station' in data:
+            ret['oil_station'] = get_object_or_404(m.Station, id=data['oil_station']['id'], is_child=True)
 
         return ret
 
