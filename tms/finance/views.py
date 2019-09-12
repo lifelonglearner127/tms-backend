@@ -219,6 +219,7 @@ class FuelCardUsageHistoryViewSet(TMSViewSet):
     serializer_class = s.FuelCardUsageHistorySerializer
 
     def create(self, request):
+        print(request.data)
         context = {
             'user': request.user,
             'images': request.data.pop('images'),
