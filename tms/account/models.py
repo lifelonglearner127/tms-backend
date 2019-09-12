@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from datetime import date
 
 from . import managers
 from ..core import constants as c
@@ -141,6 +142,29 @@ class User(AbstractBaseUser):
     def is_staff(self):
         return self.role in \
             [c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
+
+    @property
+    def status_text(self):
+        status = "Wrong Status"
+        if self.role == c.USER_ROLE_DRIVER or self.role == c.USER_ROLE_ESCORT:
+            request_set = self.my_requests.all()
+            if len(request_set) > 0:
+                for request in request_set:
+                    today_dt = date.today()
+                    if today_dt >= request.rest_request.from_date and today_dt <= request.rest_request.to_date:
+                        status = "In Rest"
+            if status != "In Rest":
+                vehicle_bind_set = self.my_vehicle_bind.all()
+                if len(vehicle_bind_set) > 0:
+                    status = "Get In"
+                    for vehicle_bind in vehicle_bind_set:
+                        jobs = vehicle_bind.vehicle.jobs.all()
+                        if len(jobs) > 0:
+                            status = "In Job Progress"
+                else:
+                    status = "Get off"
+
+        return status
 
     objects = UserManager()
     admins = managers.AdminUserManager()
