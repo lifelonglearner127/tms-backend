@@ -172,7 +172,7 @@ class ShortUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'name', 'mobile'
+            'id', 'name', 'mobile', 'status_text'
         )
 
     def to_representation(self, instance):
