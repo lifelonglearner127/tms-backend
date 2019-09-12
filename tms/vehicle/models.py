@@ -298,6 +298,45 @@ class Vehicle(TimeStampedModel):
     def branch_count(self):
         return len(self.branches)
 
+    @property
+    def status_text(self):
+        if self.status == c.VEHICLE_STATUS_INWORK:
+            job = self.objects.filter(jobs__progress__gt=1).first()
+            if job is not None:
+                if job.progress == 2:
+                    status = '赶往装货地'
+                elif job.progress == 3:
+                    status = '等待装货'
+                elif job.progress == 4:
+                    status = '装货中'
+                elif job.progress == 5:
+                    status = '装货完成'
+                elif job.progress == 6:
+                    status = '赶往质检'
+                elif job.progress == 7:
+                    status = '等待质检'
+                elif job.progress == 8:
+                    status = '质检中'
+                elif job.progress == 9:
+                    status = '质检完成'
+                elif (job.progress - 10) % 4 == 0:
+                    status = '赶往卸货'
+                elif (job.progress - 10) % 4 == 1:
+                    status = '等待卸货'
+                elif (job.progress - 10) % 4 == 2:
+                    status = '卸货中'
+                elif (job.progress - 10) % 4 == 3:
+                    status = '卸货完成'
+            else:
+                status = 'Wrong Status'
+
+        elif self.status == c.VEHICLE_STATUS_REPAIR:
+            status = 'Repairing'
+        else:
+            status = 'No job'
+
+        return status
+
     objects = models.Manager()
     inworks = managers.InWorkVehicleManager()
     availables = managers.AvailableVehicleManager()
