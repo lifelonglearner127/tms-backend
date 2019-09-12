@@ -7,6 +7,7 @@ from ..account.models import User
 from ..hr.models import Department
 from ..order.models import Order
 from ..vehicle.models import Vehicle
+from ..info.models import Station
 
 
 class BaseCard(models.Model):
@@ -212,8 +213,9 @@ class FuelCardUsageHistory(models.Model):
         null=True
     )
 
-    oil_station = models.CharField(
-        max_length=200
+    oil_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE
     )
 
     unit_price = models.FloatField(

@@ -14,6 +14,7 @@ from ..account.serializers import ShortUserSerializer
 from ..core.serializers import Base64ImageField, TMSChoiceField
 from ..hr.serializers import ShortDepartmentSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
+from ..info.serializers import OilStationSerializer
 
 
 class OrderPaymentSerializer(serializers.ModelSerializer):
@@ -324,6 +325,7 @@ class FuelCardDocumentSerializer(serializers.ModelSerializer):
 class FuelCardUsageHistorySerializer(serializers.ModelSerializer):
 
     card = FuelCardSerializer()
+    oil_station = OilStationSerializer()
     driver = ShortUserSerializer(read_only=True)
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
