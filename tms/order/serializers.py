@@ -526,6 +526,9 @@ class JobSerializer(serializers.ModelSerializer):
     unloading_stations_product = serializers.SerializerMethodField()
     stations_info = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
+    started_on = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
 
     class Meta:
         model = m.Job
