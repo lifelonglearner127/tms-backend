@@ -557,7 +557,6 @@ class JobSerializer(serializers.ModelSerializer):
         ).data
 
     def get_unloading_stations_product(self, instance):
-        
         return ShortStationProductionSerializer(
             instance.unloading_stations_product, many=True
         ).data

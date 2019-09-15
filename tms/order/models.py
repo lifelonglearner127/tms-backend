@@ -381,7 +381,17 @@ class Job(models.Model):
 
     @property
     def operating_efficiency(self):
-        pass
+        total_mileage = self.total_mileage
+        if self.finished_on and self.started_on:
+            job_duration = self.finished_on - self.started_on
+            if job_duration.microseconds == 0:
+                result_string = "未知"
+            else:
+                result_string = total_mileage / job_duration.microseconds
+        else:
+            result_string = "未知"
+
+        return result_string
 
     @property
     def drained_oil(self):
