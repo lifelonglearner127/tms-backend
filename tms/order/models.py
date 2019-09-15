@@ -382,12 +382,17 @@ class Job(models.Model):
     @property
     def operating_efficiency(self):
         total_mileage = self.total_mileage
+        print(total_mileage)
+        
         if self.finished_on and self.started_on:
-            job_duration = self.finished_on - self.started_on
-            if job_duration.microseconds == 0:
+            diff = self.finished_on - self.started_on
+            job_duration = diff.days * 24 * 60 * 60 + diff.seconds * 1000 + diff.microseconds
+            print(job_duration)
+            if job_duration == 0:
                 result_string = "未知"
             else:
-                result_string = "{:.2f}".format(total_mileage / job_duration.microseconds)
+                result_string = "{:.2f}".format(total_mileage / job_duration)
+                print(result_string)
         else:
             result_string = "未知"
 
@@ -408,10 +413,11 @@ class Job(models.Model):
                 station_unloading_time = station_unloading_time + job_station.finished_working_on - job_station.started_working_on
             unloading_total_duration = unloading_total_duration + station_unloading_time
         print(unloading_total_duration)
-        if unloading_total_duration.microseconds == 0:
+        duration = unloading_total_duration.days * 24 * 60 * 60 + unloading_total_duration.seconds * 1000 + unloading_total_duration.microseconds
+        if duration == 0:
             result_string = "未知"
         else:
-            result_string = "{:.2f}".format(total_weight * 60 * 1000 / unloading_total_duration.microseconds)
+            result_string = "{:.2f}".format(total_weight * 60 * 1000 / duration)
         return result_string
 
     @property
