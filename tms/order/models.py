@@ -387,7 +387,7 @@ class Job(models.Model):
             if job_duration.microseconds == 0:
                 result_string = "未知"
             else:
-                result_string = total_mileage / job_duration.microseconds
+                result_string = "{:.2f}".format(total_mileage / job_duration.microseconds)
         else:
             result_string = "未知"
 
@@ -411,7 +411,7 @@ class Job(models.Model):
         if unloading_total_duration.microseconds == 0:
             result_string = "未知"
         else:
-            result_string = total_weight * 60 * 1000 / unloading_total_duration.microseconds
+            result_string = "{:.2f}".format(total_weight * 60 * 1000 / unloading_total_duration.microseconds)
         return result_string
 
     @property
