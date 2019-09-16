@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from . import managers
 from ..core import constants as c
@@ -180,6 +182,11 @@ class StaffProfile(TimeStampedModel):
         return '{}-{}\'s profile'.format(
             self.user.role, self.user.username
         )
+
+
+@receiver(post_delete, sender=StaffProfile)
+def auto_delete_use_with_staffprofile(sender, instance, **kwargs):
+    instance.user.delete()
 
 
 class CustomerProfile(BasicContactModel):
