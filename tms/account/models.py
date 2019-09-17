@@ -166,6 +166,15 @@ class User(AbstractBaseUser):
 
         return status
 
+    @property
+    def driverlicense_number(self):
+        number = ""
+        if self.profile:
+            if self.profile.driver_license and self.profile.driver_license.first():
+                number = self.profile.driver_license.first().number
+        
+        return number
+
     objects = UserManager()
     admins = managers.AdminUserManager()
     staffs = managers.StaffUserManager()
