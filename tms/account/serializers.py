@@ -7,7 +7,6 @@ from . import models as m
 from . import utils
 from ..core import constants as c
 from ..core.serializers import TMSChoiceField
-from ..hr.serializers import ShortStaffProfileSerializer
 
 
 class PasswordField(serializers.CharField):
