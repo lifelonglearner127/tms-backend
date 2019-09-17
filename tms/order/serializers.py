@@ -9,13 +9,13 @@ from ..core import constants as c
 # from ..core.utils import format_datetime
 
 # models
-from ..hr.models import CustomerProfile
+from ..hr.models import CustomerProfile, StaffProfile
 from ..info.models import Product
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
-from ..hr.serializers import ShortCustomerProfileSerializer
+from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..info.serializers import (
     ShortStationSerializer, StationNameTypeSerializer, ShortProductSerializer, ShortStationProductionSerializer,
     ShortStationInfoSerializer
@@ -199,7 +199,7 @@ class OrderSerializer(serializers.ModelSerializer):
     """
     order model serializer
     """
-    assignee = ShortUserSerializer()
+    assignee = ShortStaffProfileSerializer()
     customer = ShortCustomerProfileSerializer()
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
@@ -338,7 +338,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         ret = data
         if 'assignee' in data:
-            ret['assignee'] = get_object_or_404(m.User, id=data['assignee']['id'])
+            ret['assignee'] = get_object_or_404(StaffProfile, id=data['assignee']['id'])
         ret['customer'] = get_object_or_404(
             CustomerProfile, id=data['customer']['id']
         )
