@@ -7,6 +7,7 @@ from . import models as m
 from . import utils
 from ..core import constants as c
 from ..core.serializers import TMSChoiceField
+from ..hr.serializers import ShortStaffProfileSerializer
 
 
 class PasswordField(serializers.CharField):
@@ -264,6 +265,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     role = TMSChoiceField(choices=c.USER_ROLE)
     permission = ShortUserPermissionSerializer(read_only=True)
+    profile = ShortStaffProfileSerializer()
 
     class Meta:
         model = m.User

@@ -9,7 +9,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import ShortUserSerializer, UserSerializer
 from ..info.serializers import StationNameSerializer
 
 # other
@@ -34,6 +34,8 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
     """
+    bound_driver = UserSerializer(read_only=True)
+    
     class Meta:
         model = m.Vehicle
         fields = (
