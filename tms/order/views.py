@@ -455,7 +455,6 @@ class JobViewSet(TMSViewSet):
             job_data['vehicle'] = get_object_or_404(
                 Vehicle, id=vehicle_data.get('id', None)
             )
-            print("vehicle")
 
             driver_data = job_data.get('driver', None)
             if driver_data is None:
@@ -463,10 +462,10 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['driver'] = 'Missing data'
 
-            job_data['driver'] = get_object_or_404(
+            job_driver = get_object_or_404(
                 m.StaffProfile, id=driver_data.get('id', None)
             )
-            print("driver")
+            job_data['driver'] = job_driver.user
 
             escort_data = job_data.get('escort', None)
             if escort_data is None:
@@ -474,10 +473,10 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['escort'] = 'Missing data'
 
-            job_data['escort'] = get_object_or_404(
+            job_escort = get_object_or_404(
                 m.StaffProfile, id=escort_data.get('id', None)
             )
-            print("escort")
+            job_data['escort'] = job_escort.user
 
             branch_index = 0
             job_data['stations'] = []

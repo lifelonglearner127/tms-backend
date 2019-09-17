@@ -62,6 +62,7 @@ class DriverLicenseSerializer(serializers.ModelSerializer):
 class ShortStaffProfileSerializer(serializers.ModelSerializer):
 
     name = serializers.CharField(source='user.name')
+    mobile = serializers.CharField(source='user.mobile')
     license_expiration = serializers.SerializerMethodField()
     bind_vehicle = serializers.SerializerMethodField()
     driverlicense_number = serializers.SerializerMethodField()
@@ -81,6 +82,7 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'mobile',
             'emergency_number',
             'id_card',
             'status',
