@@ -464,7 +464,7 @@ class JobViewSet(TMSViewSet):
                 errors[job_index]['driver'] = 'Missing data'
 
             job_data['driver'] = get_object_or_404(
-                User, id=driver_data.get('id', None)
+                m.StaffProfile, id=driver_data.get('id', None)
             )
             print("driver")
 
@@ -475,7 +475,7 @@ class JobViewSet(TMSViewSet):
                 errors[job_index]['escort'] = 'Missing data'
 
             job_data['escort'] = get_object_or_404(
-                User, id=escort_data.get('id', None)
+                m.StaffProfile, id=escort_data.get('id', None)
             )
             print("escort")
 
