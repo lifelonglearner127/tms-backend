@@ -265,11 +265,19 @@ class UserSerializer(serializers.ModelSerializer):
     """
     role = TMSChoiceField(choices=c.USER_ROLE)
     permission = ShortUserPermissionSerializer(read_only=True)
-    profile = ShortStaffProfileSerializer()
+    driverlicense_number = serializers.SerializerMethodField()
 
     class Meta:
         model = m.User
         fields = '__all__'
+    
+    def get_driverlicense_number(self, instance):
+        number = ""
+        if instance.profile:
+            if instance.profile.driver_license and instance.profile.driver_license.first():
+                number = instance.profile.driver_license.first().number
+        
+        return number
 
 
 class UserPermissionSerializer(serializers.ModelSerializer):
