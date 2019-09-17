@@ -169,10 +169,13 @@ class ShortUserSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of User
     """
+
+    driverlicense_number = serializers.SerializerMethodField()
+
     class Meta:
         model = m.User
         fields = (
-            'id', 'name', 'mobile', 'status_text'
+            'id', 'name', 'mobile', 'status_text', 'driverlicenseNumber'
         )
 
     def to_representation(self, instance):
@@ -181,6 +184,14 @@ class ShortUserSerializer(serializers.ModelSerializer):
             ret['name'] = instance.username
 
         return ret
+
+    def get_driverlicense_number(self, instance):
+        number = ""
+        if instance.profile:
+            if instance.profile.driver_license and instance.profile.driver_license.first():
+                number = instance.profile.driver_license.first().number
+        
+        return number
 
 
 class ShortCompanyMemberSerializer(serializers.ModelSerializer):
@@ -264,20 +275,11 @@ class UserSerializer(serializers.ModelSerializer):
     """
     role = TMSChoiceField(choices=c.USER_ROLE)
     permission = ShortUserPermissionSerializer(read_only=True)
-    driverlicense_number = serializers.SerializerMethodField()
 
     class Meta:
         model = m.User
         fields = '__all__'
     
-    def get_driverlicense_number(self, instance):
-        number = ""
-        if instance.profile:
-            if instance.profile.driver_license and instance.profile.driver_license.first():
-                number = instance.profile.driver_license.first().number
-        
-        return number
-
 
 class UserPermissionSerializer(serializers.ModelSerializer):
 

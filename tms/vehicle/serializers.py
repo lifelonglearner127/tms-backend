@@ -34,8 +34,8 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
     """
-    bound_driver = UserSerializer(read_only=True)
-    
+    bound_driver = ShortUserSerializer(read_only=True)
+
     class Meta:
         model = m.Vehicle
         fields = (
