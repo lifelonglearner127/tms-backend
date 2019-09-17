@@ -301,7 +301,7 @@ class Vehicle(TimeStampedModel):
     @property
     def status_text(self):
         if self.status == c.VEHICLE_STATUS_INWORK:
-            job = self.objects.filter(jobs__progress__gt=1).first()
+            job = self.jobs.filter(progress__gt=1).first()
             if job is not None:
                 if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
                     status = '执行任务-装货'
@@ -315,9 +315,6 @@ class Vehicle(TimeStampedModel):
                     status = '执行任务-卸货'
                 elif (job.progress - 10) % 4 == 3:
                     status = '执行任务-卸货'
-            else:
-                status = 'Wrong Status'
-
         elif self.status == c.VEHICLE_STATUS_REPAIR:
             status = 'Repairing'
         else:
