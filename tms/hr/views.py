@@ -168,6 +168,28 @@ class StaffProfileViewSet(TMSViewSet):
         )
         serializer = s.ShortStaffProfileSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+    
+    @action(detail=False, url_path='drivers/short')
+    def get_short_driver_users(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            m.StaffProfile.drivers.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='escorts/short')
+    def get_short_escort_users(self, request):
+        serializer = s.ShortStaffProfileSerializer(
+            m.StaffProfile.escorts.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class CustomerProfileViewSet(TMSViewSet):

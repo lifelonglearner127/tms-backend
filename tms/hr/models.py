@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from datetime import date, datetime, timedelta
+from math import ceil
 
 from . import managers
 from ..core import constants as c
@@ -89,6 +91,26 @@ class DriverLicense(models.Model):
     )
 
 
+def days_hours_minutes(td):
+    seconds = (td.seconds//60) % 60
+    seconds += td.microseconds / 1e6
+    return td.days, td.seconds//3600, seconds
+
+
+def format_hms_string(time_diff):
+    format_string = ""
+    days, hours, mins = days_hours_minutes(time_diff)
+    if days > 0:
+        format_string += "{}天 ".format(days)
+    if hours > 0:
+        format_string += "{}小时 ".format(hours)
+    if mins > 0:
+        format_string += "{}分钟".format(ceil(mins))
+    if mins == 0:
+        format_string += "0分钟"
+    return format_string
+
+
 class StaffProfile(TimeStampedModel):
     """
     Staff Profile Model
@@ -172,6 +194,8 @@ class StaffProfile(TimeStampedModel):
     objects = models.Manager()
     availables = managers.AvailableStaffManager()
     notavailables = managers.NotAvailableStaffManager()
+    drivers = managers.Drivers()
+    escorts = managers.Escorts()
     inwork_drivers = managers.InWorkDrivers()
     available_drivers = managers.AvailableDrivers()
     inwork_escorts = managers.InWorkEscorts()
@@ -182,6 +206,57 @@ class StaffProfile(TimeStampedModel):
         return '{}-{}\'s profile'.format(
             self.user.role, self.user.username
         )
+
+    @property
+    def status_text(self):
+        request_set = self.user.my_requests.all()
+        status = "等待任务"
+        if len(request_set) > 0:
+            for request in request_set:
+                today_dt = date.today()
+                if today_dt >= request.rest_request.from_date and today_dt <= request.rest_request.to_date:
+                    status = "休假"
+        if status != "休假":
+            job = self.user.jobs_as_driver.filter(progress__gt=1).first()
+            if job is not None:
+                if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
+                    status = '执行任务-装货'
+                elif job.progress == 6 and job.progress == 7 and job.progress == 8 and job.progress == 9:
+                    status = '执行任务-资格'
+                elif (job.progress - 10) % 4 == 0:
+                    status = '执行任务-卸货'
+                elif (job.progress - 10) % 4 == 1:
+                    status = '执行任务-卸货'
+                elif (job.progress - 10) % 4 == 2:
+                    status = '执行任务-卸货'
+                elif (job.progress - 10) % 4 == 3:
+                    status = '执行任务-卸货'
+        return status
+
+    @property
+    def driving_duration(self):
+        bind = self.user.my_vehicle_bind.first()
+        
+        if bind is not None and bind.get_off is None:
+            time_duration = datetime.now() - bind.get_on
+        elif bind is not None and bind.get_off is not None:
+            time_duration = bind.get_off - bind.get_on
+        else:
+            time_duration = timedelta(0)
+        
+        result = format_hms_string(time_duration)
+        return result
+
+    @property
+    def next_job_customer(self):
+        next_job = self.user.jobs_as_driver.filter(progress=1).first()
+        customer_name = ''
+        if next_job:
+            next_order = next_job.order.first()
+            if next_order:
+                customer = next_order.customer.first()
+                customer_name = customer.user.username
+        return customer_name
 
 
 @receiver(post_delete, sender=StaffProfile)

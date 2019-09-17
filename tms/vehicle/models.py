@@ -303,39 +303,50 @@ class Vehicle(TimeStampedModel):
         if self.status == c.VEHICLE_STATUS_INWORK:
             job = self.objects.filter(jobs__progress__gt=1).first()
             if job is not None:
-                if job.progress == 2:
-                    status = '赶往装货地'
-                elif job.progress == 3:
-                    status = '等待装货'
-                elif job.progress == 4:
-                    status = '装货中'
-                elif job.progress == 5:
-                    status = '装货完成'
-                elif job.progress == 6:
-                    status = '赶往质检'
-                elif job.progress == 7:
-                    status = '等待质检'
-                elif job.progress == 8:
-                    status = '质检中'
-                elif job.progress == 9:
-                    status = '质检完成'
+                if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
+                    status = '执行任务-装货'
+                elif job.progress == 6 and job.progress == 7 and job.progress == 8 and job.progress == 9:
+                    status = '执行任务-资格'
                 elif (job.progress - 10) % 4 == 0:
-                    status = '赶往卸货'
+                    status = '执行任务-卸货'
                 elif (job.progress - 10) % 4 == 1:
-                    status = '等待卸货'
+                    status = '执行任务-卸货'
                 elif (job.progress - 10) % 4 == 2:
-                    status = '卸货中'
+                    status = '执行任务-卸货'
                 elif (job.progress - 10) % 4 == 3:
-                    status = '卸货完成'
+                    status = '执行任务-卸货'
             else:
                 status = 'Wrong Status'
 
         elif self.status == c.VEHICLE_STATUS_REPAIR:
             status = 'Repairing'
         else:
-            status = 'No job'
+            status = '等待任务'
 
         return status
+    
+    @property
+    def bound_driver(self):
+        bind = VehicleDriverDailyBind.objects.filter(
+            vehicle=self
+        ).first()
+        if bind is not None and bind.get_off is None:
+            driver = bind.driver
+        else:
+            driver = 'No driver'
+        
+        return driver
+
+    @property
+    def next_job_customer(self):
+        next_job = self.jobs.filter(progress=c.JOB_PROGRESS_NOT_STARTED).first()
+        customer_name = ''
+        if next_job:
+            next_order = next_job.order.first()
+            if next_order:
+                customer = next_order.customer.first()
+                customer_name = customer.user.username
+        return customer_name
 
     objects = models.Manager()
     inworks = managers.InWorkVehicleManager()

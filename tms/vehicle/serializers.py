@@ -37,7 +37,7 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Vehicle
         fields = (
-            'id', 'plate_num', 'status', 'total_load', 'branches', 'status_text'
+            'id', 'plate_num', 'status', 'total_load', 'branches', 'status_text', 'bound_driver', 'next_job_customer'
         )
 
 

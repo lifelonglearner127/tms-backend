@@ -62,12 +62,41 @@ class DriverLicenseSerializer(serializers.ModelSerializer):
 class ShortStaffProfileSerializer(serializers.ModelSerializer):
 
     name = serializers.CharField(source='user.name')
+    # license_expiration = serializers.CharField(source='driver_license.expires_on')
+    license_expiration = serializers.SerializerMethodField()
+    bind_vehicle = serializers.SerializerMethodField()
+
+    def get_bind_vehicle(self, instance):
+        bind = VehicleDriverDailyBind.objects.filter(driver=instance.user, get_off=None).first()
+        if bind is not None:
+            return {
+                'id': bind.vehicle.id,
+                'plate_num': bind.vehicle.plate_num
+            }
+        else:
+            return None
 
     class Meta:
         model = m.StaffProfile
         fields = (
-            'id', 'name'
+            'id',
+            'name',
+            'emergency_number',
+            'id_card',
+            'status',
+            'license_expiration',
+            'bind_vehicle',
+            'status_text',
+            'driving_duration',
+            'next_job_customer'
         )
+    
+    def get_license_expiration(self, instance):
+        expiration = ""
+        if instance.driver_license and instance.driver_license.first():
+            expiration = instance.driver_license.first().expires_on
+        
+        return expiration
 
 
 class DriverAppStaffProfileSerializer(serializers.ModelSerializer):

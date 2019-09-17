@@ -52,6 +52,26 @@ class InWorkEscorts(models.Manager):
         )
 
 
+class Drivers(models.Manager):
+    """
+    Manager for getting drivers
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user__role=c.USER_ROLE_DRIVER,
+        )
+
+
+class Escorts(models.Manager):
+    """
+    Manager for getting escorts
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user__role=c.USER_ROLE_ESCORT,
+        )
+
+
 class AvailableEscorts(models.Manager):
     """
     Manager for getting available escorts
