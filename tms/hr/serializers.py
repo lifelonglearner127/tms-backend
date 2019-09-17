@@ -94,15 +94,15 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
     
     def get_license_expiration(self, instance):
         expiration = ""
-        if instance.driver_license and instance.driver_license.first():
-            expiration = instance.driver_license.first().expires_on
+        if instance.driver_license:
+            expiration = instance.driver_license.expires_on
         
         return expiration
 
     def get_driverlicense_number(self, instance):
         number = ""
-        if instance.driver_license and instance.driver_license.first():
-            number = instance.driver_license.first().number
+        if instance.driver_license:
+            number = instance.driver_license.number
         
         return number
 

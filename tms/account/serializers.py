@@ -179,7 +179,8 @@ class ShortUserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         if ret['name'] is None:
-            ret['name'] = instance.username
+            if instance != 'No driver':
+                ret['name'] = instance.username
 
         return ret
 
