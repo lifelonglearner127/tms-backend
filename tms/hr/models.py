@@ -3,6 +3,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from datetime import date, datetime, timedelta
 from math import ceil
+import pytz
 
 from . import managers
 from ..core import constants as c
@@ -238,7 +239,8 @@ class StaffProfile(TimeStampedModel):
         bind = self.user.my_vehicle_bind.first()
         
         if bind is not None and bind.get_off is None:
-            time_duration = datetime.now() - bind.get_on
+            dt1 = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+            time_duration = dt1 - bind.get_on
         elif bind is not None and bind.get_off is not None:
             time_duration = bind.get_off - bind.get_on
         else:
