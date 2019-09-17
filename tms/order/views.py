@@ -366,6 +366,7 @@ class JobViewSet(TMSViewSet):
     serializer_class = s.JobSerializer
 
     def create(self, request):
+        print(request.data)
         order = get_object_or_404(m.Order, id=request.data.pop('order', None))
         if order.status == c.ORDER_STATUS_COMPLETE:
             return Response(
