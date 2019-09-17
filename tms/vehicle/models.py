@@ -315,6 +315,8 @@ class Vehicle(TimeStampedModel):
                     status = '执行任务-卸货'
                 elif (job.progress - 10) % 4 == 3:
                     status = '执行任务-卸货'
+            else:
+                status = '等待任务'
         elif self.status == c.VEHICLE_STATUS_REPAIR:
             status = 'Repairing'
         else:
