@@ -251,8 +251,13 @@ class VehicleViewSet(TMSViewSet):
             escort = bind.escort.name
             driver_mobile = bind.driver.mobile
             escort_mobile = bind.escort.mobile
-            time_diff = relativedelta(datetime.now(), bind.get_on)
-            driving_duration = "{}天 {}小时 {}分钟".format(time_diff.days, time_diff.hours, time_diff.minutes)
+            try:
+                vehicle_bind = m.VehicleDriverDailyBind.objects.get(vehicle=vehicle)
+                time_diff = relativedelta(datetime.now(), vehicle_bind.get_on)
+                driving_duration = "{}天 {}小时 {}分钟".format(time_diff.days, time_diff.hours, time_diff.minutes)
+            except Exception:
+                driving_duration = '未知'
+            
         except VehicleUserBind.DoesNotExist:
             driver = '未知'
             escort = '未知'

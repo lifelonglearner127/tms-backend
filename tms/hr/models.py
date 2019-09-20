@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from datetime import date, datetime, timedelta
 from math import ceil
 import pytz
@@ -259,11 +257,6 @@ class StaffProfile(TimeStampedModel):
                 customer = next_order.customer.first()
                 customer_name = customer.user.username
         return customer_name
-
-
-@receiver(post_delete, sender=StaffProfile)
-def auto_delete_use_with_staffprofile(sender, instance, **kwargs):
-    instance.user.delete()
 
 
 class CustomerProfile(BasicContactModel):
