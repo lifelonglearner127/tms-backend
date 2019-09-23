@@ -5,7 +5,6 @@ from ..core import constants as c
 
 # models
 from . import models as m
-from ..hr.models import CustomerProfile
 
 # serializers
 from ..core.serializers import TMSChoiceField
@@ -145,6 +144,25 @@ class ShortStationSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'contact', 'mobile', 'address', 'station_type'
         )
+
+
+class ShortStationProductionSerializer(serializers.Serializer):
+    """
+    Serializer for short data of Unloading Station product
+    """
+    jobstation = serializers.CharField(max_length=200)
+    product = serializers.CharField(max_length=200)
+    mission_weight = serializers.CharField(max_length=200)
+    volume = serializers.CharField(max_length=200)
+
+
+class ShortStationInfoSerializer(serializers.Serializer):
+    """
+    Serializer for short data of Station Info
+    """
+    arrive_duration = serializers.CharField(max_length=200)
+    load_wait_duration = serializers.CharField(max_length=200)
+    load_duration = serializers.CharField(max_length=200)
 
 
 class ShortStationPointSerializer(serializers.ModelSerializer):

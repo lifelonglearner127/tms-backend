@@ -179,6 +179,18 @@ class BasicRequest(models.Model):
     def approvers_count(self):
         return self.approvers.all().count()
 
+    @property
+    def status(self):
+        if self.is_cancelled:
+            return '取消审批'
+
+        if self.approved is None:
+            return '审批中'
+        elif self.approved is True:
+            return '审批完成'
+        elif self.approved is False:
+            return '审批拒绝'
+
     class Meta:
         ordering = ['approved', '-approved_time', '-request_time']
 

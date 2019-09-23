@@ -18,7 +18,6 @@ from ..core import constants as c
 from ..core.permissions import (
     IsDriverOrEscortUser, IsCustomerUser, OrderPermission
 )
-from . import permissions as p
 
 # models
 from . import models as m
@@ -186,7 +185,6 @@ class OrderViewSet(TMSViewSet):
             order.jobs.all(),
             many=True
         )
-
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -368,7 +366,9 @@ class JobViewSet(TMSViewSet):
     serializer_class = s.JobSerializer
 
     def create(self, request):
+        
         order = get_object_or_404(m.Order, id=request.data.pop('order', None))
+        print('order')
         if order.status == c.ORDER_STATUS_COMPLETE:
             return Response(
                 {
@@ -407,6 +407,7 @@ class JobViewSet(TMSViewSet):
             job_data['route'] = get_object_or_404(
                 Route, id=route_data.get('id', None)
             )
+            print('route')
 
             loading_station_data = job_data.pop('loading_station', None)
             if loading_station_data is None:
@@ -417,6 +418,7 @@ class JobViewSet(TMSViewSet):
             loading_station = get_object_or_404(
                 Station, id=loading_station_data.get('id', None)
             )
+            print("loading_station")
 
             if job_data['route'].loading_station != loading_station:
                 if job_index not in errors:
@@ -434,6 +436,7 @@ class JobViewSet(TMSViewSet):
             quality_station = get_object_or_404(
                 Station, id=quality_station_data.get('id', None)
             )
+            print("quality_station")
 
             if not job_data['is_same_station']:
                 if job_data['route'].stations[1] != quality_station:
@@ -459,9 +462,10 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['driver'] = 'Missing data'
 
-            job_data['driver'] = get_object_or_404(
-                User, id=driver_data.get('id', None)
+            job_driver = get_object_or_404(
+                m.StaffProfile, id=driver_data.get('id', None)
             )
+            job_data['driver'] = job_driver.user
 
             escort_data = job_data.get('escort', None)
             if escort_data is None:
@@ -469,9 +473,10 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['escort'] = 'Missing data'
 
-            job_data['escort'] = get_object_or_404(
-                User, id=escort_data.get('id', None)
+            job_escort = get_object_or_404(
+                m.StaffProfile, id=escort_data.get('id', None)
             )
+            job_data['escort'] = job_escort.user
 
             branch_index = 0
             job_data['stations'] = []
@@ -509,6 +514,7 @@ class JobViewSet(TMSViewSet):
                 product = get_object_or_404(
                     Product, id=product_data.get('id', None)
                 )
+                print("product")
 
                 for order_product in order_products:
                     if order_product['product'] == product:
@@ -530,6 +536,7 @@ class JobViewSet(TMSViewSet):
                     station = get_object_or_404(
                         Station, id=station_data.get('id', None)
                     )
+                    print("station")
 
                     if station not in job_data['route'].unloading_stations:
                         if job_index not in errors:

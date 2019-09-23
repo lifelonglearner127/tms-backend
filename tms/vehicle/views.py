@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil import relativedelta
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, mixins, viewsets
@@ -18,7 +19,7 @@ from ..core.serializers import ChoiceSerializer
 from ..finance.serializers import DriverAppETCCardSerializer, DriverAppFuelCardSerializer
 
 # views
-from ..core.views import TMSViewSet, ApproveViewSet
+from ..core.views import TMSViewSet
 from ..g7.interfaces import G7Interface
 
 
@@ -248,9 +249,21 @@ class VehicleViewSet(TMSViewSet):
             bind = VehicleUserBind.objects.get(vehicle=vehicle)
             driver = bind.driver.name
             escort = bind.escort.name
+            driver_mobile = bind.driver.mobile
+            escort_mobile = bind.escort.mobile
+            try:
+                vehicle_bind = m.VehicleDriverDailyBind.objects.get(vehicle=vehicle)
+                time_diff = relativedelta(datetime.now(), vehicle_bind.get_on)
+                driving_duration = "{}天 {}小时 {}分钟".format(time_diff.days, time_diff.hours, time_diff.minutes)
+            except Exception:
+                driving_duration = '未知'
+            
         except VehicleUserBind.DoesNotExist:
             driver = '未知'
             escort = '未知'
+            driver_mobile = '未知'
+            escort_mobile = '未知'
+            driving_duration = '未知'
 
         queries = {
             'plate_num': plate_num,
@@ -262,15 +275,18 @@ class VehicleViewSet(TMSViewSet):
             'VEHICLE_STATUS_INQUIRY',
             queries=queries
         )
-
         ret = {
             'plate_num': plate_num,
             'driver': driver,
             'escort': escort,
             'gpsno': data.get('gpsno', ''),
-            'location': data['loc']['address'].split(' ')[0],
-            'speed': data['loc']['speed']
+            'location': data['loc']['address'],
+            'speed': data['loc']['speed'],
+            'driver_mobile': driver_mobile,
+            'escort_mobile': escort_mobile,
+            'driving_duration': driving_duration
         }
+        print(ret)
         return Response(
             ret,
             status=status.HTTP_200_OK

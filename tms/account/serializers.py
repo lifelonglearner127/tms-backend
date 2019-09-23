@@ -169,16 +169,18 @@ class ShortUserSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of User
     """
+
     class Meta:
         model = m.User
         fields = (
-            'id', 'name', 'mobile'
+            'id', 'name', 'mobile', 'status_text', 'driverlicense_number'
         )
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         if ret['name'] is None:
-            ret['name'] = instance.username
+            if instance != 'No driver':
+                ret['name'] = instance.username
 
         return ret
 
@@ -268,7 +270,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = '__all__'
-
+    
 
 class UserPermissionSerializer(serializers.ModelSerializer):
 

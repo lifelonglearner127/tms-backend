@@ -44,15 +44,18 @@ def notify_vehicle_request(sender, instance, created, **kwargs):
 @receiver(post_save, sender=m.RestRequest)
 def notify_rest_request(sender, instance, created, **kwargs):
     if created:
+        print(created)
         message_type = c.NOTIFICATION_REST_REQUEST
         message = '{} request a rest from {} to {}'.format(
             instance.request.requester.name,
             instance.from_date.strftime('%Y-%m-%d'),
             instance.to_date.strftime('%Y-%m-%d'),
         )
+        print(message)
 
         for approver in instance.request.approvers.all():
             if approver.channel_name:
+                print(approver.channel_name)
                 async_to_sync(channel_layer.send)(
                     approver.channel_name,
                     {

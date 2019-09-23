@@ -1,5 +1,7 @@
 from django.db import models
 from month.models import MonthField
+from datetime import timedelta
+from math import ceil
 
 from . import managers
 from ..core import constants as c
@@ -7,7 +9,7 @@ from ..core import constants as c
 # models
 from ..core.models import TimeStampedModel
 from ..account.models import User
-from ..hr.models import CustomerProfile
+from ..hr.models import CustomerProfile, StaffProfile
 from ..info.models import Station, Product
 from ..info.models import Route
 from ..vehicle.models import Vehicle
@@ -42,7 +44,7 @@ class Order(TimeStampedModel):
     )
 
     assignee = models.ForeignKey(
-        User,
+        StaffProfile,
         on_delete=models.SET_NULL,
         related_name='charge_orders',
         null=True,
@@ -173,6 +175,26 @@ class OrderReport(models.Model):
         ordering = ('-month', )
 
 
+def days_hours_minutes(td):
+    seconds = (td.seconds//60) % 60
+    seconds += td.microseconds / 1e6
+    return td.days, td.seconds//3600, seconds
+
+
+def format_hms_string(time_diff, format_string):
+    format_string = "{}: ".format(format_string)
+    days, hours, mins = days_hours_minutes(time_diff)
+    if days > 0:
+        format_string += "{}天 ".format(days)
+    if hours > 0:
+        format_string += "{}小时 ".format(hours)
+    if mins > 0:
+        format_string += "{}分钟".format(ceil(mins))
+    if mins == 0:
+        format_string += "0分钟"
+    return format_string
+
+
 class Job(models.Model):
     """
     Job model
@@ -264,7 +286,143 @@ class Job(models.Model):
 
     @property
     def loading_station(self):
-        return self.stations.all()[0]
+        return self.stations.all()
+
+    @property
+    def stations_info(self):
+        stations = self.stations.all()
+        station_info = []
+        previous_station_time = self.started_on
+        for station in stations:
+            jobstation = station.jobstation_set.get(job=self)
+            if station.station_type == 'L':
+                arrival_format_string = '赶往装货地时长'
+                loadwait_format_string = '等待装货时长'
+                load_format_string = '装货时长'
+            elif station.station_type == 'Q':
+                arrival_format_string = '赶往质检地时长'
+                loadwait_format_string = '等待质检时长'
+                load_format_string = '质检时长'
+            else:
+                arrival_format_string = '赶往卸货地时长'
+                loadwait_format_string = '等待卸货时长'
+                load_format_string = '卸货时长'
+
+            if jobstation.arrived_station_on:
+                time_diff = jobstation.arrived_station_on - previous_station_time
+                arrive_duration = format_hms_string(time_diff, arrival_format_string)
+            else:
+                arrive_duration = '{}: 未知'.format(arrival_format_string)
+
+            if jobstation.started_working_on and jobstation.arrived_station_on:
+                time_diff = jobstation.started_working_on - jobstation.arrived_station_on
+                load_wait_duration = format_hms_string(time_diff, loadwait_format_string)
+            else:
+                load_wait_duration = '{}: 未知'.format(loadwait_format_string)
+            if jobstation.started_working_on and jobstation.finished_working_on:
+                time_diff = jobstation.finished_working_on - jobstation.started_working_on
+                load_duration = format_hms_string(time_diff, load_format_string)
+            else:
+                load_duration = '{}: 未知'.format(load_format_string)
+
+            previous_station_time = jobstation.departure_station_on
+            station_info.append({
+                'arrive_duration': arrive_duration,
+                'load_wait_duration': load_wait_duration,
+                'load_duration': load_duration
+            })
+        return station_info
+
+    @property
+    def unloading_stations_product(self):
+
+        unloading_stations = self.stations.all()[2:]
+        unloading_station_products = []
+        for u_station in unloading_stations:
+            jobstation = u_station.jobstation_set.get(job=self)
+            job_station_product = jobstation.jobstationproduct_set.get()
+            unloading_station_products.append({
+                'jobstation': jobstation.station.name,
+                'product': job_station_product.product.name,
+                'mission_weight': job_station_product.mission_weight,
+                'volume': job_station_product.volume
+            })
+        return unloading_station_products
+
+    @property
+    def unloading_stations_consume_weight(self):
+
+        unloading_stations = self.stations.all()[2:]
+        total_consume_weight = 0
+        for u_station in unloading_stations:
+            jobstation = u_station.jobstation_set.get(job=self)
+            job_station_product = jobstation.jobstationproduct_set.get()
+            total_consume_weight = total_consume_weight + job_station_product.mission_weight - job_station_product.volume
+        return total_consume_weight
+
+    @property
+    def road_duration(self):
+
+        job_duration = timedelta()
+        road_time = timedelta()
+        if self.finished_on and self.started_on:
+            job_duration = self.finished_on - self.started_on
+            road_time = job_duration
+        if job_duration.microseconds > 0:
+            stations = self.stations.all()
+            for station in stations:
+                station_duration = timedelta()
+                jobstation = station.jobstation_set.get(job=self)
+                if jobstation.arrived_station_on and jobstation.departure_station_on:
+                    station_duration = jobstation.departure_station_on - jobstation.arrived_station_on
+                road_time = road_time - station_duration
+        road_time_string = format_hms_string(road_time, "在途时间")
+        return road_time_string
+
+    @property
+    def operating_efficiency(self):
+        total_mileage = self.total_mileage
+        print(total_mileage)
+        
+        if self.finished_on and self.started_on:
+            diff = self.finished_on - self.started_on
+            job_duration = diff.days * 24 * 60 * 60 + diff.seconds * 1000 + diff.microseconds
+            print(job_duration)
+            if job_duration == 0:
+                result_string = "未知"
+            else:
+                result_string = "{:.2f}".format(total_mileage / job_duration)
+                print(result_string)
+        else:
+            result_string = "未知"
+
+        return result_string
+
+    @property
+    def drained_oil(self):
+
+        total_weight = self.total_weight
+        unloading_total_duration = timedelta()
+        unloading_stations = self.stations.all()[2:]
+        for u_station in unloading_stations:
+            station_unloading_time = timedelta()
+            job_station = u_station.jobstation_set.get(job=self)
+            if job_station.arrived_station_on and job_station.started_working_on:
+                station_unloading_time = station_unloading_time + job_station.started_working_on - job_station.arrived_station_on
+            if job_station.started_working_on and job_station.finished_working_on:
+                station_unloading_time = station_unloading_time + job_station.finished_working_on - job_station.started_working_on
+            unloading_total_duration = unloading_total_duration + station_unloading_time
+        print(unloading_total_duration)
+        duration = unloading_total_duration.days * 24 * 60 * 60 + unloading_total_duration.seconds * 1000 + unloading_total_duration.microseconds
+        if duration == 0:
+            result_string = "未知"
+        else:
+            result_string = "{:.2f}".format(total_weight * 60 * 1000 / duration)
+        return result_string
+
+    @property
+    def turnover(self):
+        return self.total_weight * self.heavy_mileage * 0.4
 
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()

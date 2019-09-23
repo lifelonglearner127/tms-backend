@@ -9,7 +9,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import ShortUserSerializer, UserSerializer
 from ..info.serializers import StationNameSerializer
 
 # other
@@ -34,10 +34,12 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
     """
+    bound_driver = ShortUserSerializer(read_only=True)
+
     class Meta:
         model = m.Vehicle
         fields = (
-            'id', 'plate_num'
+            'id', 'plate_num', 'status', 'total_load', 'branches', 'status_text', 'bound_driver', 'next_job_customer'
         )
 
 
@@ -303,9 +305,26 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             return True
 
         get_on_time = self.context.get('get_on_time')
-        if instance.before_driving_checked_time < get_on_time:
-            return True
-        else:
+        try:
+            # check with existing checked time
+            if instance.before_driving_checked_time:
+                if instance.before_driving_checked_time < get_on_time:
+                    return True
+                else:
+                    return False
+            elif instance.driving_checked_items:
+                if instance.driving_checked_items < get_on_time:
+                    return True
+                else:
+                    return False
+            elif instance.after_driving_checked_time:
+                if instance.after_driving_checked_time < get_on_time:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        except Exception:
             return False
 
     def get_total_problems(self, instance):
