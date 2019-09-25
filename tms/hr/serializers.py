@@ -93,19 +93,19 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
             'next_job_customer',
             'driverlicense_number'
         )
-    
+
     def get_license_expiration(self, instance):
         expiration = ""
         if instance.driver_license:
             expiration = instance.driver_license.expires_on
-        
+
         return expiration
 
     def get_driverlicense_number(self, instance):
         number = ""
         if instance.driver_license:
             number = instance.driver_license.number
-        
+
         return number
 
 
@@ -301,21 +301,34 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         return ret
 
 
+class CustomerContactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.CustomerContact
+        fields = '__all__'
+
+
 class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 
     user_id = serializers.CharField(source='user.id')
+    primary_contact = serializers.SerializerMethodField()
 
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'user_id', 'name', 'contact', 'mobile'
+            'id', 'user_id', 'name', 'primary_contact'
         )
+
+    def get_primary_contact(self, instance):
+        return CustomerContactSerializer(instance.contacts.first()).data
 
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
 
     user = MainUserSerializer(read_only=True)
     associated_with = ShortUserSerializer(read_only=True)
+    contacts = CustomerContactSerializer(many=True, read_only=True)
+    primary_contact = serializers.SerializerMethodField()
 
     class Meta:
         model = m.CustomerProfile
@@ -357,6 +370,10 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             associated_with=associated_with,
             **validated_data
         )
+
+        for contact in self.context.get('contacts', []):
+            customer_contact = m.CustomerContact.objects.create(**contact)
+            customer.contacts.add(customer_contact)
 
         return customer
 
@@ -400,7 +417,19 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
             setattr(instance, key, value)
 
         instance.save()
+
+        instance.contacts.clear()
+        for contact in self.context.get('contacts', []):
+            customer_contact = m.CustomerContact.objects.create(
+                contact=contact.get('contact', ''),
+                mobile=contact.get('mobile', '')
+            )
+            instance.contacts.add(customer_contact)
+
         return instance
+
+    def get_primary_contact(self, instance):
+        return CustomerContactSerializer(instance.contacts.first()).data
 
 
 class CustomerAppProfileSerializer(serializers.ModelSerializer):

@@ -257,7 +257,7 @@ class VehicleViewSet(TMSViewSet):
                 driving_duration = "{}天 {}小时 {}分钟".format(time_diff.days, time_diff.hours, time_diff.minutes)
             except Exception:
                 driving_duration = '未知'
-            
+
         except VehicleUserBind.DoesNotExist:
             driver = '未知'
             escort = '未知'

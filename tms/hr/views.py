@@ -168,7 +168,7 @@ class StaffProfileViewSet(TMSViewSet):
         )
         serializer = s.ShortStaffProfileSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
-    
+
     @action(detail=False, url_path='drivers/short')
     def get_short_driver_users(self, request):
         serializer = s.ShortStaffProfileSerializer(
@@ -202,7 +202,7 @@ class CustomerProfileViewSet(TMSViewSet):
         context = {
             'user': request.data.pop('user'),
             'associated_with': request.data.pop('associated_with'),
-            # 'products': request.data.pop('products')
+            'contacts': request.data.pop('contacts')
         }
 
         serializer = self.serializer_class(
@@ -222,7 +222,7 @@ class CustomerProfileViewSet(TMSViewSet):
         context = {
             'user': request.data.pop('user'),
             'associated_with': request.data.pop('associated_with'),
-            # 'products': request.data.pop('products')
+            'contacts': request.data.pop('contacts')
         }
 
         serializer = self.serializer_class(

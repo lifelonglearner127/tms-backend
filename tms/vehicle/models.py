@@ -323,7 +323,7 @@ class Vehicle(TimeStampedModel):
             status = '等待任务'
 
         return status
-    
+
     @property
     def bound_driver(self):
         bind = VehicleDriverDailyBind.objects.filter(
@@ -333,7 +333,7 @@ class Vehicle(TimeStampedModel):
             driver = bind.driver
         else:
             driver = 'No driver'
-        
+
         return driver
 
     @property

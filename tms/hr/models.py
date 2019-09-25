@@ -5,7 +5,7 @@ import pytz
 
 from . import managers
 from ..core import constants as c
-from ..core.models import BasicContactModel, TimeStampedModel
+from ..core.models import TimeStampedModel
 from ..account.models import User
 
 
@@ -235,7 +235,7 @@ class StaffProfile(TimeStampedModel):
     @property
     def driving_duration(self):
         bind = self.user.my_vehicle_bind.first()
-        
+
         if bind is not None and bind.get_off is None:
             dt1 = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
             time_duration = dt1 - bind.get_on
@@ -243,7 +243,7 @@ class StaffProfile(TimeStampedModel):
             time_duration = bind.get_off - bind.get_on
         else:
             time_duration = timedelta(0)
-        
+
         result = format_hms_string(time_duration)
         return result
 
@@ -259,10 +259,35 @@ class StaffProfile(TimeStampedModel):
         return customer_name
 
 
-class CustomerProfile(BasicContactModel):
+class CustomerContact(models.Model):
+
+    contact = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    mobile = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True
+    )
+
+
+class CustomerProfile(TimeStampedModel):
     """
     Customer Profile Model
     """
+    name = models.CharField(
+        max_length=100
+    )
+
+    address = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True
+    )
+
     user = models.OneToOneField(
         User,
         related_name='customer_profile',
@@ -279,6 +304,10 @@ class CustomerProfile(BasicContactModel):
     customer_request = models.TextField(
         null=True,
         blank=True
+    )
+
+    contacts = models.ManyToManyField(
+        CustomerContact
     )
 
     class Meta:

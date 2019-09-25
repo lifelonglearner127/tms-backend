@@ -383,7 +383,7 @@ class Job(models.Model):
     def operating_efficiency(self):
         total_mileage = self.total_mileage
         print(total_mileage)
-        
+
         if self.finished_on and self.started_on:
             diff = self.finished_on - self.started_on
             job_duration = diff.days * 24 * 60 * 60 + diff.seconds * 1000 + diff.microseconds

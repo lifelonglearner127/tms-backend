@@ -270,7 +270,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = '__all__'
-    
+
 
 class UserPermissionSerializer(serializers.ModelSerializer):
 

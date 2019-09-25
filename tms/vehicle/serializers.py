@@ -9,7 +9,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer, UserSerializer
+from ..account.serializers import ShortUserSerializer
 from ..info.serializers import StationNameSerializer
 
 # other

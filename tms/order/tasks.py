@@ -57,11 +57,11 @@ def notify_order_changes(context):
             }
         )
 
-    # send push notification to escort
+    # send push notification to customer
     if customer.device_token:
         aliyun_request.set_Title('Cancel Job')
         aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(escort.device_token)
+        aliyun_request.set_TargetValue(customer.device_token)
         aliyun_client.do_action(aliyun_request)
 
 
