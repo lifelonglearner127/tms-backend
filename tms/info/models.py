@@ -202,6 +202,7 @@ class Station(BasicContactModel):
     oilstations = managers.OilStationManager()
     blackdots = managers.BlackDotManager()
     parkingstations = managers.ParkingStationManager()
+    getoffstations = managers.GetoffStationManager()
 
     class Meta:
         ordering = ['station_type', '-updated']

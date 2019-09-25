@@ -85,6 +85,14 @@ class ParkingStationManager(models.Manager):
         )
 
 
+class GetoffStationManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            station_type=c.STATION_TYPE_GET_OFF_STATION
+        )
+
+
 class LoadingStationPointManager(models.Manager):
 
     def get_queryset(self):

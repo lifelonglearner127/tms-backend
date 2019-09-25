@@ -287,6 +287,16 @@ class StationViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='getoff-stations')
+    def getoff_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.getoffstations.all(),
+        )
+
+        serializer = s.GetoffStationSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='me')
     def get_customer_stations(self, request):
         """

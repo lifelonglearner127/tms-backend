@@ -359,6 +359,10 @@ class ParkingStationSerializer(MainStationSerializer):
     pass
 
 
+class GetoffStationSerializer(MainStationSerializer):
+    pass
+
+
 class ShortRouteSerializer(serializers.ModelSerializer):
 
     class Meta:
