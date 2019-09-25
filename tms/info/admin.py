@@ -8,9 +8,9 @@ class AlarmSettingAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.ProductCategory)
-class ProductCategoryAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(m.ProductCategory)
+# class ProductCategoryAdmin(admin.ModelAdmin):
+#     pass
 
 
 @admin.register(m.Product)

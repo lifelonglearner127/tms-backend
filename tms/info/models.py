@@ -7,21 +7,21 @@ from ..core.models import TimeStampedModel, BasicContactModel
 from ..hr.models import CustomerProfile
 
 
-class ProductCategory(TimeStampedModel):
+# class ProductCategory(TimeStampedModel):
 
-    name = models.CharField(
-        max_length=100,
-        unique=True
-    )
+#     name = models.CharField(
+#         max_length=100,
+#         unique=True
+#     )
 
-    level = models.PositiveIntegerField(
-        default=3
-    )
+#     level = models.PositiveIntegerField(
+#         default=3
+#     )
 
-    description = models.TextField(
-        null=True,
-        blank=True
-    )
+#     description = models.TextField(
+#         null=True,
+#         blank=True
+#     )
 
 
 class Product(TimeStampedModel):
@@ -33,29 +33,33 @@ class Product(TimeStampedModel):
         unique=True
     )
 
-    code = models.CharField(
-        max_length=100,
-        unique=True
+    level = models.PositiveIntegerField(
+        default=3
     )
 
-    category = models.ForeignKey(
-        ProductCategory,
-        on_delete=models.CASCADE
-    )
+    # code = models.CharField(
+    #     max_length=100,
+    #     unique=True
+    # )
 
-    price = models.FloatField(
-        default=0
-    )
+    # category = models.ForeignKey(
+    #     ProductCategory,
+    #     on_delete=models.CASCADE
+    # )
 
-    unit_weight = models.PositiveIntegerField(
-        default=1
-    )
+    # price = models.FloatField(
+    #     default=0
+    # )
 
-    weight_measure_unit = models.CharField(
-        max_length=1,
-        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
-        default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
-    )
+    # unit_weight = models.PositiveIntegerField(
+    #     default=1
+    # )
+
+    # weight_measure_unit = models.CharField(
+    #     max_length=1,
+    #     choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
+    #     default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
+    # )
 
     description = models.TextField(
         null=True,

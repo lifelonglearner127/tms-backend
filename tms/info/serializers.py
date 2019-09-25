@@ -31,83 +31,83 @@ class ShortProductSerializer(serializers.ModelSerializer):
         )
 
 
-class ShortProductCategorySerializer(serializers.ModelSerializer):
+# class ShortProductCategorySerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.ProductCategory
-        fields = (
-            'id', 'name'
-        )
+#     class Meta:
+#         model = m.ProductCategory
+#         fields = (
+#             'id', 'name'
+#         )
 
 
-class ProductCategorySerializer(serializers.ModelSerializer):
+# class ProductCategorySerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = m.ProductCategory
-        fields = '__all__'
+#     class Meta:
+#         model = m.ProductCategory
+#         fields = '__all__'
 
 
 class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product
     """
-    category = ProductCategorySerializer(read_only=True)
-    weight_measure_unit = TMSChoiceField(choices=c.PRODUCT_WEIGHT_MEASURE_UNIT)
+    # category = ProductCategorySerializer(read_only=True)
+    # weight_measure_unit = TMSChoiceField(choices=c.PRODUCT_WEIGHT_MEASURE_UNIT)
 
     class Meta:
         model = m.Product
         fields = '__all__'
 
-    def create(self, validated_data):
-        category_data = self.context.get('category')
-        if category_data is None:
-            raise serializers.ValidationError({
-                'category': 'Category data is missing'
-            })
-        try:
-            category = m.ProductCategory.objects.get(
-                id=category_data.get('id', None)
-            )
-        except m.ProductCategory.DoesNotExist:
-            raise serializers.ValidationError({
-                'category': 'Such category does not exist'
-            })
+    # def create(self, validated_data):
+    #     category_data = self.context.get('category')
+    #     if category_data is None:
+    #         raise serializers.ValidationError({
+    #             'category': 'Category data is missing'
+    #         })
+    #     try:
+    #         category = m.ProductCategory.objects.get(
+    #             id=category_data.get('id', None)
+    #         )
+    #     except m.ProductCategory.DoesNotExist:
+    #         raise serializers.ValidationError({
+    #             'category': 'Such category does not exist'
+    #         })
 
-        return m.Product.objects.create(
-            category=category,
-            **validated_data
-        )
+    #     return m.Product.objects.create(
+    #         category=category,
+    #         **validated_data
+    #     )
 
-    def update(self, instance, validated_data):
-        category_data = self.context.get('category')
-        if category_data is None:
-            raise serializers.ValidationError({
-                'category': 'Category data is missing'
-            })
-        try:
-            category = m.ProductCategory.objects.get(
-                id=category_data.get('id', None)
-            )
-        except m.ProductCategory.DoesNotExist:
-            raise serializers.ValidationError({
-                'category': 'Such category does not exist'
-            })
+    # def update(self, instance, validated_data):
+    #     category_data = self.context.get('category')
+    #     if category_data is None:
+    #         raise serializers.ValidationError({
+    #             'category': 'Category data is missing'
+    #         })
+    #     try:
+    #         category = m.ProductCategory.objects.get(
+    #             id=category_data.get('id', None)
+    #         )
+    #     except m.ProductCategory.DoesNotExist:
+    #         raise serializers.ValidationError({
+    #             'category': 'Such category does not exist'
+    #         })
 
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
+    #     for (key, value) in validated_data.items():
+    #         setattr(instance, key, value)
 
-        instance.category = category
-        instance.save()
-        return instance
+    #     instance.category = category
+    #     instance.save()
+    #     return instance
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['price_display'] =\
-            str(instance.price) + '元 / ' +\
-            str(instance.unit_weight) +\
-            str(instance.get_weight_measure_unit_display())
+    # def to_representation(self, instance):
+    #     ret = super().to_representation(instance)
+    #     ret['price_display'] =\
+    #         str(instance.price) + '元 / ' +\
+    #         str(instance.unit_weight) +\
+    #         str(instance.get_weight_measure_unit_display())
 
-        return ret
+    #     return ret
 
 
 class AlarmSettingSerializer(serializers.ModelSerializer):

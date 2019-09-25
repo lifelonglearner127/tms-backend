@@ -55,11 +55,11 @@ class AlarmSettingAPIView(StaffAPIView):
         )
 
 
-class ProductCategoryViewSet(TMSViewSet):
+# class ProductCategoryViewSet(TMSViewSet):
 
-    queryset = m.ProductCategory.objects.all()
-    serializer_class = s.ProductCategorySerializer
-    short_serializer_class = s.ShortProductCategorySerializer
+#     queryset = m.ProductCategory.objects.all()
+#     serializer_class = s.ProductCategorySerializer
+#     short_serializer_class = s.ShortProductCategorySerializer
 
 
 class ProductViewSet(TMSViewSet):
@@ -71,49 +71,49 @@ class ProductViewSet(TMSViewSet):
     short_serializer_class = s.ShortProductSerializer
     permission_classes = [p.ProductViewSetPermission]
 
-    def create(self, request):
-        context = {
-            'category': request.data.pop('category')
-        }
+    # def create(self, request):
+    #     context = {
+    #         'category': request.data.pop('category')
+    #     }
 
-        serializer = s.ProductSerializer(
-            data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    #     serializer = s.ProductSerializer(
+    #         data=request.data, context=context
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
 
-    def update(self, request, pk=None):
-        instance = self.get_object()
-        context = {
-            'category': request.data.pop('category')
-        }
+    # def update(self, request, pk=None):
+    #     instance = self.get_object()
+    #     context = {
+    #         'category': request.data.pop('category')
+    #     }
 
-        serializer = s.ProductSerializer(
-            instance, data=request.data, context=context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    #     serializer = s.ProductSerializer(
+    #         instance, data=request.data, context=context
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
 
-    @action(detail=False, url_path="categories")
-    def get_product_cateogires(self, request):
-        serializer = ChoiceSerializer(
-            [
-                {'value': x, 'text': y} for (x, y) in c.PRODUCT_CATEGORY
-            ],
-            many=True
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    # @action(detail=False, url_path="categories")
+    # def get_product_cateogires(self, request):
+    #     serializer = ChoiceSerializer(
+    #         [
+    #             {'value': x, 'text': y} for (x, y) in c.PRODUCT_CATEGORY
+    #         ],
+    #         many=True
+    #     )
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
 
 
 class StationViewSet(TMSViewSet):
