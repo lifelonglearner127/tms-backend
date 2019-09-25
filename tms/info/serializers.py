@@ -227,10 +227,10 @@ class StationSerializer(serializers.ModelSerializer):
                 'name': 'Already existts'
             })
 
-        if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
-            raise serializers.ValidationError({
-                'product': 'Product data is missing'
-            })
+        # if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
+        #     raise serializers.ValidationError({
+        #         'product': 'Product data is missing'
+        #     })
 
         if station_type == c.STATION_TYPE_UNLOADING_STATION and len(customers) == 0:
             raise serializers.ValidationError({
@@ -269,10 +269,10 @@ class StationSerializer(serializers.ModelSerializer):
                 'name': 'Already existts'
             })
 
-        if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
-            raise serializers.ValidationError({
-                'product': 'Product data is missing'
-            })
+        # if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
+        #     raise serializers.ValidationError({
+        #         'product': 'Product data is missing'
+        #     })
 
         if station_type == c.STATION_TYPE_UNLOADING_STATION and len(customers) == 0:
             raise serializers.ValidationError({
