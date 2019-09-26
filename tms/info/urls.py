@@ -33,5 +33,5 @@ router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'alarm-setting', v.AlarmSettingAPIView.as_view()),
+    url(r'basic-setting', v.BasicSettingAPIView.as_view()),
 ]

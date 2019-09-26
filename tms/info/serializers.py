@@ -110,10 +110,10 @@ class ProductSerializer(serializers.ModelSerializer):
     #     return ret
 
 
-class AlarmSettingSerializer(serializers.ModelSerializer):
+class BasicSettingSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = m.AlarmSetting
+        model = m.BasicSetting
         fields = '__all__'
 
 

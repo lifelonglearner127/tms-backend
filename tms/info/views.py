@@ -19,10 +19,10 @@ from ..core.serializers import ChoiceSerializer
 from ..core.views import TMSViewSet, StaffAPIView
 
 
-class AlarmSettingAPIView(StaffAPIView):
+class BasicSettingAPIView(StaffAPIView):
 
     def get(self, request):
-        instance = m.AlarmSetting.objects.first()
+        instance = m.BasicSetting.objects.first()
         if instance is None:
             return Response(
                 None,
@@ -30,18 +30,18 @@ class AlarmSettingAPIView(StaffAPIView):
             )
 
         return Response(
-            s.AlarmSettingSerializer(instance).data,
+            s.BasicSettingSerializer(instance).data,
             status=status.HTTP_200_OK
         )
 
     def post(self, request):
-        instance = m.AlarmSetting.objects.first()
+        instance = m.BasicSetting.objects.first()
         if instance is None:
-            serializer = s.AlarmSettingSerializer(
+            serializer = s.BasicSettingSerializer(
                 data=request.data
             )
         else:
-            serializer = s.AlarmSettingSerializer(
+            serializer = s.BasicSettingSerializer(
                 instance,
                 data=request.data,
                 partial=True

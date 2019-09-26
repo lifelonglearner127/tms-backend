@@ -73,7 +73,11 @@ class Product(TimeStampedModel):
         return self.name
 
 
-class AlarmSetting(TimeStampedModel):
+class BasicSetting(TimeStampedModel):
+
+    tax_rate = models.FloatField(
+        default=0
+    )
 
     rapid_acceleration = models.PositiveIntegerField(
         default=0
