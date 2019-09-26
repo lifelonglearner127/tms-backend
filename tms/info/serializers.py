@@ -347,7 +347,7 @@ class MainStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Station
         fields = (
-            'id', 'name', 'longitude', 'latitude', 'radius'
+            'id', 'name', 'address', 'longitude', 'latitude', 'radius'
         )
 
 
