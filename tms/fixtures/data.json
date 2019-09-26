@@ -160,14 +160,37 @@
     }
   },
   {
+    "model": "hr.CustomerContact",
+    "pk": 1,
+    "fields": {
+      "contact": "李1",
+      "mobile": "151"
+    }
+  },
+  {
+    "model": "hr.CustomerContact",
+    "pk": 2,
+    "fields": {
+      "contact": "李2",
+      "mobile": "152"
+    }
+  },
+  {
+    "model": "hr.CustomerContact",
+    "pk": 3,
+    "fields": {
+      "contact": "李",
+      "mobile": "18618493825"
+    }
+  },
+  {
     "model": "hr.CustomerProfile",
     "pk": 3,
     "fields": {
       "user": 10,
       "associated_with": 2,
       "name": "中兴石",
-      "contact": "李1",
-      "mobile": "151",
+      "contacts": [1],
       "address": "Address 1",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
@@ -180,8 +203,7 @@
       "user": 8,
       "associated_with": 2,
       "name": "汇东商贸",
-      "contact": "李2",
-      "mobile": "152",
+      "contacts": [2],
       "address": "",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
@@ -194,8 +216,7 @@
       "user": 9,
       "associated_with": 2,
       "name": "吉润",
-      "contact": "李",
-      "mobile": "18618493825",
+      "contacts": [3],
       "address": "",
       "created": "2013-03-16T17:41:28+00:00",
       "updated": "2013-03-16T17:41:28+00:00"
@@ -268,23 +289,11 @@
     }
   },
   {
-    "model": "info.ProductCategory",
-    "pk": 1,
-    "fields": {
-        "name": "汽油",
-        "level": "1",
-        "created": "2013-03-16T17:41:28+00:00",
-        "updated": "2013-03-16T17:41:28+00:00"
-    }
-  },
-  {
     "model": "info.Product",
     "pk": 1,
     "fields": {
         "name": "汽油95",
-        "code": "222",
-        "category": 1,
-        "price": 2,
+        "level": 1,
         "description": "",
         "created": "2013-03-16T17:41:28+00:00",
         "updated": "2013-03-16T17:41:28+00:00"
@@ -295,9 +304,7 @@
       "pk": 2,
       "fields": {
           "name": "汽油92",
-          "code": "111",
-          "category": 1,
-          "price": 1,
+          "level": 1,
           "description": "",
           "created": "2013-03-16T17:41:28+00:00",
           "updated": "2013-03-16T17:41:28+00:00"
