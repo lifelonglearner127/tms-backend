@@ -27,7 +27,7 @@ LANGUAGE_CODE = 'en-us'   # en-us
 TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 SITE_ID = 1
 
 
@@ -60,7 +60,8 @@ LOCAL_APPS = [
     'tms.hr.apps.HrConfig',
     'tms.finance.apps.FinanceConfig',
     'tms.security.apps.SecurityConfig',
-    'tms.warehouse.apps.WarehouseConfig'
+    'tms.warehouse.apps.WarehouseConfig',
+    'tms.route.apps.RouteConfig'
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

@@ -2,6 +2,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 
 from . import models as m
+from ..route.models import Route
 from ..core.redis import r
 from ..core import constants as c
 
@@ -15,4 +16,4 @@ def notify_asgimqtt_of_station_changes(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=m.Station)
 def delete_paths(sender, instance, **kwargs):
-    m.Route.objects.filter(path__contains=[instance.id]).delete()
+    Route.objects.filter(map_path__contains=[instance.id]).delete()

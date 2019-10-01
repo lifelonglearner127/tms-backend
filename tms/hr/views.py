@@ -105,7 +105,7 @@ class StaffProfileViewSet(TMSViewSet):
     def short_staff(self, request):
         serializer = s.ShortStaffProfileSerializer(
             self.get_queryset().filter(
-                user__role__in=[c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
+                user__user_type__in=[c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF]
             ),
             many=True
         )

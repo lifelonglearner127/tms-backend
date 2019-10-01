@@ -78,7 +78,7 @@ def notify_rest_request(sender, instance, created, **kwargs):
 #         message = "{} created {} parking request."\
 #             "Please approve it".format(instance.driver, instance.vehicle)
 
-#         admin = User.objects.filter(role=c.USER_ROLE_ADMIN)[0]
+#         admin = User.objects.filter(user_type=c.USER_TYPE_ADMIN)[0]
 #         if admin.channel_name:
 #             async_to_sync(channel_layer.send)(
 #                 admin.channel_name,
@@ -133,7 +133,7 @@ def notify_rest_request(sender, instance, created, **kwargs):
 #     When driver request is created, staff member will be notified
 #     """
 #     if created:
-#         admin = User.objects.filter(role=c.USER_ROLE_ADMIN)[0]
+#         admin = User.objects.filter(user_type=c.USER_TYPE_ADMIN)[0]
 #         if admin.channel_name:
 #             message = "{} make an driver change request."\
 #                 "Please check and approve.".format(instance.old_driver.name)
@@ -205,7 +205,7 @@ def notify_rest_request(sender, instance, created, **kwargs):
 #     staff member will be notified
 #     """
 #     if created:
-#         admin = User.objects.filter(role=c.USER_ROLE_ADMIN)[0]
+#         admin = User.objects.filter(user_type=c.USER_TYPE_ADMIN)[0]
 #         if admin.channel_name:
 #             message = "{} make an driver change request."\
 #                 "Please check and approve.".format(instance.old_escort.name)
@@ -278,7 +278,7 @@ def notify_rest_request(sender, instance, created, **kwargs):
 #     staff member will be notified
 #     """
 #     if created:
-#         admin = User.objects.filter(role=c.USER_ROLE_ADMIN)[0]
+#         admin = User.objects.filter(user_type=c.USER_TYPE_ADMIN)[0]
 #         if admin.channel_name:
 #             message = "{} make an rest request."\
 #                 "Please check and approve.".format(instance.user.name)

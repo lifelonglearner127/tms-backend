@@ -17,10 +17,10 @@ from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..info.serializers import (
-    ShortStationSerializer, StationNameTypeSerializer, ShortProductSerializer, ShortStationProductionSerializer,
-    ShortStationInfoSerializer
+    ShortStationSerializer, ShortProductSerializer,
+    ShortStationProductionSerializer, ShortStationInfoSerializer
 )
-from ..info.serializers import ShortRouteSerializer
+from ..route.serializers import ShortRouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 from .tasks import notify_order_changes
 
@@ -201,6 +201,8 @@ class OrderSerializer(serializers.ModelSerializer):
     """
     assignee = ShortStaffProfileSerializer()
     customer = ShortCustomerProfileSerializer()
+    loading_station = ShortStationSerializer()
+    quality_station = ShortStationSerializer()
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     arrangement_status = TMSChoiceField(
@@ -227,6 +229,8 @@ class OrderSerializer(serializers.ModelSerializer):
             alias: alias,
             assignee: { id: '', name: '' },
             customer: { id: '', name: '' },
+            loading_station: { id: '', name: '' },
+            quality_station: { id: '', name: '' },
             products: [
                 product: { id: '', ... },
                 weight: 0
@@ -240,8 +244,36 @@ class OrderSerializer(serializers.ModelSerializer):
                 'products': 'Order Product data is missing'
             })
 
+        # check if loading station exists
+        loading_station_data = self.context.pop('loading_station', None)
+        if loading_station_data is None:
+            raise serializers.ValidationError({
+                'loading_station': 'Loading station data is missing'
+            })
+
+        loading_station = get_object_or_404(
+            m.Station,
+            id=loading_station_data.get('id'),
+            station_type=c.STATION_TYPE_LOADING_STATION
+        )
+
+        # check if loading station exists
+        quality_station_data = self.context.pop('quality_station', None)
+        if quality_station_data is None:
+            raise serializers.ValidationError({
+                'quality_station': 'Quality station data is missing'
+            })
+
+        quality_station = get_object_or_404(
+            m.Station,
+            id=quality_station_data.get('id'),
+            station_type=c.STATION_TYPE_QUALITY_STATION
+        )
+
         # save models
         order = m.Order.objects.create(
+            loading_station=loading_station,
+            quality_station=quality_station,
             **validated_data
         )
 
@@ -288,6 +320,35 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'products': 'Order Product data is missing'
             })
+
+        # check if loading station exists
+        loading_station_data = self.context.pop('loading_station', None)
+        if loading_station_data is None:
+            raise serializers.ValidationError({
+                'loading_station': 'Loading station data is missing'
+            })
+
+        loading_station = get_object_or_404(
+            m.Station,
+            id=loading_station_data.get('id'),
+            station_type=c.STATION_TYPE_LOADING_STATION
+        )
+
+        # check if loading station exists
+        quality_station_data = self.context.pop('quality_station', None)
+        if quality_station_data is None:
+            raise serializers.ValidationError({
+                'quality_station': 'Quality station data is missing'
+            })
+
+        quality_station = get_object_or_404(
+            m.Station,
+            id=quality_station_data.get('id'),
+            station_type=c.STATION_TYPE_QUALITY_STATION
+        )
+
+        instance.loading_station = loading_station
+        instance.quality_station = quality_station
 
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
@@ -778,7 +839,7 @@ class JobDocumentSerializer(serializers.ModelSerializer):
     def get_documents(self, instance):
         ret = []
         ret.append({
-            'station': StationNameTypeSerializer(instance.loading_station).data,
+            'station': ShortStationSerializer(instance.loading_station).data,
             'products': []
         })
         for loading_check in instance.loading_checks.all():
@@ -791,7 +852,7 @@ class JobDocumentSerializer(serializers.ModelSerializer):
 
         quality_station = m.JobStation.objects.get(job=instance, step=1)
         ret.append({
-            'station': StationNameTypeSerializer(quality_station.station).data,
+            'station': ShortStationSerializer(quality_station.station).data,
             'products': []
         })
         for quality_check in instance.quality_checks.all():
@@ -810,7 +871,7 @@ class JobDocumentSerializer(serializers.ModelSerializer):
         index = 2
         for job_station in instance.jobstation_set.all()[2:]:
             ret.append({
-                'station': StationNameTypeSerializer(job_station.station).data,
+                'station': ShortStationSerializer(job_station.station).data,
                 'products': []
             })
 

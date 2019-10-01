@@ -10,7 +10,7 @@ class TMSAuthenticationBackend:
     """
     def authenticate(
         self, request, username=None, password=None,
-        role=None, device_token=None
+        user_type=None, device_token=None
     ):
         if username.isdigit():
             kwargs = {'mobile': username}

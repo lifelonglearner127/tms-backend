@@ -7,7 +7,7 @@
           "email": "guanli1@outlook.com",
           "mobile": "133",
           "name": "管理1",
-          "role": "A",
+          "user_type": "A",
           "date_joined": "2013-03-16T17:41:28+00:00",
           "last_seen": "2013-03-16T17:41:28+00:00"
       }
@@ -21,7 +21,7 @@
         "mobile": "131",
         "device_token": "7d925fa2a6167c27893127",
         "name": "司机1",
-        "role": "D",
+        "user_type": "D",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -35,7 +35,7 @@
         "mobile": "135",
         "device_token": "7d925fa2a6167c27893127",
         "name": "司机2",
-        "role": "D",
+        "user_type": "D",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -48,7 +48,7 @@
         "email": "yayun1@outlook.com",
         "mobile": "132",
         "name": "押运1",
-        "role": "E",
+        "user_type": "E",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -61,7 +61,7 @@
         "email": "yayun2@outlook.com",
         "mobile": "136",
         "name": "押运2",
-        "role": "E",
+        "user_type": "E",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -74,7 +74,7 @@
         "email": "yuangong1@outlook.com",
         "mobile": "134",
         "name": "员工1",
-        "role": "S",
+        "user_type": "S",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -87,7 +87,7 @@
         "email": "hdsm@outlook.com",
         "mobile": "123",
         "name": "",
-        "role": "C",
+        "user_type": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -101,7 +101,7 @@
         "mobile": "1234",
         "device_token": "",
         "name": "",
-        "role": "C",
+        "user_type": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -114,7 +114,7 @@
         "email": "zxs@outlook.com",
         "mobile": "12345",
         "name": "",
-        "role": "C",
+        "user_type": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -424,12 +424,13 @@
       }
   },
   {
-    "model": "info.Route",
+    "model": "route.Route",
     "pk": 1,
     "fields": {
         "name": "路书1",
-        "path": [1, 4, 5],
-        "policy": 0,
+        "start_point": 1,
+        "end_point": 5,
+        "map_path": [4],
         "distance": 149,
         "created": "2013-03-16T17:41:28+00:00",
         "updated": "2013-03-16T17:41:28+00:00"

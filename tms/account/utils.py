@@ -6,7 +6,7 @@ from django.conf import settings
 def jwt_payload_handler(user):
     payload = {
         'username': user.username,
-        'role': user.role,
+        'user_type': user.user_type,
         'exp': datetime.utcnow() + timedelta(days=7)
     }
 

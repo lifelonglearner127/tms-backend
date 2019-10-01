@@ -25,7 +25,7 @@ class InWorkDrivers(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_DRIVER,
+            user__user_type=c.USER_TYPE_DRIVER,
             status=c.WORK_STATUS_DRIVING
         )
 
@@ -36,7 +36,7 @@ class AvailableDrivers(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_DRIVER,
+            user__user_type=c.USER_TYPE_DRIVER,
             status=c.WORK_STATUS_AVAILABLE
         )
 
@@ -47,7 +47,7 @@ class InWorkEscorts(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_ESCORT,
+            user__user_type=c.USER_TYPE_ESCORT,
             status=c.WORK_STATUS_DRIVING
         )
 
@@ -58,7 +58,7 @@ class Drivers(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_DRIVER,
+            user__user_type=c.USER_TYPE_DRIVER,
         )
 
 
@@ -68,7 +68,7 @@ class Escorts(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_ESCORT,
+            user__user_type=c.USER_TYPE_ESCORT,
         )
 
 
@@ -78,7 +78,7 @@ class AvailableEscorts(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role=c.USER_ROLE_ESCORT,
+            user__user_type=c.USER_TYPE_ESCORT,
             status=c.WORK_STATUS_AVAILABLE
         )
 
@@ -89,5 +89,5 @@ class WheelUserManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            user__role__in=[c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]
+            user__user_type__in=[c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]
         )

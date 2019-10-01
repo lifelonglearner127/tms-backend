@@ -7,7 +7,7 @@
           "email": "staff@email.com",
           "mobile": "000000",
           "name": "Staff",
-          "role": "S",
+          "user_type": "S",
           "date_joined": "2013-03-16T17:41:28+00:00",
           "last_seen": "2013-03-16T17:41:28+00:00"
       }
@@ -20,7 +20,7 @@
         "email": "driver@email.com",
         "mobile": "000001",
         "name": "Driver",
-        "role": "D",
+        "user_type": "D",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -33,7 +33,7 @@
         "email": "escort@email.com",
         "mobile": "000002",
         "name": "Driver",
-        "role": "E",
+        "user_type": "E",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }
@@ -46,7 +46,7 @@
         "email": "customer@email.com",
         "mobile": "000003",
         "name": "Customer",
-        "role": "C",
+        "user_type": "C",
         "date_joined": "2013-03-16T17:41:28+00:00",
         "last_seen": "2013-03-16T17:41:28+00:00"
     }

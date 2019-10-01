@@ -10,7 +10,7 @@ from . import models as m
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
-from ..info.serializers import StationNameSerializer
+from ..info.serializers import ShortStationSerializer
 
 # other
 from ..g7.interfaces import G7Interface
@@ -28,6 +28,15 @@ class TireSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Tire
         fields = '__all__'
+
+
+class ShortVehiclePlateNumSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Vehicle
+        fields = (
+            'id', 'plate_num',
+        )
 
 
 class ShortVehicleSerializer(serializers.ModelSerializer):
@@ -372,7 +381,7 @@ class VehicleMaintenanceHistorySerializer(serializers.ModelSerializer):
     category = TMSChoiceField(choices=c.VEHICLE_MAINTENANCE_CATEGORY)
     vehicle = ShortVehicleSerializer(read_only=True)
     assignee = ShortUserSerializer(read_only=True)
-    station = StationNameSerializer(read_only=True)
+    station = ShortStationSerializer(read_only=True)
 
     class Meta:
         model = m.VehicleMaintenanceHistory

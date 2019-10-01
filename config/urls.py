@@ -46,6 +46,13 @@ urlpatterns = [
     path(
         'api/',
         include(
+            ('tms.route.urls', 'route'),
+            namespace='route'
+        )
+    ),
+    path(
+        'api/',
+        include(
             ('tms.vehicle.urls', 'vehicle'),
             namespace='vehicle'
         )

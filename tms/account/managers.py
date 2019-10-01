@@ -8,7 +8,7 @@ class AdminUserManager(models.Manager):
     Admin Model Manager
     """
     def get_queryset(self):
-        return super().get_queryset().filter(role=c.USER_ROLE_ADMIN)
+        return super().get_queryset().filter(user_type=c.USER_TYPE_ADMIN)
 
 
 class StaffUserManager(models.Manager):
@@ -17,7 +17,7 @@ class StaffUserManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            role__in=[c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
+            user_type__in=[c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF]
         )
 
 
@@ -26,7 +26,7 @@ class DriverUserManager(models.Manager):
     Driver Model Manager
     """
     def get_queryset(self):
-        return super().get_queryset().filter(role=c.USER_ROLE_DRIVER)
+        return super().get_queryset().filter(user_type=c.USER_TYPE_DRIVER)
 
 
 class EscortUserManager(models.Manager):
@@ -34,7 +34,7 @@ class EscortUserManager(models.Manager):
     Escort Model Manager
     """
     def get_queryset(self):
-        return super().get_queryset().filter(role=c.USER_ROLE_ESCORT)
+        return super().get_queryset().filter(user_type=c.USER_TYPE_ESCORT)
 
 
 class WheelUserManager(models.Manager):
@@ -42,8 +42,8 @@ class WheelUserManager(models.Manager):
     Escort Model Manager
     """
     def get_queryset(self):
-        return super().get_queryset().filter(role__in=[
-            c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+        return super().get_queryset().filter(user_type__in=[
+            c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT
         ])
 
 
@@ -52,15 +52,15 @@ class CustomerUserManager(models.Manager):
     Customer Model Manager
     """
     def get_queryset(self):
-        return super().get_queryset().filter(role=c.USER_ROLE_CUSTOMER)
+        return super().get_queryset().filter(user_type=c.USER_TYPE_CUSTOMER)
 
 
 class CompanyMemberUserManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(
-            role__in=[
-                c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF,
-                c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT
+            user_type__in=[
+                c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF,
+                c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT
             ]
         )

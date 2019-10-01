@@ -8,10 +8,10 @@ class ProductViewSetPermission(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        if request.user.role in [c.USER_ROLE_ADMIN, c.USER_ROLE_CUSTOMER]:
+        if request.user.user_type in [c.USER_TYPE_ADMIN, c.USER_TYPE_CUSTOMER]:
             return True
 
-        if request.user.role == c.USER_ROLE_STAFF:
+        if request.user.user_type == c.USER_TYPE_STAFF:
             if request.user.permission.has_permission(
                 page='settings', action=view.action
             ):

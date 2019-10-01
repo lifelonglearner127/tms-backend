@@ -33,7 +33,7 @@ class JWTAPIView(APIView):
 
 class ObtainJWTAPIView(JWTAPIView):
     """
-    API View that receives a POST with username and password and user role
+    API View that receives a POST with username and password and user user_type
     Returns a JSON Web Token with user data
     """
     serializer_class = s.ObtainJWTSerializer
@@ -83,7 +83,7 @@ class UserViewSet(TMSViewSet):
         request.user.save()
 
         data = request.data
-        data['role'] = request.user.role
+        data['user_type'] = request.user.user_type
 
         serializer = s.ObtainJWTSerializer(data=data)
 
@@ -97,10 +97,10 @@ class UserViewSet(TMSViewSet):
 
         return Response({'error': 'error occured while saving new credentials'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, url_path="roles")
-    def get_user_roles(self, request):
+    @action(detail=False, url_path="types")
+    def get_user_types(self, request):
         serializer = ChoiceSerializer(
-            [{'value': x, 'text': y} for (x, y) in c.USER_ROLE],
+            [{'value': x, 'text': y} for (x, y) in c.USER_TYPE],
             many=True
         )
         return Response(
@@ -108,12 +108,12 @@ class UserViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path="member-roles")
-    def get_member_roles(self, request):
+    @action(detail=False, url_path="member-types")
+    def get_member_types(self, request):
         serializer = ChoiceSerializer(
             [
-                {'value': x, 'text': y} for (x, y) in c.USER_ROLE
-                if x != c.USER_ROLE_CUSTOMER
+                {'value': x, 'text': y} for (x, y) in c.USER_TYPE
+                if x != c.USER_TYPE_CUSTOMER
             ],
             many=True
         )

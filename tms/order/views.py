@@ -22,7 +22,8 @@ from ..core.permissions import (
 # models
 from . import models as m
 from ..account.models import User
-from ..info.models import Route, Station, Product
+from ..info.models import Station, Product
+from ..route.models import Route
 from ..vehicle.models import Vehicle
 
 # serializers
@@ -106,10 +107,12 @@ class OrderViewSet(TMSViewSet):
     def create(self, request):
 
         context = {
-            'products': request.data.pop('products')
+            'products': request.data.pop('products'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station')
         }
         data = request.data
-        if request.user.role == c.USER_ROLE_CUSTOMER:
+        if request.user.user_type == c.USER_TYPE_CUSTOMER:
             data['customer'] = {
                 'id': request.user.customer_profile.id
             }
@@ -141,9 +144,11 @@ class OrderViewSet(TMSViewSet):
 
         data = request.data
         context = {
-            'products': request.data.pop('products')
+            'products': request.data.pop('products'),
+            'loading_station': request.data.pop('loading_station'),
+            'quality_station': request.data.pop('quality_station')
         }
-        if request.user.role == c.USER_ROLE_CUSTOMER:
+        if request.user.user_type == c.USER_TYPE_CUSTOMER:
             data['customer'] = {
                 'id': request.user.customer_profile.id
             }
@@ -366,9 +371,12 @@ class JobViewSet(TMSViewSet):
     serializer_class = s.JobSerializer
 
     def create(self, request):
-
+        """
+        This api is called when staff member create the jobs for order
+        """
         order = get_object_or_404(m.Order, id=request.data.pop('order', None))
-        print('order')
+
+        # cannot create a job for completed order
         if order.status == c.ORDER_STATUS_COMPLETE:
             return Response(
                 {
@@ -377,6 +385,7 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # load ordered projects with not-delivered weight
         order_products = []
         for order_product in order.orderproduct_set.all():
             order_products.append({
@@ -384,8 +393,9 @@ class JobViewSet(TMSViewSet):
                 'left_weight': order_product.weight - order_product.delivered_weight
             })
 
-        jobs_data = request.data.pop('jobs', None)
-        if jobs_data is None:
+        # check if the payload is empty or not
+        jobs_data = request.data.pop('jobs', [])
+        if not len(jobs_data):
             return Response(
                 {'data': 'No data is provied'},
                 status=status.HTTP_200_OK
@@ -397,54 +407,6 @@ class JobViewSet(TMSViewSet):
 
         for job_data in jobs_data:
             job_data['total_weight'] = 0
-            # check if the loading, quality, unloading stations is in route
-            route_data = job_data.get('route', None)
-            if route_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['route'] = 'Missing Route'
-
-            job_data['route'] = get_object_or_404(
-                Route, id=route_data.get('id', None)
-            )
-            print('route')
-
-            loading_station_data = job_data.pop('loading_station', None)
-            if loading_station_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['loading_station'] = 'Missing data'
-
-            loading_station = get_object_or_404(
-                Station, id=loading_station_data.get('id', None)
-            )
-            print("loading_station")
-
-            if job_data['route'].loading_station != loading_station:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                if 'route' not in errors[job_index]:
-                    errors[job_index]['route'] = []
-                errors[job_index]['route'] = ['loading']
-
-            quality_station_data = job_data.pop('quality_station', None)
-            if quality_station_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['quality_station'] = 'Missing data'
-
-            quality_station = get_object_or_404(
-                Station, id=quality_station_data.get('id', None)
-            )
-            print("quality_station")
-
-            if not job_data['is_same_station']:
-                if job_data['route'].stations[1] != quality_station:
-                    if job_index not in errors:
-                        errors[job_index] = {}
-                    if 'route' not in errors[job_index]:
-                        errors[job_index]['route'] = []
-                    errors[job_index]['route'].append('quality')
 
             vehicle_data = job_data.get('vehicle', None)
             if vehicle_data is None:
@@ -462,10 +424,9 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['driver'] = 'Missing data'
 
-            job_driver = get_object_or_404(
-                m.StaffProfile, id=driver_data.get('id', None)
+            job_data['driver'] = get_object_or_404(
+                User, id=driver_data.get('id', None), user_type=c.USER_TYPE_DRIVER
             )
-            job_data['driver'] = job_driver.user
 
             escort_data = job_data.get('escort', None)
             if escort_data is None:
@@ -473,21 +434,18 @@ class JobViewSet(TMSViewSet):
                     errors[job_index] = {}
                 errors[job_index]['escort'] = 'Missing data'
 
-            job_escort = get_object_or_404(
-                m.StaffProfile, id=escort_data.get('id', None)
+            job_data['escort'] = get_object_or_404(
+                User, id=escort_data.get('id', None), user_type=c.USER_TYPE_ESCORT
             )
-            job_data['escort'] = job_escort.user
 
             branch_index = 0
             job_data['stations'] = []
             job_data['stations'].append({
-                'station': loading_station,
-                'due_time': job_data['due_time'],
+                'station': order.loading_station,
                 'products': []
             })
             job_data['stations'].append({
-                'station': quality_station,
-                'due_time': job_data['due_time'],
+                'station': order.quality_station,
                 'products': []
             })
 
@@ -514,7 +472,6 @@ class JobViewSet(TMSViewSet):
                 product = get_object_or_404(
                     Product, id=product_data.get('id', None)
                 )
-                print("product")
 
                 for order_product in order_products:
                     if order_product['product'] == product:
@@ -536,7 +493,6 @@ class JobViewSet(TMSViewSet):
                     station = get_object_or_404(
                         Station, id=station_data.get('id', None)
                     )
-                    print("station")
 
                     if station not in job_data['route'].unloading_stations:
                         if job_index not in errors:
@@ -600,11 +556,7 @@ class JobViewSet(TMSViewSet):
             job = m.Job.objects.create(
                 order=order,
                 vehicle=job_data['vehicle'],
-                driver=job_data['driver'],
-                escort=job_data['escort'],
-                route=job_data['route'],
-                total_weight=job_data['total_weight'],
-                is_same_station=job_data['is_same_station']
+                total_weight=job_data['total_weight']
             )
 
             station_index = 0
@@ -754,7 +706,7 @@ class JobViewSet(TMSViewSet):
             'paths': [],
             'meta': []
         }
-        while 1:
+        while True:
             queries = {
                 'plate_num': job.vehicle.plate_num,
                 'from': start_time,

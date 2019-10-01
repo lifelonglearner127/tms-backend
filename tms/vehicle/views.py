@@ -29,7 +29,7 @@ class VehicleViewSet(TMSViewSet):
     """
     queryset = m.Vehicle.objects.all()
     serializer_class = s.VehicleSerializer
-    short_serializer_class = s.ShortVehicleSerializer
+    short_serializer_class = s.ShortVehiclePlateNumSerializer
 
     def create(self, request):
         branches = request.data.get('branches', None)
@@ -65,52 +65,56 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['get'], url_path='playback')
-    def vehicle_history_track_query(self, request, pk=None):
+    @action(detail=True, methods=['get'], url_path='g7-points')
+    def get_vehicle_g7_points(self, request, pk=None):
         """
         Retrive the vehicle history track from G7 and return the response
-        Not used for now
         """
         vehicle = self.get_object()
-        from_datetime = self.request.query_params.get('from', None)
-        to_datetime = self.request.query_params.get('to', None)
+        start_time = self.request.query_params.get('start_time', None)
+        finish_time = self.request.query_params.get('finish_time', None)
 
-        if from_datetime is None or to_datetime is None:
-            results = []
-        else:
+        result = {
+            'distance': 0,
+            'path': []
+        }
+        while True:
             queries = {
                 'plate_num': vehicle.plate_num,
-                'from': from_datetime,
-                'to': to_datetime,
-                'timeInterval': 10
+                'from': start_time,
+                'to': finish_time,
+                'timeInterval': '30'
             }
-
-            data = G7Interface.call_g7_http_interface(
-                'VEHICLE_HISTORY_TRACK_QUERY',
-                queries=queries
-            )
-
-            if data is None:
-                results = []
-            else:
-                paths = []
-
-                index = 0
+            try:
+                data = G7Interface.call_g7_http_interface(
+                    'VEHICLE_HISTORY_TRACK_QUERY',
+                    queries=queries
+                )
                 for x in data:
-                    paths.append([x.pop('lng'), x.pop('lat')])
-                    x['no'] = index
-                    x['time'] = datetime.utcfromtimestamp(
-                        int(x['time'])/1000
-                    ).strftime('%Y-%m-%d %H:%M:%S')
-                    index = index + 1
+                    result['path'].append([x.pop('lng'), x.pop('lat')])
+                    result['distance'] += round(x['distance'] / 100)
 
-                results = {
-                    'paths': paths,
-                    'meta': data
+                if len(data) == 1000:
+                    start_time = datetime.fromtimestamp(
+                        int(data[999]['time'])/1000
+                    )
+                    start_time = start_time + timedelta(seconds=1)
+                    start_time = start_time.strftime('%Y-%m-%d %H:%M:%S')
+
+                else:
+                    break
+            except Exception:
+                result = {
+                    'code': '1',
+                    'msg': 'g7 error'
                 }
+                break
+
+        if 'distance' in result:
+            result['distance'] /= 1000
 
         return Response(
-            results,
+            result,
             status=status.HTTP_200_OK
         )
 

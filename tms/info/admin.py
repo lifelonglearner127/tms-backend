@@ -21,8 +21,3 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(m.Station)
 class StationAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(m.Route)
-class RouteAdmin(admin.ModelAdmin):
-    pass

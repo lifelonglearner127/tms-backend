@@ -11,7 +11,7 @@ from ..core.models import TimeStampedModel
 from ..account.models import User
 from ..hr.models import CustomerProfile, StaffProfile
 from ..info.models import Station, Product
-from ..info.models import Route
+from ..route.models import Route
 from ..vehicle.models import Vehicle
 
 
@@ -40,7 +40,9 @@ class Order(TimeStampedModel):
     Order model
     """
     alias = models.CharField(
-        max_length=100
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     assignee = models.ForeignKey(
@@ -84,6 +86,33 @@ class Order(TimeStampedModel):
     )
 
     description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    loading_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='orders_as_loading_station',
+        null=True,
+        blank=True
+    )
+
+    quality_station = models.ForeignKey(
+        Station,
+        on_delete=models.CASCADE,
+        related_name='orders_as_quality_station',
+        null=True,
+        blank=True
+    )
+
+    is_same_station = models.BooleanField(
+        default=False
+    )
+
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
@@ -211,25 +240,6 @@ class Job(models.Model):
         related_name='jobs'
     )
 
-    driver = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='jobs_as_driver'
-    )
-
-    escort = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='jobs_as_escort',
-    )
-
-    route = models.ForeignKey(
-        Route,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-
     progress = models.PositiveIntegerField(
         default=c.JOB_PROGRESS_NOT_STARTED
     )
@@ -284,9 +294,19 @@ class Job(models.Model):
         through_fields=('job', 'station')
     )
 
-    @property
-    def loading_station(self):
-        return self.stations.all()
+    associated_drivers = models.ManyToManyField(
+        User,
+        related_name='jobs_as_driver',
+        through='JobDriver',
+        through_fields=('job', 'driver')
+    )
+
+    associated_escorts = models.ManyToManyField(
+        User,
+        related_name='jobs_as_escort',
+        through='JobEscort',
+        through_fields=('job', 'escort')
+    )
 
     @property
     def stations_info(self):
@@ -430,6 +450,52 @@ class Job(models.Model):
     pending_jobs = managers.PendingJobManager()
 
 
+class JobDriver(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    start_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finish_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+
+class JobEscort(models.Model):
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE
+    )
+
+    escort = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    start_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    finish_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+
 class LoadingStationProductCheck(models.Model):
 
     job = models.ForeignKey(
@@ -489,7 +555,14 @@ class JobStation(models.Model):
 
     station = models.ForeignKey(
         Station,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.SET_NULL,
+        null=True
     )
 
     due_time = models.DateTimeField()

@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, password, **extra_fields):
-        extra_fields.setdefault('role', c.USER_ROLE_ADMIN)
+        extra_fields.setdefault('user_type', c.USER_TYPE_ADMIN)
 
         user = self.create_user(
             username,
@@ -126,10 +126,10 @@ class User(AbstractBaseUser):
         default=True
     )
 
-    role = models.CharField(
+    user_type = models.CharField(
         max_length=1,
-        choices=c.USER_ROLE,
-        default=c.USER_ROLE_STAFF
+        choices=c.USER_TYPE,
+        default=c.USER_TYPE_STAFF
     )
 
     permission = models.ForeignKey(
@@ -140,13 +140,13 @@ class User(AbstractBaseUser):
 
     @property
     def is_staff(self):
-        return self.role in \
-            [c.USER_ROLE_ADMIN, c.USER_ROLE_STAFF]
+        return self.user_type in \
+            [c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF]
 
     @property
     def status_text(self):
         status = "Wrong Status"
-        if self.role == c.USER_ROLE_DRIVER or self.role == c.USER_ROLE_ESCORT:
+        if self.user_type == c.USER_TYPE_DRIVER or self.user_type == c.USER_TYPE_ESCORT:
             request_set = self.my_requests.all()
             if len(request_set) > 0:
                 for request in request_set:
@@ -191,13 +191,13 @@ class User(AbstractBaseUser):
         return self.username
 
     def has_perm(self, perm, obj=None):
-        if self.is_active and self.role == c.USER_ROLE_ADMIN:
+        if self.is_active and self.user_type == c.USER_TYPE_ADMIN:
             return True
 
         return False
 
     def has_module_perms(self, app_label):
-        if self.is_active and self.role == c.USER_ROLE_ADMIN:
+        if self.is_active and self.user_type == c.USER_TYPE_ADMIN:
             return True
 
         return False

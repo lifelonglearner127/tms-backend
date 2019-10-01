@@ -26,7 +26,7 @@ class AuthSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'username', 'role', 'name'
+            'id', 'username', 'user_type', 'name'
         )
 
     def to_representation(self, instance):
@@ -34,9 +34,9 @@ class AuthSerializer(serializers.ModelSerializer):
         if ret['name'] is None:
             ret['name'] = instance.username
 
-        if instance.role == c.USER_ROLE_ADMIN:
+        if instance.user_type == c.USER_TYPE_ADMIN:
             ret['permissions'] = []
-        elif instance.role == c.USER_ROLE_STAFF:
+        elif instance.user_type == c.USER_TYPE_STAFF:
             ret['permissions'] = []
             if instance.permission is not None:
                 for permission in instance.permission.permissions.all():
@@ -67,14 +67,14 @@ class ObtainJWTSerializer(serializers.Serializer):
     password = serializers.CharField(
         style={'input_type': 'password'}
     )
-    role = serializers.CharField()
+    user_type = serializers.CharField()
     device_token = serializers.CharField(required=False)
 
     def validate(self, attrs):
         credentials = {
             'username': attrs.get('username'),
             'password': attrs.get('password'),
-            'role': attrs.get('role')
+            'user_type': attrs.get('user_type')
         }
 
         if all(credentials.values()):
@@ -190,7 +190,7 @@ class ShortCompanyMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'name', 'role'
+            'id', 'name', 'user_type'
         )
 
     def to_representation(self, instance):
@@ -229,7 +229,7 @@ class MainUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.User
         fields = (
-            'id', 'username', 'mobile', 'name', 'role', 'password'
+            'id', 'username', 'mobile', 'name', 'user_type', 'password'
         )
 
 
@@ -264,7 +264,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for User
     """
-    role = TMSChoiceField(choices=c.USER_ROLE)
+    user_type = TMSChoiceField(choices=c.USER_TYPE)
     permission = ShortUserPermissionSerializer(read_only=True)
 
     class Meta:

@@ -203,7 +203,7 @@ class StaffProfile(TimeStampedModel):
 
     def __str__(self):
         return '{}-{}\'s profile'.format(
-            self.user.role, self.user.username
+            self.user.user_type, self.user.username
         )
 
     @property

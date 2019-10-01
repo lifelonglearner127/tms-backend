@@ -1,7 +1,9 @@
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ..core import constants as c
 
@@ -51,6 +53,26 @@ class BasicSettingAPIView(StaffAPIView):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class TaxRateAPIView(APIView):
+
+    def get(self, request):
+        instance = m.BasicSetting.objects.first()
+
+        if instance is None:
+            tax_rate = 0
+        else:
+            tax_rate = instance.tax_rate
+
+        ret = {
+            'tax_rate': tax_rate
+        }
+
+        return Response(
+            ret,
             status=status.HTTP_200_OK
         )
 
@@ -133,7 +155,7 @@ class StationViewSet(TMSViewSet):
 
     def create(self, request):
         products = request.data.pop('products', [])
-        if request.user.role == c.USER_ROLE_CUSTOMER:
+        if request.user.user_type == c.USER_TYPE_CUSTOMER:
             customers = [{
                 'id': request.user.customer_profile.id
             }]
@@ -158,7 +180,7 @@ class StationViewSet(TMSViewSet):
     def update(self, request, pk=None):
         instance = self.get_object()
         products = request.data.pop('products', [])
-        if request.user.role == c.USER_ROLE_CUSTOMER:
+        if request.user.user_type == c.USER_TYPE_CUSTOMER:
             customers = [{
                 'id': request.user.customer_profile.id
             }]
@@ -183,49 +205,96 @@ class StationViewSet(TMSViewSet):
         )
 
     @action(detail=False, url_path='short')
-    def short(self, request):
-        station_type = self.request.query_params.get('type', None)
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION,
-            c.STATION_TYPE_OIL_STATION, c.STATION_TYPE_QUALITY_STATION
-        ]:
-            queryset = m.Station.objects.filter(station_type=station_type)
-        else:
-            queryset = self.get_queryset()
+    def get_short_stations(self, request):
 
-        serializer = s.ShortStationSerializer(queryset, many=True)
+        station_type_filter = Q()
+
+        station_types = self.request.query_params.get('station_type', '')
+        station_types = station_types.split(',')
+
+        for station_type in station_types:
+            if station_type in [
+                c.STATION_TYPE_LOADING_STATION,
+                c.STATION_TYPE_UNLOADING_STATION,
+                c.STATION_TYPE_QUALITY_STATION,
+                c.STATION_TYPE_OIL_STATION,
+                c.STATION_TYPE_GET_OFF_STATION,
+                c.STATION_TYPE_BLACK_DOT,
+                c.STATION_TYPE_PARKING_STATION,
+                c.STATION_TYPE_REPAIR_STATION,
+            ]:
+                station_type_filter |= Q(station_type=station_type)
+
+        queryset = m.Station.objects.filter(station_type_filter)
 
         return Response(
-            serializer.data,
+            s.ShortStationSerializer(queryset, many=True).data,
             status=status.HTTP_200_OK
         )
 
-        return queryset
+    # @action(detail=False, url_path='')
+    # def get_short_work_stations_with_lnglat(self, request):
+    #     """
+    #     api is used in routing page
+    #     """
+    #     queryset = m.Station.workstations.all()
+    #     station_type = self.request.query_params.get('station_type', '')
+    #     if station_type in [
+    #         c.STATION_TYPE_LOADING_STATION,
+    #         c.STATION_TYPE_QUALITY_STATION,
+    #         c.STATION_TYPE_UNLOADING_STATION,
+    #     ]:
+    #         queryset = queryset.filter(station_type=station_type)
 
-    @action(detail=False, url_path='short/names')
-    def get_station_names(self, request):
-        station_type = self.request.query_params.get('type', None)
-        if station_type in [
-            c.STATION_TYPE_LOADING_STATION,
-            c.STATION_TYPE_UNLOADING_STATION,
-            c.STATION_TYPE_QUALITY_STATION,
-            c.STATION_TYPE_OIL_STATION,
-            c.STATION_TYPE_BLACK_DOT,
-            c.STATION_TYPE_PARKING_STATION,
-            c.STATION_TYPE_REPAIR_STATION,
-        ]:
-            queryset = m.Station.objects.filter(station_type=station_type)
-        else:
-            queryset = self.get_queryset()
+    #     return Response(
+    #         s.StationForRouteSerializer(queryset).data,
+    #         status=status.HTTP_200_OK
+    #     )
 
-        serializer = s.StationNameSerializer(queryset, many=True)
+    # @action(detail=False, url_path='short')
+    # def short(self, request):
+    #     station_type = self.request.query_params.get('type', None)
+    #     if station_type in [
+    #         c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION,
+    #         c.STATION_TYPE_OIL_STATION, c.STATION_TYPE_QUALITY_STATION
+    #     ]:
+    #         queryset = m.Station.objects.filter(station_type=station_type)
+    #     else:
+    #         queryset = self.get_queryset()
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+    #     serializer = s.ShortStationSerializer(queryset, many=True)
 
-        return queryset
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
+
+    #     return queryset
+
+    # @action(detail=False, url_path='short/names')
+    # def get_station_names(self, request):
+    #     station_type = self.request.query_params.get('type', None)
+    #     if station_type in [
+    #         c.STATION_TYPE_LOADING_STATION,
+    #         c.STATION_TYPE_UNLOADING_STATION,
+    #         c.STATION_TYPE_QUALITY_STATION,
+    #         c.STATION_TYPE_OIL_STATION,
+    #         c.STATION_TYPE_BLACK_DOT,
+    #         c.STATION_TYPE_PARKING_STATION,
+    #         c.STATION_TYPE_REPAIR_STATION,
+    #     ]:
+    #         queryset = m.Station.objects.filter(station_type=station_type)
+    #     else:
+    #         queryset = self.get_queryset()
+
+    #     serializer = s.StationNameSerializer(queryset, many=True)
+
+    #     return Response(
+    #         serializer.data,
+    #         status=status.HTTP_200_OK
+    #     )
+
+    #     return queryset
 
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):
@@ -342,78 +411,6 @@ class StationViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-
-class RouteViewSet(TMSViewSet):
-
-    queryset = m.Route.objects.all()
-    serializer_class = s.RouteSerializer
-    short_serializer_class = s.ShortRouteSerializer
-    page_name = 'routes'
-
-    def create(self, request):
-        data = request.data
-        paths = []
-        for item in data.pop('path', None):
-            if item.get('id', None):
-                paths.append(item.get('id'))
-                continue
-
-            custom_point = m.Station.objects.create(
-                station_type=c.STATION_TYPE_CUSTOM_POINT,
-                latitude=item.pop('latitude'),
-                longitude=item.pop('longitude'),
-                name=item.pop('name')
-            )
-            paths.append(custom_point.id)
-
-        data['path'] = paths
-        serializer = s.RouteSerializer(
-            data=data
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    def update(self, request, pk=None):
-        instance = self.get_object()
-        data = request.data
-        paths = []
-        for item in data.pop('path', None):
-            if item.get('id', None):
-                paths.append(item.get('id'))
-                continue
-
-            custom_point = m.Station.objects.create(
-                station_type=c.STATION_TYPE_CUSTOM_POINT,
-                latitude=item.pop('latitude'),
-                longitude=item.pop('longitude'),
-                name=item.pop('name')
-            )
-            paths.append(custom_point.id)
-
-        data['path'] = paths
-        serializer = s.RouteSerializer(
-            instance, data=data, partial=True
-        )
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, url_path='points', methods=['get'])
-    def get_route_point(self, request, pk=None):
-        instance = self.get_object()
-        return Response(
-            s.RoutePointSerializer(instance).data,
-            status=status.HTTP_200_OK
-        )
 
 
 class TransportationDistanceViewSet(TMSViewSet):

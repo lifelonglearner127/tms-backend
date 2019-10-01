@@ -385,11 +385,11 @@ def notify_of_job_cancelled(context):
 def update_monthly_report():
     time = datetime.datetime.now()
     for user in User.objects.all():
-        if user.role in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+        if user.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]:
             if not m.JobReport.objects.filter(driver=user, month=month.Month(time.year, time.month)).exists():
                 m.JobReport.objects.create(driver=user, month=month.Month(time.year, time.month))
 
-        elif user.role == c.USER_ROLE_CUSTOMER:
+        elif user.user_type == c.USER_TYPE_CUSTOMER:
             if not m.OrderReport.objects.filter(
                 customer=user.customer_profile, month=month.Month(time.year, time.month)
             ).exists():

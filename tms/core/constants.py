@@ -36,7 +36,7 @@ STATION_TYPE = (
     (STATION_TYPE_BLACK_DOT, '黑点'),
     (STATION_TYPE_PARKING_STATION, '合法停车区域'),
     (STATION_TYPE_REPAIR_STATION, '供应商'),
-    (STATION_TYPE_CUSTOM_POINT, 'Custom'),
+    (STATION_TYPE_CUSTOM_POINT, '自定义'),
 )
 
 # duration unit choices
@@ -130,18 +130,18 @@ VEHICLE_CHECK_TYPE = (
 
 # Account app - Account constants
 # ----------------------------------------------------------------------------
-# user role choices
-USER_ROLE_ADMIN = 'A'
-USER_ROLE_STAFF = 'S'
-USER_ROLE_DRIVER = 'D'
-USER_ROLE_ESCORT = 'E'
-USER_ROLE_CUSTOMER = 'C'
-USER_ROLE = (
-    (USER_ROLE_ADMIN, '管理人员'),
-    (USER_ROLE_STAFF, '工作人员'),
-    (USER_ROLE_DRIVER, '驾驶人员'),
-    (USER_ROLE_ESCORT, '押运人员'),
-    (USER_ROLE_CUSTOMER, '客户')
+# user type choices
+USER_TYPE_ADMIN = 'A'
+USER_TYPE_STAFF = 'S'
+USER_TYPE_DRIVER = 'D'
+USER_TYPE_ESCORT = 'E'
+USER_TYPE_CUSTOMER = 'C'
+USER_TYPE = (
+    (USER_TYPE_ADMIN, '管理人员'),
+    (USER_TYPE_STAFF, '工作人员'),
+    (USER_TYPE_DRIVER, '驾驶人员'),
+    (USER_TYPE_ESCORT, '押运人员'),
+    (USER_TYPE_CUSTOMER, '客户')
 )
 
 # user document type choices

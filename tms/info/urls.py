@@ -25,13 +25,8 @@ router.register(
     base_name='transportation-distance'
 )
 
-router.register(
-    r'routes',
-    v.RouteViewSet,
-    base_name='route'
-)
-
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'basic-setting', v.BasicSettingAPIView.as_view()),
+    url(r'tax-setting', v.TaxRateAPIView.as_view()),
 ]

@@ -11,15 +11,6 @@ from ..core.serializers import TMSChoiceField
 from ..hr.serializers import ShortCustomerProfileSerializer
 
 
-class ShortProductDisplaySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Product
-        fields = (
-            'name',
-        )
-
-
 class ShortProductSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Product
@@ -31,83 +22,14 @@ class ShortProductSerializer(serializers.ModelSerializer):
         )
 
 
-# class ShortProductCategorySerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.ProductCategory
-#         fields = (
-#             'id', 'name'
-#         )
-
-
-# class ProductCategorySerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.ProductCategory
-#         fields = '__all__'
-
-
 class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product
     """
-    # category = ProductCategorySerializer(read_only=True)
-    # weight_measure_unit = TMSChoiceField(choices=c.PRODUCT_WEIGHT_MEASURE_UNIT)
 
     class Meta:
         model = m.Product
         fields = '__all__'
-
-    # def create(self, validated_data):
-    #     category_data = self.context.get('category')
-    #     if category_data is None:
-    #         raise serializers.ValidationError({
-    #             'category': 'Category data is missing'
-    #         })
-    #     try:
-    #         category = m.ProductCategory.objects.get(
-    #             id=category_data.get('id', None)
-    #         )
-    #     except m.ProductCategory.DoesNotExist:
-    #         raise serializers.ValidationError({
-    #             'category': 'Such category does not exist'
-    #         })
-
-    #     return m.Product.objects.create(
-    #         category=category,
-    #         **validated_data
-    #     )
-
-    # def update(self, instance, validated_data):
-    #     category_data = self.context.get('category')
-    #     if category_data is None:
-    #         raise serializers.ValidationError({
-    #             'category': 'Category data is missing'
-    #         })
-    #     try:
-    #         category = m.ProductCategory.objects.get(
-    #             id=category_data.get('id', None)
-    #         )
-    #     except m.ProductCategory.DoesNotExist:
-    #         raise serializers.ValidationError({
-    #             'category': 'Such category does not exist'
-    #         })
-
-    #     for (key, value) in validated_data.items():
-    #         setattr(instance, key, value)
-
-    #     instance.category = category
-    #     instance.save()
-    #     return instance
-
-    # def to_representation(self, instance):
-    #     ret = super().to_representation(instance)
-    #     ret['price_display'] =\
-    #         str(instance.price) + '元 / ' +\
-    #         str(instance.unit_weight) +\
-    #         str(instance.get_weight_measure_unit_display())
-
-    #     return ret
 
 
 class BasicSettingSerializer(serializers.ModelSerializer):
@@ -117,33 +39,24 @@ class BasicSettingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StationNameSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Station
-        fields = (
-            'id', 'name'
-        )
-
-
-class StationNameTypeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Station
-        fields = (
-            'id', 'name', 'station_type'
-        )
-
-
 class ShortStationSerializer(serializers.ModelSerializer):
     """
-    Serializer for short data of Loading Station
+    Serializer for Station
     """
+    name = serializers.SerializerMethodField()
+    lnglat = serializers.SerializerMethodField()
+
     class Meta:
         model = m.Station
         fields = (
-            'id', 'name', 'contact', 'mobile', 'address', 'station_type'
+            'id', 'name', 'station_type', 'lnglat'
         )
+
+    def get_name(self, obj):
+        return obj.name + ' (' + obj.get_station_type_display() + ')'
+
+    def get_lnglat(self, obj):
+        return [obj.longitude, obj.latitude]
 
 
 class ShortStationProductionSerializer(serializers.Serializer):
@@ -163,20 +76,6 @@ class ShortStationInfoSerializer(serializers.Serializer):
     arrive_duration = serializers.CharField(max_length=200)
     load_wait_duration = serializers.CharField(max_length=200)
     load_duration = serializers.CharField(max_length=200)
-
-
-class ShortStationPointSerializer(serializers.ModelSerializer):
-
-    lnglat = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.Station
-        fields = (
-            'lnglat', 'station_type'
-        )
-
-    def get_lnglat(self, obj):
-        return [obj.longitude, obj.latitude]
 
 
 class StationPointSerializer(serializers.ModelSerializer):
@@ -361,71 +260,6 @@ class ParkingStationSerializer(MainStationSerializer):
 
 class GetoffStationSerializer(MainStationSerializer):
     pass
-
-
-class ShortRouteSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Route
-        fields = (
-            'id', 'name'
-        )
-
-
-class PathStationNameField(serializers.ListField):
-
-    def to_representation(self, value):
-        paths = m.Station.objects.filter(id__in=value)
-        paths = dict([(point.id, point) for point in paths])
-
-        serializer = StationPointSerializer(
-            [paths[id] for id in value],
-            many=True
-        )
-        return serializer.data
-
-
-class RouteSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.Route
-        fields = '__all__'
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        paths = m.Station.objects.filter(id__in=ret['path'])
-        paths = dict([(point.id, point) for point in paths])
-
-        ret['path'] = StationPointSerializer(
-            [paths[id] for id in instance.path],
-            many=True
-        ).data
-
-        return ret
-
-
-class PathLngLatField(serializers.ListField):
-
-    def to_representation(self, value):
-        paths = m.Station.objects.filter(id__in=value)
-        paths = dict([(point.id, point) for point in paths])
-
-        serializer = ShortStationPointSerializer(
-            [paths[id] for id in value],
-            many=True
-        )
-        return serializer.data
-
-
-class RoutePointSerializer(serializers.ModelSerializer):
-
-    path = PathLngLatField()
-
-    class Meta:
-        model = m.Route
-        fields = (
-            'id', 'path'
-        )
 
 
 class TransportationDistanceSerializer(serializers.ModelSerializer):

@@ -164,10 +164,10 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'mobile': 'Such mobile already exisits'
             })
 
-        # check user role
-        user_data['role'] = user_data['role']['value']
+        # check user user_type
+        user_data['user_type'] = user_data['user_type']['value']
 
-        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+        if user_data['user_type'] in [c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]:
             driver_license_data = self.context.get('driver_license', None)
             if driver_license_data is None:
                 raise serializers.ValidationError({
@@ -175,7 +175,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 })
 
         permission = None
-        if user_data['role'] == c.USER_ROLE_STAFF:
+        if user_data['user_type'] == c.USER_TYPE_STAFF:
             permission_data = user_data.pop('permission')
             permission = get_object_or_404(
                 UserPermission, id=permission_data.get('id', None)
@@ -196,7 +196,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         )
 
         driver_license = None
-        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+        if user_data['user_type'] in [c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]:
             driver_license = m.DriverLicense.objects.create(
                 **driver_license_data
             )
@@ -232,8 +232,8 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 'mobile': 'Such mobile already exisits'
             })
 
-        user_data['role'] = user_data['role']['value']
-        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+        user_data['user_type'] = user_data['user_type']['value']
+        if user_data['user_type'] in [c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]:
             driver_license_data = self.context.get('driver_license', None)
             if driver_license_data is None:
                 raise serializers.ValidationError({
@@ -245,7 +245,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             instance.user.set_password(password)
 
         permission = None
-        if user_data['role'] == c.USER_ROLE_STAFF:
+        if user_data['user_type'] == c.USER_TYPE_STAFF:
             permission_data = user_data.pop('permission')
             permission = get_object_or_404(
                 UserPermission, id=permission_data.get('id', None)
@@ -271,7 +271,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
 
-        if user_data['role'] in [c.USER_ROLE_DRIVER, c.USER_ROLE_ESCORT]:
+        if user_data['user_type'] in [c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT]:
             if instance.driver_license is None:
                 driver_license = m.DriverLicense.objects.create(
                     **driver_license_data
@@ -363,7 +363,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
                 'associated_with': 'Such user does not exist'
             })
 
-        user_data.setdefault('role', c.USER_ROLE_CUSTOMER)
+        user_data.setdefault('user_type', c.USER_TYPE_CUSTOMER)
         user = m.User.objects.create_user(**user_data)
         customer = m.CustomerProfile.objects.create(
             user=user,
