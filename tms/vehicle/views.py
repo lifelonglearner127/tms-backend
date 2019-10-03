@@ -65,6 +65,65 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, url_path='playback')
+    def get_vehicle_playback_by_job(self, request, pk=None):
+        vehicle = self.get_object()
+
+        start_time = self.request.query_params.get('start_time', None)
+        finish_time = self.request.query_params.get('finish_time', None)
+
+        results = {
+            'total_distance': 0,
+            'paths': [],
+            'meta': []
+        }
+        while True:
+            queries = {
+                'plate_num': vehicle.plate_num,
+                'from': start_time,
+                'to': finish_time,
+                'timeInterval': '30'
+            }
+            try:
+                data = G7Interface.call_g7_http_interface(
+                    'VEHICLE_HISTORY_TRACK_QUERY',
+                    queries=queries
+                )
+                for x in data:
+                    results['paths'].append([x.pop('lng'), x.pop('lat')])
+                    results['total_distance'] += round(x['distance'] / 100)
+                    x['time'] = datetime.fromtimestamp(x['time']/1000).strftime('%Y-%m-%d %H:%M:%S')
+
+                results['meta'].extend(data)
+
+                if len(data) == 1000:
+                    start_time = datetime.strptime(
+                        data[999]['time'], '%Y-%m-%d %H:%M:%S'
+                    )
+                    start_time = start_time + timedelta(seconds=1)
+                    start_time = start_time.strftime('%Y-%m-%d %H:%M:%S')
+
+                else:
+                    break
+            except Exception:
+                results = {
+                    'result': {
+                        'code': '1',
+                        'msg': 'g7 error'
+                    }
+                }
+                break
+
+        if 'total_distance' in results:
+            results['total_distance'] = round(
+                results['total_distance'] / 1000, 2
+            )
+
+        return Response(
+            results,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['get'], url_path='g7-points')
     def get_vehicle_g7_points(self, request, pk=None):
         """
