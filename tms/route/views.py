@@ -98,3 +98,49 @@ class RouteViewSet(TMSViewSet):
             s.RouteSerializer(instance).data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, url_path='stations', methods=['post'])
+    def get_routes_by_stations(self, request):
+        """
+        query route by stations(over 2) and return all routes if exits
+        """
+        routes = []
+        missing_routes = []
+        stations_data = request.data.pop('stations', [])
+
+        for i in range(0, len(stations_data) - 1):
+            current_station_data = stations_data[i]
+            next_station_data = stations_data[i + 1]
+            try:
+                current_station = m.Station.objects.get(
+                    id=current_station_data.get('id', None)
+                )
+                next_station = m.Station.objects.get(
+                    id=next_station_data.get('id', None)
+                )
+            except m.Station.DoesNotExist:
+                raise s.serializers.ValidationError({
+                    'station': 'Station data does not exist in db'
+                })
+
+            try:
+                route = m.Route.objects.get(
+                    start_point=current_station,
+                    end_point=next_station
+                )
+                routes.append(route)
+            except m.Route.DoesNotExist:
+                missing_routes.append({
+                    'msg': '{} ({}) - {} ({})'.format(
+                        current_station.name, current_station.get_station_type_display(),
+                        next_station.name, next_station.get_station_type_display()
+                    )
+                })
+
+        return Response(
+            {
+                'routes': s.RouteSerializer(routes, many=True).data,
+                'missing_routes': missing_routes
+            },
+            status=status.HTTP_200_OK
+        )

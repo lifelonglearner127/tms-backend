@@ -284,10 +284,6 @@ class Job(models.Model):
         default=False
     )
 
-    is_same_station = models.BooleanField(
-        default=False
-    )
-
     stations = models.ManyToManyField(
         Station,
         through='JobStation',

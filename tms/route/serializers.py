@@ -50,6 +50,11 @@ class RouteSerializer(serializers.ModelSerializer):
             })
         end_point = get_object_or_404(m.Station, id=end_point_data.get('id', None))
 
+        if m.Route.objects.filter(start_point=start_point, end_point=end_point).exists():
+            raise serializers.ValidationError({
+                'route': '这条路书已经在'
+            })
+
         if validated_data['is_g7_route']:
             vehicle_data = self.context.get('vehicle', None)
             if vehicle_data is None:
@@ -81,6 +86,11 @@ class RouteSerializer(serializers.ModelSerializer):
                 'start_point': 'Mising data'
             })
         end_point = get_object_or_404(m.Station, id=end_point_data.get('id', None))
+
+        if m.Route.objects.exclude(id=instance.id).filter(start_point=start_point, end_point=end_point).exists():
+            raise serializers.ValidationError({
+                'route': '这条路书已经在'
+            })
 
         instance.start_point = start_point
         instance.end_point = end_point
