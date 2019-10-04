@@ -314,7 +314,7 @@
       "model": "info.Station",
       "pk": 1,
       "fields": {
-          "name": "滨阳化工",
+          "name": "滨阳化工 A",
           "contact": "王1",
           "mobile": "141",
           "address": "山东省滨州市阳信县劳店镇工业七路",
@@ -336,7 +336,7 @@
       "model": "info.Station",
       "pk": 2,
       "fields": {
-          "name": "滨阳化工",
+          "name": "滨阳化工 A",
           "contact": "张1",
           "mobile": "161",
           "address": "山东省滨州市阳信县劳店镇工业七路",
@@ -358,7 +358,7 @@
       "model": "info.Station",
       "pk": 3,
       "fields": {
-          "name": "大学东路",
+          "name": "大学东路 B",
           "contact": "高3",
           "mobile": "183",
           "address": "山东省德州市德城区宋官屯街道康博大道86",
@@ -381,7 +381,7 @@
       "model": "info.Station",
       "pk": 4,
       "fields": {
-          "name": "铁西大街",
+          "name": "铁西大街 C",
           "contact": "高2",
           "mobile": "182",
           "address": "河北省沧州市新华区南大街街道交通南大道58摩卡小镇(交通南大道)",
@@ -404,7 +404,7 @@
       "model": "info.Station",
       "pk": 5,
       "fields": {
-          "name": "海河西路",
+          "name": "海河西路 D",
           "contact": "高1",
           "mobile": "181",
           "address": "河北省沧州市运河区南陈屯乡海河西路16号",
