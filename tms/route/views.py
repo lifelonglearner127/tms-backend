@@ -99,6 +99,17 @@ class RouteViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='ids', methods=['post'])
+    def get_routes_by_ids(self, request):
+        route_ids = request.data.get('ids', [])
+        return Response(
+            s.RouteSerializer(
+                m.Route.objects.filter(id__in=route_ids),
+                many=True
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path='stations', methods=['post'])
     def get_routes_by_stations(self, request):
         """
