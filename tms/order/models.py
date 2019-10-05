@@ -468,15 +468,20 @@ class JobDriver(models.Model):
         on_delete=models.CASCADE
     )
 
-    start_at = models.DateTimeField(
+    started_at = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    finish_at = models.DateTimeField(
+    finished_at = models.DateTimeField(
         null=True,
         blank=True
     )
+
+    class Meta:
+        ordering = (
+            '-started_at',
+        )
 
 
 class JobEscort(models.Model):
@@ -491,15 +496,20 @@ class JobEscort(models.Model):
         on_delete=models.CASCADE
     )
 
-    start_at = models.DateTimeField(
+    started_at = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    finish_at = models.DateTimeField(
+    finished_at = models.DateTimeField(
         null=True,
         blank=True
     )
+
+    class Meta:
+        ordering = (
+            '-started_at',
+        )
 
 
 class LoadingStationProductCheck(models.Model):

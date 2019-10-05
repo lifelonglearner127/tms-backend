@@ -23,6 +23,16 @@ class JobAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.JobDriver)
+class JobDriverAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.JobEscort)
+class JobEscortAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.LoadingStationProductCheck)
 class LoadingStationProductCheckAdmin(admin.ModelAdmin):
     pass

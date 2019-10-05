@@ -20,7 +20,7 @@ from ..info.serializers import (
     ShortStationSerializer, ShortProductSerializer,
     ShortStationProductionSerializer, ShortStationInfoSerializer
 )
-from ..route.serializers import ShortRouteSerializer
+from ..route.serializers import ShortRouteSerializer, RouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 from .tasks import notify_order_changes
 
@@ -494,47 +494,53 @@ class JobStationSerializer(serializers.ModelSerializer):
         )
 
 
+class JobDriverSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.JobDriver
+        exclude = (
+            'job',
+        )
+
+
+class JobEscortSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.JobEscort
+        exclude = (
+            'job',
+        )
+
+
 class JobAdminSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
-    loading_station = serializers.SerializerMethodField()
-    due_time = serializers.SerializerMethodField()
-    quality_station = serializers.SerializerMethodField()
-    route = ShortRouteSerializer()
+    driver = serializers.SerializerMethodField()
+    escort = serializers.SerializerMethodField()
+    routes = serializers.SerializerMethodField()
     branches = serializers.SerializerMethodField()
-    branch_options = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'loading_station',
-            'quality_station', 'is_same_station', 'due_time', 'route', 'branches',
-            'branch_options'
+            'id', 'vehicle', 'driver', 'escort', 'routes', 'branches'
         )
 
-    def get_loading_station(self, instance):
-        return ShortStationSerializer(
-            instance.stations.all()[0]
+    def get_driver(self, instance):
+        job_driver = m.JobDriver.objects.filter(job=instance).first()
+        return ShortUserSerializer(job_driver.driver).data
+
+    def get_escort(self, instance):
+        job_escort = m.JobEscort.objects.filter(job=instance).first()
+        return ShortUserSerializer(job_escort.escort).data
+
+    def get_routes(self, instance):
+        routes = m.Route.objects.filter(id__in=instance.routes)
+        routes = dict([(route.id, route) for route in routes])
+        return RouteSerializer(
+            [routes[id] for id in instance.routes],
+            many=True
         ).data
-
-    def get_due_time(self, instance):
-        return instance.jobstation_set.all()[0].due_time
-
-    def get_quality_station(self, instance):
-        return ShortStationSerializer(
-            instance.stations.all()[0]
-        ).data
-
-    def get_branch_options(self, instance):
-        options = []
-        for i in range(0, instance.vehicle.branch_count):
-            options.append({
-                'id': i
-            })
-
-        return options
 
     def get_branches(self, instance):
         branches = []
