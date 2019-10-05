@@ -102,9 +102,11 @@ class RouteViewSet(TMSViewSet):
     @action(detail=False, url_path='ids', methods=['post'])
     def get_routes_by_ids(self, request):
         route_ids = request.data.get('ids', [])
+        routes = m.Route.objects.filter(id__in=route_ids)
+        routes = dict([(route.id, route) for route in routes])
         return Response(
             s.RouteSerializer(
-                m.Route.objects.filter(id__in=route_ids),
+                [routes[id] for id in route_ids],
                 many=True
             ).data,
             status=status.HTTP_200_OK

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
 from datetime import timedelta
 from math import ceil
@@ -102,6 +103,11 @@ class Order(TimeStampedModel):
         Station,
         on_delete=models.CASCADE,
         related_name='orders_as_quality_station',
+        null=True,
+        blank=True
+    )
+
+    loading_due_time = models.DateTimeField(
         null=True,
         blank=True
     )
@@ -238,6 +244,10 @@ class Job(models.Model):
         Vehicle,
         on_delete=models.CASCADE,
         related_name='jobs'
+    )
+
+    routes = ArrayField(
+        models.PositiveIntegerField()
     )
 
     progress = models.PositiveIntegerField(
@@ -555,13 +565,10 @@ class JobStation(models.Model):
         null=True
     )
 
-    route = models.ForeignKey(
-        Route,
-        on_delete=models.SET_NULL,
-        null=True
+    due_time = models.DateTimeField(
+        null=True,
+        blank=True
     )
-
-    due_time = models.DateTimeField()
 
     step = models.PositiveIntegerField()
 
