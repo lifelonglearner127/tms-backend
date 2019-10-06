@@ -101,6 +101,22 @@ class StaffProfileViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    # version 2
+    @action(detail=False, url_path='work-status')
+    def get_drivers_or_escorts_status(self, request):
+        """
+        retrieve the driver info
+        this api is called in arrange view when user select the driver
+        """
+        user_type = request.query_params.get('user_type', 'D')
+        page = self.paginate_queryset(
+            m.StaffProfile.objects.filter(user__user_type=user_type)
+        )
+        serializer = s.DriverEscortStatusSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    # version 2
+
     @action(detail=False, url_path='short-staff')
     def short_staff(self, request):
         serializer = s.ShortStaffProfileSerializer(

@@ -440,3 +440,17 @@ class CustomerAppProfileSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'user', 'name', 'contact', 'mobile'
         )
+
+
+# version 2
+class DriverEscortStatusSerializer(serializers.Serializer):
+    """
+    Serializer for driver, escort status in arrange view
+    """
+    id = serializers.IntegerField(source='user.id')
+    name = serializers.CharField(source='user.name')
+    mobile = serializers.CharField(source='user.mobile')
+    id_card = serializers.CharField()
+
+
+# version 2

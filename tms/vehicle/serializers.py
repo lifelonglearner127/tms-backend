@@ -618,8 +618,8 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
             return None
 
         return {
-            'id': instance.bind.escort.id,
-            'name': instance.bind.escort.name,
-            'mobile': instance.bind.escort.mobile,
-            'id_card': instance.bind.escort.profile.id_card,
+            'id': vehicle_bind.escort.id,
+            'name': vehicle_bind.escort.name,
+            'mobile': vehicle_bind.escort.mobile,
+            'id_card': vehicle_bind.escort.profile.id_card,
         }
