@@ -51,8 +51,3 @@ class JobStationProductAdmin(admin.ModelAdmin):
 @admin.register(m.JobReport)
 class JobReportAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(m.VehicleUserBind)
-class VehicleUserBindAdmin(admin.ModelAdmin):
-    pass

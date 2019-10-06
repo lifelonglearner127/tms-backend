@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -47,12 +47,29 @@ class VerifyJWTAPIView(JWTAPIView):
     serializer_class = s.VerifyJWTSerializer
 
 
-class UserViewSet(TMSViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """
     Viewset for User
     """
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
+    short_serializer_class = s.ShortUserSerializer
+
+    # version 2
+    @action(detail=False, url_path='short/by-types')
+    def get_short_users_by_types(self, request):
+        """
+        retrieve users by its user types.
+        """
+        user_types = request.query_params.get('user_types', [])
+        queryset = self.queryset
+        if len(user_types) > 0:
+            queryset = queryset.filter(user_type__in=user_types)
+
+        return Response(
+            s.ShortUserSerializer(queryset, many=True).data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, methods=['post'], url_path="me")
     def update_me(self, request):

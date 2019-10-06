@@ -302,14 +302,14 @@ class Job(models.Model):
 
     associated_drivers = models.ManyToManyField(
         User,
-        related_name='jobs_as_driver',
+        related_name='associated_drivers',
         through='JobDriver',
         through_fields=('job', 'driver')
     )
 
     associated_escorts = models.ManyToManyField(
         User,
-        related_name='jobs_as_escort',
+        related_name='associated_escorts',
         through='JobEscort',
         through_fields=('job', 'escort')
     )
@@ -465,7 +465,8 @@ class JobDriver(models.Model):
 
     driver = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='jobs_as_driver'
     )
 
     started_at = models.DateTimeField(
@@ -493,7 +494,8 @@ class JobEscort(models.Model):
 
     escort = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='jobs_as_escorts'
     )
 
     started_at = models.DateTimeField(
@@ -724,34 +726,3 @@ class JobReport(models.Model):
 
     class Meta:
         ordering = ('-month', )
-
-
-class VehicleUserBind(TimeStampedModel):
-
-    vehicle = models.OneToOneField(
-        Vehicle,
-        on_delete=models.CASCADE,
-        related_name='bind'
-    )
-
-    driver = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="vehicles_as_driver"
-    )
-
-    escort = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="vehicles_as_escort"
-    )
-
-    bind_method = models.CharField(
-        max_length=1,
-        choices=c.VEHICLE_USER_BIND_METHOD,
-        default=c.VEHICLE_USER_BIND_METHOD_BY_ADMIN
-    )
-
-    objects = models.Manager()
-    binds_by_job = managers.JobVehicleUserBindManager()
-    binds_by_admin = managers.AdminVehicleUserBindManager()

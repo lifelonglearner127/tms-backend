@@ -43,12 +43,19 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
     """
-    bound_driver = ShortUserSerializer(read_only=True)
+    # bound_driver = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.Vehicle
         fields = (
-            'id', 'plate_num', 'status', 'total_load', 'branches', 'status_text', 'bound_driver', 'next_job_customer'
+            'id',
+            'plate_num',
+            'status',
+            'total_load',
+            'branches',
+            # 'status_text',
+            # 'bound_driver',
+            # 'next_job_customer'
         )
 
 
@@ -516,3 +523,103 @@ class VehicleTireSerializer(serializers.ModelSerializer):
             'plate_num': instance.vehicle.plate_num
         }
         return ret
+
+
+class VehicleDriverEscortBindSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehicleSerializer()
+    driver = ShortUserSerializer()
+    escort = ShortUserSerializer()
+
+    class Meta:
+        model = m.VehicleDriverEscortBind
+        fields = '__all__'
+
+    def validate(self, data):
+        vehicle = data['vehicle']
+        driver = data['driver']
+        escort = data['escort']
+
+        if self.instance is None:
+
+            if m.VehicleDriverEscortBind.objects.filter(vehicle=vehicle).exists():
+                raise serializers.ValidationError({
+                    'vehicle': '这车辆匹配已存在'
+                })
+
+            if m.VehicleDriverEscortBind.objects.filter(driver=driver).exists():
+                raise serializers.ValidationError({
+                    'driver': '这司机匹配已存在'
+                })
+            if m.VehicleDriverEscortBind.objects.filter(escort=escort).exists():
+                raise serializers.ValidationError({
+                    'escort': '这押运员匹配已存在'
+                })
+
+        else:
+            if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(vehicle=vehicle).exists():
+                raise serializers.ValidationError({
+                    'vehicle': '这车辆匹配已存在'
+                })
+
+            if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(driver=driver).exists():
+                raise serializers.ValidationError({
+                    'driver': '这司机匹配已存在'
+                })
+            if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(escort=escort).exists():
+                raise serializers.ValidationError({
+                    'escort': '这押运员匹配已存在'
+                })
+
+        return data
+
+    def to_internal_value(self, data):
+        ret = {
+            'vehicle': get_object_or_404(m.Vehicle, id=data['vehicle']['id']),
+            'driver': get_object_or_404(m.User, id=data['driver']['id']),
+            'escort': get_object_or_404(m.User, id=data['escort']['id'])
+        }
+        return ret
+
+
+# version 2
+class VehicleBindDetailSerializer(serializers.ModelSerializer):
+
+    driver = serializers.SerializerMethodField()
+    escort = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Vehicle
+        fields = (
+            'id',
+            'plate_num',
+            'branch_count',
+            'driver',
+            'escort',
+        )
+
+    def get_driver(self, instance):
+        try:
+            vehicle_bind = instance.bind
+        except m.VehicleDriverEscortBind.DoesNotExist:
+            return None
+
+        return {
+            'id': vehicle_bind.driver.id,
+            'name': vehicle_bind.driver.name,
+            'mobile': vehicle_bind.driver.mobile,
+            'id_card': vehicle_bind.driver.profile.id_card
+        }
+
+    def get_escort(self, instance):
+        try:
+            vehicle_bind = instance.bind
+        except m.VehicleDriverEscortBind.DoesNotExist:
+            return None
+
+        return {
+            'id': instance.bind.escort.id,
+            'name': instance.bind.escort.name,
+            'mobile': instance.bind.escort.mobile,
+            'id_card': instance.bind.escort.profile.id_card,
+        }

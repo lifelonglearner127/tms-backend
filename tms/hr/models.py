@@ -206,31 +206,31 @@ class StaffProfile(TimeStampedModel):
             self.user.user_type, self.user.username
         )
 
-    @property
-    def status_text(self):
-        request_set = self.user.my_requests.all()
-        status = "等待任务"
-        if len(request_set) > 0:
-            for request in request_set:
-                today_dt = date.today()
-                if today_dt >= request.rest_request.from_date and today_dt <= request.rest_request.to_date:
-                    status = "休假"
-        if status != "休假":
-            job = self.user.jobs_as_driver.filter(progress__gt=1).first()
-            if job is not None:
-                if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
-                    status = '执行任务-装货'
-                elif job.progress == 6 and job.progress == 7 and job.progress == 8 and job.progress == 9:
-                    status = '执行任务-资格'
-                elif (job.progress - 10) % 4 == 0:
-                    status = '执行任务-卸货'
-                elif (job.progress - 10) % 4 == 1:
-                    status = '执行任务-卸货'
-                elif (job.progress - 10) % 4 == 2:
-                    status = '执行任务-卸货'
-                elif (job.progress - 10) % 4 == 3:
-                    status = '执行任务-卸货'
-        return status
+    # @property
+    # def status_text(self):
+    #     request_set = self.user.my_requests.all()
+    #     status = "等待任务"
+    #     if len(request_set) > 0:
+    #         for request in request_set:
+    #             today_dt = date.today()
+    #             if today_dt >= request.rest_request.from_date and today_dt <= request.rest_request.to_date:
+    #                 status = "休假"
+    #     if status != "休假":
+    #         job = self.user.jobs_as_driver.filter(progress__gt=1).first()
+    #         if job is not None:
+    #             if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
+    #                 status = '执行任务-装货'
+    #             elif job.progress == 6 and job.progress == 7 and job.progress == 8 and job.progress == 9:
+    #                 status = '执行任务-资格'
+    #             elif (job.progress - 10) % 4 == 0:
+    #                 status = '执行任务-卸货'
+    #             elif (job.progress - 10) % 4 == 1:
+    #                 status = '执行任务-卸货'
+    #             elif (job.progress - 10) % 4 == 2:
+    #                 status = '执行任务-卸货'
+    #             elif (job.progress - 10) % 4 == 3:
+    #                 status = '执行任务-卸货'
+    #     return status
 
     @property
     def driving_duration(self):
@@ -247,16 +247,16 @@ class StaffProfile(TimeStampedModel):
         result = format_hms_string(time_duration)
         return result
 
-    @property
-    def next_job_customer(self):
-        next_job = self.user.jobs_as_driver.filter(progress=1).first()
-        customer_name = ''
-        if next_job:
-            next_order = next_job.order.first()
-            if next_order:
-                customer = next_order.customer.first()
-                customer_name = customer.user.username
-        return customer_name
+    # @property
+    # def next_job_customer(self):
+    #     next_job = self.user.jobs_as_driver.filter(progress=1).first()
+    #     customer_name = ''
+    #     if next_job:
+    #         next_order = next_job.order.first()
+    #         if next_order:
+    #             customer = next_order.customer.first()
+    #             customer_name = customer.user.username
+    #     return customer_name
 
 
 class CustomerContact(models.Model):

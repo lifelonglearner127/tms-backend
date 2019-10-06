@@ -22,9 +22,7 @@ router.register(
 router.register(
     r'order-report', v.OrderReportViewSet, base_name='order-report'
 )
-router.register(
-    r'vehicle-binds', v.VehicleUserBindViewSet, base_name='vehicle-user-binds'
-)
+
 
 # # /jobs/{job_pk}/stations
 # # /jobs/{job_pk}/stations/{pk}

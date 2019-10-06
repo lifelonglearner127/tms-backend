@@ -45,7 +45,11 @@ router.register(
     v.TireManagementHistoryViewSet,
     base_name='vehicle-tires'
 )
-
+router.register(
+    r'vehicle-binds',
+    v.VehicleDriverEscortBindViewSet,
+    base_name='vehicle-user-binds'
+)
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]

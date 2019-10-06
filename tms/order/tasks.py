@@ -220,22 +220,22 @@ def calculate_job_report(context):
                 weights=job.order.total_weight
             )
 
-    # unbind vehicle, driver, escort
-    if not m.VehicleUserBind.binds_by_admin.filter(
-        vehicle=vehicle,
-        driver=driver,
-        escort=escort
-    ).exists():
-        try:
-            vehicle_bind = m.VehicleUserBind.objects.get(
-                vehicle=vehicle,
-                driver=driver,
-                escort=escort,
-                bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-            )
-            vehicle_bind.delete()
-        except m.VehicleUserBind.DoesNotExist:
-            pass
+    # # unbind vehicle, driver, escort
+    # if not m.VehicleUserBind.binds_by_admin.filter(
+    #     vehicle=vehicle,
+    #     driver=driver,
+    #     escort=escort
+    # ).exists():
+    #     try:
+    #         vehicle_bind = m.VehicleUserBind.objects.get(
+    #             vehicle=vehicle,
+    #             driver=driver,
+    #             escort=escort,
+    #             bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+    #         )
+    #         vehicle_bind.delete()
+    #     except m.VehicleUserBind.DoesNotExist:
+    #         pass
 
     # set the vehicle status to available
     vehicle.status = c.VEHICLE_STATUS_AVAILABLE
@@ -283,18 +283,18 @@ def calculate_job_report(context):
 def bind_vehicle_user(context):
     job = get_object_or_404(m.Job, id=context['job'])
 
-    # bind vehicle, driver, escort
-    if not m.VehicleUserBind.binds_by_admin.filter(
-        vehicle=job.vehicle,
-        driver=job.driver,
-        escort=job.escort
-    ).exists():
-        m.VehicleUserBind.objects.get_or_create(
-            vehicle=job.vehicle,
-            driver=job.driver,
-            escort=job.escort,
-            bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-        )
+    # # bind vehicle, driver, escort
+    # if not m.VehicleUserBind.binds_by_admin.filter(
+    #     vehicle=job.vehicle,
+    #     driver=job.driver,
+    #     escort=job.escort
+    # ).exists():
+    #     m.VehicleUserBind.objects.get_or_create(
+    #         vehicle=job.vehicle,
+    #         driver=job.driver,
+    #         escort=job.escort,
+    #         bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
+    #     )
 
     # set the vehicle status to in-work
     job.vehicle.status = c.VEHICLE_STATUS_INWORK

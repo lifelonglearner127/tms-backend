@@ -88,9 +88,8 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
             'status',
             'license_expiration',
             'bind_vehicle',
-            'status_text',
             'driving_duration',
-            'next_job_customer',
+            # 'next_job_customer',
             'driverlicense_number'
         )
 

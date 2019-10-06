@@ -10,7 +10,7 @@ from ..core import constants as c
 
 # models
 from . import models as m
-from ..order.models import VehicleUserBind, Job
+from ..order.models import Job
 from ..finance.models import ETCCard, FuelCard
 
 # serializer
@@ -47,6 +47,21 @@ class VehicleViewSet(TMSViewSet):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED
         )
+
+    # version 2
+    @action(detail=False, url_path='binds')
+    def get_vehicle_bind_details(self, request):
+        """
+        This api endpoint will be used for getting vehicle and binded drivers and escorts
+        When the user click the vehicle input box on arrange edit view on the front end
+        """
+        page = self.paginate_queryset(self.queryset)
+        serializer = s.VehicleBindDetailSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='vehicles')
+    def list_short_vehicles(self, request):
+        pass
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
@@ -309,7 +324,7 @@ class VehicleViewSet(TMSViewSet):
 
         # Get the current driver and escorts of this vehicle
         try:
-            bind = VehicleUserBind.objects.get(vehicle=vehicle)
+            bind = m.VehicleDriverEscortBind.objects.get(vehicle=vehicle)
             driver = bind.driver.name
             escort = bind.escort.name
             driver_mobile = bind.driver.mobile
@@ -321,7 +336,7 @@ class VehicleViewSet(TMSViewSet):
             except Exception:
                 driving_duration = '未知'
 
-        except VehicleUserBind.DoesNotExist:
+        except m.VehicleDriverEscortBind.DoesNotExist:
             driver = '未知'
             escort = '未知'
             driver_mobile = '未知'
@@ -771,3 +786,11 @@ class TireManagementHistoryViewSet(viewsets.ModelViewSet):
 
     queryset = m.TireManagementHistory.objects.all()
     serializer_class = s.TireManagementHistoryDataViewSerializer
+
+
+class VehicleDriverEscortBindViewSet(TMSViewSet):
+
+    serializer_class = s.VehicleDriverEscortBindSerializer
+
+    def get_queryset(self):
+        return m.VehicleDriverEscortBind.objects.all()
