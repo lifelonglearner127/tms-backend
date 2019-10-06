@@ -208,6 +208,14 @@ class OrderViewSet(TMSViewSet):
         }
         """
         order = self.get_object()
+        if order.status == c.ORDER_STATUS_COMPLETE:
+            return Response(
+                {
+                    'msg': 'Already finished'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # validate vehicle
         try:
             vehicle = Vehicle.objects.get(
