@@ -175,6 +175,12 @@ class OrderProduct(models.Model):
         default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
     )
 
+    # sum of arranged weight
+    arranged_weight = models.FloatField(
+        default=0
+    )
+
+    # summ of delivered weights
     delivered_weight = models.FloatField(
         default=0
     )

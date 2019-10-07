@@ -316,6 +316,39 @@ class OrderViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # validate if arrange weight exceed order product weight
+        arranged_products = {}
+        # {
+        #     'product_id': {
+        #         'branch': [],
+        #         'mission_weight': 0
+        #     }
+        # }
+        for job_product in job_products['total']:
+            product_id = job_product['product']
+            if product_id not in arranged_products:
+                arranged_products[product_id] = {
+                    'branch': [job_product['branch']],
+                    'mission_weight': job_product['mission_weight']
+                }
+            else:
+                arranged_products[product_id]['mission_weight'] += job_product['mission_weight']
+                arranged_products[product_id]['branch'].append(job_product['branch'])
+
+        for product_id, arranged_product in arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=order, product__id=product_id)
+            if order_product.weight - order_product.arranged_weight < arranged_product['mission_weight']:
+                for arranged_branch in arranged_product['branch']:
+                    if arranged_branch not in errors:
+                        errors[arranged_branch] = {}
+                        errors[arranged_branch]['order_over_weight'] = 'mission weight exceed order weight'
+
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         route_ids = request.data.pop('routes', [])
         routes = Route.objects.filter(id__in=route_ids)
         routes = dict([(route.id, route) for route in routes])
@@ -364,6 +397,12 @@ class OrderViewSet(TMSViewSet):
         job_quality_station = m.JobStation.objects.create(
             job=job, station=order.quality_station, step=1
         )
+
+        for product_id, arranged_product in arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=order, product__id=product_id)
+            order_product.arranged_weight += arranged_product['mission_weight']
+            order_product.save()
+
         for job_product in job_products['total']:
             m.JobStationProduct.objects.create(
                 job_station=job_loading_station,
