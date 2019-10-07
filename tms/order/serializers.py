@@ -519,11 +519,12 @@ class JobAdminSerializer(serializers.ModelSerializer):
     escort = serializers.SerializerMethodField()
     routes = serializers.SerializerMethodField()
     branches = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'routes', 'branches'
+            'id', 'vehicle', 'driver', 'escort', 'routes', 'branches', 'progress'
         )
 
     def get_driver(self, instance):
@@ -544,6 +545,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
 
     def get_branches(self, instance):
         branches = []
+        branch_ids = []
         for job_station in instance.jobstation_set.all()[2:]:
             for job_station_product in job_station.jobstationproduct_set.all():
                 for branch in branches:
@@ -556,7 +558,9 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         })
                         break
                 else:
+                    branch_ids.append(job_station_product.branch)
                     branches.append({
+                        'is_checked': True,
                         'branch': {'id': job_station_product.branch},
                         'product': ShortProductSerializer(job_station_product.product).data,
                         'mission_weight': job_station_product.mission_weight,
@@ -567,7 +571,35 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         }]
                     })
 
+        empty_branches = [branch_id for branch_id in range(0, 3) if branch_id not in branch_ids]
+        for empty_branch in empty_branches:
+            branches.append({
+                'is_checked': False,
+                'branch': {'id': empty_branch},
+                'product': None,
+                'mission_weight': 0,
+                'unloading_stations': [{
+                    'unloading_station': None,
+                    'due_time': '',
+                    'mission_weight': 0
+                }]
+            })
         return branches
+
+    def get_progress(self, instance):
+        if instance.progress >= 10:
+            if (instance - 10) % 4 == 0:
+                progress = 10
+            elif (progress - 10) % 4 == 1:
+                progress = 11
+            elif (progress - 10) % 4 == 2:
+                progress = 12
+            elif (progress - 10) % 4 == 3:
+                progress = 13
+        else:
+            progress = instance.progress
+
+        return c.JOB_PROGRESS.get(progress, '无效')
 
 
 class JobUnloadingStationProductSerializer(serializers.Field):
