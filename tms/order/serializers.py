@@ -680,6 +680,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
     )
     progress_bar = serializers.SerializerMethodField()
     progress = serializers.SerializerMethodField()
+    order_description = serializers.CharField(source='order.description')
 
     class Meta:
         model = m.Job
@@ -693,6 +694,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
             'stations',
             'progress_bar',
             'progress',
+            'order_description',
         )
 
     def get_routes(self, instance):
@@ -799,24 +801,33 @@ class JobDoneSerializer(serializers.ModelSerializer):
     """
     Serializer for completed jobs in driver app
     """
-    order_id = serializers.CharField(source='order.id')
     plate_num = serializers.CharField(source='vehicle.plate_num')
-    total_distance = serializers.IntegerField(source='route.distance')
     stations = ShortJobStationSerializer(
         source='jobstation_set', many=True, read_only=True
     )
-    driver = serializers.CharField(source='driver.name')
-    escort = serializers.CharField(source='escort.name')
+    driver = serializers.SerializerMethodField()
+    escort = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order_id', 'plate_num', 'total_distance', 'stations',
-            'started_on', 'finished_on',
-            'total_weight', 'driver', 'escort',
-            'mileage'
+            'id',
+            'plate_num',
+            'started_on',
+            'finished_on',
+            'stations',
+            'total_weight',
+            'driver',
+            'escort',
+            'mileage',
         )
+
+    def get_driver(self, instance):
+        return instance.associated_drivers.first().name
+
+    def get_escort(self, instance):
+        return instance.associated_escorts.first().name
 
 
 class BillSubCategoyChoiceField(serializers.Field):

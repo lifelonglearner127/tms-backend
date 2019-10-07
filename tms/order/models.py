@@ -461,6 +461,11 @@ class Job(models.Model):
     progress_jobs = managers.InProgressJobManager()
     pending_jobs = managers.PendingJobManager()
 
+    class Meta:
+        ordering = (
+            '-finished_on',
+        )
+
 
 class JobDriver(models.Model):
 

@@ -1075,18 +1075,15 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='done', permission_classes=[IsDriverOrEscortUser])
     def done_jobs(self, request):
-        pass
-        # page = self.paginate_queryset(
-        #     request.user.jobs_as_driver.filter(
-        #         progress=c.JOB_PROGRESS_COMPLETE
-        #     ).order_by('-finished_on')
-        # )
+        """
+        this api is used for retrieving the done job in driver app
+        """
+        page = self.paginate_queryset(
+            m.Job.completed_jobs.filter(associated_drivers=request.user)
+        )
 
-        # serializer = s.JobDoneSerializer(
-        #     page,
-        #     many=True
-        # )
-        # return self.get_paginated_response(serializer.data)
+        serializer = s.JobDoneSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
     def progress_jobs(self, request):
