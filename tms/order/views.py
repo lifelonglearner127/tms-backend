@@ -1090,26 +1090,16 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
     def progress_jobs(self, request):
-        pass
-        # job = request.user.jobs_as_driver.filter(
-        #     ~(Q(progress=c.JOB_PROGRESS_NOT_STARTED) |
-        #         Q(progress=c.JOB_PROGRESS_COMPLETE))
-        # ).first()
+        job = m.Job.progress_jobs.filter(associated_drivers=request.user).first()
+        if job is not None:
+            ret = s.JobCurrentSerializer(job).data
+        else:
+            ret = None
 
-        # # if job is None:
-        # #     job = request.user.driver_profile.jobs.filter(
-        # #         progress=c.JOB_PROGRESS_NOT_STARTED
-        # #     ).first()
-
-        # if job is not None:
-        #     ret = s.JobCurrentSerializer(job).data
-        # else:
-        #     ret = {}
-
-        # return Response(
-        #     ret,
-        #     status=status.HTTP_200_OK
-        # )
+        return Response(
+            ret,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, url_path='future', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):

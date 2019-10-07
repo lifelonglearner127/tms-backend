@@ -678,6 +678,8 @@ class JobFutureSerializer(serializers.ModelSerializer):
     stations = ShortJobStationSerializer(
         source='jobstation_set', many=True, read_only=True
     )
+    progress_bar = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
@@ -689,6 +691,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
             'escort',
             'products',
             'stations',
+            'progress_bar',
             'progress',
         )
 
@@ -721,30 +724,6 @@ class JobFutureSerializer(serializers.ModelSerializer):
                 })
 
         return ret
-
-
-class JobCurrentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for current job for driver app
-    """
-    order_id = serializers.CharField(source='order.id')
-    plate_num = serializers.CharField(source='vehicle.plate_num')
-    driver = serializers.CharField(source='driver.name')
-    escort = serializers.CharField(source='escort.name')
-    total_distance = serializers.IntegerField(source='route.distance')
-    products = serializers.SerializerMethodField()
-    stations = ShortJobStationSerializer(
-        source='jobstation_set', many=True, read_only=True
-    )
-    progress_bar = serializers.SerializerMethodField()
-    progress = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.Job
-        fields = (
-            'id', 'order_id', 'plate_num', 'driver', 'escort',
-            'total_distance', 'products', 'stations', 'progress', 'progress_bar', 'route'
-        )
 
     def get_progress_bar(self, instance):
         ret = []
@@ -808,21 +787,12 @@ class JobCurrentSerializer(serializers.ModelSerializer):
             'last_progress_finished_on': last_progress_finished_on
         }
 
-    def get_products(self, instance):
-        ret = []
-        loading_station = instance.jobstation_set.all()[0]
-        for product in loading_station.jobstationproduct_set.all():
-            for ret_product in ret:
-                if ret_product['product']['id'] == product.product.id:
-                    ret_product['mission_weight'] += product.mission_weight
-                    break
-            else:
-                ret.append({
-                    'product': ShortProductSerializer(product.product).data,
-                    'mission_weight': product.mission_weight
-                })
 
-        return ret
+class JobCurrentSerializer(JobFutureSerializer):
+    """
+    Serializer for current job for driver app
+    """
+    pass
 
 
 class JobDoneSerializer(serializers.ModelSerializer):
