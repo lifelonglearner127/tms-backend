@@ -1107,7 +1107,7 @@ class JobViewSet(TMSViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
-    def progress_jobs(self, request):
+    def current_jobs(self, request):
         """
         this api is used for retrieving the current job in driver app
         """
@@ -1115,7 +1115,7 @@ class JobViewSet(TMSViewSet):
         if job is not None:
             ret = s.JobCurrentSerializer(job).data
         else:
-            ret = None
+            ret = {}
 
         return Response(
             ret,
