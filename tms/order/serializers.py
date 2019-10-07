@@ -1160,13 +1160,11 @@ class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
         fields = ('product', 'weight', 'images')
 
     def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(
-                ShortLoadingStationDocumentSerializer(image, context={'request': self.context.get('request')}).data
-            )
-
-        return ret
+        return ShortLoadingStationDocumentSerializer(
+            instance.images.all(),
+            context={'request': self.context.get('request')},
+            many=True
+        ).data
 
 
 class CustomerAppOrderReportSerializer(serializers.ModelSerializer):

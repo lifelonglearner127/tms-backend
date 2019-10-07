@@ -853,7 +853,7 @@ class JobViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='upload-loading-check')
     def upload_loading_station_check(self, request, pk=None):
         job = self.get_object()
-        images = request.data.pop('images')
+        images = request.data.pop('images', [])
         product = get_object_or_404(Product, id=request.data.get('product').get('id'))
 
         loading_check, created = m.LoadingStationProductCheck.objects.get_or_create(
@@ -863,15 +863,21 @@ class JobViewSet(TMSViewSet):
         loading_check.weight = request.data.pop('weight')
         loading_check.save()
 
-        loading_check.images.all().delete()
-
         for image in images:
+            if image.get('id', None):
+                continue
             image['loading_station'] = loading_check.id
             serializer = s.LoadingStationDocumentSerializer(data=image)
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-        return Response(s.LoadingStationProductCheckSerializer(loading_check).data, status=status.HTTP_200_OK)
+        return Response(
+            s.LoadingStationProductCheckSerializer(
+                loading_check,
+                context={'request': request}
+            ).data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=['post'], url_path='upload-quality-check')
     def upload_quality_check(self, request, pk=None):
@@ -896,13 +902,27 @@ class JobViewSet(TMSViewSet):
         job_qualitystation_product.branch_hole = request.data.pop('branch_hole')
 
         for image in images:
+            if image.get('id', None):
+                continue
             image['job_station_product'] = job_qualitystation_product.id
             serializer = s.JobStationProductDocumentSerializer(data=image)
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
+        ret = {
+            'density': quality_check.density,
+            'additive': quality_check.additive,
+            'volume': job_qualitystation_product.volume,
+            'man_hole': job_qualitystation_product.man_hole,
+            'branch_hole': job_qualitystation_product.branch_hole,
+            'images': s.ShortJobStationProductDocumentSerializer(
+                job_qualitystation_product.images.all(),
+                context={'request': request},
+                many=True
+            ).data
+        }
         return Response(
-            {'msg': 'Successfully uploaded'},
+            ret,
             status=status.HTTP_200_OK
         )
 
@@ -1326,8 +1346,16 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
+        ret = {
+            'volume': instance.volume,
+            'images': s.ShortJobStationProductDocumentSerializer(
+                instance.images.all(),
+                context={'request': request},
+                many=True
+            ).data
+        }
         return Response(
-            {'msg': 'Successfully uploaded'},
+            ret,
             status=status.HTTP_200_OK
         )
 
