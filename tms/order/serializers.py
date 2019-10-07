@@ -17,7 +17,7 @@ from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..info.serializers import (
-    ShortStationSerializer, ShortProductSerializer,
+    ShortStationSerializer, ShortProductSerializer, StationContactSerializer,
     ShortStationProductionSerializer, ShortStationInfoSerializer
 )
 from ..route.serializers import ShortRouteSerializer, RouteSerializer
@@ -469,7 +469,7 @@ class JobStationProductDocumentSerializer(serializers.ModelSerializer):
 
 class ShortJobStationSerializer(serializers.ModelSerializer):
 
-    station = ShortStationSerializer()
+    station = StationContactSerializer()
     products = ShortJobStationProductSerializer(
         source='jobstationproduct_set', many=True, read_only=True
     )
