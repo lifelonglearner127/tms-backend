@@ -1090,6 +1090,9 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
     def progress_jobs(self, request):
+        """
+        this api is used for retrieving the current job in driver app
+        """
         job = m.Job.progress_jobs.filter(associated_drivers=request.user).first()
         if job is not None:
             ret = s.JobCurrentSerializer(job).data
@@ -1103,6 +1106,9 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='future', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):
+        """
+        this api is used for retrieving future jobs in driver app
+        """
         page = self.paginate_queryset(
             m.Job.pending_jobs.filter(associated_drivers=request.user)
         )
@@ -1112,130 +1118,130 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=True, url_path='update-progress', permission_classes=[IsDriverOrEscortUser])
     def progress_update(self, request, pk=None):
-        pass
-        # job = self.get_object()
+        """
+        this api is used for update progress in driver app
+        """
+        job = self.get_object()
 
-        # if request.user.jobs_as_driver.exclude(id=job.id).filter(
-        #     progress__gt=1
-        # ).exists():
-        #     return Response(
-        #         {'error': 'Cannot proceed more than 2 jobs simultaneously'},
-        #         status=status.HTTP_400_BAD_REQUEST
-        #     )
+        # driver cannot perform more than 2 jobs
+        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_drivers=request.user).exists():
+            return Response(
+                {'error': 'Cannot proceed more than 2 jobs simultaneously'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # current_progress = job.progress
-        # if current_progress == c.JOB_PROGRESS_COMPLETE:
-        #     return Response(
-        #         {
-        #             'progress': 'This is already completed progress',
-        #             'last_progress_finished_on': job.finished_on
-        #         },
-        #         status=status.HTTP_200_OK
-        #     )
+        # driver cannot update already finished job
+        current_progress = job.progress
+        if current_progress == c.JOB_PROGRESS_COMPLETE:
+            return Response(
+                {
+                    'progress': 'This is already completed progress',
+                    'last_progress_finished_on': job.finished_on
+                },
+                status=status.HTTP_200_OK
+            )
 
-        # if current_progress == c.JOB_PROGRESS_NOT_STARTED:
-        #     job.started_on = timezone.now()
-        #     last_progress_finished_on = None
+        if current_progress == c.JOB_PROGRESS_NOT_STARTED:
+            job.started_on = timezone.now()
+            last_progress_finished_on = None
 
-        #     # set the vehicle status to in-work
-        #     job.vehicle.status = c.VEHICLE_STATUS_INWORK
-        #     job.vehicle.save()
+            # set the vehicle status to in-work
+            job.vehicle.status = c.VEHICLE_STATUS_INWORK
+            job.vehicle.save()
 
-        #     # set the driver & escrot to in-work
-        #     job.driver.profile.status = c.WORK_STATUS_DRIVING
-        #     job.escort.profile.status = c.WORK_STATUS_DRIVING
-        #     job.driver.profile.save()
-        #     job.escort.profile.save()
-        # else:
-        #     current_station = job.jobstation_set.filter(
-        #         is_completed=False
-        #     ).first()
+            # set the driver & escrot to in-work
+            driver = job.associated_drivers.first()
+            escort = job.associated_escorts.first()
+            driver.profile.status = c.WORK_STATUS_DRIVING
+            escort.profile.status = c.WORK_STATUS_DRIVING
+            driver.profile.save()
+            escort.profile.save()
+        else:
+            current_station = job.jobstation_set.filter(
+                is_completed=False
+            ).first()
 
-        #     sub_progress =\
-        #         (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
-        #     if sub_progress == 0:
-        #         current_station.arrived_station_on = timezone.now()
-        #         current_station.save()
-        #         if current_station.step == 0:
-        #             last_progress_finished_on = job.started_on
-        #         else:
-        #             last_progress_finished_on =\
-        #                 current_station.previous_station.departure_station_on
-        #     elif sub_progress == 1:
-        #         current_station.started_working_on = timezone.now()
-        #         last_progress_finished_on = current_station.arrived_station_on
-        #         current_station.save()
-        #     elif sub_progress == 2:
-        #         current_station.finished_working_on = timezone.now()
-        #         last_progress_finished_on = current_station.started_working_on
-        #         current_station.save()
-        #     elif sub_progress == 3:
-        #         current_station.departure_station_on = timezone.now()
-        #         last_progress_finished_on = current_station.finished_working_on
-        #         current_station.is_completed = True
-        #         current_station.save()
+            sub_progress = (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
+            if sub_progress == 0:
+                current_station.arrived_station_on = timezone.now()
+                current_station.save()
+                if current_station.step == 0:
+                    last_progress_finished_on = job.started_on
+                else:
+                    last_progress_finished_on = current_station.previous_station.departure_station_on
+            elif sub_progress == 1:
+                current_station.started_working_on = timezone.now()
+                last_progress_finished_on = current_station.arrived_station_on
+                current_station.save()
+            elif sub_progress == 2:
+                current_station.finished_working_on = timezone.now()
+                last_progress_finished_on = current_station.started_working_on
+                current_station.save()
+            elif sub_progress == 3:
+                current_station.departure_station_on = timezone.now()
+                last_progress_finished_on = current_station.finished_working_on
+                current_station.is_completed = True
+                current_station.save()
 
-        #         if not current_station.has_next_station:
-        #             job.progress = c.JOB_PROGRESS_COMPLETE
-        #             job.finished_on = timezone.now()
+                if not current_station.has_next_station:
+                    job.progress = c.JOB_PROGRESS_COMPLETE
+                    job.finished_on = timezone.now()
 
-        #             # update job empty mileage
-        #             loading_station_arrived_on =\
-        #                 job.jobstation_set.get(step=0).arrived_station_on
+                    # update job empty mileage
+                    loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
 
-        #             queries = {
-        #                 'plate_num':
-        #                     job.vehicle.plate_num,
-        #                 'from':
-        #                     job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
-        #                 'to':
-        #                     loading_station_arrived_on.strftime(
-        #                         '%Y-%m-%d %H:%M:%S'
-        #                     )
-        #             }
-        #             data = G7Interface.call_g7_http_interface(
-        #                 'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-        #                 queries=queries
-        #             )
-        #             job.empty_mileage = data['total_mileage']
+                    queries = {
+                        'plate_num':
+                            job.vehicle.plate_num,
+                        'from':
+                            job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+                        'to':
+                            loading_station_arrived_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            )
+                    }
+                    data = G7Interface.call_g7_http_interface(
+                        'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                        queries=queries
+                    )
+                    job.empty_mileage = data['total_mileage']
 
-        #             # update job heavy mileage
-        #             queries = {
-        #                 'plate_num':
-        #                     job.vehicle.plate_num,
-        #                 'from':
-        #                     loading_station_arrived_on.strftime(
-        #                         '%Y-%m-%d %H:%M:%S'
-        #                     ),
-        #                 'to':
-        #                     job.finished_on.strftime(
-        #                         '%Y-%m-%d %H:%M:%S'
-        #                     )
-        #             }
-        #             job.heavy_mileage = data['total_mileage']
-        #             job.total_mileage =\
-        #                 job.empty_mileage + job.heavy_mileage
-        #             job.highway_mileage = 0
-        #             job.normalway_mileage = 0
-        #             job.save()
-        #             return Response(
-        #                 {
-        #                     'progress': c.JOB_PROGRESS_COMPLETE,
-        #                     'last_progress_finished_on':
-        #                     last_progress_finished_on
-        #                 },
-        #                 status=status.HTTP_200_OK
-        #             )
-        # job.progress = current_progress + 1
-        # job.save()
+                    # update job heavy mileage
+                    queries = {
+                        'plate_num':
+                            job.vehicle.plate_num,
+                        'from':
+                            loading_station_arrived_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            ),
+                        'to':
+                            job.finished_on.strftime(
+                                '%Y-%m-%d %H:%M:%S'
+                            )
+                    }
+                    job.heavy_mileage = data['total_mileage']
+                    job.total_mileage = job.empty_mileage + job.heavy_mileage
+                    job.highway_mileage = 0
+                    job.normalway_mileage = 0
+                    job.save()
+                    return Response(
+                        {
+                            'progress': c.JOB_PROGRESS_COMPLETE,
+                            'last_progress_finished_on':
+                            last_progress_finished_on
+                        },
+                        status=status.HTTP_200_OK
+                    )
+        job.progress = current_progress + 1
+        job.save()
 
-        # return Response(
-        #     {
-        #         'progress': job.progress,
-        #         'last_progress_finished_on': last_progress_finished_on,
-        #     },
-        #     status=status.HTTP_200_OK
-        # )
+        return Response(
+            {
+                'progress': job.progress,
+                'last_progress_finished_on': last_progress_finished_on,
+            },
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True, url_path="test/station-efence")
     def test_station_efence(self, request, pk=None):
