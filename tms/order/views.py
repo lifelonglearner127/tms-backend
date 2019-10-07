@@ -359,10 +359,10 @@ class OrderViewSet(TMSViewSet):
         m.JobEscort.objects.create(job=job, escort=escort)
 
         job_loading_station = m.JobStation.objects.create(
-            job=job, station=order.loading_station, step=0, due_time=order.loading_due_time
+            job=job, station=order.loading_station, step=0
         )
         job_quality_station = m.JobStation.objects.create(
-            job=job, station=order.quality_station, step=1, due_time=order.loading_due_time
+            job=job, station=order.quality_station, step=1
         )
         for job_product in job_products['total']:
             m.JobStationProduct.objects.create(
@@ -387,6 +387,7 @@ class OrderViewSet(TMSViewSet):
                     job_station=job_station,
                     product=get_object_or_404(Product, id=job_product['product']),
                     branch=job_product['branch'],
+                    due_time=job_product['due_time'],
                     mission_weight=job_product['mission_weight']
                 )
 

@@ -61,10 +61,6 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
-        pass
-
-    @action(detail=False, url_path='vehicles')
-    def list_short_vehicles(self, request):
         page = self.paginate_queryset(self.queryset)
         serializer = s.ShortVehicleSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)

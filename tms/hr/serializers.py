@@ -451,6 +451,3 @@ class DriverEscortStatusSerializer(serializers.Serializer):
     name = serializers.CharField(source='user.name')
     mobile = serializers.CharField(source='user.mobile')
     id_card = serializers.CharField()
-
-
-# version 2

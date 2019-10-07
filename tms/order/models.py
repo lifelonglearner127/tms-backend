@@ -577,11 +577,6 @@ class JobStation(models.Model):
         null=True
     )
 
-    due_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
     step = models.PositiveIntegerField()
 
     arrived_station_on = models.DateTimeField(
@@ -654,6 +649,11 @@ class JobStationProduct(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE
+    )
+
+    due_time = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     branch = models.PositiveIntegerField(

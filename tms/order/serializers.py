@@ -566,7 +566,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         'mission_weight': job_station_product.mission_weight,
                         'unloading_stations': [{
                             'unloading_station': ShortStationSerializer(job_station.station).data,
-                            'due_time': job_station.due_time,
+                            'due_time': job_station_product.due_time,
                             'mission_weight': job_station_product.mission_weight
                         }]
                     })

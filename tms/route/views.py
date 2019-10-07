@@ -1,11 +1,9 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import models as m
 from . import serializers as s
-from ..vehicle.models import Vehicle
 from ..core.views import TMSViewSet
 from ..core import constants as c
 
