@@ -1113,15 +1113,12 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='future', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):
-        pass
-        # page = self.paginate_queryset(
-        #     request.user.jobs_as_driver.filter(
-        #         progress=c.JOB_PROGRESS_NOT_STARTED
-        #     )
-        # )
+        page = self.paginate_queryset(
+            m.Job.pending_jobs.filter(associated_drivers=request.user)
+        )
 
-        # serializer = s.JobCurrentSerializer(page, many=True)
-        # return self.get_paginated_response(serializer.data)
+        serializer = s.JobFutureSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, url_path='update-progress', permission_classes=[IsDriverOrEscortUser])
     def progress_update(self, request, pk=None):

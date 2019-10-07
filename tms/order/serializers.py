@@ -666,6 +666,63 @@ class JobSerializer(serializers.ModelSerializer):
         ).data
 
 
+class JobFutureSerializer(serializers.ModelSerializer):
+    """
+    Serializer for future job for driver app
+    """
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+    routes = serializers.SerializerMethodField()
+    driver = serializers.SerializerMethodField()
+    escort = serializers.SerializerMethodField()
+    products = serializers.SerializerMethodField()
+    stations = ShortJobStationSerializer(
+        source='jobstation_set', many=True, read_only=True
+    )
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id',
+            'plate_num',
+            'routes',
+            'driver',
+            'escort',
+            'products',
+            'stations',
+            'progress',
+        )
+
+    def get_routes(self, instance):
+        routes = m.Route.objects.filter(id__in=instance.routes)
+        routes = dict([(route.id, route) for route in routes])
+        return RouteSerializer(
+            [routes[id] for id in instance.routes],
+            many=True
+        ).data
+
+    def get_driver(self, instance):
+        return instance.associated_drivers.first().name
+
+    def get_escort(self, instance):
+        return instance.associated_escorts.first().name
+
+    def get_products(self, instance):
+        ret = []
+        loading_station = instance.jobstation_set.all()[0]
+        for product in loading_station.jobstationproduct_set.all():
+            for ret_product in ret:
+                if ret_product['product']['id'] == product.product.id:
+                    ret_product['mission_weight'] += product.mission_weight
+                    break
+            else:
+                ret.append({
+                    'product': ShortProductSerializer(product.product).data,
+                    'mission_weight': product.mission_weight
+                })
+
+        return ret
+
+
 class JobCurrentSerializer(serializers.ModelSerializer):
     """
     Serializer for current job for driver app
