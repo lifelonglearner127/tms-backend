@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.generics import DestroyAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -1368,3 +1369,17 @@ class OrderReportViewSet(viewsets.ModelViewSet):
             many=True
         )
         return self.get_paginated_response(serializer.data)
+
+
+class LoadingStationDocumentDeleteAPIView(DestroyAPIView):
+    """
+    This api is used for delete loading station check document in driver app
+    """
+    queryset = m.LoadingStationDocument.objects.all()
+
+
+class JobStationProductDocumentDeleteAPIView(DestroyAPIView):
+    """
+    This api is used for delete loading station check document in driver app
+    """
+    queryset = m.JobStationProductDocument.objects.all()

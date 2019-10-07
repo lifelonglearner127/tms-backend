@@ -1,3 +1,4 @@
+from django.urls import path
 from django.conf.urls import url, include
 from rest_framework_nested import routers
 
@@ -54,4 +55,14 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(job_router.urls)),
     url(r'^', include(jobstation_router.urls)),
+    path(
+        'loading-station/documents/<int:pk>',
+        v.LoadingStationDocumentDeleteAPIView.as_view(),
+        name='delete-loading-station-document'
+    ),
+    path(
+        'job-station-product/documents/<int:pk>',
+        v.JobStationProductDocumentDeleteAPIView.as_view(),
+        name='delete-job-station-product-document'
+    ),
 ]

@@ -38,6 +38,16 @@ class LoadingStationProductCheckAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.LoadingStationDocument)
+class LoadingStationDocumentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.QualityCheck)
+class QualityCheckAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.JobStation)
 class JobStationAdmin(admin.ModelAdmin):
     pass
@@ -45,6 +55,11 @@ class JobStationAdmin(admin.ModelAdmin):
 
 @admin.register(m.JobStationProduct)
 class JobStationProductAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.JobStationProductDocument)
+class JobStationProductDocumentAdmin(admin.ModelAdmin):
     pass
 
 
