@@ -378,7 +378,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
 class VehicleDriverDailyBindSerializer(serializers.ModelSerializer):
 
-    get_off_station = StationNameSerializer()
+    get_off_station = StationNameSerializer(required=False)
 
     class Meta:
         model = m.VehicleDriverDailyBind
