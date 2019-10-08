@@ -46,6 +46,11 @@ router.register(
     base_name='vehicle-tires'
 )
 router.register(
+    r'vehicle-tires-tread-depth-history',
+    v.TireTreadDepthCheckHistoryViewSet,
+    base_name='vehicle-tread-history'
+)
+router.register(
     r'vehicle-binds',
     v.VehicleDriverEscortBindViewSet,
     base_name='vehicle-user-binds'

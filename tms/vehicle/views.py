@@ -807,11 +807,69 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, methods=['get'], url_path='tread-depth')
+    def get_current_tread_check(self, request, pk=None):
+        """
+        this api is called in web admin to check the current tread depth
+        """
+        vehicle_tire = self.get_object()
+        if vehicle_tire.current_tire is None:
+            return Response(
+                {
+                    'msg': 'no tire installed yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if vehicle_tire.current_tire.current_tread_depth is None:
+            tread_depth = vehicle_tire.current_tire.tread_depth
+        else:
+            tread_depth = vehicle_tire.current_tire.current_tread_depth.tread_depth
+
+        return Response(
+            {
+                'tread_depth': tread_depth
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='tread-check')
+    def tread_check(self, request, pk=None):
+        """
+        this api is called in web manager when user check the tread
+        """
+        vehice_tire = self.get_object()
+        if vehice_tire.current_tire is None:
+            return Response(
+                {
+                    'msg': 'not tire yet'
+                },
+                status=status.HTTP_200_OK
+            )
+
+        m.TireTreadDepthCheckHistory.objects.create(
+            tire=vehice_tire.current_tire,
+            tread_depth=request.data.pop('tread_depth', 0)
+        )
+
+        return Response(
+            {
+                'msg': 'success'
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 class TireManagementHistoryViewSet(viewsets.ModelViewSet):
 
     queryset = m.TireManagementHistory.objects.all()
     serializer_class = s.TireManagementHistoryDataViewSerializer
+
+
+class TireTreadDepthCheckHistoryViewSet(viewsets.ModelViewSet):
+
+    queryset = m.TireTreadDepthCheckHistory.objects.all()
+    serializer_class = s.TireTreadDepthCheckHistorySerializer
 
 
 class VehicleDriverEscortBindViewSet(TMSViewSet):

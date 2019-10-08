@@ -732,10 +732,44 @@ class TireManagementHistory(TimeStampedModel):
         max_length=100
     )
 
+    @property
+    def current_tread_depth(self):
+        return self.history.first()
+
     class Meta:
         ordering = [
             '-installed_on',
         ]
+
+
+class TireTreadDepthCheckHistory(TimeStampedModel):
+
+    tire = models.ForeignKey(
+        TireManagementHistory,
+        on_delete=models.CASCADE,
+        related_name='history'
+    )
+
+    tread_depth = models.FloatField(
+        default=0
+    )
+
+    checked_on = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    @property
+    def before_tread_depth(self):
+        before_thread_depth = self.tire.history.filter(checked_on__lt=self.checked_on).first()
+        if before_thread_depth is not None:
+            return before_thread_depth.tread_depth
+        else:
+            return self.tire.tread_depth
+
+    class Meta:
+        ordering = (
+            '-checked_on',
+        )
 
 
 class VehicleDriverEscortBind(models.Model):
