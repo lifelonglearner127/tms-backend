@@ -334,6 +334,19 @@ class StationViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='oil-stations/short')
+    def get_short_oil_stations(self, request):
+        """
+        this api is called in driver app in fuel upload
+        """
+        page = self.paginate_queryset(
+            m.Station.oilstations.all(),
+        )
+
+        serializer = s.StationNameSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='black-dots')
     def black_dots(self, request):
         page = self.paginate_queryset(
