@@ -111,6 +111,10 @@ class Test(TimeStampedModel):
         User
     )
 
+    @property
+    def question_count(self):
+        return self.questions.all().count()
+
 
 class TestResult(models.Model):
 

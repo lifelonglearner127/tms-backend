@@ -187,8 +187,13 @@ class TestViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="my-tests")
     def me(self, request):
+        """
+        this api is called in driver app for retrieving test
+        """
         page = self.paginate_queryset(m.Test.objects.filter(appliants=request.user))
-        serializer = s.ShortTestSerializer(page, many=True)
+        serializer = s.ShortTestSerializer(
+            page, context={'user': request.user}, many=True
+        )
         return self.get_paginated_response(serializer.data)
 
 
