@@ -367,3 +367,17 @@ class TransportationDistanceSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class OtherCostTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.OtherCostType
+        fields = '__all__'
+
+
+class TicketTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.TicketType
+        fields = '__all__'

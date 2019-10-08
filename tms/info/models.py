@@ -227,3 +227,17 @@ class TransportationDistance(TimeStampedModel):
         null=True,
         blank=True
     )
+
+
+class OtherCostType(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+
+class TicketType(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )

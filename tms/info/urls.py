@@ -25,6 +25,18 @@ router.register(
     base_name='transportation-distance'
 )
 
+router.register(
+    r'other-cost-types',
+    v.OtherCostTypeViewSet,
+    base_name='other-cost-types'
+)
+
+router.register(
+    r'ticket-types',
+    v.TicketTypeViewSet,
+    base_name='ticket-types'
+)
+
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'basic-setting', v.BasicSettingAPIView.as_view()),

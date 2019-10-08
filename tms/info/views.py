@@ -1,5 +1,5 @@
 from django.db.models import Q
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -464,5 +464,83 @@ class TransportationDistanceViewSet(TMSViewSet):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class OtherCostTypeViewSet(viewsets.ModelViewSet):
+
+    queryset = m.OtherCostType.objects.all()
+    serializer_class = s.OtherCostTypeSerializer
+
+    def create(self, request):
+        name = request.data.get('name', '')
+        if self.queryset.filter(name=name).exists():
+            return Response(
+                {
+                    'name': 'Duplicate'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        obj = m.OtherCostType.objects.create(name=name)
+        return Response(
+            self.serializer_class(obj).data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        name = request.data.get('name', '')
+        if self.queryset.exclude(id=instance.id).filter(name=name).exists():
+            return Response(
+                {
+                    'name': 'Duplicate'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        instance.name = name
+        instance.save()
+        return Response(
+            self.serializer_class(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class TicketTypeViewSet(viewsets.ModelViewSet):
+
+    queryset = m.TicketType.objects.all()
+    serializer_class = s.TicketTypeSerializer
+
+    def create(self, request):
+        name = request.data.get('name', '')
+        if self.queryset.filter(name=name).exists():
+            return Response(
+                {
+                    'name': 'Duplicate'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        obj = m.TicketType.objects.create(name=name)
+        return Response(
+            self.serializer_class(obj).data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+        name = request.data.get('name', '')
+        if self.queryset.exclude(id=instance.id).filter(name=name).exists():
+            return Response(
+                {
+                    'name': 'Duplicate'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        instance.name = name
+        instance.save()
+        return Response(
+            self.serializer_class(instance).data,
             status=status.HTTP_200_OK
         )
