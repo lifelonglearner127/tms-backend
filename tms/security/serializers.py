@@ -17,12 +17,19 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
     policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     author = ShortUserSerializer(read_only=True)
+    is_read = serializers.SerializerMethodField()
 
     class Meta:
         model = m.CompanyPolicy
         exclude = (
             'is_published', 'content'
         )
+
+    def get_is_read(self, instance):
+        return m.CompanyPolicyRead.objects.filter(
+            policy=instance,
+            user=self.context.get('user', None)
+        ).exists()
 
 
 class CompanyPolicySerializer(serializers.ModelSerializer):
@@ -79,6 +86,13 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class CompanyPolicyReadSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.CompanyPolicy
+        fields = '__all__'
 
 
 class ShortQuestionSerializer(serializers.ModelSerializer):

@@ -42,6 +42,23 @@ class CompanyPolicy(TimeStampedModel):
     unpublished_content = managers.UnPublishedContentManager()
 
 
+class CompanyPolicyRead(models.Model):
+
+    policy = models.ForeignKey(
+        CompanyPolicy,
+        on_delete=models.CASCADE
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    is_read = models.BooleanField(
+        default=False
+    )
+
+
 class Question(TimeStampedModel):
 
     title = models.CharField(

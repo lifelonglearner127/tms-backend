@@ -74,8 +74,13 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="short")
     def get_short_policies(self, request):
+        """
+        this api is called in driver app
+        """
         page = self.paginate_queryset(m.CompanyPolicy.published_content.all())
-        serializer = s.ShortCompanyPolicySerializer(page, many=True)
+        serializer = s.ShortCompanyPolicySerializer(
+            page, context={'user': request.user}, many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path="policy-options")
@@ -89,6 +94,25 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
 
         return Response(
             ret, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path="read")
+    def read_policy(self, request, pk=None):
+        """
+        this api is called in driver app for marking policy read state
+        """
+        policy = self.get_object()
+        m.CompanyPolicyRead.objects.create(
+            policy=policy,
+            user=request.user,
+            is_read=True
+        )
+
+        return Response(
+            {
+                'is_read': True
+            },
+            status=status.HTTP_200_OK
         )
 
 
