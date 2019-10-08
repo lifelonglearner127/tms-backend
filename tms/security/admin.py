@@ -8,6 +8,11 @@ class CompanyPolicyAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.CompanyPolicyRead)
+class CompanyPolicyReadAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.Question)
 class QuestionAdmin(admin.ModelAdmin):
     pass
