@@ -26,10 +26,11 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
         )
 
     def get_is_read(self, instance):
-        return m.CompanyPolicyRead.objects.filter(
+        policy_read = m.CompanyPolicyRead.objects.filter(
             policy=instance,
             user=self.context.get('user', None)
-        ).exists()
+        ).first()
+        return policy_read is not None and policy_read.is_read
 
 
 class CompanyPolicySerializer(serializers.ModelSerializer):
