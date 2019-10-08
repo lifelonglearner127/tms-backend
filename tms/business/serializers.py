@@ -287,13 +287,9 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             return VehicleRepairRequestSerializer(instance.vehicle_repair_request).data
 
     def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(
-                ShortRequestDocumentSerializer(image, context={'request': self.context.get('request')}).data
-            )
-
-        return ret
+        return ShortRequestDocumentSerializer(
+            instance.images.all(), context={'request': self.context.get('request')}, many=True
+        ).data
 
     def get_days(self, instance):
         if instance.request_type == c.REQUEST_TYPE_REST:
