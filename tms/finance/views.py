@@ -106,10 +106,10 @@ class ETCCardChargeHistoryViewSet(TMSViewSet):
     serializer_class = s.ETCCardChargeHistorySerializer
 
 
-class ETCCardUsageHistoryViewSet(TMSViewSet):
+class ETCBillHistoryViewSet(TMSViewSet):
 
-    queryset = m.ETCCardUsageHistory.objects.all()
-    serializer_class = s.ETCCardUsageHistorySerializer
+    queryset = m.ETCBillHistory.objects.all()
+    serializer_class = s.ETCBillHistorySerializer
 
     def create(self, request):
         context = {
@@ -213,10 +213,10 @@ class FuelCardChargeHistoryViewSet(TMSViewSet):
     serializer_class = s.FuelCardChargeHistorySerializer
 
 
-class FuelCardUsageHistoryViewSet(TMSViewSet):
+class FuelBillHistoryViewSet(TMSViewSet):
 
-    queryset = m.FuelCardUsageHistory.objects.all()
-    serializer_class = s.FuelCardUsageHistorySerializer
+    queryset = m.FuelBillHistory.objects.all()
+    serializer_class = s.FuelBillHistorySerializer
 
     def create(self, request):
         context = {

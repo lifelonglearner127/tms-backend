@@ -16,7 +16,7 @@ from ..finance.models import ETCCard, FuelCard
 # serializer
 from . import serializers as s
 from ..core.serializers import ChoiceSerializer
-from ..finance.serializers import DriverAppETCCardSerializer, DriverAppFuelCardSerializer
+from ..finance.serializers import ETCCardBalanceSerializer, FuelCardBalanceSerializer
 
 # views
 from ..core.views import TMSViewSet
@@ -514,7 +514,7 @@ class VehicleViewSet(TMSViewSet):
         try:
             card = ETCCard.objects.get(vehicle=vehicle)
             return Response(
-                DriverAppETCCardSerializer(card).data,
+                ETCCardBalanceSerializer(card).data,
                 status=status.HTTP_200_OK
             )
         except ETCCard.DoesNotExist:
@@ -529,7 +529,7 @@ class VehicleViewSet(TMSViewSet):
         try:
             card = FuelCard.objects.get(vehicle=vehicle)
             return Response(
-                DriverAppFuelCardSerializer(card).data,
+                FuelCardBalanceSerializer(card).data,
                 status=status.HTTP_200_OK
             )
         except FuelCard.DoesNotExist:

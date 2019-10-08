@@ -21,9 +21,9 @@ router.register(
     base_name='etc-charges'
 )
 router.register(
-    r'etc-usages',
-    v.ETCCardUsageHistoryViewSet,
-    base_name='etc-usages'
+    r'etc-bills',
+    v.ETCBillHistoryViewSet,
+    base_name='etc-bills'
 )
 router.register(
     r'fuel-card',
@@ -36,9 +36,9 @@ router.register(
     base_name='fuel-charges'
 )
 router.register(
-    r'fuel-usages',
-    v.FuelCardUsageHistoryViewSet,
-    base_name='fuel-usages'
+    r'fuel-bills',
+    v.FuelBillHistoryViewSet,
+    base_name='fuel-bills'
 )
 router.register(
     r'bills',

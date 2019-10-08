@@ -13,13 +13,13 @@ class ETCCardChargeHistoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.ETCCardUsageHistory)
-class ETCCardUsageHistoryAdmin(admin.ModelAdmin):
+@admin.register(m.ETCBillHistory)
+class ETCBillHistoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.ETCCardUsageDocument)
-class ETCCardUsageDocumentAdmin(admin.ModelAdmin):
+@admin.register(m.ETCBillDocument)
+class ETCBillDocumentAdmin(admin.ModelAdmin):
     pass
 
 
@@ -33,13 +33,13 @@ class FuelCardChargeHistoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.FuelCardUsageHistory)
-class FuelCardUsageHistoryAdmin(admin.ModelAdmin):
+@admin.register(m.FuelBillHistory)
+class FuelBillHistoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.FuelCardUsageDocument)
-class FuelCardUsageDocumentAdmin(admin.ModelAdmin):
+@admin.register(m.FuelBillDocument)
+class FuelBillDocumentAdmin(admin.ModelAdmin):
     pass
 
 

@@ -14,7 +14,7 @@ from ..account.serializers import ShortUserSerializer
 from ..core.serializers import Base64ImageField, TMSChoiceField
 from ..hr.serializers import ShortDepartmentSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
-from ..info.serializers import StationSerializer
+from ..info.serializers import StationNameSerializer
 
 
 class OrderPaymentSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class ShortETCCardSerializer(serializers.ModelSerializer):
         )
 
 
-class DriverAppETCCardSerializer(serializers.ModelSerializer):
+class ETCCardBalanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.ETCCard
@@ -42,7 +42,7 @@ class DriverAppETCCardSerializer(serializers.ModelSerializer):
         )
 
 
-class DriverAppFuelCardSerializer(serializers.ModelSerializer):
+class FuelCardBalanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.FuelCard
@@ -141,53 +141,72 @@ class ETCCardChargeHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ETCCardDocumentSerializer(serializers.ModelSerializer):
+class ShortETCBillDocumentSerializer(serializers.ModelSerializer):
 
     document = Base64ImageField()
 
     class Meta:
-        model = m.ETCCardUsageDocument
+        model = m.ETCBillDocument
+        exclude = (
+            'etc_bill',
+        )
+
+
+class ETCBillDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.ETCBillDocument
         fields = '__all__'
 
 
-class ETCCardUsageHistorySerializer(serializers.ModelSerializer):
+class ETCBillHistorySerializer(serializers.ModelSerializer):
 
-    card = ETCCardSerializer()
+    card = ShortETCCardSerializer()
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
+    images = serializers.SerializerMethodField()
 
     class Meta:
-        model = m.ETCCardUsageHistory
+        model = m.ETCBillHistory
         fields = '__all__'
 
     def create(self, validated_data):
-        etc_usage = m.ETCCardUsageHistory.objects.create(
+        etc_bill = m.ETCBillHistory.objects.create(
             driver=self.context.get('user'),
             paid_on=timezone.now(),
             **validated_data
         )
-        etc_usage.card.balance -= validated_data['amount']
-        etc_usage.card.save()
+        if validated_data.get('is_card', False):
+            etc_bill.card.balance -= validated_data['amount']
+            etc_bill.card.save()
 
         images = self.context.get('images')
         for image in images:
-            image['etc_usage'] = etc_usage.id
-            serializer = ETCCardDocumentSerializer(
+            image['etc_bill'] = etc_bill.id
+            serializer = ETCBillDocumentSerializer(
                 data=image,
                 context={'request': self.context.get('request')}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-        return etc_usage
+        return etc_bill
 
     def to_internal_value(self, data):
-        ret = data
-        if 'card' in data:
-            ret['card'] = get_object_or_404(m.ETCCard, id=data['card']['id'])
+        if data.get('is_card', False):
+            data['card'] = get_object_or_404(m.ETCCard, id=data['card']['id'])
+        else:
+            data.pop('card', None)
 
-        return ret
+        return data
+
+    def get_images(self, instance):
+        return ShortETCBillDocumentSerializer(
+            instance.images.all(), context={'request': self.context.get('request')}, many=True
+        ).data
 
 
 class ShortFuelCardSerializer(serializers.ModelSerializer):
@@ -313,57 +332,80 @@ class FuelCardChargeHistorySerializer(serializers.ModelSerializer):
         return ret
 
 
-class FuelCardDocumentSerializer(serializers.ModelSerializer):
+class ShortFuelBillDocumentSerializer(serializers.ModelSerializer):
 
     document = Base64ImageField()
 
     class Meta:
-        model = m.FuelCardUsageDocument
+        model = m.FuelBillDocument
+        exclude = (
+            'fuel_bill',
+        )
+
+
+class FuelBillDocumentSerializer(serializers.ModelSerializer):
+
+    document = Base64ImageField()
+
+    class Meta:
+        model = m.FuelBillDocument
         fields = '__all__'
 
 
-class FuelCardUsageHistorySerializer(serializers.ModelSerializer):
+class FuelBillHistorySerializer(serializers.ModelSerializer):
 
-    card = FuelCardSerializer()
-    oil_station = StationSerializer()
+    card = ShortFuelCardSerializer()
+    oil_station = StationNameSerializer()
     driver = ShortUserSerializer(read_only=True)
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
+    images = serializers.SerializerMethodField()
 
     class Meta:
-        model = m.FuelCardUsageHistory
+        model = m.FuelBillHistory
         fields = '__all__'
 
     def create(self, validated_data):
-        fuel_usage = m.FuelCardUsageHistory.objects.create(
+        fuel_bill = m.FuelBillHistory.objects.create(
             driver=self.context.get('user'),
             paid_on=timezone.now(),
             **validated_data
         )
-        fuel_usage.card.balance -= validated_data['total_price']
-        fuel_usage.card.save()
+        if validated_data.get('is_card', False):
+            fuel_bill.card.balance -= validated_data['total_price']
+            fuel_bill.card.save()
 
         images = self.context.get('images')
         for image in images:
-            image['fuel_usage'] = fuel_usage.id
-            serializer = FuelCardDocumentSerializer(
+            image['fuel_bill'] = fuel_bill.id
+            serializer = FuelBillDocumentSerializer(
                 data=image,
                 context={'request': self.context.get('request')}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-        return fuel_usage
+        return fuel_bill
 
     def to_internal_value(self, data):
-        ret = data
-        if 'card' in data:
-            ret['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'], is_child=True)
-        if 'oil_station' in data:
-            ret['oil_station'] = get_object_or_404(m.Station, id=data['oil_station']['id'])
+        if data.get('is_card', False):
+            data['card'] = get_object_or_404(m.FuelCard, id=data['card']['id'], is_child=True)
+        else:
+            data.pop('card', None)
 
-        return ret
+        if 'oil_station' in data:
+            data['oil_station'] = get_object_or_404(
+                m.Station, id=data['oil_station']['id'],
+                station_type=c.STATION_TYPE_OIL_STATION
+            )
+
+        return data
+
+    def get_images(self, instance):
+        return ShortFuelBillDocumentSerializer(
+            instance.images.all(), context={'request': self.context.get('request')}, many=True
+        ).data
 
 
 # class BillSubCategoyChoiceField(serializers.Field):
@@ -508,10 +550,6 @@ class BillSerializer(serializers.ModelSerializer):
         return instance
 
     def get_images(self, instance):
-        ret = []
-        for image in instance.images.all():
-            ret.append(BillDocumentSerializer(
-                image, context={'request': self.context.get('request')}).data
-            )
-
-        return ret
+        return BillDocumentSerializer(
+            instance.images.all(), context={'request': self.context.get('request')}, many=True
+        ).data

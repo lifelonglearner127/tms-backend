@@ -113,11 +113,17 @@ class ETCCardChargeHistory(models.Model):
         ]
 
 
-class ETCCardUsageHistory(models.Model):
+class ETCBillHistory(models.Model):
 
     card = models.ForeignKey(
         ETCCard,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    is_card = models.BooleanField(
+        default=False
     )
 
     driver = models.ForeignKey(
@@ -148,16 +154,20 @@ class ETCCardUsageHistory(models.Model):
         auto_now_add=True
     )
 
+    objects = models.Manager()
+    cash_history = managers.CashHistoryManager()
+    card_history = managers.CardHistoryManager()
+
     class Meta:
         ordering = [
             '-paid_on', '-created_on',
         ]
 
 
-class ETCCardUsageDocument(models.Model):
+class ETCBillDocument(models.Model):
 
-    etc_usage = models.ForeignKey(
-        ETCCardUsageHistory,
+    etc_bill = models.ForeignKey(
+        ETCBillHistory,
         on_delete=models.CASCADE,
         related_name='images'
     )
@@ -200,11 +210,17 @@ class FuelCardChargeHistory(models.Model):
         ordering = ['-charged_on', '-created_on']
 
 
-class FuelCardUsageHistory(models.Model):
+class FuelBillHistory(models.Model):
 
     card = models.ForeignKey(
         FuelCard,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    is_card = models.BooleanField(
+        default=False
     )
 
     driver = models.ForeignKey(
@@ -246,16 +262,20 @@ class FuelCardUsageHistory(models.Model):
         auto_now_add=True
     )
 
+    objects = models.Manager()
+    cash_history = managers.CashHistoryManager()
+    card_history = managers.CardHistoryManager()
+
     class Meta:
         ordering = [
             '-paid_on', '-created_on',
         ]
 
 
-class FuelCardUsageDocument(models.Model):
+class FuelBillDocument(models.Model):
 
-    fuel_usage = models.ForeignKey(
-        FuelCardUsageHistory,
+    fuel_bill = models.ForeignKey(
+        FuelBillHistory,
         on_delete=models.CASCADE,
         related_name='images'
     )

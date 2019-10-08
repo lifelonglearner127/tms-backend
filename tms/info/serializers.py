@@ -39,6 +39,16 @@ class BasicSettingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StationNameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id',
+            'name',
+        )
+
+
 class ShortStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
@@ -57,6 +67,20 @@ class ShortStationSerializer(serializers.ModelSerializer):
 
     def get_lnglat(self, obj):
         return [obj.longitude, obj.latitude]
+
+
+class StationContactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id',
+            'name',
+            'station_type',
+            'contact',
+            'mobile',
+            'address',
+        )
 
 
 class ShortStationProductionSerializer(serializers.Serializer):

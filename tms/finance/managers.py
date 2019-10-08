@@ -41,3 +41,15 @@ class ChildernCards(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(is_child=True)
+
+
+class CardHistoryManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_card=True)
+
+
+class CashHistoryManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_card=False)
