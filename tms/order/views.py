@@ -623,181 +623,151 @@ class JobViewSet(TMSViewSet):
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
 
-    def create(self, request):
+    def update(self, request, pk=None):
         """
-        This api is called when staff member create the jobs for order
+         - completed order jobs cannot be updated
+         - completed job cannot be updated
+         - job cannot updated after loading
+         - vehicle cannot be updated if the job started
+         - branches and routes cannot be updated if the vehicle arrived at loading station
         """
-        order = get_object_or_404(m.Order, id=request.data.pop('order', None))
+        job = self.get_object()
 
-        # cannot create a job for completed order
-        if order.status == c.ORDER_STATUS_COMPLETE:
+        msg = ''
+        if job.order.status == c.ORDER_STATUS_COMPLETE:
+            msg = "Cannot update completed order's job"
+
+        if job.progress == c.JOB_PROGRESS_COMPLETE:
+            msg = "Cannot update completed job"
+
+        if job.progress > c.JOB_PROGRESS_TO_LOADING_STATION:
+            msg = "Cannot update this job because it load the product"
+
+        if msg:
             return Response(
                 {
-                    'msg': 'Already finished'
+                    'msg': msg
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # load ordered projects with not-delivered weight
-        order_products = []
-        for order_product in order.orderproduct_set.all():
-            order_products.append({
-                'product': order_product.product,
-                'left_weight': order_product.weight - order_product.delivered_weight
+        # validate vehicle
+        try:
+            vehicle = Vehicle.objects.get(
+                id=request.data.pop('vehicle', None)
+            )
+        except Vehicle.DoesNotExist:
+            raise s.serializers.ValidationError({
+                'vehicle': 'Such vehicle does not exist'
             })
 
-        # check if the payload is empty or not
-        jobs_data = request.data.pop('jobs', [])
-        if not len(jobs_data):
+        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.vehicle != vehicle:
             return Response(
-                {'data': 'No data is provied'},
-                status=status.HTTP_200_OK
+                {
+                    'msg': 'you canot change the vehicle'
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        # validation check, weight validation, route validation
+        # validate driver
+        try:
+            driver = User.objects.get(
+                id=request.data.pop('driver', None)
+            )
+        except User.DoesNotExist:
+            raise s.serializers.ValidationError({
+                'driver': 'Such driver does not exist'
+            })
+
+        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.associated_drivers.first() != driver:
+            return Response(
+                {
+                    'msg': 'you canot change the driver'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # validate escort
+        try:
+            escort = User.objects.get(
+                id=request.data.pop('escort', None)
+            )
+        except User.DoesNotExist:
+            raise s.serializers.ValidationError({
+                'escort': 'Such escort does not exist'
+            })
+
+        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.driver.associated_escorts.first() != escort:
+            return Response(
+                {
+                    'msg': 'you canot change the escort'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # check if branch weight exceed vehicle branch weight
         errors = {}
-        job_index = 0
+        branches_data = request.data.pop('branches', [])
+        job_products = {
+            'total': []
+        }
+        for branch_data in branches_data:
+            branch = branch_data.get('branch', 0)
+            product = branch_data.get('product')
+            branch_weight = float(branch_data.get('mission_weight', 0))
 
-        for job_data in jobs_data:
-            job_data['total_weight'] = 0
-
-            vehicle_data = job_data.get('vehicle', None)
-            if vehicle_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['vehicle'] = 'Missing data'
-
-            job_data['vehicle'] = get_object_or_404(
-                Vehicle, id=vehicle_data.get('id', None)
-            )
-
-            driver_data = job_data.get('driver', None)
-            if driver_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['driver'] = 'Missing data'
-
-            job_data['driver'] = get_object_or_404(
-                User, id=driver_data.get('id', None), user_type=c.USER_TYPE_DRIVER
-            )
-
-            escort_data = job_data.get('escort', None)
-            if escort_data is None:
-                if job_index not in errors:
-                    errors[job_index] = {}
-                errors[job_index]['escort'] = 'Missing data'
-
-            job_data['escort'] = get_object_or_404(
-                User, id=escort_data.get('id', None), user_type=c.USER_TYPE_ESCORT
-            )
-
-            branch_index = 0
-            job_data['stations'] = []
-            job_data['stations'].append({
-                'station': order.loading_station,
-                'products': []
-            })
-            job_data['stations'].append({
-                'station': order.quality_station,
-                'products': []
+            # restructure by job station such data structure
+            # {
+            #     'total': [
+            #         {
+            #             'product': id,
+            #             'branch': id,
+            #             'mission_weight': 0
+            #         }
+            #     ],
+            #     'station_id': [
+            #         {
+            #             'product': id,
+            #             'branch': id,
+            #             'due_time': {},
+            #             'mission_weight': 0,
+            #         }
+            #     ]
+            # }
+            # restructure by job station
+            job_products['total'].append({
+                'product': product,
+                'branch': branch,
+                'mission_weight': branch_weight
             })
 
-            for branch_data in job_data['branches']:
-                branch_id = int(branch_data.get('branch').get('id'))
-                branch_mission_weight = float(
-                    branch_data.get('mission_weight')
-                )
+            if vehicle.branches[branch] < float(branch_data.get('mission_weight')):
+                if branch not in errors:
+                    errors[branch] = {}
+                errors[branch]['branch_over_weight'] = 'mission weight exceed vehicle branch actual load'
 
-                job_data['total_weight'] += branch_mission_weight
+            for unloading_station_data in branch_data.get('unloading_stations', []):
+                unloading_station_id = unloading_station_data.get('unloading_station')
+                due_time = unloading_station_data.get('due_time')
+                unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
+                branch_weight = branch_weight - unloading_station_weight
 
-                # check if the branch mission weight exceed vehicle branch load
-                if job_data['vehicle'].branches[branch_id] < float(branch_data.get('mission_weight')):
-                    if job_index not in errors:
-                        errors[job_index] = {}
+                # restructure by job station
+                if unloading_station_id not in job_products:
+                    job_products[unloading_station_id] = []
 
-                    if branch_id not in errors[job_index]:
-                        errors[job_index][branch_index] = {}
+                job_products[unloading_station_id].append({
+                    'product': product,
+                    'branch': branch,
+                    'due_time': due_time,
+                    'mission_weight': unloading_station_weight
+                })
 
-                    errors[job_index][branch_index]['branch_over_weight'] =\
-                        'mission weight exceed vehicle branch actual load'
-
-                product_data = branch_data.pop('product', None)
-                product = get_object_or_404(
-                    Product, id=product_data.get('id', None)
-                )
-
-                for order_product in order_products:
-                    if order_product['product'] == product:
-                        order_product['left_weight'] -= branch_mission_weight
-
-                for i in range(0, 2):
-                    job_data['stations'][i]['products'].append({
-                        'product': product,
-                        'branch': branch_id,
-                        'mission_weight': branch_mission_weight
-                    })
-
-                unloading_stations_data = branch_data.pop('unloading_stations')
-
-                for unloading_station_data in unloading_stations_data:
-                    station_data = unloading_station_data.get(
-                        'unloading_station'
-                    )
-                    station = get_object_or_404(
-                        Station, id=station_data.get('id', None)
-                    )
-
-                    if station not in job_data['route'].unloading_stations:
-                        if job_index not in errors:
-                            errors[job_index] = {}
-                        if 'route' not in errors[job_index]:
-                            errors[job_index]['route'] = []
-                        errors[job_index]['route'].append('unloading')
-
-                    due_time = unloading_station_data.get(
-                        'due_time'
-                    )
-                    unloading_station_mission_weight = float(unloading_station_data.get('mission_weight', 0))
-                    branch_mission_weight -= unloading_station_mission_weight
-                    for unloading_station in job_data['stations'][2:]:
-                        if unloading_station['station'] == station:
-                            unloading_station['products'].append({
-                                'product': product,
-                                'branch': branch_id,
-                                'mission_weight': unloading_station_mission_weight
-                            })
-                            break
-
-                    else:
-                        job_data['stations'].append({
-                            'station': station,
-                            'due_time': due_time,
-                            'products': [{
-                                'product': product,
-                                'branch': branch_id,
-                                'mission_weight': unloading_station_mission_weight
-                            }]
-                        })
-
-                if branch_mission_weight != 0:
-                    if job_index not in errors:
-                        errors[job_index] = {}
-                    if branch_index not in errors[job_index]:
-                        errors[job_index][branch_index] = {}
-
-                    errors[job_index][branch_index]['station_over_weight'] =\
-                        'sum of unloading weights overweight branch missin weight'
-
-                branch_index += 1
-
-            job_index += 1
-
-        product_index = 0
-        for order_product in order_products:
-            if order_product['left_weight'] < 0:
-                if 'order' not in errors:
-                    errors['order'] = {}
-                errors['order'][product_index] = 'arrange weight exceed order weight'
+            if branch_weight != 0:
+                if branch not in errors:
+                    errors[branch] = {}
+                errors[branch]['station_over_weight'] =\
+                    'sum of unloading weights does not match with branch mission weight'
 
         if errors:
             return Response(
@@ -805,50 +775,179 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        for job_data in jobs_data:
-            job = m.Job.objects.create(
-                order=order,
-                vehicle=job_data['vehicle'],
-                total_weight=job_data['total_weight']
+        # validate if arrange weight exceed order product weight
+        arranged_products = {}
+        # {
+        #     'product_id': {
+        #         'branch': [],
+        #         'mission_weight': 0
+        #     }
+        # }
+
+        for job_product in job_products['total']:
+            product_id = job_product['product']
+            if product_id not in arranged_products:
+                arranged_products[product_id] = {
+                    'branch': [job_product['branch']],
+                    'mission_weight': job_product['mission_weight']
+                }
+            else:
+                arranged_products[product_id]['mission_weight'] += job_product['mission_weight']
+                arranged_products[product_id]['branch'].append(job_product['branch'])
+
+        old_arranged_products = {}
+        for jobstationproduct in job.jobstation_set.first().jobstationproduct_set.all():
+            product_id = jobstationproduct.product.id
+            if product_id not in old_arranged_products:
+                old_arranged_products[product_id] = {
+                    'branch': [jobstationproduct.branch],
+                    'mission_weight': jobstationproduct.mission_weight
+                }
+            else:
+                old_arranged_products[product_id]['mission_weight'] += jobstationproduct.mission_weight
+                old_arranged_products[product_id]['branch'].append(jobstationproduct.branch)
+
+        for product_id, arranged_product in arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+
+            remaining_product_weight = order_product.weight - order_product.arranged_weight
+            if product_id in old_arranged_products:
+                remaining_product_weight += old_arranged_products[product_id]['mission_weight']
+
+            if remaining_product_weight < arranged_product['mission_weight']:
+                for arranged_branch in arranged_product['branch']:
+                    if arranged_branch not in errors:
+                        errors[arranged_branch] = {}
+                        errors[arranged_branch]['order_over_weight'] = 'mission weight exceed order weight'
+
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-            station_index = 0
-            for station in job_data['stations']:
-                if station_index < 2:
-                    step = station_index
-                    station_index += 1
-                else:
-                    step = job_data['route'].stations.index(station['station'])
-                    if job_data['is_same_station']:
-                        step += 1
+        route_ids = request.data.pop('routes', [])
+        routes = Route.objects.filter(id__in=route_ids)
+        routes = dict([(route.id, route) for route in routes])
+        routes = [routes[id] for id in route_ids]
 
-                job_station = m.JobStation.objects.create(
-                   job=job,
-                   station=station['station'],
-                   step=step,
-                   due_time=station['due_time']
+        # route validations
+        if not job.order.is_same_station:
+            routes = routes[1:]
+
+        if len(routes) != len(job_products.keys()) - 1:
+            if 'routes' not in errors:
+                errors['routes'] = 'Route and station does not match'
+
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        for key in job_products.keys():
+            if key == 'total':
+                continue
+
+            for route in routes:
+                if key == route.end_point.id:
+                    break
+            else:
+                if 'routes' not in errors:
+                    errors['routes'] = []
+                errors['routes'].append(key)
+
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # create job & associated driver and escort instance
+        job.vehicle = vehicle
+        job.routes = route_ids
+        job.save()
+
+        job.stations.clear()
+
+        for product_id, old_arranged_product in old_arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+            order_product.arranged_weight -= old_arranged_product['mission_weight']
+            order_product.save()
+
+        for product_id, arranged_product in arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+            order_product.arranged_weight += arranged_product['mission_weight']
+            order_product.save()
+
+        job_loading_station = m.JobStation.objects.create(
+            job=job, station=job.order.loading_station, step=0
+        )
+        job_quality_station = m.JobStation.objects.create(
+            job=job, station=job.order.quality_station, step=1
+        )
+        for job_product in job_products['total']:
+            m.JobStationProduct.objects.create(
+                job_station=job_loading_station,
+                product=get_object_or_404(Product, id=job_product['product']),
+                branch=job_product['branch'],
+                mission_weight=job_product['mission_weight']
+            )
+            m.JobStationProduct.objects.create(
+                job_station=job_quality_station,
+                product=get_object_or_404(Product, id=job_product['product']),
+                branch=job_product['branch'],
+                mission_weight=job_product['mission_weight']
+            )
+
+        for route_index, route in enumerate(routes):
+            job_station = m.JobStation.objects.create(
+                job=job, station=route.end_point, step=route_index+2
+            )
+            for job_product in job_products[route.end_point.id]:
+                m.JobStationProduct.objects.create(
+                    job_station=job_station,
+                    product=get_object_or_404(Product, id=job_product['product']),
+                    branch=job_product['branch'],
+                    due_time=job_product['due_time'],
+                    mission_weight=job_product['mission_weight']
                 )
 
-                for job_station_product in station['products']:
-                    m.JobStationProduct.objects.create(
-                        job_station=job_station,
-                        **job_station_product
-                    )
-
-        if jobs_data is not None:
-            order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
-            order.save()
-
         return Response(
-            {'msg': 'Ok'},
+            s.JobAdminSerializer(job).data,
             status=status.HTTP_200_OK
         )
 
-    def retrieve(self, request, pk=None):
-        pass
+    def destroy(self, request, pk=None):
+        # job can be deleted only if driver didn't start the job
+        job = self.get_object()
+        if job.progress != c.JOB_PROGRESS_NOT_STARTED:
+            return Response(
+                {
+                    'msg': 'Cannot delete this job'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-    def update(self, request, pk=None):
-        pass
+        arranged_products = {}
+        for jobstationproduct in job.jobstation_set.first().jobstationproduct_set.all():
+            product_id = jobstationproduct.product.id
+            if product_id not in arranged_products:
+                arranged_products[product_id] = {
+                    'branch': [jobstationproduct.branch],
+                    'mission_weight': jobstationproduct.mission_weight
+                }
+            else:
+                arranged_products[product_id]['mission_weight'] += jobstationproduct.mission_weight
+                arranged_products[product_id]['branch'].append(jobstationproduct.branch)
+
+        for product_id, arranged_product in arranged_products.items():
+            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+            order_product.arranged_weight -= arranged_product['mission_weight']
+            order_product.save()
+
+        job.delete()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'], url_path='upload-loading-check')
     def upload_loading_station_check(self, request, pk=None):
