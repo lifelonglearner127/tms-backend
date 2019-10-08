@@ -486,14 +486,33 @@ class VehicleViewSet(TMSViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='daily-unbind')
+    @action(detail=True, methods=['post'], url_path='daily-unbind')
     def vehicle_driver_daily_unbind(self, request, pk=None):
+        """
+        this api is called in driver app when driver get off the vehicle
+        """
         vehicle = self.get_object()
+        station_data = request.data.pop('station', None)
+        if station_data is None:
+            return Response(
+                {
+                    'msg': 'missing station data'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        if bind is None:
+            return Response({
+                'msg': "You didn't get on this vehicle before"
+            })
+
         if bind.get_off is not None:
             return Response({
-                'msg': 'You alread get off this vehicle'
+                'msg': 'You already get off this vehicle'
             })
+
+        # check if the vehicle check is all done
         vehicle_check = m.VehicleCheckHistory.objects.filter(
             vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
         ).first()
@@ -503,6 +522,17 @@ class VehicleViewSet(TMSViewSet):
             return Response(
                 {'msg': '你没有完成车辆三检查'}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        station_id = station_data.get('id', None)
+        if station_id is not None:
+            station = get_object_or_404(m.Station, id=station_id)
+        else:
+            station = m.Station.objects.create(
+                name=station_data.get('name', ''),
+                station_type=c.STATION_TYPE_GET_OFF_STATION
+            )
+
+        bind.get_off_station = station
         bind.get_off = timezone.now()
         bind.save()
 

@@ -10,7 +10,7 @@ from . import models as m
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
-from ..info.serializers import ShortStationSerializer
+from ..info.serializers import ShortStationSerializer, StationNameSerializer
 
 # other
 from ..g7.interfaces import G7Interface
@@ -377,6 +377,8 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
 
 class VehicleDriverDailyBindSerializer(serializers.ModelSerializer):
+
+    get_off_station = StationNameSerializer()
 
     class Meta:
         model = m.VehicleDriverDailyBind

@@ -657,6 +657,13 @@ class VehicleDriverDailyBind(models.Model):
         blank=True
     )
 
+    get_off_station = models.ForeignKey(
+        Station,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
     class Meta:
         ordering = ['-get_on', 'vehicle']
 
