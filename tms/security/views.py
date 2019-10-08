@@ -102,12 +102,13 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
         this api is called in driver app for marking policy read state
         """
         policy = self.get_object()
-        m.CompanyPolicyRead.objects.create(
+        policy_read, created = m.CompanyPolicyRead.objects.get_or_create(
             policy=policy,
-            user=request.user,
-            is_read=True
+            user=request.user
         )
 
+        policy_read.is_read = True
+        policy_read.save()
         return Response(
             {
                 'is_read': True

@@ -58,6 +58,12 @@ class CompanyPolicyRead(models.Model):
         default=False
     )
 
+    class Meta:
+        unique_together = [
+            'policy',
+            'user',
+        ]
+
 
 class Question(TimeStampedModel):
 
