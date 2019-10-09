@@ -213,11 +213,12 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     before_driving_images = serializers.SerializerMethodField()
     driving_images = serializers.SerializerMethodField()
     after_driving_images = serializers.SerializerMethodField()
-    before_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
-    driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
-    after_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    before_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    after_driving_checked_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     is_readonly = serializers.SerializerMethodField()
-    updated = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    created = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    updated = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
 
     class Meta:
         model = m.VehicleCheckHistory
