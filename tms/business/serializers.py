@@ -9,8 +9,10 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
+from ..info.serializers import OtherCostTypeSerializer, TicketTypeSerializer
+from ..hr.serializers import ShortDepartmentSerializer
 from ..account.serializers import ShortUserSerializer
-from ..vehicle.serializers import ShortVehicleSerializer
+from ..vehicle.serializers import ShortVehiclePlateNumSerializer
 
 
 # class ParkingRequestSerializer(serializers.ModelSerializer):
@@ -22,7 +24,7 @@ from ..vehicle.serializers import ShortVehicleSerializer
 
 # class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
 
-#     vehicle = ShortVehicleSerializer()
+#     vehicle = ShortVehiclePlateNumSerializer()
 #     driver = ShortUserSerializer()
 #     escort = ShortUserSerializer()
 
@@ -120,7 +122,7 @@ class RestRequestSerializer(serializers.ModelSerializer):
 
 class VehicleRepairRequestSerializer(serializers.ModelSerializer):
 
-    vehicle = ShortVehicleSerializer(read_only=True)
+    vehicle = ShortVehiclePlateNumSerializer(read_only=True)
     category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
 
     class Meta:
@@ -137,6 +139,41 @@ class VehicleRepairRequestSerializer(serializers.ModelSerializer):
         instance.vehicle = self.context.get('vehicle')
         instance.save()
         return instance
+
+
+class SelfDrivingPaymentRequestSerializer(serializers.ModelSerializer):
+
+    department = ShortDepartmentSerializer(read_only=True)
+
+    class Meta:
+        model = m.SelfDrivingPaymentRequest
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return m.SelfDrivingPaymentRequest.objects.create(
+            department=self.context.get('department'),
+            **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.department = self.context.get('department')
+        instance.save()
+        return instance
+
+
+class InvoicePaymentRequestSerializer(serializers.ModelSerializer):
+
+    other_cost_type = OtherCostTypeSerializer(read_only=True)
+    department = ShortDepartmentSerializer(read_only=True)
+    vehicle = ShortVehiclePlateNumSerializer(read_only=True)
+    ticket_type = TicketTypeSerializer(read_only=True)
+
+    class Meta:
+        model = m.InvoicePaymentRequest
+        fields = '__all__'
 
 
 class BasicRequestSerializer(serializers.ModelSerializer):
@@ -209,10 +246,33 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             serializer = RestRequestSerializer(data=detail)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
         elif validated_data['request_type'] == c.REQUEST_TYPE_VEHICLE_REPAIR:
             detail['request'] = basic_request.id
             serializer = VehicleRepairRequestSerializer(
                 data=detail, context={'vehicle': get_object_or_404(m.Vehicle, id=detail['vehicle']['id'])}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        elif validated_data['request_type'] == c.REQUEST_TYPE_SELF_DRIVING_PAYMENT:
+            detail['request'] = basic_request.id
+            serializer = SelfDrivingPaymentRequestSerializer(
+                data=detail, context={'department': get_object_or_404(m.Department, id=detail['department']['id'])}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        elif validated_data['request_type'] == c.REQUEST_TYPE_INVOICE_PAYMENT:
+            detail['request'] = basic_request.id
+            serializer = InvoicePaymentRequestSerializer(
+                data=detail,
+                context={
+                    'other_cost_type': get_object_or_404(m.OtherCostType, id=detail['other_cost_type']['id']),
+                    'department': get_object_or_404(m.Department, id=detail['department']['id']),
+                    'vehicle': get_object_or_404(m.Vehicle, id=detail['vehicle']['id']),
+                    'ticket_type': get_object_or_404(m.TicketType, id=detail['ticket_type']['id']),
+                }
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -269,6 +329,7 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             serializer = RestRequestSerializer(instance.rest_request, data=detail, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+        
         elif validated_data['request_type'] == c.REQUEST_TYPE_VEHICLE_REPAIR:
             serializer = VehicleRepairRequestSerializer(
                 instance.vehicle_repair_request, data=detail,
@@ -276,6 +337,12 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
+        elif validated_data['request_type'] == c.REQUEST_TYPE_SELF_DRIVING_PAYMENT:
+            pass
+
+        elif validated_data['request_type'] == c.REQUEST_TYPE_INVOICE_PAYMENT:
+            pass
 
         return instance
 
@@ -421,7 +488,7 @@ class BasicRequestSerializer(serializers.ModelSerializer):
 # class VehicleRepairRequestSerializer(serializers.ModelSerializer):
 
 #     request = BasicRequestSerializer(read_only=True)
-#     vehicle = ShortVehicleSerializer(read_only=True)
+#     vehicle = ShortVehiclePlateNumSerializer(read_only=True)
 #     category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
 
 #     class Meta:

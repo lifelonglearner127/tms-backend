@@ -21,3 +21,13 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(m.Station)
 class StationAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.OtherCostType)
+class OtherCostTypeAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.TicketType)
+class TicketTypeAdmin(admin.ModelAdmin):
+    pass

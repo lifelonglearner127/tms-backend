@@ -7,6 +7,8 @@ from . import managers
 # models
 # from ..core.models import ApprovedModel
 from ..account.models import User
+from ..hr.models import Department
+from ..info.models import OtherCostType, TicketType
 from ..vehicle.models import Vehicle
 
 
@@ -121,8 +123,7 @@ class BasicRequest(models.Model):
         related_name='my_requests'
     )
 
-    request_type = models.CharField(
-        max_length=1,
+    request_type = models.PositiveIntegerField(
         choices=c.REQUEST_TYPE,
         default=c.REQUEST_TYPE_REST
     )
@@ -310,4 +311,69 @@ class VehicleRepairRequest(models.Model):
         max_length=1,
         choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY,
         default=c.VEHICLE_REPAIR_REQUEST_CATEGORY_BRAKE
+    )
+
+
+class SelfDrivingPaymentRequest(models.Model):
+
+    request = models.OneToOneField(
+        BasicRequest,
+        on_delete=models.CASCADE,
+        related_name='self_driving_request'
+    )
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='self_driving_requests'
+    )
+
+    plate_num = models.CharField(
+        max_length=100
+    )
+
+    line = models.CharField(
+        max_length=100
+    )
+
+    mileage = models.FloatField(
+        default=0
+    )
+
+    amount = models.FloatField(
+        default=0
+    )
+
+
+class InvoicePaymentRequest(models.Model):
+
+    other_cost_type = models.ForeignKey(
+        OtherCostType,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    paid_on = models.DateField()
+
+    amount = models.FloatField(
+        default=0
+    )
+
+    ticket_type = models.ForeignKey(
+        TicketType,
+        on_delete=models.SET_NULL,
+        null=True
     )

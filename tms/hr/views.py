@@ -15,6 +15,12 @@ class DepartmentViewSet(TMSViewSet):
     serializer_class = s.DepartmentSerializer
     short_serializer_class = s.ShortDepartmentSerializer
 
+    @action(detail=False, url_path='list-departments')
+    def get_short_departments(self, request):
+        page = self.paginate_queryset(self.queryset)
+        serializer = s.ShortDepartmentSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
 
 class PositionViewSet(TMSViewSet):
 

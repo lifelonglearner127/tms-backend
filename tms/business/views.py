@@ -146,9 +146,14 @@ class BasicRequestViewSet(TMSViewSet):
         if request_type == c.REQUEST_TYPE_REST:
             queryset = queryset.filter(request_type=c.REQUEST_TYPE_REST)
 
-        if request_type == c.REQUEST_TYPE_VEHICLE_REPAIR:
+        elif request_type == c.REQUEST_TYPE_VEHICLE_REPAIR:
             queryset = queryset.filter(request_type=c.REQUEST_TYPE_VEHICLE_REPAIR)
 
+        elif request_type == c.REQUEST_TYPE_SELF_DRIVING_PAYMENT:
+            queryset = queryset.filter(request_type=c.REQUEST_TYPE_SELF_DRIVING_PAYMENT)
+
+        elif request_type == c.REQUEST_TYPE_INVOICE_PAYMENT:
+            queryset = queryset.filter(request_type=c.REQUEST_TYPE_INVOICE_PAYMENT)
         return queryset
 
     def create(self, request):
