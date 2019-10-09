@@ -18,6 +18,11 @@ class VehicleCheckDocumentAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.VehicleCheckItem)
+class VehicleCheckItemAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.VehicleCheckHistory)
 class VehicleCheckHistoryAdmin(admin.ModelAdmin):
     pass
