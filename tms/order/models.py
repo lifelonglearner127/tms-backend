@@ -480,19 +480,23 @@ class JobDriver(models.Model):
         related_name='jobs_as_driver'
     )
 
-    started_at = models.DateTimeField(
+    started_on = models.DateTimeField(
         null=True,
         blank=True
     )
 
-    finished_at = models.DateTimeField(
+    finished_on = models.DateTimeField(
         null=True,
         blank=True
+    )
+
+    assigned_on = models.DateTimeField(
+        auto_now_add=True
     )
 
     class Meta:
         ordering = (
-            '-started_at',
+            'job', '-assigned_on',
         )
 
 

@@ -36,6 +36,7 @@ from ..core.views import TMSViewSet
 
 # other
 from ..g7.interfaces import G7Interface
+from .tasks import notify_of_job_creation
 
 
 class OrderCartViewSet(TMSViewSet):
@@ -431,6 +432,14 @@ class OrderViewSet(TMSViewSet):
                     mission_weight=job_product['mission_weight']
                 )
 
+        # send notification
+        notify_of_job_creation.apply_async(
+            args=[{
+                'job': job.id,
+                'driver': driver.id,
+                'escort': escort.id
+            }]
+        )
         return Response(
             s.JobAdminSerializer(job).data,
             status=status.HTTP_200_OK
@@ -912,6 +921,12 @@ class JobViewSet(TMSViewSet):
                     due_time=job_product['due_time'],
                     mission_weight=job_product['mission_weight']
                 )
+
+        if job.associated_drivers.first() != driver:
+            m.JobDriver.objects.create(job=job, driver=driver)
+
+        if job.associated_escorts.first() != escort:
+            m.JobEscort.objects.create(job=job, escort=escort)
 
         return Response(
             s.JobAdminSerializer(job).data,

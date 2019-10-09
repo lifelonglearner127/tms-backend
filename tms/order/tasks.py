@@ -66,26 +66,16 @@ def notify_order_changes(context):
 
 
 @app.task
-def notify_job_changes(context):
+def notify_of_job_creation(context):
     """
-    Send notificatio when a new job is created
+    When the job is created, notification is sent to the driver and escort
+    and customer will be notified as well
     """
     job = get_object_or_404(m.Job, id=context['job'])
+    driver = get_object_or_404(User, id=context['driver'])
+    escort = get_object_or_404(User, id=context['escort'])
 
-    # send in-app notfication to driver & escort
-    message = {
-        "vehicle": job.vehicle.plate_num,
-        "customer": {
-            "name": job.order.customer.name,
-            "mobile": job.order.customer.mobile
-        },
-        "escort": {
-            "name": job.escort.name,
-            "mobile": job.escort.mobile
-        },
-        "stations": []
-    }
-
+    # send in-app notfication to driver
     stations = []
     for job_station in job.jobstation_set.all():
         products = []
@@ -99,7 +89,23 @@ def notify_job_changes(context):
             'products': ', '.join(products)
         })
 
-    message['stations'] = stations
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer": {
+            "name": job.order.customer.name,
+            "mobile": job.order.customer.mobile
+        },
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        },
+        "stations": stations
+    }
+
     driver_notification = Notification.objects.create(
         user=job.driver,
         message=message,
@@ -185,6 +191,97 @@ def notify_job_changes(context):
         aliyun_request.set_Title('New Job')
         aliyun_request.set_Body('New Job')
         aliyun_request.set_TargetValue(job.escort.device_token)
+        aliyun_client.do_action(aliyun_request)
+
+
+@app.task
+def notify_of_driver_changes_before_job_start(context):
+    """
+    when the job driver changes before the job start,
+    1. old driver will be notified
+    2. new driver will be notified about
+    """
+    pass
+
+
+@app.task
+def notify_of_escort_changes_before_job_start(context):
+    """
+    """
+    pass
+
+
+@app.task
+def notify_of_job_products_changes(context):
+    """
+    """
+    pass
+
+
+@app.task
+def notify_of_job_deleted(context):
+    """
+    send notification when the job is deleted
+    """
+    job_id = context['job']
+    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
+    driver = get_object_or_404(User, id=context['driver'])
+    escort = get_object_or_404(User, id=context['escort'])
+
+    r.srem('jobs', job_id)
+
+    # send notification
+    message = {
+        "vehicle": vehicle.plate_num,
+        "notification": str(job_id) + ' was cancelled'
+    }
+
+    driver_notification = Notification.objects.create(
+        user=driver,
+        message=message,
+        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
+    )
+
+    escort_notification = Notification.objects.create(
+        user=escort,
+        message=message,
+        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
+    )
+
+    if driver.channel_name:
+        async_to_sync(channel_layer.send)(
+            driver.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(driver_notification).data
+                )
+            }
+        )
+
+    if escort.channel_name:
+        async_to_sync(channel_layer.send)(
+            escort.channel_name,
+            {
+                'type': 'notify',
+                'data': json.dumps(
+                    NotificationSerializer(escort_notification).data
+                )
+            }
+        )
+
+    # send push notification to driver
+    if driver.device_token:
+        aliyun_request.set_Title('Cancel Job')
+        aliyun_request.set_Body('Cancel Job')
+        aliyun_request.set_TargetValue(driver.device_token)
+        aliyun_client.do_action(aliyun_request)
+
+    # send push notification to escort
+    if escort.device_token:
+        aliyun_request.set_Title('Cancel Job')
+        aliyun_request.set_Body('Cancel Job')
+        aliyun_request.set_TargetValue(escort.device_token)
         aliyun_client.do_action(aliyun_request)
 
 
@@ -307,78 +404,6 @@ def bind_vehicle_user(context):
     job.escort.profile.save()
 
 
-@app.task
-def notify_of_job_cancelled(context):
-    """
-    send notification when the job is cancelled
-    """
-    job_id = context['job']
-    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
-    driver = get_object_or_404(User, id=context['driver'])
-    escort = get_object_or_404(User, id=context['escort'])
-
-    # unbind vehicle and driver
-    r.srem('jobs', job_id)
-    m.VehicleUserBind.objects.filter(
-        vehicle=vehicle,
-        driver=driver,
-        escort=escort,
-        bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-    ).delete()
-
-    # send notification
-    message = {
-        "vehicle": vehicle.plate_num,
-        "notification": str(job_id) + ' was cancelled'
-    }
-
-    driver_notification = Notification.objects.create(
-        user=driver,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
-    )
-
-    escort_notification = Notification.objects.create(
-        user=escort,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
-    )
-
-    if driver.channel_name:
-        async_to_sync(channel_layer.send)(
-            driver.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(driver_notification).data
-                )
-            }
-        )
-
-    if escort.channel_name:
-        async_to_sync(channel_layer.send)(
-            escort.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(escort_notification).data
-                )
-            }
-        )
-
-    # send push notification to driver
-    if driver.device_token:
-        aliyun_request.set_Title('Cancel Job')
-        aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(driver.device_token)
-        aliyun_client.do_action(aliyun_request)
-
-    # send push notification to escort
-    if escort.device_token:
-        aliyun_request.set_Title('Cancel Job')
-        aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(escort.device_token)
-        aliyun_client.do_action(aliyun_request)
 
 
 @app.task
