@@ -304,6 +304,14 @@ class StationViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='loading-stations/short')
+    def get_short_loading_stations(self, request):
+        page = self.paginate_queryset(m.Station.loadingstations.all())
+
+        serializer = s.StationNameSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='unloading-stations')
     def unloading_stations(self, request):
         page = self.paginate_queryset(
@@ -314,6 +322,14 @@ class StationViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='unloading-stations/short')
+    def get_short_unloading_stations(self, request):
+        page = self.paginate_queryset(m.Station.unloadingstations.all())
+
+        serializer = s.StationNameSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path='quality-stations')
     def quality_stations(self, request):
         page = self.paginate_queryset(
@@ -321,6 +337,14 @@ class StationViewSet(TMSViewSet):
         )
 
         serializer = s.WorkStationSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='quality-stations/short')
+    def get_short_quality_stations(self, request):
+        page = self.paginate_queryset(m.Station.qualitystations.all())
+
+        serializer = s.StationNameSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
@@ -374,6 +398,14 @@ class StationViewSet(TMSViewSet):
         )
 
         serializer = s.GetoffStationSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='getoff-stations/short')
+    def get_short_getoff_stations(self, request):
+        page = self.paginate_queryset(m.Station.getoffstations.all())
+
+        serializer = s.StationNameSerializer(page, many=True)
 
         return self.get_paginated_response(serializer.data)
 
