@@ -178,6 +178,25 @@ class ShortVehicleCheckDocumentSerializer(serializers.ModelSerializer):
         )
 
 
+class ShortVehicleCheckHistorySerializer(serializers.ModelSerializer):
+
+    plate_num = serializers.CharField(source='vehicle.plate_num')
+    driver = serializers.CharField(source='driver.name')
+    checked_on = serializers.DateTimeField(
+        source='created',
+        format='%Y-%m-%d'
+    )
+
+    class Meta:
+        model = m.VehicleCheckHistory
+        fields = (
+            'id',
+            'plate_num',
+            'driver',
+            'checked_on',
+        )
+
+
 class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
     before_driving_checked_items = VehicleBeforeDrivingItemCheckSerializer(
@@ -189,6 +208,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
         source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
     )
+    driver = ShortUserSerializer()
     total_problems = serializers.SerializerMethodField()
     before_driving_images = serializers.SerializerMethodField()
     driving_images = serializers.SerializerMethodField()

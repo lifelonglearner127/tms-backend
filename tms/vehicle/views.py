@@ -620,7 +620,19 @@ class TireViewSet(TMSViewSet):
     serializer_class = s.TireSerializer
 
 
-class VehicleCheckHistoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class VehicleCheckHistoryViewSet(viewsets.ModelViewSet):
+
+    queryset = m.VehicleCheckHistory.objects.all()
+    serializer_class = s.VehicleCheckHistorySerializer
+
+    def list(self, request):
+        page = self.paginate_queryset(self.queryset)
+        return self.get_paginated_response(
+            s.ShortVehicleCheckHistorySerializer(
+                page,
+                many=True
+            ).data
+        )
 
     @action(detail=False, url_path="me")
     def get_my_check_history(self, request):
