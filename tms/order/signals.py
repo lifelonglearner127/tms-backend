@@ -1,5 +1,5 @@
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_delete
 
 from ..core import constants as c
 from ..core.redis import r
@@ -36,7 +36,7 @@ def updated_job(sender, instance, created, **kwargs):
 
 
 # Job delete notifications; when the job is deleted, driver, escort should be notified of the changes
-@receiver(post_delete, sender=m.Job)
+@receiver(pre_delete, sender=m.Job)
 def job_deleted(sender, instance, **kwargs):
 
     notify_of_job_deleted.apply_async(
