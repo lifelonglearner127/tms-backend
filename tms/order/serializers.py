@@ -199,10 +199,10 @@ class OrderSerializer(serializers.ModelSerializer):
     """
     order model serializer
     """
-    assignee = ShortStaffProfileSerializer()
-    customer = ShortCustomerProfileSerializer()
-    loading_station = ShortStationSerializer()
-    quality_station = ShortStationSerializer()
+    assignee = ShortStaffProfileSerializer(read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
+    loading_station = ShortStationSerializer(read_only=True)
+    quality_station = ShortStationSerializer(read_only=True)
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     arrangement_status = TMSChoiceField(
