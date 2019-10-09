@@ -92,8 +92,8 @@ def notify_of_job_creation(context):
     message = {
         "vehicle": job.vehicle.plate_num,
         "customer": {
-            "name": job.order.customer.name,
-            "mobile": job.order.customer.mobile
+            "name": job.order.customer.contacts.first().contact,
+            "mobile": job.order.customer.contacts.first().mobile
         },
         "driver": {
             "name": driver.name,
@@ -107,20 +107,20 @@ def notify_of_job_creation(context):
     }
 
     driver_notification = Notification.objects.create(
-        user=job.driver,
+        user=driver,
         message=message,
         msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
     )
 
     escort_notification = Notification.objects.create(
-        user=job.escort,
+        user=escort,
         message=message,
         msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
     )
 
-    if job.driver.channel_name:
+    if driver.channel_name:
         async_to_sync(channel_layer.send)(
-            job.driver.channel_name,
+            driver.channel_name,
             {
                 'type': 'notify',
                 'data': json.dumps(
@@ -129,9 +129,9 @@ def notify_of_job_creation(context):
             }
         )
 
-    if job.escort.channel_name:
+    if escort.channel_name:
         async_to_sync(channel_layer.send)(
-            job.escort.channel_name,
+            escort.channel_name,
             {
                 'type': 'notify',
                 'data': json.dumps(
@@ -143,12 +143,12 @@ def notify_of_job_creation(context):
     message = {
         "vehicle": job.vehicle.plate_num,
         "driver": {
-            "name": job.driver.name,
-            "mobile": job.driver.mobile
+            "name": driver.name,
+            "mobile": driver.mobile
         },
         "escort": {
-            "name": job.escort.name,
-            "mobile": job.escort.mobile
+            "name": escort.name,
+            "mobile": escort.mobile
         }
     }
     message['stations'] = stations
@@ -174,17 +174,17 @@ def notify_of_job_creation(context):
     # This would be not effeciency and there might be a solution to send bulk notification using one api call
 
     # send push notification to driver
-    if job.driver.device_token:
+    if driver.device_token:
         aliyun_request.set_Title('New Job')
         aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(job.driver.device_token)
+        aliyun_request.set_TargetValue(driver.device_token)
         aliyun_client.do_action(aliyun_request)
 
     # send push notification to escort
-    if job.escort.device_token:
+    if escort.device_token:
         aliyun_request.set_Title('New Job')
         aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(job.escort.device_token)
+        aliyun_request.set_TargetValue(escort.device_token)
         aliyun_client.do_action(aliyun_request)
 
     if job.order.customer.user.device_token:
