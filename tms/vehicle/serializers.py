@@ -208,7 +208,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
         source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
     )
-    driver = ShortUserSerializer()
+    driver = ShortUserSerializer(read_only=True)
     total_problems = serializers.SerializerMethodField()
     before_driving_images = serializers.SerializerMethodField()
     driving_images = serializers.SerializerMethodField()
