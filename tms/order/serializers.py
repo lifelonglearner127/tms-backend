@@ -18,7 +18,7 @@ from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..info.serializers import (
     ShortStationSerializer, ShortProductSerializer, StationContactSerializer,
-    ShortStationProductionSerializer, ShortStationInfoSerializer
+    ShortStationProductionSerializer, ShortStationInfoSerializer, StationNameSerializer
 )
 from ..route.serializers import ShortRouteSerializer, RouteSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
@@ -115,12 +115,22 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 
 class ShortOrderSerializer(serializers.ModelSerializer):
+    assignee = ShortStaffProfileSerializer(read_only=True)
+    customer = ShortCustomerProfileSerializer(read_only=True)
+    loading_station = ShortStationSerializer(read_only=True)
+    quality_station = ShortStationSerializer(read_only=True)
+    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
+    status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+    updated = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
 
     class Meta:
         model = m.Order
-        fields = (
-            'id', 'alias'
-        )
+        fields = '__all__'
 
 
 class OrderCustomerAppSerializer(serializers.ModelSerializer):
@@ -496,6 +506,8 @@ class JobStationSerializer(serializers.ModelSerializer):
 
 class JobDriverSerializer(serializers.ModelSerializer):
 
+    driver = ShortUserSerializer(read_only=True)
+
     class Meta:
         model = m.JobDriver
         exclude = (
@@ -504,6 +516,8 @@ class JobDriverSerializer(serializers.ModelSerializer):
 
 
 class JobEscortSerializer(serializers.ModelSerializer):
+
+    escort = ShortUserSerializer(read_only=True)
 
     class Meta:
         model = m.JobEscort
@@ -615,55 +629,73 @@ class JobUnloadingStationProductSerializer(serializers.Field):
 
 
 class JobSerializer(serializers.ModelSerializer):
-
+    """
+    this serializer is used in workdiary
+    """
+    order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
-    loading_station = serializers.SerializerMethodField()
-    quality_station = serializers.SerializerMethodField()
-    unloading_stations = serializers.SerializerMethodField()
-    unloading_stations_product = serializers.SerializerMethodField()
-    stations_info = serializers.SerializerMethodField()
-    mileage = JobMileageField(source='*')
-    started_on = serializers.DateTimeField(
-        format='%Y-%m-%d', required=False
+    associated_drivers = JobDriverSerializer(
+        source='jobdriver_set', many=True, read_only=True
     )
+    associated_escorts = JobEscortSerializer(
+        source='jobescort_set', many=True, read_only=True
+    )
+    branches = serializers.SerializerMethodField()
+    routes = serializers.SerializerMethodField()
+    stations = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
-        fields = (
-            'id', 'vehicle', 'driver', 'escort', 'loading_station',
-            'quality_station', 'unloading_stations', 'total_weight',
-            'mileage', 'started_on', 'turnover', 'stations',
-            'unloading_stations_consume_weight',
-            'road_duration', 'operating_efficiency', 'drained_oil',
-            'unloading_stations_product', 'stations_info'
-        )
+        fields = '__all__'
 
-    def get_loading_station(self, instance):
-        return ShortStationSerializer(
-            instance.stations.all()[0]
+    def get_routes(self, instance):
+        routes = m.Route.objects.filter(id__in=instance.routes)
+        routes = dict([(route.id, route) for route in routes])
+        return RouteSerializer(
+            [routes[id] for id in instance.routes],
+            many=True
         ).data
 
-    def get_quality_station(self, instance):
-        return ShortStationSerializer(
-            instance.stations.all()[0]
+    def get_branches(self, instance):
+        branches = []
+        for job_station in instance.jobstation_set.all()[2:]:
+            for job_station_product in job_station.jobstationproduct_set.all():
+                for branch in branches:
+                    if branch['branch'] == job_station_product.branch:
+                        branch['mission_weight'] += job_station_product.mission_weight
+                        branch['unloading_stations'].append({
+                            'unloading_station': StationNameSerializer(job_station.station).data,
+                            'mission_weight': job_station_product.mission_weight
+                        })
+                        break
+                else:
+                    order_product = instance.order.orderproduct_set.filter(product=job_station_product.product).first()
+
+                    branches.append({
+                        'branch': job_station_product.branch,
+                        'product': ShortProductSerializer(job_station_product.product).data,
+                        'mission_weight': job_station_product.mission_weight,
+                        'weight_measure_unit': order_product.get_weight_measure_unit_display(),
+                        'unloading_stations': [{
+                            'unloading_station': StationNameSerializer(job_station.station).data,
+                            'mission_weight': job_station_product.mission_weight
+                        }]
+                    })
+
+        return branches
+
+    def get_stations(self, instance):
+        ret = {
+            'loading_station': [],
+            'quality_station': [],
+            'unloading_stations': []
+        }
+
+        ret['loading_station'] = LoadingStationProductCheckSerializer(
+            instance.loading_checks.all(), many=True
         ).data
 
-    def get_unloading_stations(self, instance):
-        return ShortStationSerializer(
-            instance.stations.all()[2:], many=True
-        ).data
-
-    def get_unloading_stations_product(self, instance):
-        return ShortStationProductionSerializer(
-            instance.unloading_stations_product, many=True
-        ).data
-
-    def get_stations_info(self, instance):
-        return ShortStationInfoSerializer(
-            instance.stations_info, many=True
-        ).data
+        return ret
 
 
 class JobFutureSerializer(serializers.ModelSerializer):
