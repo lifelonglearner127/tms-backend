@@ -360,6 +360,9 @@ class FuelBillHistorySerializer(serializers.ModelSerializer):
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
+    created_on = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
     images = serializers.SerializerMethodField()
 
     class Meta:

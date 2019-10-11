@@ -430,6 +430,58 @@ class JobMileageField(serializers.Field):
         }
 
 
+class JobDurationField(serializers.Field):
+
+    def to_representation(self, instance):
+        durations = []
+        if instance.started_on is None:
+            return durations
+
+        time_list = [instance.started_on]
+        job_stations = instance.jobstation_set.all()
+        for job_station in job_stations:
+            if job_station.arrived_station_on is None:
+                break
+            time_list.append(job_station.arrived_station_on)
+
+            if job_station.started_working_on is None:
+                break
+            time_list.append(job_station.started_working_on)
+
+            if job_station.finished_working_on is None:
+                break
+            time_list.append(job_station.finished_working_on)
+
+            if job_station.departure_station_on is None:
+                break
+            time_list.append(job_station.departure_station_on)
+
+        if instance.finished_on is not None:
+            time_list.append(instance.finished_on)
+
+        # station_duration = []
+        # for i in range(len(time_list) - 1):
+        #     if i % 4 == 0:
+        #         station_duration = []
+        #     elif i % 4 == 3:
+        #         durations.append(station_duration)
+
+        #     station_duration.append(
+        #         round(
+        #             (time_list[i + 1] - time_list[i]).total_seconds() / 60
+        #         )
+        #     )
+
+        for i in range(len(time_list) - 1):
+            durations.append(
+                round(
+                    (time_list[i + 1] - time_list[i]).total_seconds() / 60
+                )
+            )
+
+        return durations
+
+
 class QualityCheckSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -673,10 +725,15 @@ class JobDoneSerializer(serializers.ModelSerializer):
     stations = serializers.SerializerMethodField()
     costs = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
+    durations = JobDurationField(source='*')
 
     class Meta:
         model = m.Job
-        fields = '__all__'
+        fields = (
+            'id', 'order', 'vehicle', 'associated_drivers', 'associated_escorts', 'branches',
+            'routes', 'stations', 'costs', 'mileage', 'durations', 'started_on', 'finished_on',
+            'is_paid',
+        )
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
@@ -754,6 +811,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
         for job_station in job_stations[2:]:
             station_payload = {
                 'id': job_station.id,
+                'station': StationNameSerializer(job_station.station).data,
                 'time': JobStationTimeSerializer(job_station).data,
                 'branches': []
             }

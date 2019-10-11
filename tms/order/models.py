@@ -393,25 +393,6 @@ class Job(models.Model):
         return total_consume_weight
 
     @property
-    def road_duration(self):
-
-        job_duration = timedelta()
-        road_time = timedelta()
-        if self.finished_on and self.started_on:
-            job_duration = self.finished_on - self.started_on
-            road_time = job_duration
-        if job_duration.microseconds > 0:
-            stations = self.stations.all()
-            for station in stations:
-                station_duration = timedelta()
-                jobstation = station.jobstation_set.get(job=self)
-                if jobstation.arrived_station_on and jobstation.departure_station_on:
-                    station_duration = jobstation.departure_station_on - jobstation.arrived_station_on
-                road_time = road_time - station_duration
-        road_time_string = format_hms_string(road_time, "在途时间")
-        return road_time_string
-
-    @property
     def operating_efficiency(self):
         total_mileage = self.total_mileage
         print(total_mileage)
