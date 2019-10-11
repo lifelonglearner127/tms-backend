@@ -632,6 +632,14 @@ class JobViewSet(TMSViewSet):
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
 
+    def retrieve(self, request, pk=None):
+        job = self.get_object()
+
+        return Response(
+            s.JobDoneSerializer(job, context={'request': request}).data,
+            status=status.HTTP_200_OK
+        )
+
     def update(self, request, pk=None):
         """
          - completed order jobs cannot be updated
@@ -967,6 +975,13 @@ class JobViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='upload-loading-check')
     def upload_loading_station_check(self, request, pk=None):
         job = self.get_object()
+        if job.progress == c.JOB_PROGRESS_NOT_STARTED:
+            return Response(
+                {
+                    'msg': 'You cannot upload because this job is not started yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         images = request.data.pop('images', [])
         product = get_object_or_404(Product, id=request.data.get('product').get('id'))
 
@@ -996,6 +1011,14 @@ class JobViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='upload-quality-check')
     def upload_quality_check(self, request, pk=None):
         job = self.get_object()
+        if job.progress == c.JOB_PROGRESS_NOT_STARTED:
+            return Response(
+                {
+                    'msg': 'You cannot upload because this job is not started yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         images = request.data.pop('images')
         branch = request.data.get('branch', 0)
 
@@ -1011,9 +1034,12 @@ class JobViewSet(TMSViewSet):
         job_qualitystation_product = get_object_or_404(
             m.JobStationProduct, job_station=job_qualitystation, branch=branch
         )
+
+        job_qualitystation_product.weight = request.data.pop('weight')
         job_qualitystation_product.volume = request.data.pop('volume')
         job_qualitystation_product.man_hole = request.data.pop('man_hole')
         job_qualitystation_product.branch_hole = request.data.pop('branch_hole')
+        job_qualitystation_product.save()
 
         for image in images:
             if image.get('id', None):
@@ -1193,23 +1219,22 @@ class JobViewSet(TMSViewSet):
     def get_driving(self, request):
         pass
 
-    @action(detail=False, url_path='previous', permission_classes=[IsDriverOrEscortUser])
-    def previous_jobs(self, request):
-        pass
-        # serializer = s.JobDoneSerializer(
-        #     request.user.jobs_as_driver.filter(
-        #         finished_on__lte=timezone.now()
-        #     ),
-        #     many=True
-        # )
-
-        # return Response(
-        #     serializer.data,
-        #     status=status.HTTP_200_OK
-        # )
-
-    @action(detail=False, url_path='done', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='done')
     def done_jobs(self, request):
+        """
+        this api is used for retrieving the done job in driver app
+        """
+        page = self.paginate_queryset(
+            m.Job.completed_jobs.all()
+        )
+
+        serializer = s.JobSerializer(
+            page, context={'request': request}, many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='me/done', permission_classes=[IsDriverOrEscortUser])
+    def driver_done_jobs(self, request):
         """
         this api is used for retrieving the done job in driver app
         """
@@ -1220,7 +1245,7 @@ class JobViewSet(TMSViewSet):
         serializer = s.JobDoneSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path='current', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='me/current', permission_classes=[IsDriverOrEscortUser])
     def current_jobs(self, request):
         """
         this api is used for retrieving the current job in driver app
@@ -1236,7 +1261,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path='future', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='me/future', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):
         """
         this api is used for retrieving future jobs in driver app
@@ -1448,6 +1473,14 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         weight is different from mission weight
         """
         instance = self.get_object()
+        if instance.job_station.job.progress == c.JOB_PROGRESS_NOT_STARTED:
+            return Response(
+                {
+                    'msg': 'You cannot upload because this job is not started yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         images = request.data.pop('images', [])
         instance.man_hole = request.data.pop('man_hole', '')
         instance.branch_hole = request.data.pop('branch_hole', '')

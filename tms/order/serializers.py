@@ -432,7 +432,9 @@ class QualityCheckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.QualityCheck
-        fields = '__all__'
+        exclude = (
+            'job',
+        )
 
 
 class ShortJobStationProductSerializer(serializers.ModelSerializer):
@@ -488,6 +490,23 @@ class ShortJobStationSerializer(serializers.ModelSerializer):
         model = m.JobStation
         fields = (
             'id', 'station', 'products'
+        )
+
+
+class JobStationTimeSerializer(serializers.ModelSerializer):
+
+    arrived_station_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    started_working_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    finished_working_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    departure_station_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = m.JobStation
+        fields = (
+            'arrived_station_on',
+            'started_working_on',
+            'finished_working_on',
+            'departure_station_on',
         )
 
 
@@ -629,6 +648,13 @@ class JobUnloadingStationProductSerializer(serializers.Field):
 
 
 class JobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Job
+        fields = '__all__'
+
+
+class JobDoneSerializer(serializers.ModelSerializer):
     """
     this serializer is used in workdiary
     """
@@ -643,6 +669,7 @@ class JobSerializer(serializers.ModelSerializer):
     branches = serializers.SerializerMethodField()
     routes = serializers.SerializerMethodField()
     stations = serializers.SerializerMethodField()
+    mileage = JobMileageField(source='*')
 
     class Meta:
         model = m.Job
@@ -685,16 +712,64 @@ class JobSerializer(serializers.ModelSerializer):
         return branches
 
     def get_stations(self, instance):
+        job_stations = instance.jobstation_set.all()
         ret = {
-            'loading_station': [],
-            'quality_station': [],
+            'loading_station': {
+                'time': JobStationTimeSerializer(job_stations[0]).data,
+                'loading_checks': []
+            },
+            'quality_station': {
+                'time': JobStationTimeSerializer(job_stations[1]).data,
+                'branches': []
+            },
             'unloading_stations': []
         }
 
-        ret['loading_station'] = LoadingStationProductCheckSerializer(
-            instance.loading_checks.all(), many=True
+        ret['loading_station']['loading_checks'] = LoadingStationProductCheckSerializer(
+            instance.loading_checks.all(), context={'request': self.context.get('request')}, many=True
         ).data
 
+        quality_station = job_stations[1]
+        for product in quality_station.jobstationproduct_set.all():
+            quality_check = instance.quality_checks.filter(branch=product.branch).first()
+
+            ret['quality_station']['branches'].append({
+                'branch': product.branch,
+                'product': ShortProductSerializer(product.product).data,
+                'weight': product.weight,
+                'due_time': product.due_time,
+                'density': quality_check.density,
+                'additive': quality_check.additive,
+                'volume': product.volume,
+                'man_hole': product.man_hole,
+                'branch_hole': product.branch_hole,
+                'images': ShortJobStationProductDocumentSerializer(
+                    product.images.all(), context={'request': self.context.get('request')}, many=True
+                ).data
+            })
+
+        for job_station in job_stations[2:]:
+            station_payload = {
+                'id': job_station.id,
+                'time': JobStationTimeSerializer(job_station).data,
+                'branches': []
+            }
+
+            for product in job_station.jobstationproduct_set.all():
+                station_payload['branches'].append({
+                    'id': product.id,
+                    'branch': product.branch,
+                    'product': ShortProductSerializer(product.product).data,
+                    'due_time': product.due_time,
+                    'volume': product.volume,
+                    'man_hole': product.man_hole,
+                    'branch_hole': product.branch_hole,
+                    'images': ShortJobStationProductDocumentSerializer(
+                        product.images.all(), context={'request': self.context.get('request')}, many=True
+                    ).data
+                })
+
+            ret['unloading_stations'].append(station_payload)
         return ret
 
 
@@ -827,39 +902,6 @@ class JobCurrentSerializer(JobFutureSerializer):
     Serializer for current job for driver app
     """
     pass
-
-
-class JobDoneSerializer(serializers.ModelSerializer):
-    """
-    Serializer for completed jobs in driver app
-    """
-    plate_num = serializers.CharField(source='vehicle.plate_num')
-    stations = ShortJobStationSerializer(
-        source='jobstation_set', many=True, read_only=True
-    )
-    driver = serializers.SerializerMethodField()
-    escort = serializers.SerializerMethodField()
-    mileage = JobMileageField(source='*')
-
-    class Meta:
-        model = m.Job
-        fields = (
-            'id',
-            'plate_num',
-            'started_on',
-            'finished_on',
-            'stations',
-            'total_weight',
-            'driver',
-            'escort',
-            'mileage',
-        )
-
-    def get_driver(self, instance):
-        return instance.associated_drivers.first().name
-
-    def get_escort(self, instance):
-        return instance.associated_escorts.first().name
 
 
 class BillSubCategoyChoiceField(serializers.Field):
@@ -1186,10 +1228,15 @@ class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
 
     product = ShortProductSerializer(read_only=True)
     images = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
 
     class Meta:
         model = m.LoadingStationProductCheck
-        fields = ('product', 'weight', 'images')
+        exclude = (
+            'job',
+        )
 
     def get_images(self, instance):
         return ShortLoadingStationDocumentSerializer(

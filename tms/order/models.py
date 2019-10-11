@@ -8,7 +8,7 @@ from . import managers
 from ..core import constants as c
 
 # models
-from ..core.models import TimeStampedModel
+from ..core.models import TimeStampedModel, CreatedTimeModel
 from ..account.models import User
 from ..hr.models import CustomerProfile, StaffProfile
 from ..info.models import Station, Product
@@ -533,7 +533,7 @@ class JobEscort(models.Model):
         )
 
 
-class LoadingStationProductCheck(models.Model):
+class LoadingStationProductCheck(CreatedTimeModel):
 
     job = models.ForeignKey(
         Job,
@@ -680,6 +680,10 @@ class JobStationProduct(models.Model):
     )
 
     mission_weight = models.FloatField(
+        default=0
+    )
+
+    weight = models.FloatField(
         default=0
     )
 
