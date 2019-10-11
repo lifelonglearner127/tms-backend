@@ -632,14 +632,6 @@ class JobViewSet(TMSViewSet):
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
 
-    def retrieve(self, request, pk=None):
-        job = self.get_object()
-
-        return Response(
-            s.JobDoneSerializer(job, context={'request': request}).data,
-            status=status.HTTP_200_OK
-        )
-
     def update(self, request, pk=None):
         """
          - completed order jobs cannot be updated
@@ -972,6 +964,22 @@ class JobViewSet(TMSViewSet):
         job.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, url_path='done-job')
+    def get_done_job(self, request, pk=None):
+        job = self.get_object()
+        if job.progress != c.JOB_PROGRESS_COMPLETE:
+            return Response(
+                {
+                    'msg': 'Cannot read this job because this job is not complete yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            s.JobDoneSerializer(job, context={'request': request}).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['post'], url_path='upload-loading-check')
     def upload_loading_station_check(self, request, pk=None):
         job = self.get_object()
@@ -1219,7 +1227,7 @@ class JobViewSet(TMSViewSet):
     def get_driving(self, request):
         pass
 
-    @action(detail=False, url_path='done')
+    @action(detail=False, url_path='done-jobs')
     def done_jobs(self, request):
         """
         this api is used for retrieving the done job in driver app
@@ -1233,7 +1241,7 @@ class JobViewSet(TMSViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path='me/done', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='me/done-jobs', permission_classes=[IsDriverOrEscortUser])
     def driver_done_jobs(self, request):
         """
         this api is used for retrieving the done job in driver app
@@ -1245,7 +1253,7 @@ class JobViewSet(TMSViewSet):
         serializer = s.JobDoneSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path='me/current', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='me/current-jobs', permission_classes=[IsDriverOrEscortUser])
     def current_jobs(self, request):
         """
         this api is used for retrieving the current job in driver app
@@ -1261,7 +1269,7 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path='me/future', permission_classes=[IsDriverOrEscortUser])
+    @action(detail=False, url_path='me/future-jobs', permission_classes=[IsDriverOrEscortUser])
     def future_jobs(self, request):
         """
         this api is used for retrieving future jobs in driver app

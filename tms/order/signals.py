@@ -23,16 +23,16 @@ def updated_job(sender, instance, created, **kwargs):
             instance.order.status = c.ORDER_STATUS_INPROGRESS
             instance.order.save()
 
-    if instance.progress == c.JOB_PROGRESS_COMPLETE:
-        r.srem('jobs', instance.id)
-        calculate_job_report.apply_async(
-            args=[{
-                'job': instance.id,
-                'vehicle': instance.vehicle.id,
-                'driver': instance.driver.id,
-                'escort': instance.escort.id
-            }]
-        )
+    # if instance.progress == c.JOB_PROGRESS_COMPLETE:
+    #     r.srem('jobs', instance.id)
+    #     calculate_job_report.apply_async(
+    #         args=[{
+    #             'job': instance.id,
+    #             'vehicle': instance.vehicle.id,
+    #             'driver': instance.driver.id,
+    #             'escort': instance.escort.id
+    #         }]
+    #     )
 
 
 # Job delete notifications; when the job is deleted, driver, escort should be notified of the changes

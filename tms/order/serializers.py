@@ -11,11 +11,13 @@ from ..core import constants as c
 # models
 from ..hr.models import CustomerProfile, StaffProfile
 from ..info.models import Product
+from ..finance.models import FuelBillHistory
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import ShortUserSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
+from ..finance.serializers import FuelBillHistorySerializer
 from ..info.serializers import (
     ShortStationSerializer, ShortProductSerializer, StationContactSerializer,
     ShortStationProductionSerializer, ShortStationInfoSerializer, StationNameSerializer
@@ -669,6 +671,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
     branches = serializers.SerializerMethodField()
     routes = serializers.SerializerMethodField()
     stations = serializers.SerializerMethodField()
+    costs = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
 
     class Meta:
@@ -770,6 +773,26 @@ class JobDoneSerializer(serializers.ModelSerializer):
                 })
 
             ret['unloading_stations'].append(station_payload)
+        return ret
+
+    def get_costs(self, instance):
+        ret = {
+            'fuel': {}
+        }
+        vehicle = instance.vehicle
+        previous_job = vehicle.jobs.exclude(id=instance.id).filter(progress=c.JOB_PROGRESS_COMPLETE).first()
+        if previous_job is not None and previous_job.finished_on is not None:
+            bill_history = FuelBillHistory.objects.filter(
+                created_on__range=(previous_job.finished_on, instance.finished_on)
+            )
+        else:
+            bill_history = FuelBillHistory.objects.filter(
+                created_on__lte=instance.finished_on
+            )
+
+        ret['fuel'] = FuelBillHistorySerializer(
+            bill_history, context={'request': self.context.get('request')}, many=True
+        ).data
         return ret
 
 
