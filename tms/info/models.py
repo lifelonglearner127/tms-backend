@@ -179,6 +179,30 @@ class Station(BasicContactModel):
         blank=True
     )
 
+    province = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    city = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    district = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    detail_address = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
     objects = models.Manager()
     loadingstations = managers.LoadingStationManager()
     unloadingstations = managers.UnLoadingStationManager()

@@ -148,6 +148,8 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
     arrangement_status = TMSChoiceField(
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
     )
+    loading_station = StationNameSerializer(read_only=True)
+    quality_station = StationNameSerializer(read_only=True)
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
@@ -156,8 +158,8 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Order
         fields = (
-            'id', 'status', 'arrangement_status', 'invoice_ticket', 'tax_rate', 'description',
-            'products', 'jobs'
+            'id', 'status', 'loading_station', 'quality_station', 'loading_due_time', 'is_same_station',
+            'arrangement_status', 'invoice_ticket', 'tax_rate', 'description', 'products', 'jobs'
         )
 
     def get_jobs(self, instance):
