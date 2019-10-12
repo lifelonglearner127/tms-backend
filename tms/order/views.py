@@ -1251,7 +1251,9 @@ class JobViewSet(TMSViewSet):
             m.Job.completed_jobs.filter(associated_drivers=request.user)
         )
 
-        serializer = s.JobDoneSerializer(page, many=True)
+        serializer = s.JobDoneSerializer(
+            page, context={'request': request}, many=True
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, url_path='me/current-jobs', permission_classes=[IsDriverOrEscortUser])

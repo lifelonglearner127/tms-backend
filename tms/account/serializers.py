@@ -165,6 +165,15 @@ class VerifyJWTSerializer(VerificationBaseSerializer):
         }
 
 
+class ShortUserNameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name',
+        )
+
+
 class ShortUserSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of User

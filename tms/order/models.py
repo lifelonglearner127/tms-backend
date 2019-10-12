@@ -577,6 +577,10 @@ class JobStation(models.Model):
         null=True
     )
 
+    transport_unit_price = models.FloatField(
+        default=0
+    )
+
     step = models.PositiveIntegerField()
 
     arrived_station_on = models.DateTimeField(

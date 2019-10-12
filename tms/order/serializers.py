@@ -15,7 +15,7 @@ from ..finance.models import FuelBillHistory
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import ShortUserSerializer, ShortUserNameSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..finance.serializers import FuelBillHistorySerializer
 from ..info.serializers import (
@@ -23,7 +23,7 @@ from ..info.serializers import (
     ShortStationProductionSerializer, ShortStationInfoSerializer, StationNameSerializer
 )
 from ..route.serializers import ShortRouteSerializer, RouteSerializer
-from ..vehicle.serializers import ShortVehicleSerializer
+from ..vehicle.serializers import ShortVehicleSerializer, ShortVehiclePlateNumSerializer
 from .tasks import notify_order_changes
 
 
@@ -117,12 +117,10 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 
 class ShortOrderSerializer(serializers.ModelSerializer):
-    assignee = ShortStaffProfileSerializer(read_only=True)
+    assignee = ShortUserNameSerializer(read_only=True)
     customer = ShortCustomerProfileSerializer(read_only=True)
-    loading_station = ShortStationSerializer(read_only=True)
-    quality_station = ShortStationSerializer(read_only=True)
-    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
-    status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    loading_station = StationNameSerializer(read_only=True)
+    quality_station = StationNameSerializer(read_only=True)
     created = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
@@ -132,7 +130,16 @@ class ShortOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Order
-        fields = '__all__'
+        fields = (
+            'id',
+            'assignee',
+            'customer',
+            'loading_station',
+            'quality_station',
+            'created',
+            'updated',
+            'description',
+        )
 
 
 class OrderCustomerAppSerializer(serializers.ModelSerializer):
@@ -713,7 +720,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
     this serializer is used in workdiary
     """
     order = ShortOrderSerializer()
-    vehicle = ShortVehicleSerializer()
+    vehicle = ShortVehiclePlateNumSerializer()
     associated_drivers = JobDriverSerializer(
         source='jobdriver_set', many=True, read_only=True
     )
