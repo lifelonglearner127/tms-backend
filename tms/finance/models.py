@@ -283,22 +283,6 @@ class FuelBillDocument(models.Model):
     document = models.ImageField()
 
 
-class OrderPayment(models.Model):
-
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE
-    )
-
-    amount = models.FloatField(
-        default=0
-    )
-
-    is_complete = models.BooleanField(
-        default=False
-    )
-
-
 class Bill(CreatedTimeModel):
 
     user = models.ForeignKey(

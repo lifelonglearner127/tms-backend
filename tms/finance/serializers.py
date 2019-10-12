@@ -17,13 +17,6 @@ from ..vehicle.serializers import ShortVehicleSerializer
 from ..info.serializers import StationNameSerializer
 
 
-class OrderPaymentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.OrderPayment
-        fields = '__all__'
-
-
 class ShortETCCardSerializer(serializers.ModelSerializer):
 
     class Meta:

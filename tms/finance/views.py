@@ -13,12 +13,6 @@ from . import serializers as s
 from ..core.views import TMSViewSet
 
 
-class OrderPaymentViewSet(TMSViewSet):
-
-    queryset = m.OrderPayment.objects.all()
-    serializer_class = s.OrderPaymentSerializer
-
-
 class ETCCardViewSet(TMSViewSet):
 
     queryset = m.ETCCard.objects.all()

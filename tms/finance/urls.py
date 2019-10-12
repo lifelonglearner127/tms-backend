@@ -6,11 +6,6 @@ from . import views as v
 
 router = routers.SimpleRouter(trailing_slash=False)
 router.register(
-    r'order-payment',
-    v.OrderPaymentViewSet,
-    base_name='order-payment'
-)
-router.register(
     r'etc-card',
     v.ETCCardViewSet,
     base_name='etc-card'

@@ -43,11 +43,6 @@ class FuelBillDocumentAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.OrderPayment)
-class OrderPaymentAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.BillDocument)
 class BillDocumentAdmin(admin.ModelAdmin):
     pass
