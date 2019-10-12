@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from . import serializers as s
 from ..core import constants as c
 from ..core.permissions import IsDriverOrEscortUser
 from ..core.views import TMSViewSet
+from ..vehicle.models import VehicleDriverDailyBind
 
 
 class DepartmentViewSet(TMSViewSet):
@@ -114,11 +116,49 @@ class StaffProfileViewSet(TMSViewSet):
         retrieve the driver info
         this api is called in arrange view when user select the driver
         """
+        ret = []
         user_type = request.query_params.get('user_type', 'D')
         page = self.paginate_queryset(
             m.StaffProfile.objects.filter(user__user_type=user_type)
         )
-        serializer = s.DriverEscortStatusSerializer(page, many=True)
+
+        for instance in page:
+            vehicle_bind = VehicleDriverDailyBind.objects.filter(driver=instance.user).first()
+            # job_driver = instance.user.jobs_as_driver.filter(job__progress__gt=c.JOB_PROGRESS_NOT_STARTED).first()
+            status_payload = {
+                'id': instance.user.id,
+                'name': instance.user.name,
+                'mobile': instance.user.mobile,
+                'id_card': instance.id_card,
+                'vehicle': '',
+                'duration': 0,
+                # 'current_progress': ''
+            }
+
+            if vehicle_bind is not None and vehicle_bind.get_off is None:
+                status_payload['vehicle'] = vehicle_bind.vehicle.plate_num
+                status_payload['duration'] = int((timezone.now() - vehicle_bind.get_on).total_seconds() / 60)
+
+            # if job_driver is not None:
+            #     job = job_driver.job
+
+            #     if job.progress >= 10:
+            #         if (job.progress - 10) % 4 == 0:
+            #             progress = 10
+            #         elif (job.progress - 10) % 4 == 1:
+            #             progress = 11
+            #         elif (job.progress - 10) % 4 == 2:
+            #             progress = 12
+            #         elif (job.progress - 10) % 4 == 3:
+            #             progress = 13
+            #     else:
+            #         progress = job.progress
+
+            #     status_payload['current_progress'] = c.JOB_PROGRESS.get(progress, '无效')
+
+            ret.append(status_payload)
+
+        serializer = s.DriverEscortStatusSerializer(ret, many=True)
         return self.get_paginated_response(serializer.data)
 
     # version 2

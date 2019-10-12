@@ -1309,6 +1309,11 @@ class JobViewSet(TMSViewSet):
 
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
+
+            job_driver = m.JobDriver.objects.get(job=job, driver=request.user)
+            job_driver.started_on = timezone.now()
+            job_driver.save()
+
             last_progress_finished_on = None
 
             # set the vehicle status to in-work
@@ -1352,6 +1357,10 @@ class JobViewSet(TMSViewSet):
                 if not current_station.has_next_station:
                     job.progress = c.JOB_PROGRESS_COMPLETE
                     job.finished_on = timezone.now()
+
+                    job_driver = m.JobDriver.objects.get(job=job, driver=request.user)
+                    job_driver.finished_on = timezone.now()
+                    job_driver.save()
 
                     # update job empty mileage
                     loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on

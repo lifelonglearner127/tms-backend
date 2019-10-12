@@ -447,7 +447,10 @@ class DriverEscortStatusSerializer(serializers.Serializer):
     """
     Serializer for driver, escort status in arrange view
     """
-    id = serializers.IntegerField(source='user.id')
-    name = serializers.CharField(source='user.name')
-    mobile = serializers.CharField(source='user.mobile')
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    mobile = serializers.CharField()
     id_card = serializers.CharField()
+    vehicle = serializers.CharField()
+    duration = serializers.IntegerField()
+    # current_progress = serializers.CharField()
