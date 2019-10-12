@@ -1058,6 +1058,7 @@ class JobViewSet(TMSViewSet):
             serializer.save()
 
         ret = {
+            'branch': branch,
             'density': quality_check.density,
             'additive': quality_check.additive,
             'volume': job_qualitystation_product.volume,
@@ -1502,6 +1503,7 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
             serializer.save()
 
         ret = {
+            'branch': instance.branch,
             'volume': instance.volume,
             'images': s.ShortJobStationProductDocumentSerializer(
                 instance.images.all(),
