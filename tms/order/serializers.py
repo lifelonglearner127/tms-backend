@@ -675,13 +675,13 @@ class JobAdminSerializer(serializers.ModelSerializer):
 
     def get_progress(self, instance):
         if instance.progress >= 10:
-            if (instance - 10) % 4 == 0:
+            if (instance.progress - 10) % 4 == 0:
                 progress = 10
-            elif (progress - 10) % 4 == 1:
+            elif (instance.progress - 10) % 4 == 1:
                 progress = 11
-            elif (progress - 10) % 4 == 2:
+            elif (instance.progress - 10) % 4 == 2:
                 progress = 12
-            elif (progress - 10) % 4 == 3:
+            elif (instance.progress - 10) % 4 == 3:
                 progress = 13
         else:
             progress = instance.progress

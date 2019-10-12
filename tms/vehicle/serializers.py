@@ -621,15 +621,19 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
 
     driver = serializers.SerializerMethodField()
     escort = serializers.SerializerMethodField()
+    total_branch_size = serializers.SerializerMethodField()
+    current_progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Vehicle
         fields = (
             'id',
             'plate_num',
-            'branch_count',
+            'total_branch_size',
             'driver',
             'escort',
+            'current_progress',
+            'cert_expires_on',
         )
 
     def get_driver(self, instance):
@@ -657,3 +661,29 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
             'mobile': vehicle_bind.escort.mobile,
             'id_card': vehicle_bind.escort.profile.id_card,
         }
+
+    def get_total_branch_size(self, instance):
+        total_branch_size = 0
+        for branch in instance.branches:
+            total_branch_size += branch
+
+        return total_branch_size
+
+    def get_current_progress(self, instance):
+        current_job = instance.jobs.filter(progress__gt=c.JOB_PROGRESS_NOT_STARTED).first()
+        if current_job is None:
+            return '无效'
+
+        if current_job.progress >= 10:
+            if (current_job.progress - 10) % 4 == 0:
+                progress = 10
+            elif (current_job.progress - 10) % 4 == 1:
+                progress = 11
+            elif (current_job.progress - 10) % 4 == 2:
+                progress = 12
+            elif (current_job.progress - 10) % 4 == 3:
+                progress = 13
+        else:
+            progress = current_job.progress
+
+        return c.JOB_PROGRESS.get(progress, '无效')
