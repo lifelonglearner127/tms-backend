@@ -8,8 +8,7 @@ from ..core import constants as c
 
 # serializers
 from ..account.serializers import (
-    ShortUserSerializer, MainUserSerializer, UserSerializer,
-    DriverAppUserSerializer, CustomerAppUserSerializer
+    MainUserSerializer, UserSerializer, UserUsernameSerializer
 )
 
 
@@ -112,7 +111,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
 
     department = ShortDepartmentSerializer(read_only=True)
     position = ShortPositionSerializer(read_only=True)
-    user = DriverAppUserSerializer(read_only=True)
+    user = MainUserSerializer(read_only=True)
     bind_vehicle = serializers.SerializerMethodField()
 
     class Meta:
@@ -325,7 +324,7 @@ class ShortCustomerProfileSerializer(serializers.ModelSerializer):
 class CustomerProfileSerializer(serializers.ModelSerializer):
 
     user = MainUserSerializer(read_only=True)
-    associated_with = ShortUserSerializer(read_only=True)
+    associated_with = MainUserSerializer(read_only=True)
     contacts = CustomerContactSerializer(many=True, read_only=True)
     primary_contact = serializers.SerializerMethodField()
 
@@ -433,7 +432,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
 class CustomerAppProfileSerializer(serializers.ModelSerializer):
 
-    user = CustomerAppUserSerializer(read_only=True)
+    user = UserUsernameSerializer(read_only=True)
 
     class Meta:
         model = m.CustomerProfile

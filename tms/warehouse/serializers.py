@@ -7,7 +7,7 @@ from . import models as m
 
 # serializers
 from ..account.serializers import (
-    ShortUserSerializer, ShortCompanyMemberSerializer
+    MainUserSerializer, UserNameTypeSerializer
 )
 from ..core.serializers import TMSChoiceField
 
@@ -60,7 +60,7 @@ class InTransactionSerializer(serializers.ModelSerializer):
 class OutTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
-    recipient = ShortCompanyMemberSerializer(read_only=True)
+    recipient = UserNameTypeSerializer(read_only=True)
     amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
 
     class Meta:
@@ -140,7 +140,7 @@ class OutTransactionHistorySerializer(serializers.ModelSerializer):
 
 class WarehouseProductSerializer(serializers.ModelSerializer):
 
-    assignee = ShortUserSerializer(read_only=True)
+    assignee = MainUserSerializer(read_only=True)
     in_transactions = InTransactionHistorySerializer(
         many=True, read_only=True
     )

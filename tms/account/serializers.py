@@ -165,120 +165,13 @@ class VerifyJWTSerializer(VerificationBaseSerializer):
         }
 
 
-class ShortUserNameSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'name',
-        )
-
-
-class ShortUserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for short data of User
-    """
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'name', 'mobile', 'user_type'
-        )
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if ret['name'] is None:
-            if instance != 'No driver':
-                ret['name'] = instance.username
-
-        return ret
-
-
-class ShortCompanyMemberSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'name', 'user_type'
-        )
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if ret['name'] is None:
-            ret['name'] = instance.username
-
-        return ret
-
-
-class ShortUserWithDepartmentSerializer(serializers.ModelSerializer):
-
-    department = serializers.SerializerMethodField()
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'name', 'department'
-        )
-
-    def get_department(self, instance):
-        ret = {}
-        if instance.profile is not None:
-            ret = {
-                'id': instance.profile.department.id,
-                'name': instance.profile.department.name
-            }
-
-        return ret
-
-
-class MainUserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for User's main data
-    """
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'username', 'mobile', 'name', 'user_type', 'password'
-        )
-
-
-class DriverAppUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'username', 'mobile', 'name'
-        )
-
-
-class CustomerAppUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.User
-        fields = (
-            'id', 'username',
-        )
-
-
-class ShortUserPermissionSerializer(serializers.ModelSerializer):
+class UserPermissionNameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.UserPermission
         fields = (
             'id', 'name'
         )
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for User
-    """
-    user_type = TMSChoiceField(choices=c.USER_TYPE)
-    permission = ShortUserPermissionSerializer(read_only=True)
-
-    class Meta:
-        model = m.User
-        fields = '__all__'
 
 
 class UserPermissionSerializer(serializers.ModelSerializer):
@@ -306,3 +199,88 @@ class UserPermissionSerializer(serializers.ModelSerializer):
                 })
 
         return ret
+
+
+class UserUsernameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'username',
+        )
+
+
+class UserNameSerializer(serializers.ModelSerializer):
+    """
+    Serializer
+    """
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name',
+        )
+
+
+class UserNameTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name', 'user_type'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.username
+
+        return ret
+
+
+class UserDepartmentSerializer(serializers.ModelSerializer):
+
+    department = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'name', 'department'
+        )
+
+    def get_department(self, instance):
+        ret = {}
+        if instance.profile is not None:
+            ret = {
+                'id': instance.profile.department.id,
+                'name': instance.profile.department.name
+            }
+
+        return ret
+
+
+class MainUserSerializer(serializers.ModelSerializer):
+    """
+    Serializer
+    """
+    class Meta:
+        model = m.User
+        fields = (
+            'id', 'username', 'name', 'mobile', 'user_type'
+        )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['name'] = ret['name'] if ret['name'] is None else instance.username
+        return ret
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User
+    """
+    user_type = TMSChoiceField(choices=c.USER_TYPE)
+    permission = UserPermissionNameSerializer(read_only=True)
+
+    class Meta:
+        model = m.User
+        fields = '__all__'

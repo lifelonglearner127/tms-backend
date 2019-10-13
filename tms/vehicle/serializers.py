@@ -9,7 +9,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import MainUserSerializer
 from ..info.serializers import StationLocationSerializer, StationNameSerializer
 
 # other
@@ -43,7 +43,7 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of vehicle
     """
-    # bound_driver = ShortUserSerializer(read_only=True)
+    # bound_driver = MainUserSerializer(read_only=True)
 
     class Meta:
         model = m.Vehicle
@@ -205,7 +205,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
     after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
         source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
     )
-    driver = ShortUserSerializer(read_only=True)
+    driver = MainUserSerializer(read_only=True)
     total_problems = serializers.SerializerMethodField()
     before_driving_images = serializers.SerializerMethodField()
     driving_images = serializers.SerializerMethodField()
@@ -407,7 +407,7 @@ class VehicleMaintenanceHistorySerializer(serializers.ModelSerializer):
 
     category = TMSChoiceField(choices=c.VEHICLE_MAINTENANCE_CATEGORY)
     vehicle = ShortVehicleSerializer(read_only=True)
-    assignee = ShortUserSerializer(read_only=True)
+    assignee = MainUserSerializer(read_only=True)
     station = StationLocationSerializer(read_only=True)
 
     class Meta:
@@ -559,8 +559,8 @@ class VehicleTireSerializer(serializers.ModelSerializer):
 class VehicleDriverEscortBindSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
+    driver = MainUserSerializer()
+    escort = MainUserSerializer()
 
     class Meta:
         model = m.VehicleDriverEscortBind

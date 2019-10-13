@@ -53,7 +53,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = m.User.objects.all()
     serializer_class = s.UserSerializer
-    short_serializer_class = s.ShortUserSerializer
+    short_serializer_class = s.MainUserSerializer
 
     # version 2
     @action(detail=False, url_path='short/by-types')
@@ -67,7 +67,7 @@ class UserViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(user_type__in=user_types)
 
         return Response(
-            s.ShortUserSerializer(queryset, many=True).data,
+            s.MainUserSerializer(queryset, many=True).data,
             status=status.HTTP_200_OK
         )
 
@@ -141,7 +141,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='company-members/short')
     def get_short_company_members(self, request):
-        serializer = s.ShortCompanyMemberSerializer(
+        serializer = s.UserNameTypeSerializer(
             m.User.companymembers.all(),
             many=True
         )
@@ -152,7 +152,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='company-member-list')
     def get_short_company_members_with_pagination(self, request):
-        serializer = s.ShortCompanyMemberSerializer(
+        serializer = s.UserNameTypeSerializer(
             self.paginate_queryset(m.User.companymembers.all()),
             many=True
         )
@@ -160,7 +160,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='staffs/short')
     def get_short_staff_users(self, request):
-        serializer = s.ShortUserSerializer(
+        serializer = s.MainUserSerializer(
             m.User.staffs.all(),
             many=True
         )
@@ -171,7 +171,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='staff-list')
     def get_short_staff_users_with_pagination(self, request):
-        serializer = s.ShortUserSerializer(
+        serializer = s.MainUserSerializer(
             self.paginate_queryset(m.User.staffs.all()),
             many=True
         )
@@ -179,7 +179,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='drivers/short')
     def get_short_driver_users(self, request):
-        serializer = s.ShortUserSerializer(
+        serializer = s.MainUserSerializer(
             m.User.drivers.all(),
             many=True
         )
@@ -190,7 +190,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='escorts/short')
     def get_short_escort_users(self, request):
-        serializer = s.ShortUserSerializer(
+        serializer = s.MainUserSerializer(
             m.User.escorts.all(),
             many=True
         )
@@ -201,7 +201,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="wheels/short")
     def get_wheels_users(self, request):
-        serializer = s.ShortUserWithDepartmentSerializer(
+        serializer = s.UserDepartmentSerializer(
             self.paginate_queryset(m.User.wheels.all()),
             many=True
         )
@@ -209,7 +209,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='customers/short')
     def get_short_customer_users(self, request):
-        serializer = s.ShortUserSerializer(
+        serializer = s.MainUserSerializer(
             m.User.customers.all(),
             many=True
         )
@@ -223,7 +223,7 @@ class UserPermissionViewSet(TMSViewSet):
 
     queryset = m.UserPermission.objects.all()
     serializer_class = s.UserPermissionSerializer
-    short_serializer_class = s.ShortUserPermissionSerializer
+    short_serializer_class = s.UserPermissionNameSerializer
 
     def create(self, request):
         data = request.data

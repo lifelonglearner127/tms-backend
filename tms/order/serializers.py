@@ -15,7 +15,7 @@ from ..finance.models import FuelBillHistory
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import ShortUserSerializer, ShortUserNameSerializer
+from ..account.serializers import MainUserSerializer, UserNameSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..finance.serializers import FuelBillHistorySerializer
 from ..info.serializers import (
@@ -88,8 +88,8 @@ class OrderCartSerializer(serializers.ModelSerializer):
 
 class ShortJobSerializer(serializers.ModelSerializer):
 
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
+    driver = MainUserSerializer()
+    escort = MainUserSerializer()
     vehicle = ShortVehicleSerializer()
     route = ShortRouteSerializer()
 
@@ -117,7 +117,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 
 class ShortOrderSerializer(serializers.ModelSerializer):
-    assignee = ShortUserNameSerializer(read_only=True)
+    assignee = UserNameSerializer(read_only=True)
     customer = ShortCustomerProfileSerializer(read_only=True)
     loading_station = StationNameSerializer(read_only=True)
     quality_station = StationNameSerializer(read_only=True)
@@ -588,7 +588,7 @@ class JobStationSerializer(serializers.ModelSerializer):
 
 class JobDriverSerializer(serializers.ModelSerializer):
 
-    driver = ShortUserSerializer(read_only=True)
+    driver = MainUserSerializer(read_only=True)
 
     class Meta:
         model = m.JobDriver
@@ -599,7 +599,7 @@ class JobDriverSerializer(serializers.ModelSerializer):
 
 class JobEscortSerializer(serializers.ModelSerializer):
 
-    escort = ShortUserSerializer(read_only=True)
+    escort = MainUserSerializer(read_only=True)
 
     class Meta:
         model = m.JobEscort
@@ -625,11 +625,11 @@ class JobAdminSerializer(serializers.ModelSerializer):
 
     def get_driver(self, instance):
         job_driver = m.JobDriver.objects.filter(job=instance).first()
-        return ShortUserSerializer(job_driver.driver).data
+        return MainUserSerializer(job_driver.driver).data
 
     def get_escort(self, instance):
         job_escort = m.JobEscort.objects.filter(job=instance).first()
-        return ShortUserSerializer(job_escort.escort).data
+        return MainUserSerializer(job_escort.escort).data
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
@@ -1061,8 +1061,8 @@ class JobMileageSerializer(serializers.ModelSerializer):
 
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
+    driver = MainUserSerializer()
+    escort = MainUserSerializer()
 
     class Meta:
         model = m.Job
@@ -1174,8 +1174,8 @@ class JobTimeDurationSerializer(serializers.ModelSerializer):
     """
     order = ShortOrderSerializer()
     vehicle = ShortVehicleSerializer()
-    driver = ShortUserSerializer()
-    escort = ShortUserSerializer()
+    driver = MainUserSerializer()
+    escort = MainUserSerializer()
     total_time = serializers.SerializerMethodField()
     durations = serializers.SerializerMethodField()
 
@@ -1296,8 +1296,8 @@ class JobByVehicleSerializer(serializers.ModelSerializer):
     """
     alias = serializers.CharField(source='order.alias')
     products = ProductNameSerializer(source='order.products', many=True)
-    driver = ShortUserSerializer(read_only=True)
-    escort = ShortUserSerializer(read_only=True)
+    driver = MainUserSerializer(read_only=True)
+    escort = MainUserSerializer(read_only=True)
 
     class Meta:
         model = m.Job

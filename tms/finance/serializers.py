@@ -10,14 +10,14 @@ from ..hr.models import Department
 from ..vehicle.models import Vehicle
 
 # serializers
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import MainUserSerializer
 from ..core.serializers import Base64ImageField, TMSChoiceField
 from ..hr.serializers import ShortDepartmentSerializer
 from ..vehicle.serializers import ShortVehicleSerializer
 from ..info.serializers import StationNameSerializer
 
 
-class ShortETCCardSerializer(serializers.ModelSerializer):
+class ETCCardNumberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.ETCCard
@@ -35,18 +35,9 @@ class ETCCardBalanceSerializer(serializers.ModelSerializer):
         )
 
 
-class FuelCardBalanceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = m.FuelCard
-        fields = (
-            'id', 'number', 'balance'
-        )
-
-
 class ETCCardSerializer(serializers.ModelSerializer):
 
-    master = ShortETCCardSerializer(read_only=True)
+    master = ETCCardNumberSerializer(read_only=True)
     vehicle = ShortVehicleSerializer(read_only=True)
     department = ShortDepartmentSerializer(read_only=True)
 
@@ -156,7 +147,7 @@ class ETCBillDocumentSerializer(serializers.ModelSerializer):
 
 class ETCBillHistorySerializer(serializers.ModelSerializer):
 
-    card = ShortETCCardSerializer()
+    card = ETCCardNumberSerializer()
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
@@ -202,7 +193,7 @@ class ETCBillHistorySerializer(serializers.ModelSerializer):
         ).data
 
 
-class ShortFuelCardSerializer(serializers.ModelSerializer):
+class FuelCardNumberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.FuelCard
@@ -211,9 +202,18 @@ class ShortFuelCardSerializer(serializers.ModelSerializer):
         )
 
 
+class FuelCardBalanceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.FuelCard
+        fields = (
+            'id', 'number', 'balance'
+        )
+
+
 class FuelCardSerializer(serializers.ModelSerializer):
 
-    master = ShortFuelCardSerializer(read_only=True)
+    master = FuelCardNumberSerializer(read_only=True)
     vehicle = ShortVehicleSerializer(read_only=True)
     department = ShortDepartmentSerializer(read_only=True)
 
@@ -347,9 +347,9 @@ class FuelBillDocumentSerializer(serializers.ModelSerializer):
 
 class FuelBillHistorySerializer(serializers.ModelSerializer):
 
-    card = ShortFuelCardSerializer()
+    card = FuelCardNumberSerializer()
     oil_station = StationNameSerializer()
-    driver = ShortUserSerializer(read_only=True)
+    driver = MainUserSerializer(read_only=True)
     paid_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
@@ -404,96 +404,6 @@ class FuelBillHistorySerializer(serializers.ModelSerializer):
         ).data
 
 
-# class BillSubCategoyChoiceField(serializers.Field):
-
-#     def to_representation(self, instance):
-
-#         if instance.category == c.BILL_FROM_LOADING_STATION:
-#             sub_categories = c.LOADING_STATION_BILL_SUB_CATEGORY
-#         elif instance.category == c.BILL_FROM_QUALITY_STATION:
-#             sub_categories = c.QUALITY_STATION_BILL_SUB_CATEGORY
-#         elif instance.category == c.BILL_FROM_UNLOADING_STATION:
-#             sub_categories = c.UNLOADING_STATION_BILL_SUB_CATEGORY
-#         elif instance.category == c.BILL_FROM_OIL_STATION:
-#             sub_categories = c.OIL_BILL_SUB_CATEGORY
-#         elif instance.category == c.BILL_FROM_TRAFFIC:
-#             sub_categories = c.TRAFFIC_BILL_SUB_CATEGORY
-#         elif instance.category == c.BILL_FROM_OTHER:
-#             sub_categories = c.OTHER_BILL_SUB_CATEGORY
-
-#         choices = dict((x, y) for x, y in sub_categories)
-#         ret = {
-#             'value': instance.sub_category,
-#             'text': choices[instance.sub_category]
-#         }
-#         return ret
-
-#     def to_internal_value(self, data):
-#         return {
-#             'sub_category': data['value']
-#         }
-
-
-# class BillDetailCategoyChoiceField(serializers.Field):
-
-#     def to_representation(self, instance):
-#         if (
-#             instance.category != c.BILL_FROM_OTHER or
-#             instance.sub_category != c.TRAFFIC_VIOLATION_BILL
-#         ):
-#             return None
-
-#         choices = dict(
-#             (x, y) for x, y in c.TRAFFIC_VIOLATION_DETAIL_CATEGORY
-#         )
-#         ret = {
-#             'value': instance.detail_category,
-#             'text': choices[instance.detail_category]
-#         }
-#         return ret
-
-#     def to_internal_value(self, data):
-#         return {
-#             'detail_category': data['value']
-#         }
-
-
-# class ShortBillDocumentSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.BillDocument
-#         fields = (
-#             'amount', 'unit_price', 'cost',
-#         )
-
-
-# class BillDocumentSerializer(serializers.ModelSerializer):
-
-#     bill = Base64ImageField()
-#     category = TMSChoiceField(choices=c.BILL_CATEGORY)
-#     sub_category = BillSubCategoyChoiceField(source='*', required=False)
-#     detail_category = BillDetailCategoyChoiceField(source='*', required=False)
-
-#     class Meta:
-#         model = m.BillDocument
-#         fields = '__all__'
-#         read_only_fields = ('user', )
-
-#     def create(self, validated_data):
-#         user = self.context.get('user')
-#         return m.BillDocument.objects.create(
-#             user=user,
-#             **validated_data
-#         )
-
-#     def update(self, instance, validated_data):
-#         for (key, value) in validated_data.items():
-#             setattr(instance, key, value)
-#         instance.user = self.context('user')
-#         instance.save()
-#         return instance
-
-
 class BillDocumentSerializer(serializers.ModelSerializer):
 
     document = Base64ImageField()
@@ -505,7 +415,7 @@ class BillDocumentSerializer(serializers.ModelSerializer):
 
 class BillSerializer(serializers.ModelSerializer):
 
-    user = ShortUserSerializer(read_only=True)
+    user = MainUserSerializer(read_only=True)
     category = TMSChoiceField(choices=c.BILL_CATEGORY)
     images = serializers.SerializerMethodField()
 

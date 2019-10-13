@@ -11,67 +11,13 @@ from . import models as m
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..info.serializers import OtherCostTypeSerializer, TicketTypeSerializer
 from ..hr.serializers import ShortDepartmentSerializer
-from ..account.serializers import ShortUserSerializer
+from ..account.serializers import MainUserSerializer
 from ..vehicle.serializers import ShortVehiclePlateNumSerializer
-
-
-# class ParkingRequestSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.ParkingRequest
-#         fields = '__all__'
-
-
-# class ParkingRequestDataViewSerializer(serializers.ModelSerializer):
-
-#     vehicle = ShortVehiclePlateNumSerializer()
-#     driver = ShortUserSerializer()
-#     escort = ShortUserSerializer()
-
-#     class Meta:
-#         model = m.ParkingRequest
-#         fields = '__all__'
-
-
-# class DriverChangeRequestSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.DriverChangeRequest
-#         fields = '__all__'
-#         read_only_fields = ('new_driver', )
-
-
-# class DriverChangeRequestDataViewSerializer(serializers.ModelSerializer):
-
-#     job = ShortJobSerializer()
-#     old_driver = ShortUserSerializer()
-#     new_driver = ShortUserSerializer()
-
-#     class Meta:
-#         model = m.DriverChangeRequest
-#         fields = '__all__'
-
-
-# class EscortChangeRequestSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = m.EscortChangeRequest
-#         fields = '__all__'
-
-
-# class EscortChangeRequestDataViewSerializer(serializers.ModelSerializer):
-
-#     job = ShortJobSerializer()
-#     new_escort = ShortUserSerializer()
-
-#     class Meta:
-#         model = m.EscortChangeRequest
-#         fields = '__all__'
 
 
 class RequestApproverSerializer(serializers.ModelSerializer):
 
-    approver = ShortUserSerializer(read_only=True)
+    approver = MainUserSerializer(read_only=True)
     approver_type = TMSChoiceField(choices=c.APPROVER_TYPE)
 
     class Meta:
@@ -83,7 +29,7 @@ class RequestApproverSerializer(serializers.ModelSerializer):
 
 class RequestCCSerializer(serializers.ModelSerializer):
 
-    cc = ShortUserSerializer(read_only=True)
+    cc = MainUserSerializer(read_only=True)
     cc_type = TMSChoiceField(choices=c.CC_TYPE)
 
     class Meta:
@@ -178,7 +124,7 @@ class InvoicePaymentRequestSerializer(serializers.ModelSerializer):
 
 class BasicRequestSerializer(serializers.ModelSerializer):
 
-    requester = ShortUserSerializer(read_only=True)
+    requester = MainUserSerializer(read_only=True)
     request_type = TMSChoiceField(choices=c.REQUEST_TYPE)
     request_time = serializers.DateTimeField(
         format='%Y-%m-%d', required=False
@@ -376,208 +322,3 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             return '审批完'
         elif instance.approved is False:
             return '审批拒绝'
-
-
-# class RestRequestSerializer(serializers.ModelSerializer):
-
-#     request = BasicRequestSerializer(read_only=True)
-#     category = TMSChoiceField(choices=c.REST_REQUEST_CATEGORY)
-#     days = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = m.RestRequest
-#         fields = '__all__'
-
-#     def create(self, validated_data):
-#         requester = self.context.pop('requester')
-#         description = self.context.pop('description', '')
-#         approvers_data = self.context.pop('approvers', [])
-#         ccs_data = self.context.pop('ccs', [])
-
-#         basic_request = m.BasicRequest.objects.create(
-#             request_type=c.REQUEST_TYPE_REST,
-#             requester=requester,
-#             description=description
-#         )
-
-#         step = 0
-#         for approver_data in approvers_data:
-#             approver_type = approver_data.get('approver_type', None)
-#             approver = approver_data.get('approver', None)
-#             approver = m.User.objects.get(id=approver.get('id', None))
-
-#             m.RequestApprover.objects.create(
-#                 request=basic_request,
-#                 approver_type=approver_type['value'],
-#                 approver=approver,
-#                 step=step
-#             )
-#             step += 1
-
-#         for cc_data in ccs_data:
-#             cc_type = cc_data.get('cc_type', None)
-#             cc = cc_data.get('cc', None)
-#             cc = m.User.objects.get(id=cc.get('id', None))
-
-#             m.RequestCC.objects.create(
-#                 request=basic_request,
-#                 cc_type=cc_type['value'],
-#                 cc=cc
-#             )
-
-#         return m.RestRequest.objects.create(request=basic_request, **validated_data)
-
-#     def update(self, instance, validated_data):
-#         requester = self.context.pop('requester')
-#         description = self.context.pop('description', '')
-#         approvers_data = self.context.pop('approvers', [])
-#         ccs_data = self.context.pop('ccs', [])
-
-#         instance.request.requester = requester
-#         instance.request.description = description
-#         instance.request.save()
-
-#         instance.request.approvers.clear()
-#         instance.request.ccs.clear()
-#         step = 0
-#         for approver_data in approvers_data:
-#             approver_type = approver_data.get('approver_type', None)
-#             approver = approver_data.get('approver', None)
-#             approver = m.User.objects.get(id=approver.get('id', None))
-
-#             m.RequestApprover.objects.create(
-#                 request=instance.request,
-#                 approver_type=approver_type['value'],
-#                 approver=approver,
-#                 step=step
-#             )
-#             step += 1
-
-#         for cc_data in ccs_data:
-#             cc_type = cc_data.get('cc_type', None)
-#             cc = cc_data.get('cc', None)
-#             cc = m.User.objects.get(id=cc.get('id', None))
-
-#             m.RequestCC.objects.create(
-#                 request=instance.request,
-#                 cc_type=cc_type['value'],
-#                 cc=cc
-#             )
-
-#         for (key, value) in validated_data.items():
-#             setattr(instance, key, value)
-
-#         instance.save()
-#         return instance
-
-#     def validate(self, data):
-#         from_date = data.get('from_date', None)
-#         to_date = data.get('to_date', None)
-
-#         if from_date > to_date:
-#             raise serializers.ValidationError({
-#                 'to_date': 'Error'
-#             })
-
-#         return data
-
-#     def get_days(self, instance):
-#         return (instance.to_date - instance.from_date).days
-
-
-# class VehicleRepairRequestSerializer(serializers.ModelSerializer):
-
-#     request = BasicRequestSerializer(read_only=True)
-#     vehicle = ShortVehiclePlateNumSerializer(read_only=True)
-#     category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
-
-#     class Meta:
-#         model = m.VehicleRepairRequest
-#         fields = '__all__'
-
-#     def create(self, validated_data):
-#         requester = self.context.pop('requester')
-#         description = self.context.pop('description', '')
-#         approvers_data = self.context.pop('approvers', [])
-#         ccs_data = self.context.pop('ccs', [])
-#         vehicle = self.context.pop('vehicle')
-
-#         basic_request = m.BasicRequest.objects.create(
-#             request_type=c.REQUEST_TYPE_VEHICLE_REPAIR,
-#             requester=requester,
-#             description=description
-#         )
-
-#         step = 0
-#         for approver_data in approvers_data:
-#             approver_type = approver_data.get('approver_type', None)
-#             approver = approver_data.get('approver', None)
-#             approver = m.User.objects.get(id=approver.get('id', None))
-
-#             m.RequestApprover.objects.create(
-#                 request=basic_request,
-#                 approver_type=approver_type['value'],
-#                 approver=approver,
-#                 step=step
-#             )
-#             step += 1
-
-#         for cc_data in ccs_data:
-#             cc_type = cc_data.get('cc_type', None)
-#             cc = cc_data.get('cc', None)
-#             cc = m.User.objects.get(id=cc.get('id', None))
-
-#             m.RequestCC.objects.create(
-#                 request=basic_request,
-#                 cc_type=cc_type['value'],
-#                 cc=cc
-#             )
-
-#         return m.VehicleRepairRequest.objects.create(
-#             request=basic_request, vehicle=vehicle, **validated_data
-#         )
-
-#     def update(self, instance, validated_data):
-#         requester = self.context.pop('requester')
-#         description = self.context.pop('description', '')
-#         approvers_data = self.context.pop('approvers', [])
-#         ccs_data = self.context.pop('ccs', [])
-#         vehicle = self.context.pop('vehicle')
-
-#         instance.request.requester = requester
-#         instance.request.description = description
-#         instance.request.save()
-
-#         instance.request.approvers.clear()
-#         instance.request.ccs.clear()
-#         step = 0
-#         for approver_data in approvers_data:
-#             approver_type = approver_data.get('approver_type', None)
-#             approver = approver_data.get('approver', None)
-#             approver = m.User.objects.get(id=approver.get('id', None))
-
-#             m.RequestApprover.objects.create(
-#                 request=instance.request,
-#                 approver_type=approver_type['value'],
-#                 approver=approver,
-#                 step=step
-#             )
-#             step += 1
-
-#         for cc_data in ccs_data:
-#             cc_type = cc_data.get('cc_type', None)
-#             cc = cc_data.get('cc', None)
-#             cc = m.User.objects.get(id=cc.get('id', None))
-
-#             m.RequestCC.objects.create(
-#                 request=instance.request,
-#                 cc_type=cc_type['value'],
-#                 cc=cc
-#             )
-
-#         instance.vehicle = vehicle
-#         for (key, value) in validated_data.items():
-#             setattr(instance, key, value)
-
-#         instance.save()
-#         return instance

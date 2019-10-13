@@ -17,7 +17,7 @@ class ETCCardViewSet(TMSViewSet):
 
     queryset = m.ETCCard.objects.all()
     serializer_class = s.ETCCardSerializer
-    short_serializer_class = s.ShortETCCardSerializer
+    short_serializer_class = s.ETCCardNumberSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -60,7 +60,7 @@ class ETCCardViewSet(TMSViewSet):
 
     @action(detail=False, url_path="master")
     def get_master_cards(self, request):
-        serializer = s.ShortETCCardSerializer(
+        serializer = s.ETCCardNumberSerializer(
             self.queryset.filter(is_child=False), many=True
         )
 
@@ -123,7 +123,7 @@ class ETCBillHistoryViewSet(TMSViewSet):
 class FuelCardViewSet(TMSViewSet):
 
     queryset = m.FuelCard.objects.all()
-    short_serializer_class = s.ShortFuelCardSerializer
+    short_serializer_class = s.FuelCardNumberSerializer
     serializer_class = s.FuelCardSerializer
 
     def get_queryset(self):
@@ -167,7 +167,7 @@ class FuelCardViewSet(TMSViewSet):
 
     @action(detail=False, url_path="master")
     def get_master_cards(self, request):
-        serializer = s.ShortFuelCardSerializer(
+        serializer = s.FuelCardNumberSerializer(
             self.queryset.filter(is_child=False), many=True
         )
 

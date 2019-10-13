@@ -8,7 +8,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import ShortUserSerializer, ShortUserWithDepartmentSerializer
+from ..account.serializers import MainUserSerializer, UserDepartmentSerializer
 from ..hr.serializers import ShortDepartmentSerializer
 
 
@@ -16,7 +16,7 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
 
     policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
-    author = ShortUserSerializer(read_only=True)
+    author = MainUserSerializer(read_only=True)
     is_read = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,7 +35,7 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
 
 class CompanyPolicySerializer(serializers.ModelSerializer):
 
-    author = ShortUserSerializer(read_only=True)
+    author = MainUserSerializer(read_only=True)
     policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
@@ -164,7 +164,7 @@ class TestSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['questions'] = ShortQuestionSerializer(instance.questions.all(), many=True).data
-        ret['appliants'] = ShortUserWithDepartmentSerializer(instance.appliants.all(), many=True).data
+        ret['appliants'] = UserDepartmentSerializer(instance.appliants.all(), many=True).data
         return ret
 
 
@@ -191,7 +191,7 @@ class TestQuestionResultSerializer(serializers.ModelSerializer):
 class TestResultSerializer(serializers.ModelSerializer):
 
     test = ShortTestSerializer()
-    appliant = ShortUserSerializer()
+    appliant = MainUserSerializer()
     questions = TestQuestionResultSerializer(
         source='testquestionresult_set', many=True
     )
@@ -225,7 +225,7 @@ class SecurityLibraryAttachmentSerializer(serializers.ModelSerializer):
 
 class SecurityLibrarySerializer(serializers.ModelSerializer):
 
-    author = ShortUserSerializer(read_only=True)
+    author = MainUserSerializer(read_only=True)
     departments = ShortDepartmentSerializer(read_only=True, many=True)
     attachments = serializers.SerializerMethodField()
 
@@ -302,5 +302,5 @@ class SecurityLearningProgramSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['audiences'] = ShortUserWithDepartmentSerializer(instance.audiences.all(), many=True).data
+        ret['audiences'] = UserDepartmentSerializer(instance.audiences.all(), many=True).data
         return ret
