@@ -25,7 +25,7 @@ from . import models as m
 from ..account.models import User
 from ..info.models import Station, Product
 from ..route.models import Route
-from ..vehicle.models import Vehicle
+from ..vehicle.models import Vehicle, VehicleDriverDailyBind
 
 # serializers
 from . import serializers as s
@@ -438,6 +438,10 @@ class OrderViewSet(TMSViewSet):
                     due_time=job_product['due_time'],
                     mission_weight=job_product['mission_weight']
                 )
+
+        if order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_PENDING:
+            order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
+            order.save()
 
         # send notification
         notify_of_job_creation.apply_async(
@@ -1321,6 +1325,15 @@ class JobViewSet(TMSViewSet):
         """
         job = self.get_object()
 
+        # check if this driver is on vehicle
+        vehicle_bind = VehicleDriverDailyBind.objects.filter(vehicle=job.vehicle, driver=request.user).first()
+        if vehicle_bind is None or vehicle_bind.get_off is not None or\
+           (vehicle_bind.get_off is None and vehicle_bind.vehicle != job.vehicle):
+            return Response(
+                {'error': 'You need to get on vehicle first'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # driver cannot perform more than 2 jobs
         if m.Job.progress_jobs.exclude(id=job.id).filter(associated_drivers=request.user).exists():
             return Response(
@@ -1414,7 +1427,7 @@ class JobViewSet(TMSViewSet):
                         'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
                         queries=queries
                     )
-                    job.empty_mileage = data['total_mileage']
+                    job.empty_mileage = data['total_mileage'] / (100 * 1000)
 
                     # update job heavy mileage
                     queries = {
@@ -1429,7 +1442,7 @@ class JobViewSet(TMSViewSet):
                                 '%Y-%m-%d %H:%M:%S'
                             )
                     }
-                    job.heavy_mileage = data['total_mileage']
+                    job.heavy_mileage = data['total_mileage'] / (100 * 1000)
                     job.total_mileage = job.empty_mileage + job.heavy_mileage
                     job.highway_mileage = 0
                     job.normalway_mileage = 0

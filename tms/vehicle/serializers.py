@@ -53,9 +53,6 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
             'status',
             'total_load',
             'branches',
-            # 'status_text',
-            # 'bound_driver',
-            # 'next_job_customer'
         )
 
 

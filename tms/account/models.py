@@ -144,29 +144,6 @@ class User(AbstractBaseUser):
             [c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF]
 
     @property
-    def status_text(self):
-        status = "Wrong Status"
-        if self.user_type == c.USER_TYPE_DRIVER or self.user_type == c.USER_TYPE_ESCORT:
-            request_set = self.my_requests.all()
-            if len(request_set) > 0:
-                for request in request_set:
-                    today_dt = date.today()
-                    if today_dt >= request.rest_request.from_date and today_dt <= request.rest_request.to_date:
-                        status = "In Rest"
-            if status != "In Rest":
-                vehicle_bind_set = self.my_vehicle_bind.all()
-                if len(vehicle_bind_set) > 0:
-                    status = "Get In"
-                    for vehicle_bind in vehicle_bind_set:
-                        jobs = vehicle_bind.vehicle.jobs.all()
-                        if len(jobs) > 0:
-                            status = "In Job Progress"
-                else:
-                    status = "Get off"
-
-        return status
-
-    @property
     def driverlicense_number(self):
         number = ""
         if self.profile:

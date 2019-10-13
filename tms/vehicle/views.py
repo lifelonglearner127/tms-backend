@@ -203,32 +203,21 @@ class VehicleViewSet(TMSViewSet):
             if vehicle.status == c.VEHICLE_STATUS_INWORK:
                 job = Job.objects.filter(vehicle=vehicle, progress__gt=1).first()
                 if job is not None:
-                    if job.progress == 2:
-                        status = '赶往装货地'
-                    elif job.progress == 3:
-                        status = '等待装货'
-                    elif job.progress == 4:
-                        status = '装货中'
-                    elif job.progress == 5:
-                        status = '装货完成'
-                    elif job.progress == 6:
-                        status = '赶往质检'
-                    elif job.progress == 7:
-                        status = '等待质检'
-                    elif job.progress == 8:
-                        status = '质检中'
-                    elif job.progress == 9:
-                        status = '质检完成'
-                    elif (job.progress - 10) % 4 == 0:
-                        status = '赶往卸货'
-                    elif (job.progress - 10) % 4 == 1:
-                        status = '等待卸货'
-                    elif (job.progress - 10) % 4 == 2:
-                        status = '卸货中'
-                    elif (job.progress - 10) % 4 == 3:
-                        status = '卸货完成'
+                    if job.progress >= 10:
+                        if (job.progress - 10) % 4 == 0:
+                            progress = 10
+                        elif (job.progress - 10) % 4 == 1:
+                            progress = 11
+                        elif (job.progress - 10) % 4 == 2:
+                            progress = 12
+                        elif (job.progress - 10) % 4 == 3:
+                            progress = 13
+                    else:
+                        progress = job.progress
+
+                    status = c.JOB_PROGRESS.get(progress)
                 else:
-                    status = 'Wrong Status'
+                    status = '无效'
 
             elif vehicle.status == c.VEHICLE_STATUS_REPAIR:
                 status = 'Repairing'

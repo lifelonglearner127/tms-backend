@@ -299,32 +299,6 @@ class Vehicle(TimeStampedModel):
         return len(self.branches)
 
     # @property
-    # def status_text(self):
-    #     if self.status == c.VEHICLE_STATUS_INWORK:
-    #         job = self.jobs.filter(progress__gt=1).first()
-    #         if job is not None:
-    #             if job.progress == 2 and job.progress == 3 and job.progress == 4 and job.progress == 5:
-    #                 status = '执行任务-装货'
-    #             elif job.progress == 6 and job.progress == 7 and job.progress == 8 and job.progress == 9:
-    #                 status = '执行任务-资格'
-    #             elif (job.progress - 10) % 4 == 0:
-    #                 status = '执行任务-卸货'
-    #             elif (job.progress - 10) % 4 == 1:
-    #                 status = '执行任务-卸货'
-    #             elif (job.progress - 10) % 4 == 2:
-    #                 status = '执行任务-卸货'
-    #             elif (job.progress - 10) % 4 == 3:
-    #                 status = '执行任务-卸货'
-    #         else:
-    #             status = '等待任务'
-    #     elif self.status == c.VEHICLE_STATUS_REPAIR:
-    #         status = 'Repairing'
-    #     else:
-    #         status = '等待任务'
-
-    #     return status
-
-    # @property
     # def bound_driver(self):
     #     bind = VehicleDriverDailyBind.objects.filter(
     #         vehicle=self
