@@ -66,3 +66,8 @@ class JobStationProductDocumentAdmin(admin.ModelAdmin):
 @admin.register(m.JobReport)
 class JobReportAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.OrderPayment)
+class OrderPaymentAdmin(admin.ModelAdmin):
+    pass

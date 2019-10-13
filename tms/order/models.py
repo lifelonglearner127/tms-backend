@@ -753,5 +753,5 @@ class OrderPayment(models.Model):
 
     status = models.PositiveIntegerField(
         choices=c.ORDER_PAYMENT_STATUS,
-        default=c.ORDER_SOURCE_INTERNAL
+        default=c.ORDER_PAYMENT_STATUS_NO_DISTANCE
     )
