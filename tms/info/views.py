@@ -88,7 +88,7 @@ class ProductViewSet(TMSViewSet):
     """
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
-    short_serializer_class = s.ShortProductSerializer
+    short_serializer_class = s.ProductNameSerializer
     permission_classes = [p.ProductViewSetPermission]
 
     # def create(self, request):
@@ -226,73 +226,9 @@ class StationViewSet(TMSViewSet):
         queryset = m.Station.objects.filter(station_type_filter)
 
         return Response(
-            s.ShortStationSerializer(queryset, many=True).data,
+            s.StationLocationSerializer(queryset, many=True).data,
             status=status.HTTP_200_OK
         )
-
-    # @action(detail=False, url_path='')
-    # def get_short_work_stations_with_lnglat(self, request):
-    #     """
-    #     api is used in routing page
-    #     """
-    #     queryset = m.Station.workstations.all()
-    #     station_type = self.request.query_params.get('station_type', '')
-    #     if station_type in [
-    #         c.STATION_TYPE_LOADING_STATION,
-    #         c.STATION_TYPE_QUALITY_STATION,
-    #         c.STATION_TYPE_UNLOADING_STATION,
-    #     ]:
-    #         queryset = queryset.filter(station_type=station_type)
-
-    #     return Response(
-    #         s.StationForRouteSerializer(queryset).data,
-    #         status=status.HTTP_200_OK
-    #     )
-
-    # @action(detail=False, url_path='short')
-    # def short(self, request):
-    #     station_type = self.request.query_params.get('type', None)
-    #     if station_type in [
-    #         c.STATION_TYPE_LOADING_STATION, c.STATION_TYPE_UNLOADING_STATION,
-    #         c.STATION_TYPE_OIL_STATION, c.STATION_TYPE_QUALITY_STATION
-    #     ]:
-    #         queryset = m.Station.objects.filter(station_type=station_type)
-    #     else:
-    #         queryset = self.get_queryset()
-
-    #     serializer = s.ShortStationSerializer(queryset, many=True)
-
-    #     return Response(
-    #         serializer.data,
-    #         status=status.HTTP_200_OK
-    #     )
-
-    #     return queryset
-
-    # @action(detail=False, url_path='short/names')
-    # def get_station_names(self, request):
-    #     station_type = self.request.query_params.get('type', None)
-    #     if station_type in [
-    #         c.STATION_TYPE_LOADING_STATION,
-    #         c.STATION_TYPE_UNLOADING_STATION,
-    #         c.STATION_TYPE_QUALITY_STATION,
-    #         c.STATION_TYPE_OIL_STATION,
-    #         c.STATION_TYPE_BLACK_DOT,
-    #         c.STATION_TYPE_PARKING_STATION,
-    #         c.STATION_TYPE_REPAIR_STATION,
-    #     ]:
-    #         queryset = m.Station.objects.filter(station_type=station_type)
-    #     else:
-    #         queryset = self.get_queryset()
-
-    #     serializer = s.StationNameSerializer(queryset, many=True)
-
-    #     return Response(
-    #         serializer.data,
-    #         status=status.HTTP_200_OK
-    #     )
-
-    #     return queryset
 
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):

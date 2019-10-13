@@ -6,7 +6,7 @@ from . import models as m
 from ..info.models import Station
 
 # serializers
-from ..info.serializers import ShortStationSerializer
+from ..info.serializers import StationLocationSerializer
 from ..vehicle.serializers import ShortVehiclePlateNumSerializer
 
 
@@ -21,8 +21,8 @@ class ShortRouteSerializer(serializers.ModelSerializer):
 
 class RouteSerializer(serializers.ModelSerializer):
 
-    start_point = ShortStationSerializer(read_only=True)
-    end_point = ShortStationSerializer(read_only=True)
+    start_point = StationLocationSerializer(read_only=True)
+    end_point = StationLocationSerializer(read_only=True)
     vehicle = ShortVehiclePlateNumSerializer(read_only=True)
     start_time = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
@@ -119,7 +119,7 @@ class RouteSerializer(serializers.ModelSerializer):
             path = Station.objects.filter(id__in=instance.map_path)
             path = dict([(point.id, point) for point in path])
 
-            ret['map_path'] = ShortStationSerializer(
+            ret['map_path'] = StationLocationSerializer(
                 [path[id] for id in instance.map_path],
                 many=True
             ).data

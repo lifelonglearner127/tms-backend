@@ -19,30 +19,6 @@ class Product(TimeStampedModel):
         default=3
     )
 
-    # code = models.CharField(
-    #     max_length=100,
-    #     unique=True
-    # )
-
-    # category = models.ForeignKey(
-    #     ProductCategory,
-    #     on_delete=models.CASCADE
-    # )
-
-    # price = models.FloatField(
-    #     default=0
-    # )
-
-    # unit_weight = models.PositiveIntegerField(
-    #     default=1
-    # )
-
-    # weight_measure_unit = models.CharField(
-    #     max_length=1,
-    #     choices=c.PRODUCT_WEIGHT_MEASURE_UNIT,
-    #     default=c.PRODUCT_WEIGHT_MEASURE_UNIT_TON
-    # )
-
     description = models.TextField(
         null=True,
         blank=True
@@ -56,7 +32,9 @@ class Product(TimeStampedModel):
 
 
 class BasicSetting(TimeStampedModel):
-
+    """
+    Basic setting modal
+    """
     tax_rate = models.FloatField(
         default=0
     )

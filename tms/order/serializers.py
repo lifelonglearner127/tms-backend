@@ -19,7 +19,7 @@ from ..account.serializers import ShortUserSerializer, ShortUserNameSerializer
 from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
 from ..finance.serializers import FuelBillHistorySerializer
 from ..info.serializers import (
-    ShortStationSerializer, ShortProductSerializer, StationContactSerializer,
+    StationLocationSerializer, ProductNameSerializer, StationContactSerializer,
     StationNameSerializer
 )
 from ..route.serializers import ShortRouteSerializer, RouteSerializer
@@ -29,7 +29,7 @@ from .tasks import notify_order_changes
 
 class OrderCartSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer(read_only=True)
+    product = ProductNameSerializer(read_only=True)
 
     class Meta:
         model = m.OrderCart
@@ -104,7 +104,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
     """
     Serializer for ordred products
     """
-    product = ShortProductSerializer(read_only=True)
+    product = ProductNameSerializer(read_only=True)
     weight_measure_unit = TMSChoiceField(
         choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
     )
@@ -175,7 +175,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                                     break
                             else:
                                 ret_station['products'].append({
-                                    'product': ShortProductSerializer(jobstationproduct.product).data,
+                                    'product': ProductNameSerializer(jobstationproduct.product).data,
                                     'weight': jobstationproduct.mission_weight,
                                     'vehicle': job.vehicle.plate_num,
                                     'driver': job.driver.name,
@@ -184,7 +184,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                         break
                 else:
                     item = {}
-                    item['station'] = ShortStationSerializer(job_station.station).data
+                    item['station'] = StationLocationSerializer(job_station.station).data
                     item['due_time'] = job_station.due_time
                     item['products'] = []
                     for jobstationproduct in job_station.jobstationproduct_set.all():
@@ -195,7 +195,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
 
                         else:
                             item['products'].append({
-                                'product': ShortProductSerializer(jobstationproduct.product).data,
+                                'product': ProductNameSerializer(jobstationproduct.product).data,
                                 'weight': jobstationproduct.mission_weight,
                                 'vehicle': job.vehicle.plate_num,
                                 'driver': job.driver.name,
@@ -210,7 +210,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                 for ret_product in ret[0]['products']:
                     if ret_product['product']['id'] == product.product.id and ret_product['weight'] < product.weight:
                         ret[0]['remaining'].append({
-                            'product': ShortProductSerializer(product.product).data,
+                            'product': ProductNameSerializer(product.product).data,
                             'weight': product.weight - ret_product['weight']
                         })
         return ret
@@ -222,8 +222,8 @@ class OrderSerializer(serializers.ModelSerializer):
     """
     assignee = ShortStaffProfileSerializer(read_only=True)
     customer = ShortCustomerProfileSerializer(read_only=True)
-    loading_station = ShortStationSerializer(read_only=True)
-    quality_station = ShortStationSerializer(read_only=True)
+    loading_station = StationLocationSerializer(read_only=True)
+    quality_station = StationLocationSerializer(read_only=True)
     order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
     status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
     arrangement_status = TMSChoiceField(
@@ -502,7 +502,7 @@ class QualityCheckSerializer(serializers.ModelSerializer):
 
 class ShortJobStationProductSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer(read_only=True)
+    product = ProductNameSerializer(read_only=True)
 
     class Meta:
         model = m.JobStationProduct
@@ -513,7 +513,7 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
 
 class JobStationProductSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer(read_only=True)
+    product = ProductNameSerializer(read_only=True)
 
     class Meta:
         model = m.JobStationProduct
@@ -648,7 +648,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                     if branch['branch']['id'] == job_station_product.branch:
                         branch['mission_weight'] += job_station_product.mission_weight
                         branch['unloading_stations'].append({
-                            'unloading_station': ShortStationSerializer(job_station.station).data,
+                            'unloading_station': StationLocationSerializer(job_station.station).data,
                             'due_time': job_station.due_time,
                             'mission_weight': job_station_product.mission_weight
                         })
@@ -658,10 +658,10 @@ class JobAdminSerializer(serializers.ModelSerializer):
                     branches.append({
                         'is_checked': True,
                         'branch': {'id': job_station_product.branch},
-                        'product': ShortProductSerializer(job_station_product.product).data,
+                        'product': ProductNameSerializer(job_station_product.product).data,
                         'mission_weight': job_station_product.mission_weight,
                         'unloading_stations': [{
-                            'unloading_station': ShortStationSerializer(job_station.station).data,
+                            'unloading_station': StationLocationSerializer(job_station.station).data,
                             'due_time': job_station_product.due_time,
                             'transport_unit_price': job_station.transport_unit_price,
                             'mission_weight': job_station_product.mission_weight
@@ -773,7 +773,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
 
                     branches.append({
                         'branch': job_station_product.branch,
-                        'product': ShortProductSerializer(job_station_product.product).data,
+                        'product': ProductNameSerializer(job_station_product.product).data,
                         'mission_weight': job_station_product.mission_weight,
                         'weight_measure_unit': order_product.get_weight_measure_unit_display(),
                         'unloading_stations': [{
@@ -813,7 +813,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
 
             ret['quality_station']['branches'].append({
                 'branch': product.branch,
-                'product': ShortProductSerializer(product.product).data,
+                'product': ProductNameSerializer(product.product).data,
                 'weight': product.weight,
                 'due_time': product.due_time,
                 'density': quality_check.density,
@@ -838,7 +838,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
                 station_payload['branches'].append({
                     'id': product.id,
                     'branch': product.branch,
-                    'product': ShortProductSerializer(product.product).data,
+                    'product': ProductNameSerializer(product.product).data,
                     'due_time': product.due_time,
                     'volume': product.volume,
                     'man_hole': product.man_hole,
@@ -927,7 +927,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
                     break
             else:
                 ret.append({
-                    'product': ShortProductSerializer(product.product).data,
+                    'product': ProductNameSerializer(product.product).data,
                     'mission_weight': product.mission_weight
                 })
 
@@ -1088,12 +1088,12 @@ class JobDocumentSerializer(serializers.ModelSerializer):
     def get_documents(self, instance):
         ret = []
         ret.append({
-            'station': ShortStationSerializer(instance.loading_station).data,
+            'station': StationLocationSerializer(instance.loading_station).data,
             'products': []
         })
         for loading_check in instance.loading_checks.all():
             ret[0]['products'].append({
-                'product': ShortProductSerializer(loading_check.product).data,
+                'product': ProductNameSerializer(loading_check.product).data,
                 'images': ShortLoadingStationDocumentSerializer(
                     loading_check.images.all(), many=True, context={'request': self.context.get('request')}
                 ).data
@@ -1101,7 +1101,7 @@ class JobDocumentSerializer(serializers.ModelSerializer):
 
         quality_station = m.JobStation.objects.get(job=instance, step=1)
         ret.append({
-            'station': ShortStationSerializer(quality_station.station).data,
+            'station': StationLocationSerializer(quality_station.station).data,
             'products': []
         })
         for quality_check in instance.quality_checks.all():
@@ -1111,7 +1111,7 @@ class JobDocumentSerializer(serializers.ModelSerializer):
             )
             ret[1]['products'].append({
                 'branch': quality_check.branch,
-                'product': ShortProductSerializer(quality_product.product).data,
+                'product': ProductNameSerializer(quality_product.product).data,
                 'images': ShortJobStationProductDocumentSerializer(
                     quality_product.images.all(), many=True, context={'request': self.context.get('request')}
                 ).data
@@ -1120,14 +1120,14 @@ class JobDocumentSerializer(serializers.ModelSerializer):
         index = 2
         for job_station in instance.jobstation_set.all()[2:]:
             ret.append({
-                'station': ShortStationSerializer(job_station.station).data,
+                'station': StationLocationSerializer(job_station.station).data,
                 'products': []
             })
 
             for job_station_product in job_station.jobstationproduct_set.all():
                 ret[index]['products'].append({
                     'branch': job_station_product.branch,
-                    'product': ShortProductSerializer(job_station_product.product).data,
+                    'product': ProductNameSerializer(job_station_product.product).data,
                     'images': ShortJobStationProductDocumentSerializer(
                         job_station_product.images.all(), many=True, context={'request': self.context.get('request')}
                     ).data
@@ -1295,7 +1295,7 @@ class JobByVehicleSerializer(serializers.ModelSerializer):
     Used for truck playback response
     """
     alias = serializers.CharField(source='order.alias')
-    products = ShortProductSerializer(source='order.products', many=True)
+    products = ProductNameSerializer(source='order.products', many=True)
     driver = ShortUserSerializer(read_only=True)
     escort = ShortUserSerializer(read_only=True)
 
@@ -1325,7 +1325,7 @@ class LoadingStationDocumentSerializer(serializers.ModelSerializer):
 
 class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
 
-    product = ShortProductSerializer(read_only=True)
+    product = ProductNameSerializer(read_only=True)
     images = serializers.SerializerMethodField()
     created = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False

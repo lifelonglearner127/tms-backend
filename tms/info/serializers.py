@@ -11,7 +11,7 @@ from ..core.serializers import TMSChoiceField
 from ..hr.serializers import ShortCustomerProfileSerializer
 
 
-class ShortProductSerializer(serializers.ModelSerializer):
+class ProductNameSerializer(serializers.ModelSerializer):
     """
     Serializer for short data of Product
     """
@@ -49,7 +49,7 @@ class StationNameSerializer(serializers.ModelSerializer):
         )
 
 
-class ShortStationSerializer(serializers.ModelSerializer):
+class StationLocationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
     """
@@ -83,25 +83,6 @@ class StationContactSerializer(serializers.ModelSerializer):
         )
 
 
-class ShortStationProductionSerializer(serializers.Serializer):
-    """
-    Serializer for short data of Unloading Station product
-    """
-    jobstation = serializers.CharField(max_length=200)
-    product = serializers.CharField(max_length=200)
-    mission_weight = serializers.CharField(max_length=200)
-    volume = serializers.CharField(max_length=200)
-
-
-class ShortStationInfoSerializer(serializers.Serializer):
-    """
-    Serializer for short data of Station Info
-    """
-    arrive_duration = serializers.CharField(max_length=200)
-    load_wait_duration = serializers.CharField(max_length=200)
-    load_duration = serializers.CharField(max_length=200)
-
-
 class StationPointSerializer(serializers.ModelSerializer):
 
     lnglat = serializers.SerializerMethodField()
@@ -120,7 +101,7 @@ class StationSerializer(serializers.ModelSerializer):
     """
     Serializer for Station
     """
-    products = ShortProductSerializer(many=True, read_only=True)
+    products = ProductNameSerializer(many=True, read_only=True)
     customers = ShortCustomerProfileSerializer(many=True, read_only=True)
     working_time_measure_unit = TMSChoiceField(
         choices=c.TIME_MEASURE_UNIT, required=False
@@ -149,11 +130,6 @@ class StationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'name': 'Already existts'
             })
-
-        # if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
-        #     raise serializers.ValidationError({
-        #         'product': 'Product data is missing'
-        #     })
 
         if station_type == c.STATION_TYPE_UNLOADING_STATION and len(customers) == 0:
             raise serializers.ValidationError({
@@ -192,11 +168,6 @@ class StationSerializer(serializers.ModelSerializer):
                 'name': 'Already existts'
             })
 
-        # if station_type == c.STATION_TYPE_LOADING_STATION and len(products) == 0:
-        #     raise serializers.ValidationError({
-        #         'product': 'Product data is missing'
-        #     })
-
         if station_type == c.STATION_TYPE_UNLOADING_STATION and len(customers) == 0:
             raise serializers.ValidationError({
                 'customer': 'Customer data is missing'
@@ -227,7 +198,7 @@ class WorkStationSerializer(serializers.ModelSerializer):
     """
     Serializer for Loading Station, Unloading Station, Quality Station
     """
-    products = ShortProductSerializer(many=True, read_only=True)
+    products = ProductNameSerializer(many=True, read_only=True)
     customers = ShortCustomerProfileSerializer(many=True, read_only=True)
 
     class Meta:
@@ -288,8 +259,8 @@ class GetoffStationSerializer(MainStationSerializer):
 
 class TransportationDistanceSerializer(serializers.ModelSerializer):
 
-    start_point = ShortStationSerializer(read_only=True)
-    end_point = ShortStationSerializer(read_only=True)
+    start_point = StationNameSerializer(read_only=True)
+    end_point = StationNameSerializer(read_only=True)
 
     class Meta:
         model = m.TransportationDistance
