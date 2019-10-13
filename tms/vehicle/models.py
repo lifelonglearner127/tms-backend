@@ -333,29 +333,6 @@ class Vehicle(TimeStampedModel):
         return self.plate_num
 
 
-class Tire(TimeStampedModel):
-
-    model = models.CharField(
-        max_length=100
-    )
-
-    tire_type = models.CharField(
-        max_length=100
-    )
-
-    tread_depth = models.FloatField(
-        default=0
-    )
-
-    mileage_limit = models.PositiveIntegerField(
-        default=0
-    )
-
-    use_cycle = models.PositiveIntegerField(
-        default=0
-    )
-
-
 class FuelConsumption(TimeStampedModel):
 
     vehicle_type = models.CharField(

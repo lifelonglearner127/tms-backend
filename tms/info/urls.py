@@ -9,11 +9,6 @@ router.register(
     v.ProductViewSet,
     base_name='products'
 )
-# router.register(
-#     r'product-categories',
-#     v.ProductCategoryViewSet,
-#     base_name='product-categories'
-# )
 router.register(
     r'stations',
     v.StationViewSet,

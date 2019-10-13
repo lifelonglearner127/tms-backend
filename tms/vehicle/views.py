@@ -603,12 +603,6 @@ class FuelConsumptionViewSet(TMSViewSet):
     serializer_class = s.FuelConsumptionSerializer
 
 
-class TireViewSet(TMSViewSet):
-
-    queryset = m.Tire.objects.all()
-    serializer_class = s.TireSerializer
-
-
 class VehicleCheckHistoryViewSet(viewsets.ModelViewSet):
 
     queryset = m.VehicleCheckHistory.objects.all()
