@@ -755,3 +755,23 @@ class OrderPayment(models.Model):
         choices=c.ORDER_PAYMENT_STATUS,
         default=c.ORDER_PAYMENT_STATUS_NO_DISTANCE
     )
+
+    @property
+    def loading_station_volume(self):
+        total_volume = 0
+        for product in self.job_station.jobstationproduct_set.all():
+            total_volume += product.volume
+
+        return total_volume
+
+    @property
+    def unloading_station_volume(self):
+        total_volume = 0
+        for product in self.job_station.jobstationproduct_set.all():
+            total_volume += product.volume
+
+        return total_volume
+
+    @property
+    def total_price(self):
+        return self.distance * self.job_station.transport_unit_price * self.unloading_station_volume - self.adjustment

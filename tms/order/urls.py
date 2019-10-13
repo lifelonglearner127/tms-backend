@@ -18,6 +18,9 @@ router.register(
     r'jobs', v.JobViewSet, base_name='job'
 )
 router.register(
+    r'order-payments', v.OrderPaymentViewSet, base_name='order-payments'
+)
+router.register(
     r'job-report', v.JobReportViewSet, base_name='job-report'
 )
 router.register(

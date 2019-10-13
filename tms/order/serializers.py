@@ -736,6 +736,8 @@ class JobDoneSerializer(serializers.ModelSerializer):
     costs = serializers.SerializerMethodField()
     mileage = JobMileageField(source='*')
     durations = JobDurationField(source='*')
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    finished_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
 
     class Meta:
         model = m.Job
@@ -1360,3 +1362,30 @@ class OrderReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.OrderReport
         fields = '__all__'
+
+
+class OrderPaymentSerializer(serializers.ModelSerializer):
+
+    invoice_ticket = serializers.BooleanField(source='job_station.job.order.invoice_ticket', read_only=True)
+    customer = serializers.CharField(source='job_station.job.order.customer.name', read_only=True)
+    loading_station = StationNameSerializer(source='job_station.job.order.loading_station', read_only=True)
+    unloading_station = StationNameSerializer(source='job_station.station', read_only=True)
+    transport_unit_price = serializers.FloatField(source='job_station.transport_unit_price', read_only=True)
+    status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS, required=False)
+
+    class Meta:
+        model = m.OrderPayment
+        fields = (
+            'id',
+            'distance',
+            'adjustment',
+            'status',
+            'customer',
+            'invoice_ticket',
+            'loading_station',
+            'unloading_station',
+            'transport_unit_price',
+            'loading_station_volume',
+            'unloading_station_volume',
+            'total_price',
+        )

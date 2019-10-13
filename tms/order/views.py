@@ -1245,7 +1245,7 @@ class JobViewSet(TMSViewSet):
             m.Job.completed_jobs.all()
         )
 
-        serializer = s.JobSerializer(
+        serializer = s.JobDoneSerializer(
             page, context={'request': request}, many=True
         )
         return self.get_paginated_response(serializer.data)
@@ -1590,3 +1590,47 @@ class JobStationProductDocumentDeleteAPIView(DestroyAPIView):
     This api is used for delete loading station check document in driver app
     """
     queryset = m.JobStationProductDocument.objects.all()
+
+
+class OrderPaymentViewSet(viewsets.ModelViewSet):
+
+    queryset = m.OrderPayment.objects.all()
+    serializer_class = s.OrderPaymentSerializer
+
+    @action(detail=True, methods=['post'], url_path='update-distance')
+    def update_order_payment_distance(self, request, pk=None):
+        instance = self.get_object()
+        instance.distance = float(request.data.get('distance', 0))
+        instance.adjustment = float(request.data.get('adjustment', 0))
+        if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
+            instance.status = c.ORDER_PAYMENT_STATUS_PENDING
+
+        instance.save()
+        return Response(
+            s.OrderPaymentSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='update-status')
+    def update_order_payment_status(self, request, pk=None):
+        instance = self.get_object()
+        instance.status = int(request.data.get('status', 0))
+        instance.save()
+        return Response(
+            s.OrderPaymentSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='me')
+    def get_my_order_payments(self, request):
+        page = self.paginate_queryset(
+            self.queryset.filter(
+                job_station__job__order__customer__user=request.user,
+                status=c.ORDER_PAYMENT_STATUS_PENDING
+            )
+        )
+        serializer = self.serializer_class(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
