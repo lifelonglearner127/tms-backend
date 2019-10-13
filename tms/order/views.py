@@ -23,7 +23,7 @@ from ..core.permissions import (
 # models
 from . import models as m
 from ..account.models import User
-from ..info.models import Station, Product
+from ..info.models import Product
 from ..route.models import Route
 from ..vehicle.models import Vehicle, VehicleDriverDailyBind
 

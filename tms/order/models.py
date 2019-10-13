@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
-from datetime import timedelta
 from math import ceil
 
 from . import managers
@@ -364,74 +363,6 @@ class Job(models.Model):
                 'load_duration': load_duration
             })
         return station_info
-
-    @property
-    def unloading_stations_product(self):
-
-        unloading_stations = self.stations.all()[2:]
-        unloading_station_products = []
-        for u_station in unloading_stations:
-            jobstation = u_station.jobstation_set.get(job=self)
-            job_station_product = jobstation.jobstationproduct_set.get()
-            unloading_station_products.append({
-                'jobstation': jobstation.station.name,
-                'product': job_station_product.product.name,
-                'mission_weight': job_station_product.mission_weight,
-                'volume': job_station_product.volume
-            })
-        return unloading_station_products
-
-    @property
-    def unloading_stations_consume_weight(self):
-
-        unloading_stations = self.stations.all()[2:]
-        total_consume_weight = 0
-        for u_station in unloading_stations:
-            jobstation = u_station.jobstation_set.get(job=self)
-            job_station_product = jobstation.jobstationproduct_set.get()
-            total_consume_weight = total_consume_weight + job_station_product.mission_weight - job_station_product.volume
-        return total_consume_weight
-
-    @property
-    def operating_efficiency(self):
-        total_mileage = self.total_mileage
-        print(total_mileage)
-
-        if self.finished_on and self.started_on:
-            diff = self.finished_on - self.started_on
-            job_duration = diff.days * 24 * 60 * 60 + diff.seconds * 1000 + diff.microseconds
-            print(job_duration)
-            if job_duration == 0:
-                result_string = "未知"
-            else:
-                result_string = "{:.2f}".format(total_mileage / job_duration)
-                print(result_string)
-        else:
-            result_string = "未知"
-
-        return result_string
-
-    @property
-    def drained_oil(self):
-
-        total_weight = self.total_weight
-        unloading_total_duration = timedelta()
-        unloading_stations = self.stations.all()[2:]
-        for u_station in unloading_stations:
-            station_unloading_time = timedelta()
-            job_station = u_station.jobstation_set.get(job=self)
-            if job_station.arrived_station_on and job_station.started_working_on:
-                station_unloading_time = station_unloading_time + job_station.started_working_on - job_station.arrived_station_on
-            if job_station.started_working_on and job_station.finished_working_on:
-                station_unloading_time = station_unloading_time + job_station.finished_working_on - job_station.started_working_on
-            unloading_total_duration = unloading_total_duration + station_unloading_time
-        print(unloading_total_duration)
-        duration = unloading_total_duration.days * 24 * 60 * 60 + unloading_total_duration.seconds * 1000 + unloading_total_duration.microseconds
-        if duration == 0:
-            result_string = "未知"
-        else:
-            result_string = "{:.2f}".format(total_weight * 60 * 1000 / duration)
-        return result_string
 
     @property
     def freight_payment_to_driver(self):

@@ -5,7 +5,6 @@ from ..core import constants as c
 from ..core.models import CreatedTimeModel
 from ..account.models import User
 from ..hr.models import Department
-from ..order.models import Order
 from ..vehicle.models import Vehicle
 from ..info.models import Station
 

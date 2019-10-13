@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from math import ceil
 import pytz
 

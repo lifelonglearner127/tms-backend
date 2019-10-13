@@ -329,7 +329,7 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             serializer = RestRequestSerializer(instance.rest_request, data=detail, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-        
+
         elif validated_data['request_type'] == c.REQUEST_TYPE_VEHICLE_REPAIR:
             serializer = VehicleRepairRequestSerializer(
                 instance.vehicle_repair_request, data=detail,

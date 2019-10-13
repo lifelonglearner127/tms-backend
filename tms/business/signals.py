@@ -1,7 +1,6 @@
 import json
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from fieldsignals import pre_save_changed
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -10,7 +9,6 @@ from ..core import constants as c
 
 # models
 from . import models as m
-from ..account.models import User
 
 # serializers
 
