@@ -250,6 +250,7 @@ class OrderViewSet(TMSViewSet):
 
         # check if branch weight exceed vehicle branch weight
         errors = {}
+        transport_unit_prices = {}
         branches_data = request.data.pop('branches', [])
         job_products = {
             'total': []
@@ -292,9 +293,11 @@ class OrderViewSet(TMSViewSet):
             for unloading_station_data in branch_data.get('unloading_stations', []):
                 unloading_station_id = unloading_station_data.get('unloading_station')
                 due_time = unloading_station_data.get('due_time')
+                transport_unit_price = float(unloading_station_data.get('transport_unit_price'))
                 unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
                 branch_weight = branch_weight - unloading_station_weight
 
+                transport_unit_prices[unloading_station_id] = transport_unit_price
                 # restructure by job station
                 if unloading_station_id not in job_products:
                     job_products[unloading_station_id] = []
@@ -421,7 +424,8 @@ class OrderViewSet(TMSViewSet):
 
         for route_index, route in enumerate(routes):
             job_station = m.JobStation.objects.create(
-                job=job, station=route.end_point, step=route_index+2
+                job=job, station=route.end_point, step=route_index+2,
+                transport_unit_price=transport_unit_prices[route.end_point.id]
             )
             for job_product in job_products[route.end_point.id]:
                 m.JobStationProduct.objects.create(
@@ -716,6 +720,7 @@ class JobViewSet(TMSViewSet):
 
         # check if branch weight exceed vehicle branch weight
         errors = {}
+        transport_unit_prices = {}
         branches_data = request.data.pop('branches', [])
         job_products = {
             'total': []
@@ -758,9 +763,11 @@ class JobViewSet(TMSViewSet):
             for unloading_station_data in branch_data.get('unloading_stations', []):
                 unloading_station_id = unloading_station_data.get('unloading_station')
                 due_time = unloading_station_data.get('due_time')
+                transport_unit_price = float(unloading_station_data.get('transport_unit_price'))
                 unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
                 branch_weight = branch_weight - unloading_station_weight
 
+                transport_unit_prices[unloading_station_id] = transport_unit_price
                 # restructure by job station
                 if unloading_station_id not in job_products:
                     job_products[unloading_station_id] = []
@@ -911,7 +918,8 @@ class JobViewSet(TMSViewSet):
 
         for route_index, route in enumerate(routes):
             job_station = m.JobStation.objects.create(
-                job=job, station=route.end_point, step=route_index+2
+                job=job, station=route.end_point, step=route_index+2,
+                transport_unit_price=transport_unit_prices[route.end_point.id]
             )
             for job_product in job_products[route.end_point.id]:
                 m.JobStationProduct.objects.create(

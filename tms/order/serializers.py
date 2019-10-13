@@ -663,6 +663,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         'unloading_stations': [{
                             'unloading_station': ShortStationSerializer(job_station.station).data,
                             'due_time': job_station_product.due_time,
+                            'transport_unit_price': job_station.transport_unit_price,
                             'mission_weight': job_station_product.mission_weight
                         }]
                     })
