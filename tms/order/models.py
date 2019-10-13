@@ -434,7 +434,7 @@ class Job(models.Model):
         return result_string
 
     @property
-    def turnover(self):
+    def freight_payment_to_driver(self):
         return self.total_weight * self.heavy_mileage * 0.4
 
     objects = models.Manager()
@@ -734,3 +734,24 @@ class JobReport(models.Model):
 
     class Meta:
         ordering = ('-month', )
+
+
+class OrderPayment(models.Model):
+
+    job_station = models.ForeignKey(
+        JobStation,
+        on_delete=models.CASCADE
+    )
+
+    distance = models.FloatField(
+        default=0
+    )
+
+    adjustment = models.FloatField(
+        default=0
+    )
+
+    status = models.PositiveIntegerField(
+        choices=c.ORDER_PAYMENT_STATUS,
+        default=c.ORDER_SOURCE_INTERNAL
+    )

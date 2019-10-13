@@ -741,7 +741,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'order', 'vehicle', 'associated_drivers', 'associated_escorts', 'branches',
             'routes', 'stations', 'costs', 'mileage', 'durations', 'started_on', 'finished_on',
-            'is_paid',
+            'is_paid', 'freight_payment_to_driver',
         )
 
     def get_routes(self, instance):
@@ -801,6 +801,9 @@ class JobDoneSerializer(serializers.ModelSerializer):
         quality_station = job_stations[1]
         for product in quality_station.jobstationproduct_set.all():
             quality_check = instance.quality_checks.filter(branch=product.branch).first()
+
+            if quality_check is None:
+                continue
 
             ret['quality_station']['branches'].append({
                 'branch': product.branch,

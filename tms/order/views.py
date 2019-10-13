@@ -1356,6 +1356,9 @@ class JobViewSet(TMSViewSet):
                 current_station.is_completed = True
                 current_station.save()
 
+                if current_station.step >= 2:
+                    m.OrderPayment.objects.create(job_station=current_station)
+
                 if not current_station.has_next_station:
                     job.progress = c.JOB_PROGRESS_COMPLETE
                     job.finished_on = timezone.now()
