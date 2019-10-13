@@ -26,6 +26,34 @@ from ..notification.serializers import NotificationSerializer
 channel_layer = get_channel_layer()
 
 
+def send_notifications(users, message, message_type):
+
+    for user in users:
+        notification = Notification.objects.create(
+            user=user,
+            message=message,
+            msg_type=message_type
+        )
+
+        if user.channel_name:
+            async_to_sync(channel_layer.send)(
+                user.channel_name,
+                {
+                    'type': 'notify',
+                    'data': json.dumps(
+                        NotificationSerializer(notification).data
+                    )
+                }
+            )
+
+        # send push notification to driver
+        if user.device_token:
+            aliyun_request.set_Title(message_type)
+            aliyun_request.set_Body(message_type)
+            aliyun_request.set_TargetValue(user.device_token)
+            aliyun_client.do_action(aliyun_request)
+
+
 @app.task
 def notify_order_changes(context):
     order = get_object_or_404(m.Order, id=context['order'])
@@ -195,27 +223,136 @@ def notify_of_job_creation(context):
 
 
 @app.task
-def notify_of_driver_changes_before_job_start(context):
+def notify_of_driver_or_escort_changes_before_job_start(context):
     """
     when the job driver changes before the job start,
-    1. old driver will be notified
-    2. new driver will be notified about
+     - if only driver changes, new driver will be notified, old driver will be notified, escort will be notified
+     - if only escort changes, new escort will be notified, old escort will be notified, drivier will be notified
     """
-    pass
+    job = get_object_or_404(m.Job, id=context['job'])
+    current_driver = get_object_or_404(User, id=context['current_driver'])
+    current_escort = get_object_or_404(User, id=context['current_escort'])
+    new_driver = get_object_or_404(User, id=context['new_driver'])
+    new_escort = get_object_or_404(User, id=context['new_escort'])
+    is_driver_updated = context['is_driver_updated']
+    is_escort_updated = context['is_escort_updated']
 
+    stations = []
+    for job_station in job.jobstation_set.all():
+        products = []
+        for jobstationproduct in job_station.jobstationproduct_set.all():
+            product = jobstationproduct.product.name + '(' +\
+                      str(jobstationproduct.mission_weight) + ')'
+            products.append(product)
 
-@app.task
-def notify_of_escort_changes_before_job_start(context):
-    """
-    """
-    pass
+        stations.append({
+            'station': job_station.station.address,
+            'products': ', '.join(products)
+        })
+
+    cancel_job_message = {
+        "vehicle": job.vehicle.plate_num,
+        "notification": str(job.id) + ' was cancelled'
+    }
+
+    new_job_message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer": {
+            "name": job.order.customer.contacts.first().contact,
+            "mobile": job.order.customer.contacts.first().mobile
+        },
+        "driver": {
+            "name": new_driver.name,
+            "mobile": new_driver.mobile
+        },
+        "escort": {
+            "name": new_escort.name,
+            "mobile": new_escort.mobile
+        },
+        "stations": stations
+    }
+
+    if is_driver_updated and is_escort_updated:
+        send_notifications([current_driver, current_escort], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
+        send_notifications([new_driver, new_escort], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
+
+    elif is_driver_updated and not is_escort_updated:
+        send_notifications([current_driver], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
+        send_notifications([new_driver], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
+        change_message = {
+            "driver": {
+                "name": new_driver.name,
+                "mobile": new_driver.mobile
+            }
+        }
+        send_notifications([current_escort], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
+    elif not is_driver_updated and is_escort_updated:
+        send_notifications([current_escort], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
+        send_notifications([new_escort], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
+        change_message = {
+            "escort": {
+                "name": new_escort.name,
+                "mobile": new_escort.mobile
+            }
+        }
+        send_notifications([current_driver], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
 
 
 @app.task
 def notify_of_job_products_changes(context):
     """
     """
-    pass
+    job = get_object_or_404(m.Job, id=context['job'])
+    driver = get_object_or_404(User, id=context['driver'])
+    escort = get_object_or_404(User, id=context['escort'])
+
+    # send in-app notfication to driver
+    stations = []
+    for job_station in job.jobstation_set.all():
+        products = []
+        for jobstationproduct in job_station.jobstationproduct_set.all():
+            product = jobstationproduct.product.name + '(' +\
+                      str(jobstationproduct.mission_weight) + ')'
+            products.append(product)
+
+        stations.append({
+            'station': job_station.station.address,
+            'products': ', '.join(products)
+        })
+
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer": {
+            "name": job.order.customer.contacts.first().contact,
+            "mobile": job.order.customer.contacts.first().mobile
+        },
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        },
+        "stations": stations
+    }
+
+    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
+
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        }
+    }
+    message['stations'] = stations
+
+    send_notifications([job.order.customer.user], message, c.CUSTOMER_NOTIFICATION_UPDATE_ARRANGEMENT)
 
 
 @app.task
@@ -236,53 +373,7 @@ def notify_of_job_deleted(context):
         "notification": str(job_id) + ' was cancelled'
     }
 
-    driver_notification = Notification.objects.create(
-        user=driver,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
-    )
-
-    escort_notification = Notification.objects.create(
-        user=escort,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_DELETE_JOB
-    )
-
-    if driver.channel_name:
-        async_to_sync(channel_layer.send)(
-            driver.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(driver_notification).data
-                )
-            }
-        )
-
-    if escort.channel_name:
-        async_to_sync(channel_layer.send)(
-            escort.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(escort_notification).data
-                )
-            }
-        )
-
-    # send push notification to driver
-    if driver.device_token:
-        aliyun_request.set_Title('Cancel Job')
-        aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(driver.device_token)
-        aliyun_client.do_action(aliyun_request)
-
-    # send push notification to escort
-    if escort.device_token:
-        aliyun_request.set_Title('Cancel Job')
-        aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(escort.device_token)
-        aliyun_client.do_action(aliyun_request)
+    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_DELETE_JOB)
 
 
 @app.task
@@ -402,8 +493,6 @@ def bind_vehicle_user(context):
     job.escort.profile.status = c.WORK_STATUS_DRIVING
     job.driver.profile.save()
     job.escort.profile.save()
-
-
 
 
 @app.task

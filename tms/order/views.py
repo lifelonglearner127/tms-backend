@@ -36,7 +36,10 @@ from ..core.views import TMSViewSet
 
 # other
 from ..g7.interfaces import G7Interface
-from .tasks import notify_of_job_creation
+from .tasks import (
+    notify_of_job_creation, notify_of_job_products_changes,
+    notify_of_driver_or_escort_changes_before_job_start
+)
 
 
 class OrderCartViewSet(TMSViewSet):
@@ -653,7 +656,7 @@ class JobViewSet(TMSViewSet):
         if job.progress == c.JOB_PROGRESS_COMPLETE:
             msg = "Cannot update completed job"
 
-        if job.progress > c.JOB_PROGRESS_TO_LOADING_STATION:
+        if job.progress > c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
             msg = "Cannot update this job because it load the product"
 
         if msg:
@@ -683,8 +686,12 @@ class JobViewSet(TMSViewSet):
             )
 
         # validate driver
+        # driver change and escort change should be in seperate context after the job is started
+        current_driver = job.associated_drivers.first()
+        current_escort = job.associated_escorts.first()
+
         try:
-            driver = User.objects.get(
+            new_driver = User.objects.get(
                 id=request.data.pop('driver', None)
             )
         except User.DoesNotExist:
@@ -692,7 +699,7 @@ class JobViewSet(TMSViewSet):
                 'driver': 'Such driver does not exist'
             })
 
-        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.associated_drivers.first() != driver:
+        if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_driver != new_driver:
             return Response(
                 {
                     'msg': 'you canot change the driver'
@@ -702,7 +709,7 @@ class JobViewSet(TMSViewSet):
 
         # validate escort
         try:
-            escort = User.objects.get(
+            new_escort = User.objects.get(
                 id=request.data.pop('escort', None)
             )
         except User.DoesNotExist:
@@ -710,7 +717,7 @@ class JobViewSet(TMSViewSet):
                 'escort': 'Such escort does not exist'
             })
 
-        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.driver.associated_escorts.first() != escort:
+        if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_escort != new_escort:
             return Response(
                 {
                     'msg': 'you canot change the escort'
@@ -930,11 +937,26 @@ class JobViewSet(TMSViewSet):
                     mission_weight=job_product['mission_weight']
                 )
 
-        if job.associated_drivers.first() != driver:
-            m.JobDriver.objects.create(job=job, driver=driver)
-
-        if job.associated_escorts.first() != escort:
-            m.JobEscort.objects.create(job=job, escort=escort)
+        if current_driver == new_driver and current_escort == new_escort:
+            notify_of_job_products_changes.apply_async(
+                args=[{
+                    'job': job.id,
+                    'driver': current_driver.id,
+                    'escort': current_escort.id
+                }]
+            )
+        else:
+            notify_of_driver_or_escort_changes_before_job_start.apply_async(
+                args=[{
+                    'job': job.id,
+                    'current_driver': current_driver.id,
+                    'new_driver': new_driver.id,
+                    'current_escort': current_escort.id,
+                    'new_escort': new_escort.id,
+                    'is_driver_updated': current_driver != new_driver,
+                    'is_escort_updated':  current_escort != new_escort
+                }]
+            )
 
         return Response(
             s.JobAdminSerializer(job).data,

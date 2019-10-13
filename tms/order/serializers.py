@@ -681,6 +681,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                     'mission_weight': 0
                 }]
             })
+        branches.sort(key=lambda branch: branch['branch']['id'])
         return branches
 
     def get_progress(self, instance):
@@ -788,10 +789,12 @@ class JobDoneSerializer(serializers.ModelSerializer):
         ret = {
             'loading_station': {
                 'time': JobStationTimeSerializer(job_stations[0]).data,
+                'station': StationNameSerializer(job_stations[0].station).data,
                 'loading_checks': []
             },
             'quality_station': {
                 'time': JobStationTimeSerializer(job_stations[1]).data,
+                'station': StationNameSerializer(job_stations[1].station).data,
                 'branches': []
             },
             'unloading_stations': []
