@@ -1225,54 +1225,6 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=False, url_path='mileage')
-    def get_mileage(self, request):
-        page = self.paginate_queryset(
-            m.Job.objects.all()
-        )
-
-        serializer = s.JobMileageSerializer(page, many=True)
-
-        return self.get_paginated_response(serializer.data)
-
-    @action(detail=False, url_path='job-documents')
-    def get_all_documents(self, request):
-        page = self.paginate_queryset(
-            m.Job.completed_jobs.all()
-        )
-        serializer = s.JobDocumentSerializer(
-            page,
-            many=True,
-            context={'request': request}
-        )
-        return self.get_paginated_response(serializer.data)
-
-    @action(detail=True, url_path='documents')
-    def get_documents(self, request, pk=None):
-        job = self.get_object()
-        serializer = s.JobDocumentSerializer(
-            job,
-            context={'request': request}
-        )
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=False, url_path='time')
-    def get_time(self, request):
-        page = self.paginate_queryset(
-            m.Job.completed_jobs.all(),
-        )
-
-        serializer = s.JobTimeDurationSerializer(page, many=True)
-
-        return self.get_paginated_response(serializer.data)
-
-    @action(detail=False, url_path='driving')
-    def get_driving(self, request):
-        pass
-
     @action(detail=False, url_path='done-jobs')
     def done_jobs(self, request):
         """
