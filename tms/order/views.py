@@ -197,6 +197,7 @@ class OrderViewSet(TMSViewSet):
             driver: {},
             escort: {},
             routes: {},
+            restPlace: {}
             loop: {}
             branches: [
                 {
@@ -249,6 +250,16 @@ class OrderViewSet(TMSViewSet):
         except User.DoesNotExist:
             raise s.serializers.ValidationError({
                 'escort': 'Such escort does not exist'
+            })
+
+        # validate rest place
+        try:
+            rest_place = m.Station.parkingstations.get(
+                id=request.data.pop('rest_place', None)
+            )
+        except m.Station.DoesNotExist:
+            raise s.serializers.ValidationError({
+                'station': 'Such station does not exist'
             })
 
         # check if branch weight exceed vehicle branch weight
@@ -395,7 +406,7 @@ class OrderViewSet(TMSViewSet):
             )
 
         # create job & associated driver and escort instance
-        job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids)
+        job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids, rest_place=rest_place)
         m.JobDriver.objects.create(job=job, driver=driver)
         m.JobEscort.objects.create(job=job, escort=escort)
 

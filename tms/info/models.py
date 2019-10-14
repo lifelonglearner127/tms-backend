@@ -84,9 +84,9 @@ class Station(BasicContactModel):
     """
     Station model, used as base class
     """
-    station_type = models.CharField(
-        max_length=1,
+    station_type = models.PositiveIntegerField(
         choices=c.STATION_TYPE,
+        default=c.STATION_TYPE_LOADING_STATION
     )
 
     longitude = models.FloatField(

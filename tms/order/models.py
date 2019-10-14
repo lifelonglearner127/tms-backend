@@ -255,6 +255,13 @@ class Job(models.Model):
         models.PositiveIntegerField()
     )
 
+    rest_place = models.ForeignKey(
+        Station,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='jobs_as_rest_place'
+    )
+
     progress = models.PositiveIntegerField(
         default=c.JOB_PROGRESS_NOT_STARTED
     )

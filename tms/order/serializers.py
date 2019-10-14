@@ -614,13 +614,14 @@ class JobAdminSerializer(serializers.ModelSerializer):
     driver = serializers.SerializerMethodField()
     escort = serializers.SerializerMethodField()
     routes = serializers.SerializerMethodField()
+    rest_place = StationNameSerializer()
     branches = serializers.SerializerMethodField()
     progress = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'routes', 'branches', 'progress'
+            'id', 'vehicle', 'driver', 'escort', 'rest_place', 'routes', 'branches', 'progress'
         )
 
     def get_driver(self, instance):
