@@ -11,6 +11,7 @@ from ..hr.models import Department
 
 
 class CompanyPolicy(TimeStampedModel):
+
     title = models.CharField(
         max_length=100
     )
@@ -37,6 +38,10 @@ class CompanyPolicy(TimeStampedModel):
 
     content = models.TextField()
 
+    @property
+    def read_user_count(self):
+        return self.reads.count()
+
     objects = models.Manager()
     published_content = managers.PublishedContentManager()
     unpublished_content = managers.UnPublishedContentManager()
@@ -46,7 +51,8 @@ class CompanyPolicyRead(models.Model):
 
     policy = models.ForeignKey(
         CompanyPolicy,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='reads'
     )
 
     user = models.ForeignKey(
@@ -55,7 +61,11 @@ class CompanyPolicyRead(models.Model):
     )
 
     is_read = models.BooleanField(
-        default=False
+        default=True
+    )
+
+    recent_read_time = models.DateTimeField(
+        auto_now=True
     )
 
     class Meta:

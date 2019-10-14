@@ -8,7 +8,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import MainUserSerializer, UserDepartmentSerializer
+from ..account.serializers import UserNameSerializer, MainUserSerializer, UserDepartmentSerializer
 from ..hr.serializers import ShortDepartmentSerializer
 
 
@@ -31,6 +31,27 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
             user=self.context.get('user', None)
         ).first()
         return policy_read is not None and policy_read.is_read
+
+
+class CompanyPolicyStatusSerializer(serializers.ModelSerializer):
+
+    total_user_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.CompanyPolicy
+        fields = (
+            'id',
+            'title',
+            'author',
+            'published_on',
+            'is_published',
+            'policy_type',
+            'read_user_count',
+            'total_user_count',
+        )
+
+    def get_total_user_count(self, instance):
+        return m.User.drivers.count()
 
 
 class CompanyPolicySerializer(serializers.ModelSerializer):
@@ -91,9 +112,14 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
 
 class CompanyPolicyReadSerializer(serializers.ModelSerializer):
 
+    user = UserNameSerializer(read_only=True)
+    recent_read_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+
     class Meta:
-        model = m.CompanyPolicy
-        fields = '__all__'
+        model = m.CompanyPolicyRead
+        exclude = (
+            'policy',
+        )
 
 
 class ShortQuestionSerializer(serializers.ModelSerializer):

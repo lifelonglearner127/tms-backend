@@ -83,8 +83,23 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=True, url_path="status")
+    def get_policy_status(self, request, pk=None):
+        policy = self.get_object()
+        return Response(
+            s.CompanyPolicyStatusSerializer(policy).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path="users")
+    def get_users(self, request, pk=None):
+        policy = self.get_object()
+        page = self.paginate_queryset(policy.reads.filter(is_read=True))
+        serializer = s.CompanyPolicyReadSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=False, url_path="policy-options")
-    def get_policy(self, request):
+    def get_policy_options(self, request):
         ret = []
         for (value, text) in c.COMPANY_POLICY_TYPE:
             ret.append({
@@ -107,8 +122,10 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
             user=request.user
         )
 
-        policy_read.is_read = True
-        policy_read.save()
+        if not created:
+            policy_read.is_read = True
+            policy_read.save()
+
         return Response(
             {
                 'is_read': True
