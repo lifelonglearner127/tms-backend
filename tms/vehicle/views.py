@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from dateutil import relativedelta
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -917,3 +918,37 @@ class VehicleViolationViewSet(TMSViewSet):
 
     queryset = m.VehicleViolation.objects.all()
     serializer_class = s.VehicleViolationSerializer
+
+
+class VehicleViolationUploadView(APIView):
+
+    parser_classes = [MultiPartParser, ]
+
+    def post(self, request):
+        for _, data_file in request.data.items():
+            if not data_file.name.endswith('.csv'):
+                return Response({
+                    'msg': 'File is not csv type'
+                })
+            data = data_file.read().decode('utf-8')
+            lines = data.split('\n')
+
+            for line in lines:
+                fields = line.split(',')
+                if len(fields) != 8:
+                    continue
+
+                data_dict = {}
+                data_dict['violates_on'] = fields[0]
+                data_dict['vehicle'] = fields[1]
+                data_dict['driver'] = fields[2]
+                data_dict['address'] = fields[3]
+                data_dict['fine'] = fields[4]
+                data_dict['deduction_score'] = fields[5]
+                data_dict['description'] = fields[6]
+                data_dict['status'] = fields[7]
+                m.VehicleViolation.objects.create(**data_dict)
+
+        return Response({
+            'msg': 'Successfully uploaded'
+        }, status=status.HTTP_200_OK)

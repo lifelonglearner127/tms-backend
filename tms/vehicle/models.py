@@ -749,15 +749,23 @@ class VehicleDriverEscortBind(models.Model):
 
 class VehicleViolation(models.Model):
 
-    vehicle = models.ForeignKey(
-        Vehicle,
-        on_delete=models.CASCADE
+    # vehicle = models.ForeignKey(
+    #     Vehicle,
+    #     on_delete=models.CASCADE
+    # )
+
+    # driver = models.ForeignKey(
+    #     User,
+    #     on_delete=models.SET_NULL,
+    #     null=True
+    # )
+
+    vehicle = models.CharField(
+        max_length=100
     )
 
-    driver = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True
+    driver = models.CharField(
+        max_length=100
     )
 
     address = models.CharField(
@@ -772,17 +780,28 @@ class VehicleViolation(models.Model):
         default=0
     )
 
-    status = models.PositiveIntegerField(
-        default=c.VEHICLE_VIOLATION_STATUS_PENDING,
-        choices=c.VEHICLE_VIOLATION_STATUS
+    status = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
     )
+    # status = models.PositiveIntegerField(
+    #     default=c.VEHICLE_VIOLATION_STATUS_PENDING,
+    #     choices=c.VEHICLE_VIOLATION_STATUS
+    # )
 
     description = models.TextField(
         null=True,
         blank=True
     )
 
-    violates_on = models.DateTimeField(
+    violates_on = models.CharField(
+        max_length=100,
         null=True,
         blank=True
     )
+
+    # violates_on = models.DateTimeField(
+    #     null=True,
+    #     blank=True
+    # )

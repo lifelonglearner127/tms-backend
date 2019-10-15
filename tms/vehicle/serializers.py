@@ -684,8 +684,8 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
 
 class VehicleViolationSerializer(serializers.ModelSerializer):
 
-    vehicle = ShortVehiclePlateNumSerializer(read_only=True)
-    driver = UserNameSerializer(read_only=True)
+    # vehicle = ShortVehiclePlateNumSerializer(read_only=True)
+    # driver = UserNameSerializer(read_only=True)
 
     class Meta:
         model = m.VehicleViolation

@@ -1,4 +1,5 @@
 from django.conf.urls import url, include
+from django.urls import path
 
 from rest_framework_nested import routers
 
@@ -57,4 +58,5 @@ router.register(
 )
 urlpatterns = [
     url(r'^', include(router.urls)),
+    path('vehicle-violations/upload-csv/', v.VehicleViolationUploadView.as_view()),
 ]
