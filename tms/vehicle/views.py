@@ -911,3 +911,9 @@ class VehicleDriverEscortBindViewSet(TMSViewSet):
 
     def get_queryset(self):
         return m.VehicleDriverEscortBind.objects.all()
+
+
+class VehicleViolationViewSet(TMSViewSet):
+
+    queryset = m.VehicleViolation.objects.all()
+    serializer_class = s.VehicleViolationSerializer
