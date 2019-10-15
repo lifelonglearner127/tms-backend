@@ -308,25 +308,18 @@ class VehicleViewSet(TMSViewSet):
         vehicle = get_object_or_404(m.Vehicle, plate_num=plate_num)
 
         # Get the current driver and escorts of this vehicle
-        try:
-            bind = m.VehicleDriverEscortBind.objects.get(vehicle=vehicle)
-            driver = bind.driver.name
-            escort = bind.escort.name
-            driver_mobile = bind.driver.mobile
-            escort_mobile = bind.escort.mobile
-            try:
-                vehicle_bind = m.VehicleDriverDailyBind.objects.get(vehicle=vehicle)
-                time_diff = relativedelta(datetime.now(), vehicle_bind.get_on)
-                driving_duration = "{}天 {}小时 {}分钟".format(time_diff.days, time_diff.hours, time_diff.minutes)
-            except Exception:
-                driving_duration = '未知'
 
-        except m.VehicleDriverEscortBind.DoesNotExist:
+        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle).first()
+        if bind is not None and bind.get_off is None:
+            driver = bind.driver.name
+            driver_mobile = bind.driver.mobile
+            escort = '未知'
+            escort_mobile = '未知'
+        else:
             driver = '未知'
             escort = '未知'
             driver_mobile = '未知'
             escort_mobile = '未知'
-            driving_duration = '未知'
 
         queries = {
             'plate_num': plate_num,
@@ -342,14 +335,13 @@ class VehicleViewSet(TMSViewSet):
             'plate_num': plate_num,
             'driver': driver,
             'escort': escort,
-            'gpsno': data.get('gpsno', ''),
-            'location': data['loc']['address'],
-            'speed': data['loc']['speed'],
             'driver_mobile': driver_mobile,
             'escort_mobile': escort_mobile,
-            'driving_duration': driving_duration
+            'gpsno': data.get('gpsno', ''),
+            'last_gps_time': data.get('time', ''),
+            'location': data['loc']['address'],
+            'speed': data['loc']['speed']
         }
-        print(ret)
         return Response(
             ret,
             status=status.HTTP_200_OK
