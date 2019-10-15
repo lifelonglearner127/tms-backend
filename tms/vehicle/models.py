@@ -442,6 +442,9 @@ class VehicleCheckItem(TimeStampedModel):
     before_driving_check_items = managers.BeforeDrivingCheckItemsManager()
     driving_check_items = managers.DrivingCheckItemsManager()
     after_driving_check_items = managers.AfterDrivingCheckItemsManager()
+    published_before_driving_check_items = managers.PublishedBeforeDrivingCheckItemsManager()
+    published_driving_check_items = managers.PublishedDrivingCheckItemsManager()
+    published_after_driving_check_items = managers.PublishedAfterDrivingCheckItemsManager()
 
 
 class VehicleCheckHistory(TimeStampedModel):

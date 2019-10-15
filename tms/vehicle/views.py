@@ -420,6 +420,14 @@ class VehicleViewSet(TMSViewSet):
     def vehicle_check(self, request, pk=None):
         vehicle = self.get_object()
         bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        if bind is None or bind.get_off is not None:
+            return Response(
+                {
+                    'msg': 'You need to get on this vehicle'
+                },
+                status=status.HTTP_200_OK
+            )
+
         vehicle_check, created = m.VehicleCheckHistory.objects.get_or_create(
             vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
         )
@@ -498,10 +506,48 @@ class VehicleViewSet(TMSViewSet):
             vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
         ).first()
 
-        if vehicle_check is None or vehicle_check.before_driving_checked_time is None or\
-           vehicle_check.driving_checked_time is None or vehicle_check.after_driving_checked_time is None:
+        if vehicle_check is None:
             return Response(
-                {'msg': '你没有完成车辆三检查'}, status=status.HTTP_400_BAD_REQUEST
+                {
+                    'msg': '你没有完成车辆三检查'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # check if driver complete before driving check
+        before_driving_check_item_count = m.VehicleCheckItem.published_before_driving_check_items.count()
+        checked_item_count = vehicle_check.vehiclebeforedrivingitemcheck_set.filter(is_checked=True).count()
+        if vehicle_check.before_driving_checked_time is None or\
+           checked_item_count != before_driving_check_item_count:
+            return Response(
+                {
+                    'msg': "you didn't complete before driving check "
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # check if driver complete driving check
+        driving_check_item_count = m.VehicleCheckItem.published_driving_check_items.count()
+        checked_item_count = vehicle_check.vehicledrivingitemcheck_set.filter(is_checked=True).count()
+        if vehicle_check.driving_checked_time is None or\
+           checked_item_count != driving_check_item_count:
+            return Response(
+                {
+                    'msg': "you didn't complete driving check "
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # check if driver complete after driving check
+        after_driving_check_item_count = m.VehicleCheckItem.published_after_driving_check_items.count()
+        checked_item_count = vehicle_check.vehicleafterdrivingitemcheck_set.filter(is_checked=True).count()
+        if vehicle_check.after_driving_checked_time is None or\
+           checked_item_count != after_driving_check_item_count:
+            return Response(
+                {
+                    'msg': "you didn't complete after driving check "
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         station_id = station_data.get('id', None)

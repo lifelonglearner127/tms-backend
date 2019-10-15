@@ -39,7 +39,7 @@ class BeforeDrivingCheckItemsManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.VEHICLE_STATUS_REPAIR
+            is_before_driving_item=True
         )
 
 
@@ -49,7 +49,7 @@ class DrivingCheckItemsManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.VEHICLE_STATUS_REPAIR
+            is_driving_item=True
         )
 
 
@@ -59,5 +59,38 @@ class AfterDrivingCheckItemsManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.VEHICLE_STATUS_REPAIR
+            is_after_driving_item=True
+        )
+
+
+class PublishedBeforeDrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_before_driving_item=True,
+            is_published=True
+        )
+
+
+class PublishedDrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_driving_item=True,
+            is_published=True
+        )
+
+
+class PublishedAfterDrivingCheckItemsManager(models.Manager):
+    """
+    Manager for getting in repairing vehicles
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_after_driving_item=True,
+            is_published=True
         )
