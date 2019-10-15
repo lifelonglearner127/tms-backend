@@ -367,6 +367,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['before'] = {
             'items': ret.pop('before_driving_checked_items'),
+            'itemsCount': m.VehicleCheckItem.published_before_driving_check_items.count(),
             'problems': ret.pop('before_driving_problems'),
             'description': ret.pop('before_driving_description'),
             'images': ret.pop('before_driving_images')
@@ -374,6 +375,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['driving'] = {
             'items': ret.pop('driving_checked_items'),
+            'itemsCount': m.VehicleCheckItem.published_driving_check_items.count(),
             'problems': ret.pop('driving_problems'),
             'description': ret.pop('driving_description'),
             'images': ret.pop('driving_images')
@@ -381,6 +383,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['after'] = {
             'items': ret.pop('after_driving_checked_items'),
+            'itemsCount': m.VehicleCheckItem.published_after_driving_check_items.count(),
             'problems': ret.pop('after_driving_problems'),
             'description': ret.pop('after_driving_description'),
             'images': ret.pop('after_driving_images')
