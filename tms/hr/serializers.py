@@ -433,11 +433,12 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 class CustomerAppProfileSerializer(serializers.ModelSerializer):
 
     user = UserUsernameSerializer(read_only=True)
+    contacts = CustomerContactSerializer(many=True, read_only=True)
 
     class Meta:
         model = m.CustomerProfile
         fields = (
-            'id', 'user', 'name', 'contact', 'mobile'
+            'id', 'user', 'name', 'contacts',
         )
 
 
