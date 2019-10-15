@@ -9,7 +9,7 @@ from . import models as m
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import MainUserSerializer
+from ..account.serializers import MainUserSerializer, UserNameSerializer
 from ..info.serializers import StationLocationSerializer, StationNameSerializer
 
 # other
@@ -21,7 +21,6 @@ class FuelConsumptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.FuelConsumption
         fields = '__all__'
-
 
 
 class ShortVehiclePlateNumSerializer(serializers.ModelSerializer):
@@ -681,3 +680,13 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
             progress = current_job.progress
 
         return c.JOB_PROGRESS.get(progress, '无效')
+
+
+class VehicleViolationSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehiclePlateNumSerializer(read_only=True)
+    driver = UserNameSerializer(read_only=True)
+
+    class Meta:
+        model = m.VehicleViolation
+        fields = '__all__'

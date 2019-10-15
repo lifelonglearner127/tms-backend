@@ -745,3 +745,44 @@ class VehicleDriverEscortBind(models.Model):
         on_delete=models.CASCADE,
         related_name="vehicles_as_escort"
     )
+
+
+class VehicleViolation(models.Model):
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    address = models.CharField(
+        max_length=500
+    )
+
+    fine = models.FloatField(
+        default=0
+    )
+
+    deduction_score = models.PositiveIntegerField(
+        default=0
+    )
+
+    status = models.PositiveIntegerField(
+        default=c.VEHICLE_VIOLATION_STATUS_PENDING,
+        choices=c.VEHICLE_VIOLATION_STATUS
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    violates_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )

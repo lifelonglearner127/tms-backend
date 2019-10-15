@@ -26,6 +26,11 @@ router.register(
     base_name='vehicle-check-history'
 )
 router.register(
+    r'vehicle-violations',
+    v.VehicleViolationViewSet,
+    base_name='vehicle-violations'
+)
+router.register(
     r'vehicle-maintenance-history',
     v.VehicleMaintenanceHistoryViewSet,
     base_name='vehicle-maintenance-history'
