@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -326,5 +326,21 @@ class CustomerProfileViewSet(TMSViewSet):
         customer_profile.save()
         return Response(
             s.CustomerAppProfileSerializer(customer_profile).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class CompanySectionViewSet(viewsets.ModelViewSet):
+
+    queryset = m.CompanySection.objects.all()
+    serializer_class = s.CompanySectionSerializer
+
+    @action(detail=False, url_path='tree')
+    def get_company_tree(self, request):
+        return Response(
+            s.CompanySectionTreeSerializer(
+                m.CompanySection.objects.filter(parent=None),
+                many=True
+            ).data,
             status=status.HTTP_200_OK
         )

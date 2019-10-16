@@ -454,3 +454,43 @@ class DriverEscortStatusSerializer(serializers.Serializer):
     vehicle = serializers.CharField()
     duration = serializers.IntegerField()
     # current_progress = serializers.CharField()
+
+
+class CompanySectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.CompanySection
+        fields = '__all__'
+
+
+class RecursiveSerializer(serializers.Serializer):
+    def to_representation(self, value):
+        serializer = self.parent.parent.__class__(value, context=self.context)
+        return serializer.data
+
+
+class CompanySectionTreeSerializer(serializers.ModelSerializer):
+
+    children = RecursiveSerializer(many=True, read_only=True)
+    data = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.CompanySection
+        fields = (
+            'id',
+            'text',
+            'data',
+            'state',
+            'children'
+        )
+
+    def get_data(self, instance):
+        ret = {}
+        ret['description'] = instance.description
+        return ret
+
+    def get_state(self, instance):
+        ret = {}
+        ret['expanded'] = True
+        return ret

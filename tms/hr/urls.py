@@ -30,6 +30,11 @@ router.register(
     v.CustomerProfileViewSet,
     base_name='customer-profile'
 )
+router.register(
+    r'company-section',
+    v.CompanySectionViewSet,
+    base_name='company-section'
+)
 
 
 urlpatterns = [

@@ -25,3 +25,8 @@ class StaffProfileAdmin(admin.ModelAdmin):
 @admin.register(m.CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.CompanySection)
+class CompanySectionAdmin(admin.ModelAdmin):
+    pass

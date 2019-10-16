@@ -9,6 +9,26 @@ from ..core.models import TimeStampedModel
 from ..account.models import User
 
 
+class CompanySection(models.Model):
+
+    text = models.CharField(
+        max_length=100
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
+
+
 class Department(TimeStampedModel):
 
     name = models.CharField(
