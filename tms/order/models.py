@@ -143,9 +143,6 @@ class Order(TimeStampedModel):
 
         return weight
 
-    def __str__(self):
-        return self.alias
-
     class Meta:
         ordering = ['-updated']
 
