@@ -218,7 +218,7 @@ def notify_of_job_creation(context):
     if job.order.customer.user.device_token:
         aliyun_request.set_Title('New Job')
         aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(job.escort.device_token)
+        aliyun_request.set_TargetValue(job.order.customer.user.device_token)
         aliyun_client.do_action(aliyun_request)
 
 

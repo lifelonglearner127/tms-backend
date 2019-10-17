@@ -185,7 +185,6 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                 else:
                     item = {}
                     item['station'] = StationLocationSerializer(job_station.station).data
-                    item['due_time'] = job_station.due_time
                     item['products'] = []
                     for jobstationproduct in job_station.jobstationproduct_set.all():
                         for product in item['products']:
@@ -196,6 +195,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                         else:
                             item['products'].append({
                                 'product': ProductNameSerializer(jobstationproduct.product).data,
+                                'due_time': jobstationproduct.due_time,
                                 'weight': jobstationproduct.mission_weight,
                                 'vehicle': job.vehicle.plate_num,
                                 'driver': job.driver.name,
