@@ -91,6 +91,14 @@ class ProductViewSet(TMSViewSet):
     short_serializer_class = s.ProductNameSerializer
     permission_classes = [p.ProductViewSetPermission]
 
+    def get_queryset(self):
+        queryset = self.queryset
+        product_name = self.request.query_params.get('name', None)
+        if product_name is not None:
+            queryset = queryset.filter(name__contains=product_name)
+
+        return queryset
+
     # def create(self, request):
     #     context = {
     #         'category': request.data.pop('category')
@@ -232,9 +240,12 @@ class StationViewSet(TMSViewSet):
 
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):
-        page = self.paginate_queryset(
-            m.Station.loadingstations.all(),
-        )
+        queryset = m.Station.loadingstations.all()
+        station_name = request.query_params.get('name', None)
+        if station_name is not None:
+            queryset = queryset.filter(name__contains=station_name)
+
+        page = self.paginate_queryset(queryset)
 
         serializer = s.WorkStationSerializer(page, many=True)
 
@@ -250,9 +261,12 @@ class StationViewSet(TMSViewSet):
 
     @action(detail=False, url_path='unloading-stations')
     def unloading_stations(self, request):
-        page = self.paginate_queryset(
-            m.Station.unloadingstations.all(),
-        )
+        queryset = m.Station.unloadingstations.all()
+        station_name = request.query_params.get('name', None)
+        if station_name is not None:
+            queryset = queryset.filter(name__contains=station_name)
+
+        page = self.paginate_queryset(queryset)
 
         serializer = s.WorkStationSerializer(page, many=True)
 
@@ -268,9 +282,12 @@ class StationViewSet(TMSViewSet):
 
     @action(detail=False, url_path='quality-stations')
     def quality_stations(self, request):
-        page = self.paginate_queryset(
-            m.Station.qualitystations.all(),
-        )
+        queryset = m.Station.qualitystations.all()
+        station_name = request.query_params.get('name', None)
+        if station_name is not None:
+            queryset = queryset.filter(name__contains=station_name)
+
+        page = self.paginate_queryset(queryset)
 
         serializer = s.WorkStationSerializer(page, many=True)
 
@@ -286,9 +303,12 @@ class StationViewSet(TMSViewSet):
 
     @action(detail=False, url_path='oil-stations')
     def oil_stations(self, request):
-        page = self.paginate_queryset(
-            m.Station.oilstations.all(),
-        )
+        queryset = m.Station.oilstations.all()
+        station_name = request.query_params.get('name', None)
+        if station_name is not None:
+            queryset = queryset.filter(name__contains=station_name)
+
+        page = self.paginate_queryset(queryset)
 
         serializer = s.OilStationSerializer(page, many=True)
 
