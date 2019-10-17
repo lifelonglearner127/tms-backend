@@ -1209,7 +1209,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
             'unloading_station',
             'transport_unit_price',
             'loading_products',
-            'unloading_products'
+            'unloading_products',
             'total_price',
         )
 
