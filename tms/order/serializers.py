@@ -514,6 +514,8 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
 
 class JobStationLoadingProductSerializer(serializers.ModelSerializer):
 
+    product = ProductNameSerializer()
+
     class Meta:
         model = m.JobStationProduct
         fields = (
@@ -522,6 +524,8 @@ class JobStationLoadingProductSerializer(serializers.ModelSerializer):
 
 
 class JobStationUnloadingProductSerializer(serializers.ModelSerializer):
+
+    product = ProductNameSerializer()
 
     class Meta:
         model = m.JobStationProduct
