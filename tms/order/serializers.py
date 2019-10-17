@@ -1167,6 +1167,7 @@ class OrderReportSerializer(serializers.ModelSerializer):
 
 class OrderPaymentSerializer(serializers.ModelSerializer):
 
+    vehicle = ShortVehiclePlateNumSerializer(source='job_station.job.vehicle')
     invoice_ticket = serializers.BooleanField(source='job_station.job.order.invoice_ticket', read_only=True)
     customer = serializers.CharField(source='job_station.job.order.customer.name', read_only=True)
     loading_station = StationNameSerializer(source='job_station.job.order.loading_station', read_only=True)
@@ -1178,6 +1179,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
         model = m.OrderPayment
         fields = (
             'id',
+            'vehicle',
             'distance',
             'adjustment',
             'status',
