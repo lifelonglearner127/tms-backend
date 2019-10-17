@@ -1214,7 +1214,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
         )
 
     def get_loading_products(self, instance):
-        return JobStationLoadingProductSerializer(instance.jobstationproduct_set.all()).data
+        return JobStationLoadingProductSerializer(instance.jobstationproduct_set.all(), many=True).data
 
     def get_unloading_products(self, instance):
-        return JobStationUnloadingProductSerializer(instance.jobstationproduct_set.all()).data
+        return JobStationUnloadingProductSerializer(instance.jobstationproduct_set.all(), many=True).data
