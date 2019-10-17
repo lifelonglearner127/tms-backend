@@ -977,6 +977,12 @@ class JobViewSet(TMSViewSet):
                 }]
             )
         else:
+            if current_driver != new_driver:
+                m.JobDriver.objects.create(job=job, driver=new_driver)
+
+            if current_escort != new_escort:
+                m.JobEscort.objects.create(job=job, escort=new_escort)
+
             notify_of_driver_or_escort_changes_before_job_start.apply_async(
                 args=[{
                     'job': job.id,

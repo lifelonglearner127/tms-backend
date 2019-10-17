@@ -97,8 +97,9 @@ class CustomerJobPositionConsumer(AsyncJsonWebsocketConsumer):
         data = event['data']
         for vehicle in data:
             if vehicle['plateNum'] not in self.vehicles:
-                data.remote(vehicle)
+                data.remove(vehicle)
 
-        await self.send_json({
-            'content': json.dumps(data)
-        })
+        if len(data) > 0:
+            await self.send_json({
+                'content': json.dumps(data)
+            })

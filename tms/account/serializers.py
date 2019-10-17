@@ -270,7 +270,7 @@ class MainUserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['name'] = ret['name'] if ret['name'] is None else instance.username
+        ret['name'] = ret['name'] if ret['name'] is not None else instance.username
         return ret
 
 
