@@ -148,8 +148,8 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
     arrangement_status = TMSChoiceField(
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
     )
-    loading_station = StationNameSerializer(read_only=True)
-    quality_station = StationNameSerializer(read_only=True)
+    loading_station = StationContactSerializer(read_only=True)
+    quality_station = StationContactSerializer(read_only=True)
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
