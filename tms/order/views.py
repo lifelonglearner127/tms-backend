@@ -253,14 +253,16 @@ class OrderViewSet(TMSViewSet):
             })
 
         # validate rest place
-        try:
-            rest_place = m.Station.parkingstations.get(
-                id=request.data.pop('rest_place', None)
-            )
-        except m.Station.DoesNotExist:
-            raise s.serializers.ValidationError({
-                'station': 'Such station does not exist'
-            })
+        rest_place = request.data.pop('rest_place', None)
+        if rest_place is not None:
+            try:
+                rest_place = m.Station.parkingstations.get(
+                    id=request.data.pop('rest_place', None)
+                )
+            except m.Station.DoesNotExist:
+                raise s.serializers.ValidationError({
+                    'station': 'Such station does not exist'
+                })
 
         # check if branch weight exceed vehicle branch weight
         errors = {}

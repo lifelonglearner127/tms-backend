@@ -165,8 +165,13 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
     def get_jobs(self, instance):
         ret = []
         for job in instance.jobs.all():
+            job_item = {}
+            job_item['vehicle'] = job.vehicle.plate_num
+            job_item['drivers'] = [job.associated_drivers.first().name]
+            job_item['escorts'] = [job.associated_escorts.first().name]
+            job_item['details'] = []
             for job_station in job.jobstation_set.all():
-                for ret_station in ret:
+                for ret_station in job_item['details']:
                     if ret_station['station']['id'] == job_station.station.id:
                         for jobstationproduct in job_station.jobstationproduct_set.all():
                             for product in ret_station['products']:
@@ -176,10 +181,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                             else:
                                 ret_station['products'].append({
                                     'product': ProductNameSerializer(jobstationproduct.product).data,
-                                    'weight': jobstationproduct.mission_weight,
-                                    'vehicle': job.vehicle.plate_num,
-                                    'driver': job.driver.name,
-                                    'escort': job.driver.name
+                                    'weight': jobstationproduct.mission_weight
                                 })
                         break
                 else:
@@ -196,23 +198,22 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                             item['products'].append({
                                 'product': ProductNameSerializer(jobstationproduct.product).data,
                                 'due_time': jobstationproduct.due_time,
-                                'weight': jobstationproduct.mission_weight,
-                                'vehicle': job.vehicle.plate_num,
-                                'driver': job.driver.name,
-                                'escort': job.driver.name
+                                'weight': jobstationproduct.mission_weight
                             })
 
-                    ret.append(item)
+                    job_item['details'].append(item)
 
-        if len(ret) > 0:
-            ret[0]['remaining'] = []
-            for product in instance.orderproduct_set.all():
-                for ret_product in ret[0]['products']:
-                    if ret_product['product']['id'] == product.product.id and ret_product['weight'] < product.weight:
-                        ret[0]['remaining'].append({
-                            'product': ProductNameSerializer(product.product).data,
-                            'weight': product.weight - ret_product['weight']
-                        })
+        # if len(ret) > 0:
+        #     ret[0]['remaining'] = []
+        #     for product in instance.orderproduct_set.all():
+        #         for ret_product in ret[0]['products']:
+        #             if ret_product['product']['id'] == product.product.id and ret_product['weight'] < product.weight:
+        #                 ret[0]['remaining'].append({
+        #                     'product': ProductNameSerializer(product.product).data,
+        #                     'weight': product.weight - ret_product['weight']
+        #                 })
+
+            ret.append(job_item)
         return ret
 
 
