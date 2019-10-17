@@ -586,6 +586,20 @@ class OrderViewSet(TMSViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=True, url_path='payments')
+    def get_order_payments(self, request, pk=None):
+        order = self.get_object()
+        page = self.paginate_queryset(
+            m.OrderPayment.objects.filter(
+                job_station__job__order=order
+            )
+        )
+        serializer = s.OrderPaymentSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
     @action(detail=True, url_path='position')
     def get_all_vehicle_positions(self, request, pk=None):
         """
