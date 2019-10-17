@@ -2,6 +2,7 @@ from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from . import models as m
 from . import serializers as s
 from .permissions import IsMyNotification
 
@@ -49,3 +50,9 @@ class NotificationViewSet(mixins.RetrieveModelMixin,
             },
             status=status.HTTP_200_OK
         )
+
+
+class EventViewSets(viewsets.ModelViewSet):
+
+    queryset = m.Event.objects.all()
+    serializer_class = s.EventSerializer

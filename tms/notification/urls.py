@@ -9,6 +9,12 @@ router.register(
     views.NotificationViewSet,
     base_name='notifications'
 )
+router.register(
+    r'events',
+    views.EventViewSets,
+    base_name='events'
+)
+
 
 urlpatterns = [
     url(r'^', include(router.urls)),

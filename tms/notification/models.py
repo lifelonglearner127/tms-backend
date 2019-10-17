@@ -4,6 +4,7 @@ from django.db import models
 from jsonfield import JSONField
 from ..core import constants as c
 from ..account.models import User
+from ..vehicle.models import Vehicle
 from . import managers
 
 
@@ -42,4 +43,50 @@ class Notification(models.Model):
     def __str__(self):
         return 'Meessage to {}'.format(
             self.user.username
+        )
+
+
+class Event(models.Model):
+
+    event_type = models.PositiveIntegerField(
+        default=c.EVENT_TYPE_DRIVER_LICENSE_EXPIRED,
+        choices=c.EVENT_TYPE
+    )
+
+    expires_on = models.DateField()
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    is_head = models.BooleanField(
+        default=False
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    is_processed = models.BooleanField(
+        default=False
+    )
+
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    objects = models.Manager()
+    processed_events = managers.ProcessedEventManager()
+    pending_events = managers.PendingEventManager()
+
+    class Meta:
+        ordering = (
+            '-created_on',
+            'is_processed'
         )
