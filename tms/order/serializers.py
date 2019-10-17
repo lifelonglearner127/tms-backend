@@ -186,7 +186,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
                         break
                 else:
                     item = {}
-                    item['station'] = StationLocationSerializer(job_station.station).data
+                    item['station'] = StationContactSerializer(job_station.station).data
                     item['products'] = []
                     for jobstationproduct in job_station.jobstationproduct_set.all():
                         for product in item['products']:
