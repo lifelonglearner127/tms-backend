@@ -62,8 +62,8 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
-        page = self.paginate_queryset(self.queryset)
-        serializer = s.ShortVehicleSerializer(page, many=True)
+        page = self.paginate_queryset(m.Vehicle.availables.all())
+        serializer = s.ShortVehicleStatusSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='branches')
@@ -201,7 +201,7 @@ class VehicleViewSet(TMSViewSet):
                 driver = bind.driver.name
             else:
                 driver = 'No driver'
-            if vehicle.status == c.VEHICLE_STATUS_INWORK:
+            if vehicle.status == c.VEHICLE_STATUS_UNDER_WHEEL:
                 job = Job.objects.filter(vehicle=vehicle, progress__gt=1).first()
                 if job is not None:
                     if job.progress >= 10:
@@ -223,7 +223,7 @@ class VehicleViewSet(TMSViewSet):
             elif vehicle.status == c.VEHICLE_STATUS_REPAIR:
                 status = 'Repairing'
             else:
-                status = 'No job'
+                status = '无效'
 
             ret.append({
                 'plate_num': vehicle.plate_num,
@@ -467,14 +467,45 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=True, methods=['get'], url_path='daily-bind')
     def vehicle_driver_daily_bind(self, request, pk=None):
-        data = request.data
-        data['vehicle'] = pk
-        data['driver'] = request.user.id
-        serializer = s.VehicleDriverDailyBindSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        vehicle = self.get_object()
+        driver = request.user
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # check if vehicle is available
+        if vehicle.status != c.VEHICLE_STATUS_AVAILABLE:
+            return Response(
+                {
+                    'msg': 'Cannot get on this vehicle because this vehicle is unavailable'
+                }
+            )
+
+        # check if somebody is get on this vehicle
+        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle).first()
+        if bind is not None and bind.get_off is None:
+            return Response({
+                'msg': 'Somebody already get on this vehicle'
+            })
+
+        # check if driver is available
+        if driver.profile.status != c.WORK_STATUS_AVAILABLE:
+            return Response({
+                'msg': 'Cannot get on this vehicle because you are not available'
+            })
+
+        bind = m.VehicleDriverDailyBind.objects.create(
+            vehicle=vehicle,
+            driver=request.user
+        )
+
+        vehicle.status = c.VEHICLE_STATUS_UNDER_WHEEL
+        vehicle.save()
+
+        driver.profile.status = c.WORK_STATUS_DRIVING
+        driver.profile.save()
+
+        return Response(
+            s.VehicleDriverDailyBindSerializer(bind).data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=['post'], url_path='daily-unbind')
     def vehicle_driver_daily_unbind(self, request, pk=None):
@@ -482,6 +513,7 @@ class VehicleViewSet(TMSViewSet):
         this api is called in driver app when driver get off the vehicle
         """
         vehicle = self.get_object()
+        driver = request.user
         station_data = request.data.pop('station', None)
         if station_data is None:
             return Response(
@@ -491,7 +523,7 @@ class VehicleViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=driver).first()
         if bind is None:
             return Response({
                 'msg': "You didn't get on this vehicle before"
@@ -504,7 +536,7 @@ class VehicleViewSet(TMSViewSet):
 
         # check if the vehicle check is all done
         vehicle_check = m.VehicleCheckHistory.objects.filter(
-            vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
+            vehicle=vehicle, driver=driver, before_driving_checked_time__gt=bind.get_on
         ).first()
 
         if vehicle_check is None:
@@ -563,6 +595,10 @@ class VehicleViewSet(TMSViewSet):
         bind.get_off_station = station
         bind.get_off = timezone.now()
         bind.save()
+        vehicle.status = c.VEHICLE_STATUS_AVAILABLE
+        vehicle.save()
+        driver.profile.status = c.WORK_STATUS_AVAILABLE
+        driver.profile.save()
 
         return Response(s.VehicleDriverDailyBindSerializer(bind).data, status=status.HTTP_200_OK)
 

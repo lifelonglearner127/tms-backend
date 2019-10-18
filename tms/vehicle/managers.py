@@ -13,13 +13,13 @@ class AvailableVehicleManager(models.Manager):
         )
 
 
-class InWorkVehicleManager(models.Manager):
+class UnderWheelVehicleManager(models.Manager):
     """
     Manager for getting in work vehicles
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.VEHICLE_STATUS_INWORK
+            status=c.VEHICLE_STATUS_UNDER_WHEEL
         )
 
 

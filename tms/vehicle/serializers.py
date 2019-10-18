@@ -49,6 +49,19 @@ class ShortVehicleSerializer(serializers.ModelSerializer):
         )
 
 
+class ShortVehicleStatusSerializer(serializers.ModelSerializer):
+
+    status = TMSChoiceField(choices=c.VEHICLE_STATUS)
+
+    class Meta:
+        model = m.Vehicle
+        fields = (
+            'id',
+            'plate_num',
+            'status'
+        )
+
+
 class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer

@@ -204,8 +204,7 @@ class StaffProfile(TimeStampedModel):
         null=True
     )
 
-    status = models.CharField(
-        max_length=1,
+    status = models.PositiveIntegerField(
         choices=c.WORK_STATUS,
         default=c.WORK_STATUS_AVAILABLE
     )

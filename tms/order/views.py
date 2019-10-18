@@ -1345,18 +1345,6 @@ class JobViewSet(TMSViewSet):
             job_driver.save()
 
             last_progress_finished_on = None
-
-            # set the vehicle status to in-work
-            job.vehicle.status = c.VEHICLE_STATUS_INWORK
-            job.vehicle.save()
-
-            # set the driver & escrot to in-work
-            driver = job.associated_drivers.first()
-            escort = job.associated_escorts.first()
-            driver.profile.status = c.WORK_STATUS_DRIVING
-            escort.profile.status = c.WORK_STATUS_DRIVING
-            driver.profile.save()
-            escort.profile.save()
         else:
             current_station = job.jobstation_set.filter(
                 is_completed=False

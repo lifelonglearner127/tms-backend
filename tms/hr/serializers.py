@@ -243,8 +243,8 @@ class StaffProfileSerializer(serializers.ModelSerializer):
             instance.user.set_password(password)
 
         permission = None
+        permission_data = user_data.pop('permission')
         if user_data['user_type'] == c.USER_TYPE_STAFF:
-            permission_data = user_data.pop('permission')
             permission = get_object_or_404(
                 UserPermission, id=permission_data.get('id', None)
             )

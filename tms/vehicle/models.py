@@ -288,8 +288,7 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    status = models.CharField(
-        max_length=1,
+    status = models.PositiveIntegerField(
         choices=c.VEHICLE_STATUS,
         default=c.VEHICLE_STATUS_AVAILABLE
     )
@@ -322,7 +321,7 @@ class Vehicle(TimeStampedModel):
         return customer_name
 
     objects = models.Manager()
-    inworks = managers.InWorkVehicleManager()
+    inworks = managers.UnderWheelVehicleManager()
     availables = managers.AvailableVehicleManager()
     repairs = managers.RepairVehicleManager()
 

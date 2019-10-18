@@ -425,16 +425,6 @@ def calculate_job_report(context):
     #     except m.VehicleUserBind.DoesNotExist:
     #         pass
 
-    # set the vehicle status to available
-    vehicle.status = c.VEHICLE_STATUS_AVAILABLE
-    vehicle.save()
-
-    # set the driver & escrot to in-work
-    driver.profile.status = c.WORK_STATUS_AVAILABLE
-    escort.profile.status = c.WORK_STATUS_AVAILABLE
-    driver.profile.save()
-    escort.profile.save()
-
     # update job report
     job_year = job.finished_on.year
     job_month = job.finished_on.month
@@ -465,34 +455,6 @@ def calculate_job_report(context):
             highway_mileage=job.highway_mileage,
             normalway_mileage=job.normalway_mileage
         )
-
-
-@app.task
-def bind_vehicle_user(context):
-    job = get_object_or_404(m.Job, id=context['job'])
-
-    # # bind vehicle, driver, escort
-    # if not m.VehicleUserBind.binds_by_admin.filter(
-    #     vehicle=job.vehicle,
-    #     driver=job.driver,
-    #     escort=job.escort
-    # ).exists():
-    #     m.VehicleUserBind.objects.get_or_create(
-    #         vehicle=job.vehicle,
-    #         driver=job.driver,
-    #         escort=job.escort,
-    #         bind_method=c.VEHICLE_USER_BIND_METHOD_BY_JOB
-    #     )
-
-    # set the vehicle status to in-work
-    job.vehicle.status = c.VEHICLE_STATUS_INWORK
-    job.vehicle.save()
-
-    # set the driver & escrot to in-work
-    job.driver.profile.status = c.WORK_STATUS_DRIVING
-    job.escort.profile.status = c.WORK_STATUS_DRIVING
-    job.driver.profile.save()
-    job.escort.profile.save()
 
 
 @app.task
