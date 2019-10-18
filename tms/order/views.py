@@ -1623,7 +1623,7 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
         instance.distance = float(request.data.get('distance', 0))
         instance.adjustment = float(request.data.get('adjustment', 0))
         if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
-            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_CUSTOMER_CONFIRM
+            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG
 
         instance.save()
         return Response(
@@ -1631,7 +1631,7 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['post'], url_path='confirm-duizhang')
+    @action(detail=True, methods=['get'], url_path='confirm-duizhang')
     def confirm_duizhang(self, request, pk=None):
         """
         this api will be called from customer app
@@ -1655,7 +1655,7 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['post'], url_path='confirm-payment')
+    @action(detail=True, methods=['get'], url_path='confirm-payment')
     def confirm_order_payment(self, request, pk=None):
         """
         this api will be called from customer app
@@ -1669,8 +1669,17 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
             )
 
         instance.status = c.ORDER_PAYMENT_STATUS_COMPLETE
+        instance.save()
         return Response(
             s.OrderPaymentSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='current-status')
+    def get_current_status(self, request, pk=None):
+        instance = self.get_object()
+        return Response(
+            s.OrderPaymentStatusSerializer(instance).data,
             status=status.HTTP_200_OK
         )
 

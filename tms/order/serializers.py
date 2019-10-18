@@ -1195,7 +1195,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
     loading_station = StationNameSerializer(source='job_station.job.order.loading_station', read_only=True)
     unloading_station = StationNameSerializer(source='job_station.station', read_only=True)
     transport_unit_price = serializers.FloatField(source='job_station.transport_unit_price', read_only=True)
-    status = serializers.SerializerMethodField()
+    status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS)
     loading_products = serializers.SerializerMethodField()
     unloading_products = serializers.SerializerMethodField()
 
@@ -1227,10 +1227,34 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
             instance.job_station.jobstationproduct_set.all(), many=True
         ).data
 
-    def get_status(self, instance):
-        ret = instance.get_status_display()
-        if instance.job_station.job.order.invoice_ticket and\
-           instance.status == c.ORDER_PAYMENT_STATUS_WAITING_PAYMENT_CONFRIM:
-            ret = '开票后，' + ret
 
+class OrderPaymentStatusSerializer(serializers.ModelSerializer):
+
+    status_option = serializers.SerializerMethodField()
+    status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS)
+
+    class Meta:
+        model = m.OrderPayment
+        fields = (
+            'id',
+            'status',
+            'status_option',
+        )
+
+    def get_status_option(self, instance):
+        ret = [
+            {
+                'value': c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG,
+                'text': '待对账'
+            },
+            {
+                'value': c.ORDER_PAYMENT_STATUS_COMPLETE,
+                'text': '结算'
+            }
+        ]
+        if instance.job_station.job.order.invoice_ticket:
+            ret.insert(1, {
+                'value': c.ORDER_PAYMENT_STATUS_WAITING_PAYMENT_CONFRIM,
+                'text': '开票后, 待结算'
+            })
         return ret
