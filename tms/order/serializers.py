@@ -139,6 +139,7 @@ class ShortOrderSerializer(serializers.ModelSerializer):
             'created',
             'updated',
             'description',
+            'tax_rate',
         )
 
 
