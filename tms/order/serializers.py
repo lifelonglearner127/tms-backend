@@ -1195,7 +1195,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
     loading_station = StationNameSerializer(source='job_station.job.order.loading_station', read_only=True)
     unloading_station = StationNameSerializer(source='job_station.station', read_only=True)
     transport_unit_price = serializers.FloatField(source='job_station.transport_unit_price', read_only=True)
-    status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS, required=False)
+    status = serializers.SerializerMethodField()
     loading_products = serializers.SerializerMethodField()
     unloading_products = serializers.SerializerMethodField()
 
@@ -1226,3 +1226,11 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
         return JobStationUnloadingProductSerializer(
             instance.job_station.jobstationproduct_set.all(), many=True
         ).data
+
+    def get_status(self, instance):
+        ret = instance.get_status_display()
+        if instance.job_station.job.order.invoice_ticket and\
+           instance.status == c.ORDER_PAYMENT_STATUS_WAITING_PAYMENT_CONFRIM:
+            ret = '开票后，' + ret
+
+        return ret

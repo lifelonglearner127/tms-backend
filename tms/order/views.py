@@ -1623,9 +1623,52 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
         instance.distance = float(request.data.get('distance', 0))
         instance.adjustment = float(request.data.get('adjustment', 0))
         if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
-            instance.status = c.ORDER_PAYMENT_STATUS_PENDING
+            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_CUSTOMER_CONFIRM
 
         instance.save()
+        return Response(
+            s.OrderPaymentSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='confirm-duizhang')
+    def confirm_duizhang(self, request, pk=None):
+        """
+        this api will be called from customer app
+        """
+        instance = self.get_object()
+        if instance.status != c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG:
+            return Response(
+                {
+                    'msg': 'You cannot duizhang because due to its current status'
+                }
+            )
+
+        if instance.job_station.job.order.invoice_ticket:
+            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_TICKET
+        else:
+            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_PAYMENT_CONFRIM
+
+        instance.save()
+        return Response(
+            s.OrderPaymentSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='confirm-payment')
+    def confirm_order_payment(self, request, pk=None):
+        """
+        this api will be called from customer app
+        """
+        instance = self.get_object()
+        if instance.status != c.ORDER_PAYMENT_STATUS_WAITING_PAYMENT_CONFRIM:
+            return Response(
+                {
+                    'msg': 'You cannot duizhang because due to its current status'
+                }
+            )
+
+        instance.status = c.ORDER_PAYMENT_STATUS_COMPLETE
         return Response(
             s.OrderPaymentSerializer(instance).data,
             status=status.HTTP_200_OK
@@ -1640,17 +1683,3 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
             s.OrderPaymentSerializer(instance).data,
             status=status.HTTP_200_OK
         )
-
-    @action(detail=False, url_path='me')
-    def get_my_order_payments(self, request):
-        page = self.paginate_queryset(
-            self.queryset.filter(
-                job_station__job__order__customer__user=request.user,
-                status=c.ORDER_PAYMENT_STATUS_PENDING
-            )
-        )
-        serializer = self.serializer_class(
-            page,
-            many=True
-        )
-        return self.get_paginated_response(serializer.data)
