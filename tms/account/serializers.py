@@ -220,6 +220,13 @@ class UserNameSerializer(serializers.ModelSerializer):
             'id', 'name',
         )
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret['name'] is None:
+            ret['name'] = instance.username
+
+        return ret
+
 
 class UserNameTypeSerializer(serializers.ModelSerializer):
 

@@ -200,7 +200,7 @@ class VehicleViewSet(TMSViewSet):
             if bind is not None and bind.get_off is None:
                 driver = bind.driver.name
             else:
-                driver = 'No driver'
+                driver = '无司机'
             if vehicle.status == c.VEHICLE_STATUS_UNDER_WHEEL:
                 job = Job.objects.filter(vehicle=vehicle, progress__gt=1).first()
                 if job is not None:
@@ -221,7 +221,7 @@ class VehicleViewSet(TMSViewSet):
                     status = '无效'
 
             elif vehicle.status == c.VEHICLE_STATUS_REPAIR:
-                status = 'Repairing'
+                status = '修车'
             else:
                 status = '无效'
 

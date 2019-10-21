@@ -35,7 +35,9 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
 
 class CompanyPolicyStatusSerializer(serializers.ModelSerializer):
 
+    author = UserNameSerializer()
     total_user_count = serializers.SerializerMethodField()
+    published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
 
     class Meta:
         model = m.CompanyPolicy

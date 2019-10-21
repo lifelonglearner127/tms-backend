@@ -143,6 +143,9 @@ class BasicRequestViewSet(TMSViewSet):
     def get_queryset(self):
         queryset = self.queryset
         request_type = self.request.query_params.get('type', None)
+        if request_type is not None:
+            request_type = int(request_type)
+
         if request_type == c.REQUEST_TYPE_REST:
             queryset = queryset.filter(request_type=c.REQUEST_TYPE_REST)
 
@@ -155,6 +158,13 @@ class BasicRequestViewSet(TMSViewSet):
         elif request_type == c.REQUEST_TYPE_INVOICE_PAYMENT:
             queryset = queryset.filter(request_type=c.REQUEST_TYPE_INVOICE_PAYMENT)
         return queryset
+
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        return Response(
+            s.BasicRequestSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
 
     def create(self, request):
         requester = request.data.pop('requester', None)

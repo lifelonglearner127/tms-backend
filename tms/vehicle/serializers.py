@@ -584,31 +584,31 @@ class VehicleDriverEscortBindSerializer(serializers.ModelSerializer):
 
             if m.VehicleDriverEscortBind.objects.filter(vehicle=vehicle).exists():
                 raise serializers.ValidationError({
-                    'vehicle': '这车辆匹配已存在'
+                    'vehicle': '车辆已存在'
                 })
 
             if m.VehicleDriverEscortBind.objects.filter(driver=driver).exists():
                 raise serializers.ValidationError({
-                    'driver': '这司机匹配已存在'
+                    'driver': '司机已存在'
                 })
             if m.VehicleDriverEscortBind.objects.filter(escort=escort).exists():
                 raise serializers.ValidationError({
-                    'escort': '这押运员匹配已存在'
+                    'escort': '押运员已存在'
                 })
 
         else:
             if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(vehicle=vehicle).exists():
                 raise serializers.ValidationError({
-                    'vehicle': '这车辆匹配已存在'
+                    'vehicle': '车辆已存在'
                 })
 
             if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(driver=driver).exists():
                 raise serializers.ValidationError({
-                    'driver': '这司机匹配已存在'
+                    'driver': '司机已存在'
                 })
             if m.VehicleDriverEscortBind.objects.exclude(id=self.instance.id).filter(escort=escort).exists():
                 raise serializers.ValidationError({
-                    'escort': '这押运员匹配已存在'
+                    'escort': '押运员已存在'
                 })
 
         return data

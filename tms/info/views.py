@@ -238,6 +238,32 @@ class StationViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='stations')
+    def get_stations(self, request):
+        stations = m.Station.objects.filter(~Q(station_type=c.STATION_TYPE_CUSTOM_POINT))
+        station_count = stations.count()
+
+        center_lng = 0
+        center_lat = 0
+
+        for station in stations:
+            center_lng += station.longitude
+            center_lat += station.latitude
+
+        center_lng /= station_count
+        center_lat /= station_count
+
+        return Response(
+            {
+                'stations': s.StationPointSerializer(
+                    m.Station.objects.filter(~Q(station_type=c.STATION_TYPE_CUSTOM_POINT)),
+                    many=True
+                ).data,
+                'center_position': [center_lng, center_lat]
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path='loading-stations')
     def loading_stations(self, request):
         queryset = m.Station.loadingstations.all()
