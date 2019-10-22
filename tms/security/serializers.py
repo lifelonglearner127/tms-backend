@@ -5,6 +5,7 @@ from ..core import constants as c
 
 # models
 from . import models as m
+from ..hr.models import StaffProfile
 
 # serializers
 from ..core.serializers import TMSChoiceField
@@ -14,7 +15,6 @@ from ..hr.serializers import ShortDepartmentSerializer
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
 
-    policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
     published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
     author = MainUserSerializer(read_only=True)
     is_read = serializers.SerializerMethodField()
@@ -22,7 +22,7 @@ class ShortCompanyPolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = m.CompanyPolicy
         exclude = (
-            'is_published', 'content'
+            'is_published', 'content', 'departments'
         )
 
     def get_is_read(self, instance):
@@ -38,6 +38,7 @@ class CompanyPolicyStatusSerializer(serializers.ModelSerializer):
     author = UserNameSerializer()
     total_user_count = serializers.SerializerMethodField()
     published_on = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    departments = ShortDepartmentSerializer(many=True)
 
     class Meta:
         model = m.CompanyPolicy
@@ -47,19 +48,21 @@ class CompanyPolicyStatusSerializer(serializers.ModelSerializer):
             'author',
             'published_on',
             'is_published',
-            'policy_type',
+            'departments',
             'read_user_count',
             'total_user_count',
         )
 
     def get_total_user_count(self, instance):
-        return m.User.drivers.count()
+        return StaffProfile.objects.filter(
+            department__in=instance.departments.all()
+        ).count()
 
 
 class CompanyPolicySerializer(serializers.ModelSerializer):
 
-    author = MainUserSerializer(read_only=True)
-    policy_type = TMSChoiceField(c.COMPANY_POLICY_TYPE)
+    author = UserNameSerializer(read_only=True)
+    departments = ShortDepartmentSerializer(many=True, read_only=True)
     published_on = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S', required=False
     )
@@ -85,10 +88,14 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
                 'author': 'Such user does not exits'
             })
 
-        return self.Meta.model.objects.create(
-            author=author,
-            **validated_data
-        )
+        instance = m.CompanyPolicy.objects.create(author=author, **validated_data)
+
+        departments = self.context.get('departments', [])
+        for department in departments:
+            department = get_object_or_404(m.Department, id=department)
+            instance.departments.add(department)
+
+        return instance
 
     def update(self, instance, validated_data):
         author_data = self.context.get('author', None)
@@ -105,8 +112,16 @@ class CompanyPolicySerializer(serializers.ModelSerializer):
             })
 
         instance.author = author
+
+        instance.departments.clear()
+
         for (key, value) in validated_data.items():
             setattr(instance, key, value)
+
+        departments = self.context.get('departments', [])
+        for department in departments:
+            department = get_object_or_404(m.Department, id=department)
+            instance.departments.add(department)
 
         instance.save()
         return instance

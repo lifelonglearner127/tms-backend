@@ -30,10 +30,8 @@ class CompanyPolicy(TimeStampedModel):
         default=False
     )
 
-    policy_type = models.CharField(
-        max_length=1,
-        choices=c.COMPANY_POLICY_TYPE,
-        default=c.COMPANY_POLICY_TYPE_SHELL
+    departments = models.ManyToManyField(
+        Department
     )
 
     content = models.TextField()

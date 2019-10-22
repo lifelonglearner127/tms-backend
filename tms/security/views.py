@@ -28,7 +28,7 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         author = request.data.pop('author', None)
-
+        departments = request.data.pop('departments', [])
         if author is not None:
             pass
         else:
@@ -37,7 +37,8 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
         serializer = s.CompanyPolicySerializer(
             data=request.data,
             context={
-                'author': author
+                'author': author,
+                'departments': departments
             }
         )
 
@@ -51,7 +52,7 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None):
         instance = self.get_object()
         author = request.data.pop('author', None)
-
+        departments = request.data.pop('departments', [])
         if author is not None:
             pass
         else:
@@ -61,7 +62,8 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
             instance,
             data=request.data,
             context={
-                'author': author
+                'author': author,
+                'departments': departments
             }
         )
 
@@ -77,7 +79,11 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
         """
         this api is called in driver app
         """
-        page = self.paginate_queryset(m.CompanyPolicy.published_content.all())
+        page = self.paginate_queryset(
+            m.CompanyPolicy.published_content.filter(
+                departments=request.user.profile.department
+            )
+        )
         serializer = s.ShortCompanyPolicySerializer(
             page, context={'user': request.user}, many=True
         )
@@ -318,7 +324,7 @@ def get_company_policy(request, policy_id):
             'title': policy.title,
             'published_on': policy.published_on,
             'author': policy.author.name if policy.author.name else policy.author.username,
-            'policy_type': policy.get_policy_type_display,
+            'departments': ', '.join([department.name for department in policy.departments]),
             'content': policy.content
         }
     )

@@ -217,6 +217,7 @@ class StationViewSet(TMSViewSet):
 
         station_types = self.request.query_params.get('station_type', '')
         station_types = station_types.split(',')
+        station_types = [int(station_type) for station_type in station_types]
 
         for station_type in station_types:
             if station_type in [

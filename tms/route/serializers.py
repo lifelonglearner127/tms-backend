@@ -52,7 +52,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
         if m.Route.objects.filter(start_point=start_point, end_point=end_point).exists():
             raise serializers.ValidationError({
-                'route': '这条路书已经在'
+                'route': '已存在同线路书'
             })
 
         if validated_data['is_g7_route']:
@@ -89,7 +89,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
         if m.Route.objects.exclude(id=instance.id).filter(start_point=start_point, end_point=end_point).exists():
             raise serializers.ValidationError({
-                'route': '这条路书已经在'
+                'route': '已存在同线路书'
             })
 
         instance.start_point = start_point

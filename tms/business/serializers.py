@@ -19,6 +19,7 @@ class RequestApproverSerializer(serializers.ModelSerializer):
 
     approver = MainUserSerializer(read_only=True)
     approver_type = TMSChoiceField(choices=c.APPROVER_TYPE)
+    approved_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
 
     class Meta:
         model = m.RequestApprover
@@ -31,6 +32,7 @@ class RequestCCSerializer(serializers.ModelSerializer):
 
     cc = MainUserSerializer(read_only=True)
     cc_type = TMSChoiceField(choices=c.CC_TYPE)
+    read_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
 
     class Meta:
         model = m.RequestCC
