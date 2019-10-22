@@ -129,7 +129,7 @@ class BasicRequestSerializer(serializers.ModelSerializer):
     requester = MainUserSerializer(read_only=True)
     request_type = TMSChoiceField(choices=c.REQUEST_TYPE)
     request_time = serializers.DateTimeField(
-        format='%Y-%m-%d', required=False
+        format='%Y-%m-%d', read_only=True
     )
     approvers = RequestApproverSerializer(
         source='requestapprover_set', many=True, read_only=True
@@ -287,10 +287,27 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             serializer.save()
 
         elif validated_data['request_type'] == c.REQUEST_TYPE_SELF_DRIVING_PAYMENT:
-            pass
+            serializer = SelfDrivingPaymentRequestSerializer(
+                instance.self_driving_request, data=detail,
+                context={'department': get_object_or_404(m.Department, id=detail['department']['id'])},
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         elif validated_data['request_type'] == c.REQUEST_TYPE_INVOICE_PAYMENT:
-            pass
+            serializer = InvoicePaymentRequestSerializer(
+                instance.invoice_payment_request,
+                data=detail,
+                context={
+                    'other_cost_type': get_object_or_404(m.OtherCostType, id=detail['other_cost_type']['id']),
+                    'department': get_object_or_404(m.Department, id=detail['department']['id']),
+                    'vehicle': get_object_or_404(m.Vehicle, id=detail['vehicle']['id']),
+                    'ticket_type': get_object_or_404(m.TicketType, id=detail['ticket_type']['id']),
+                }
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
         return instance
 
@@ -300,6 +317,12 @@ class BasicRequestSerializer(serializers.ModelSerializer):
 
         elif instance.request_type == c.REQUEST_TYPE_VEHICLE_REPAIR:
             return VehicleRepairRequestSerializer(instance.vehicle_repair_request).data
+
+        elif instance.request_type == c.REQUEST_TYPE_SELF_DRIVING_PAYMENT:
+            return SelfDrivingPaymentRequestSerializer(instance.self_driving_request).data
+
+        elif instance.request_type == c.REQUEST_TYPE_INVOICE_PAYMENT:
+            return InvoicePaymentRequestSerializer(instance.invoice_payment_request).data
 
     def get_images(self, instance):
         return ShortRequestDocumentSerializer(

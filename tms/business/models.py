@@ -348,6 +348,12 @@ class SelfDrivingPaymentRequest(models.Model):
 
 class InvoicePaymentRequest(models.Model):
 
+    request = models.OneToOneField(
+        BasicRequest,
+        on_delete=models.CASCADE,
+        related_name='invoice_payment_request'
+    )
+
     other_cost_type = models.ForeignKey(
         OtherCostType,
         on_delete=models.SET_NULL,
