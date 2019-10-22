@@ -112,6 +112,7 @@ class StationSerializer(serializers.ModelSerializer):
     price_vary_duration_unit = TMSChoiceField(
         choices=c.PRICE_VARY_DURATION_UNIT, required=False
     )
+    station_type = TMSChoiceField(choices=c.STATION_TYPE)
 
     class Meta:
         model = m.Station
