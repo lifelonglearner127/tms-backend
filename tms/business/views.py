@@ -436,7 +436,24 @@ class BasicRequestViewSet(TMSViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, url_path="me/unapproved")
+    @action(detail=False, url_path="me/waiting")
+    def get_my_waiting_request(self, request):
+        """
+        Get my waiting request; used in driver app
+        """
+        page = self.paginate_queryset(
+            request.user.my_requests.filter(approved=None)
+        )
+        serializer = s.BasicRequestSerializer(
+            page,
+            context={
+                'request': request
+            },
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path="me/declined")
     def get_my_unapproved_request(self, request):
         """
         Get my unapproved request; used in driver app
