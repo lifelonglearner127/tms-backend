@@ -251,8 +251,9 @@ class StationViewSet(TMSViewSet):
             center_lng += station.longitude
             center_lat += station.latitude
 
-        center_lng /= station_count
-        center_lat /= station_count
+        if station_count:
+            center_lng /= station_count
+            center_lat /= station_count
 
         return Response(
             {
