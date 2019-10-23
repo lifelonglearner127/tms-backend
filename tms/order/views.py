@@ -42,6 +42,8 @@ from .tasks import (
     notify_of_driver_or_escort_changes_before_job_start
 )
 
+from .utils import get_branches
+
 
 class OrderCartViewSet(TMSViewSet):
 
@@ -979,9 +981,11 @@ class JobViewSet(TMSViewSet):
             )
         else:
             if current_driver != new_driver:
+                m.JobDriver.objects.get(job=job).delete()
                 m.JobDriver.objects.create(job=job, driver=new_driver)
 
             if current_escort != new_escort:
+                m.JobEscort.objects.get(job=job).delete()
                 m.JobEscort.objects.create(job=job, escort=new_escort)
 
             notify_of_driver_or_escort_changes_before_job_start.apply_async(
@@ -1034,7 +1038,12 @@ class JobViewSet(TMSViewSet):
                 'job': job.id,
                 'vehicle': job.vehicle.plate_num,
                 'driver': job.associated_drivers.first().id,
-                'escort': job.associated_escorts.first().id
+                'escort': job.associated_escorts.first().id,
+                'customer_name': job.order.customer.contacts.first().contact,
+                'customer_mobile': job.order.customer.contacts.first().mobile,
+                'loading_station': job.order.loading_station.address,
+                'branches': get_branches(job),
+                'rest_place': job.rest_place.address if job.rest_place is not None else '-'
             }]
         )
         job.delete()

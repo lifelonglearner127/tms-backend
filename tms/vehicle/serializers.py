@@ -639,7 +639,7 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
             'driver',
             'escort',
             'current_progress',
-            'cert_expires_on',
+            'license_expires_on',
         )
 
     def get_driver(self, instance):

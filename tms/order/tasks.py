@@ -15,6 +15,7 @@ from ..core.redis import r
 
 # models
 from . import models as m
+from .utils import get_branches
 from ..account.models import User
 from ..notification.models import Notification
 from ..vehicle.models import Vehicle
@@ -68,29 +69,8 @@ def notify_order_changes(context):
             'product': order_product.product.name,
             'weight': order_product.weight
         })
-    customer_notification = Notification.objects.create(
-        user=customer,
-        msg_type=c.CUSTOMER_NOTIFICATION_NEW_ORDER,
-        message=message
-    )
 
-    if customer.channel_name:
-        async_to_sync(channel_layer.send)(
-            customer.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(customer_notification).data
-                )
-            }
-        )
-
-    # send push notification to customer
-    if customer.device_token:
-        aliyun_request.set_Title('Cancel Job')
-        aliyun_request.set_Body('Cancel Job')
-        aliyun_request.set_TargetValue(customer.device_token)
-        aliyun_client.do_action(aliyun_request)
+    send_notifications([customer], message, c.CUSTOMER_NOTIFICATION_NEW_ORDER)
 
 
 @app.task
@@ -104,19 +84,6 @@ def notify_of_job_creation(context):
     escort = get_object_or_404(User, id=context['escort'])
 
     # send in-app notfication to driver
-    stations = []
-    for job_station in job.jobstation_set.all():
-        products = []
-        for jobstationproduct in job_station.jobstationproduct_set.all():
-            product = jobstationproduct.product.name + '(' +\
-                      str(jobstationproduct.mission_weight) + ')'
-            products.append(product)
-
-        stations.append({
-            'station': job_station.station.address,
-            'products': ', '.join(products)
-        })
-
     message = {
         "vehicle": job.vehicle.plate_num,
         "customer": {
@@ -131,42 +98,10 @@ def notify_of_job_creation(context):
             "name": escort.name,
             "mobile": escort.mobile
         },
-        "stations": stations
+        "branches": get_branches(job)
     }
 
-    driver_notification = Notification.objects.create(
-        user=driver,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
-    )
-
-    escort_notification = Notification.objects.create(
-        user=escort,
-        message=message,
-        msg_type=c.DRIVER_NOTIFICATION_NEW_JOB
-    )
-
-    if driver.channel_name:
-        async_to_sync(channel_layer.send)(
-            driver.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(driver_notification).data
-                )
-            }
-        )
-
-    if escort.channel_name:
-        async_to_sync(channel_layer.send)(
-            escort.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(escort_notification).data
-                )
-            }
-        )
+    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_NEW_JOB)
 
     message = {
         "vehicle": job.vehicle.plate_num,
@@ -179,47 +114,8 @@ def notify_of_job_creation(context):
             "mobile": escort.mobile
         }
     }
-    message['stations'] = stations
 
-    customer_notification = Notification.objects.create(
-        user=job.order.customer.user,
-        message=message,
-        msg_type=c.CUSTOMER_NOTIFICATION_NEW_ARRANGEMENT
-    )
-
-    if job.order.customer.user.channel_name:
-        async_to_sync(channel_layer.send)(
-            job.order.customer.user.channel_name,
-            {
-                'type': 'notify',
-                'data': json.dumps(
-                    NotificationSerializer(customer_notification).data
-                )
-            }
-        )
-
-    # TODO: now push notification api is called twice; one for driver and other for escort
-    # This would be not effeciency and there might be a solution to send bulk notification using one api call
-
-    # send push notification to driver
-    if driver.device_token:
-        aliyun_request.set_Title('New Job')
-        aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(driver.device_token)
-        aliyun_client.do_action(aliyun_request)
-
-    # send push notification to escort
-    if escort.device_token:
-        aliyun_request.set_Title('New Job')
-        aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(escort.device_token)
-        aliyun_client.do_action(aliyun_request)
-
-    if job.order.customer.user.device_token:
-        aliyun_request.set_Title('New Job')
-        aliyun_request.set_Body('New Job')
-        aliyun_request.set_TargetValue(job.order.customer.user.device_token)
-        aliyun_client.do_action(aliyun_request)
+    send_notifications([job.order.customer.user], message, c.CUSTOMER_NOTIFICATION_NEW_ARRANGEMENT)
 
 
 @app.task
@@ -237,24 +133,6 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
     is_driver_updated = context['is_driver_updated']
     is_escort_updated = context['is_escort_updated']
 
-    stations = []
-    for job_station in job.jobstation_set.all():
-        products = []
-        for jobstationproduct in job_station.jobstationproduct_set.all():
-            product = jobstationproduct.product.name + '(' +\
-                      str(jobstationproduct.mission_weight) + ')'
-            products.append(product)
-
-        stations.append({
-            'station': job_station.station.address,
-            'products': ', '.join(products)
-        })
-
-    cancel_job_message = {
-        "vehicle": job.vehicle.plate_num,
-        "notification": str(job.id) + ' was cancelled'
-    }
-
     new_job_message = {
         "vehicle": job.vehicle.plate_num,
         "customer": {
@@ -269,8 +147,31 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
             "name": new_escort.name,
             "mobile": new_escort.mobile
         },
-        "stations": stations
+        "loading_station": job.order.loading_station.address,
+        "branches": get_branches(job),
+        "rest_place": job.rest_place.address if job.rest_place is not None else '-'
     }
+
+    cancel_job_message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer": {
+            "name": job.order.customer.contacts.first().contact,
+            "mobile": job.order.customer.contacts.first().mobile
+        },
+        "driver": {
+            "name": current_driver.name,
+            "mobile": current_driver.mobile
+        },
+        "escort": {
+            "name": current_escort.name,
+            "mobile": current_escort.mobile
+        },
+        "loading_station": job.order.loading_station.address,
+        "branches": get_branches(job),
+        "rest_place": job.rest_place.address if job.rest_place is not None else '-'
+    }
+
+    change_message = new_job_message
 
     if is_driver_updated and is_escort_updated:
         send_notifications([current_driver, current_escort], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
@@ -279,22 +180,22 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
     elif is_driver_updated and not is_escort_updated:
         send_notifications([current_driver], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
         send_notifications([new_driver], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
-        change_message = {
-            "driver": {
-                "name": new_driver.name,
-                "mobile": new_driver.mobile
-            }
-        }
+        # change_message = {
+        #     "driver": {
+        #         "name": new_driver.name,
+        #         "mobile": new_driver.mobile
+        #     }
+        # }
         send_notifications([current_escort], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
     elif not is_driver_updated and is_escort_updated:
         send_notifications([current_escort], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
         send_notifications([new_escort], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
-        change_message = {
-            "escort": {
-                "name": new_escort.name,
-                "mobile": new_escort.mobile
-            }
-        }
+        # change_message = {
+        #     "escort": {
+        #         "name": new_escort.name,
+        #         "mobile": new_escort.mobile
+        #     }
+        # }
         send_notifications([current_driver], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
 
 
@@ -305,20 +206,6 @@ def notify_of_job_products_changes(context):
     job = get_object_or_404(m.Job, id=context['job'])
     driver = get_object_or_404(User, id=context['driver'])
     escort = get_object_or_404(User, id=context['escort'])
-
-    # send in-app notfication to driver
-    stations = []
-    for job_station in job.jobstation_set.all():
-        products = []
-        for jobstationproduct in job_station.jobstationproduct_set.all():
-            product = jobstationproduct.product.name + '(' +\
-                      str(jobstationproduct.mission_weight) + ')'
-            products.append(product)
-
-        stations.append({
-            'station': job_station.station.address,
-            'products': ', '.join(products)
-        })
 
     message = {
         "vehicle": job.vehicle.plate_num,
@@ -334,23 +221,12 @@ def notify_of_job_products_changes(context):
             "name": escort.name,
             "mobile": escort.mobile
         },
-        "stations": stations
+        "loading_station": job.order.loading_station.address,
+        "branches": get_branches(job),
+        "rest_place": job.rest_place.address
     }
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
-
-    message = {
-        "vehicle": job.vehicle.plate_num,
-        "driver": {
-            "name": driver.name,
-            "mobile": driver.mobile
-        },
-        "escort": {
-            "name": escort.name,
-            "mobile": escort.mobile
-        }
-    }
-    message['stations'] = stations
 
     send_notifications([job.order.customer.user], message, c.CUSTOMER_NOTIFICATION_UPDATE_ARRANGEMENT)
 
@@ -368,9 +244,27 @@ def notify_of_job_deleted(context):
     r.srem('jobs', job_id)
 
     # send notification
+    # message = {
+    #     "vehicle": vehicle,
+    #     "notification": str(job_id) + ' was cancelled'
+    # }
     message = {
         "vehicle": vehicle,
-        "notification": str(job_id) + ' was cancelled'
+        "customer": {
+            "name": context['customer_name'],
+            "mobile": context['customer_mobile']
+        },
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        },
+        "loading_station": context['loading_station'],
+        "branches": context['branches'],
+        "rest_place": context['rest_place']
     }
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_DELETE_JOB)
