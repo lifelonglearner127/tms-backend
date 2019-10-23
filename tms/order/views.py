@@ -38,6 +38,7 @@ from ..core.views import TMSViewSet
 from ..g7.interfaces import G7Interface
 from .tasks import (
     notify_of_job_creation, notify_of_job_products_changes,
+    notify_of_job_deleted,
     notify_of_driver_or_escort_changes_before_job_start
 )
 
@@ -1028,6 +1029,14 @@ class JobViewSet(TMSViewSet):
             order_product.arranged_weight -= arranged_product['mission_weight']
             order_product.save()
 
+        notify_of_job_deleted.apply_async(
+            args=[{
+                'job': job.id,
+                'vehicle': job.vehicle.plate_num,
+                'driver': job.associated_drivers.first().id,
+                'escort': job.associated_escorts.first().id
+            }]
+        )
         job.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 

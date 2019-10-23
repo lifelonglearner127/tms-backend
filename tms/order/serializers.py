@@ -16,7 +16,10 @@ from ..finance.models import FuelBillHistory
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
 from ..account.serializers import MainUserSerializer, UserNameSerializer
-from ..hr.serializers import ShortCustomerProfileSerializer, ShortStaffProfileSerializer
+from ..hr.serializers import (
+    ShortCustomerProfileSerializer, ShortStaffProfileSerializer,
+    ShortProfileNameSerializer
+)
 from ..finance.serializers import FuelBillHistorySerializer
 from ..info.serializers import (
     StationLocationSerializer, ProductNameSerializer, StationContactSerializer,
@@ -117,7 +120,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 
 class ShortOrderSerializer(serializers.ModelSerializer):
-    assignee = UserNameSerializer(read_only=True)
+    assignee = ShortProfileNameSerializer(read_only=True)
     customer = ShortCustomerProfileSerializer(read_only=True)
     loading_station = StationNameSerializer(read_only=True)
     quality_station = StationNameSerializer(read_only=True)

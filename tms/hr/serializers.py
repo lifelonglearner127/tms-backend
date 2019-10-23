@@ -58,6 +58,18 @@ class DriverLicenseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortProfileNameSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='user.name')
+
+    class Meta:
+        model = m.StaffProfile
+        fields = (
+            'id',
+            'name'
+        )
+
+
 class ShortStaffProfileSerializer(serializers.ModelSerializer):
 
     name = serializers.CharField(source='user.name')

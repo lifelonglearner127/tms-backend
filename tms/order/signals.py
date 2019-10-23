@@ -6,7 +6,6 @@ from ..core.redis import r
 
 # models
 from . import models as m
-from .tasks import calculate_job_report, notify_of_job_deleted
 
 
 @receiver(post_save, sender=m.Job)
@@ -36,14 +35,14 @@ def updated_job(sender, instance, created, **kwargs):
 
 
 # Job delete notifications; when the job is deleted, driver, escort should be notified of the changes
-@receiver(pre_delete, sender=m.Job)
-def job_deleted(sender, instance, **kwargs):
+# @receiver(pre_delete, sender=m.Job)
+# def job_deleted(sender, instance, **kwargs):
 
-    notify_of_job_deleted.apply_async(
-        args=[{
-            'job': instance.id,
-            'vehicle': instance.vehicle.id,
-            'driver': instance.associated_drivers.first().id,
-            'escort': instance.associated_escorts.first().id
-        }]
-    )
+#     notify_of_job_deleted.apply_async(
+#         args=[{
+#             'job': instance.id,
+#             'vehicle': instance.vehicle.id,
+#             'driver': instance.associated_drivers.first().id,
+#             'escort': instance.associated_escorts.first().id
+#         }]
+#     )

@@ -361,7 +361,7 @@ def notify_of_job_deleted(context):
     send notification when the job is deleted
     """
     job_id = context['job']
-    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
+    vehicle = context['vehicle']
     driver = get_object_or_404(User, id=context['driver'])
     escort = get_object_or_404(User, id=context['escort'])
 
@@ -369,7 +369,7 @@ def notify_of_job_deleted(context):
 
     # send notification
     message = {
-        "vehicle": vehicle.plate_num,
+        "vehicle": vehicle,
         "notification": str(job_id) + ' was cancelled'
     }
 
