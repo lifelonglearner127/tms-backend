@@ -725,7 +725,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
         else:
             progress = instance.progress
 
-        return c.JOB_PROGRESS.get(progress, '无效')
+        return c.JOB_PROGRESS.get(progress, '无任务')
 
 
 class JobUnloadingStationProductSerializer(serializers.Field):

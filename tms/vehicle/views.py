@@ -218,12 +218,12 @@ class VehicleViewSet(TMSViewSet):
 
                     status = c.JOB_PROGRESS.get(progress)
                 else:
-                    status = '无效'
+                    status = '无任务'
 
             elif vehicle.status == c.VEHICLE_STATUS_REPAIR:
                 status = '修车'
             else:
-                status = '无效'
+                status = '无任务'
 
             ret.append({
                 'plate_num': vehicle.plate_num,

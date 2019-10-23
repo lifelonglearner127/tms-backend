@@ -678,7 +678,7 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
     def get_current_progress(self, instance):
         current_job = instance.jobs.filter(progress__gt=c.JOB_PROGRESS_NOT_STARTED).first()
         if current_job is None:
-            return '无效'
+            return '无任务'
 
         if current_job.progress >= 10:
             if (current_job.progress - 10) % 4 == 0:
@@ -692,7 +692,7 @@ class VehicleBindDetailSerializer(serializers.ModelSerializer):
         else:
             progress = current_job.progress
 
-        return c.JOB_PROGRESS.get(progress, '无效')
+        return c.JOB_PROGRESS.get(progress, '无任务')
 
 
 class VehicleViolationSerializer(serializers.ModelSerializer):

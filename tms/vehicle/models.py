@@ -120,35 +120,45 @@ class Vehicle(TimeStampedModel):
     )
 
     # Identity Information
-    cert_type = models.CharField(
+    license_type = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_id = models.CharField(
+    license_id = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_authority = models.CharField(
+    license_authority = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_registered_on = models.DateField(
+    license_registered_on = models.DateField(
         null=True,
         blank=True
     )
 
-    cert_active_on = models.DateField(
+    license_active_on = models.DateField(
         null=True,
         blank=True
     )
 
-    cert_expires_on = models.DateField(
+    license_expires_on = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    operation_permit_active_on = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    operation_permit_expires_on = models.DateField(
         null=True,
         blank=True
     )
@@ -163,35 +173,45 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    cert_type_2 = models.CharField(
+    license_type_2 = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_id_2 = models.CharField(
+    license_id_2 = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_authority_2 = models.CharField(
+    license_authority_2 = models.CharField(
         max_length=100,
         null=True,
         blank=True
     )
 
-    cert_registered_on_2 = models.DateField(
+    license_registered_on_2 = models.DateField(
         null=True,
         blank=True
     )
 
-    cert_active_on_2 = models.DateField(
+    license_active_on_2 = models.DateField(
         null=True,
         blank=True
     )
 
-    cert_expires_on_2 = models.DateField(
+    license_expires_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    operation_permit_active_on_2 = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    operation_permit_expires_on_2 = models.DateField(
         null=True,
         blank=True
     )
