@@ -1544,6 +1544,12 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         instance.volume = request.data.pop('volume', 0)
         instance.save()
 
+        # update order product delivered weight
+        order = instance.job_station.job.order
+        order_product = order.orderproduct_set.filter(product=instance.product).first()
+        order_product.delivered_weight += instance.volume
+        order_product.save()
+
         for image in images:
             image['job_station_product'] = instance.id
             serializer = s.JobStationProductDocumentSerializer(data=image)
