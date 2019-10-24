@@ -28,6 +28,16 @@ class RequestCCAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.SelfDrivingPaymentRequest)
+class SelfDrivingPaymentRequestAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(m.InvoicePaymentRequest)
+class InvoicePaymentRequestAdmin(admin.ModelAdmin):
+    pass
+
+
 # @admin.register(m.ParkingRequest)
 # class ParkingRequestAdmin(admin.ModelAdmin):
 #     pass

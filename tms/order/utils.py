@@ -11,7 +11,8 @@ def get_branches(job):
                             'address': job_station.station.address,
                             'time': job_station_product.due_time.strftime("%Y-%m-%d %H:%M")
                         },
-                        'weight': str(job_station_product.mission_weight) + order_product.get_weight_measure_unit_display()
+                        'weight': str(job_station_product.mission_weight)
+                        + order_product.get_weight_measure_unit_display()
                     })
                     break
             else:
@@ -23,7 +24,8 @@ def get_branches(job):
                             'address': job_station.station.address,
                             'time': job_station_product.due_time.strftime("%Y-%m-%d %H:%M")
                         },
-                        'weight': str(job_station_product.mission_weight) + order_product.get_weight_measure_unit_display()
+                        'weight': str(job_station_product.mission_weight)
+                        + order_product.get_weight_measure_unit_display()
                     }]
                 })
 

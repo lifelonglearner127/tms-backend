@@ -522,6 +522,13 @@ class OtherCostTypeViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='short')
+    def get_list_without_pagination(self, request):
+        return Response(
+            self.serializer_class(self.queryset, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
 
 class TicketTypeViewSet(viewsets.ModelViewSet):
 
@@ -558,5 +565,12 @@ class TicketTypeViewSet(viewsets.ModelViewSet):
         instance.save()
         return Response(
             self.serializer_class(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='short')
+    def get_list_without_pagination(self, request):
+        return Response(
+            self.serializer_class(self.queryset, many=True).data,
             status=status.HTTP_200_OK
         )

@@ -123,6 +123,26 @@ class InvoicePaymentRequestSerializer(serializers.ModelSerializer):
         model = m.InvoicePaymentRequest
         fields = '__all__'
 
+    def create(self, validated_data):
+        return m.InvoicePaymentRequest.objects.create(
+            other_cost_type=self.context.get('other_cost_type'),
+            department=self.context.get('department'),
+            vehicle=self.context.get('vehicle'),
+            ticket_type=self.context.get('ticket_type'),
+            **validated_data
+        )
+
+    def update(self, instance, validated_data):
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.other_cost_type = self.context.get('other_cost_type')
+        instance.department = self.context.get('department')
+        instance.vehicle = self.context.get('vehicle')
+        instance.ticket_type = self.context.get('ticket_type')
+        instance.save()
+        return instance
+
 
 class BasicRequestSerializer(serializers.ModelSerializer):
 

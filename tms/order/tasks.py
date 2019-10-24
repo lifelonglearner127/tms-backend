@@ -18,7 +18,7 @@ from . import models as m
 from .utils import get_branches
 from ..account.models import User
 from ..notification.models import Notification
-from ..vehicle.models import Vehicle
+# from ..vehicle.models import Vehicle
 
 # serializers
 from ..notification.serializers import NotificationSerializer
@@ -275,9 +275,9 @@ def notify_of_job_deleted(context):
 @app.task
 def calculate_job_report(context):
     job = get_object_or_404(m.Job, id=context['job'])
-    vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
+    # vehicle = get_object_or_404(Vehicle, id=context['vehicle'])
     driver = get_object_or_404(User, id=context['driver'])
-    escort = get_object_or_404(User, id=context['escort'])
+    # escort = get_object_or_404(User, id=context['escort'])
 
     if not job.order.jobs.filter(
         progress__gt=c.JOB_PROGRESS_COMPLETE

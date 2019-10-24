@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -143,6 +144,11 @@ class BasicRequestViewSet(TMSViewSet):
     def get_queryset(self):
         queryset = self.queryset
         request_type = self.request.query_params.get('type', None)
+
+        if self.request.user.user_type != c.USER_TYPE_ADMIN:
+            my_filter = Q(approvers=self.request.user) | Q(ccs=self.request.user) | Q(requester=self.request.user)
+            queryset = queryset.filter(my_filter)
+
         if request_type is not None:
             request_type = int(request_type)
 

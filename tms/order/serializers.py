@@ -1,7 +1,7 @@
 # from collections import defaultdict
 # from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.utils import timezone as datetime
+# from django.utils import timezone as datetime
 from rest_framework import serializers
 
 from . import models as m
@@ -15,7 +15,7 @@ from ..finance.models import FuelBillHistory
 
 # serializers
 from ..core.serializers import TMSChoiceField, Base64ImageField
-from ..account.serializers import MainUserSerializer, UserNameSerializer
+from ..account.serializers import MainUserSerializer
 from ..hr.serializers import (
     ShortCustomerProfileSerializer, ShortStaffProfileSerializer,
     ShortProfileNameSerializer
