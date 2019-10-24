@@ -98,7 +98,9 @@ def notify_of_job_creation(context):
             "name": escort.name,
             "mobile": escort.mobile
         },
-        "branches": get_branches(job)
+        "loading_station": job.order.loading_station.address,
+        "branches": get_branches(job),
+        "rest_place": job.rest_place.address if job.rest_place is not None else '-'
     }
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_NEW_JOB)
