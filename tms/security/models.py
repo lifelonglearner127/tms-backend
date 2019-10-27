@@ -5,9 +5,9 @@ from ..core import constants as c
 
 from . import managers
 # models
-from ..core.models import TimeStampedModel
+from ..core.models import TimeStampedModel, CreatedTimeModel
 from ..account.models import User
-from ..hr.models import Department
+from ..hr.models import Department, SecurityOfficerProfile
 
 
 class CompanyPolicy(TimeStampedModel):
@@ -249,4 +249,45 @@ class SecurityLearningProgram(TimeStampedModel):
 
     audiences = models.ManyToManyField(
         User
+    )
+
+
+class SecurityCheckPlan(CreatedTimeModel):
+
+    from_date = models.DateTimeField()
+
+    to_date = models.DateTimeField()
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    check_address = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+
+    leader = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    check_content = models.TextField()
+
+    check_result = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    is_published = models.BooleanField(
+        default=False
+    )
+
+    security_officers = models.ManyToManyField(
+        SecurityOfficerProfile
     )

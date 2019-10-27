@@ -458,3 +458,9 @@ def answer_question(request, test_id, question_id):
     return redirect(
         reverse('security:app-test', args=[test_id]) + '?username=' + username + '&token=' + token
     )
+
+
+class SecurityCheckPlanViewSet(viewsets.ModelViewSet):
+
+    queryset = m.SecurityCheckPlan.objects.all()
+    serializer_class = s.SecurityCheckPlanSerializer

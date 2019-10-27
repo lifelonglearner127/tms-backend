@@ -10,7 +10,7 @@ from ..hr.models import StaffProfile
 # serializers
 from ..core.serializers import TMSChoiceField
 from ..account.serializers import UserNameSerializer, MainUserSerializer, UserDepartmentSerializer
-from ..hr.serializers import ShortDepartmentSerializer
+from ..hr.serializers import ShortDepartmentSerializer, ShortSecurityOfficerProfileSerializer
 
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
@@ -346,4 +346,30 @@ class SecurityLearningProgramSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['audiences'] = UserDepartmentSerializer(instance.audiences.all(), many=True).data
+        return ret
+
+
+class SecurityCheckPlanSerializer(serializers.ModelSerializer):
+
+    from_date = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+    to_date = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S', required=False
+    )
+
+    class Meta:
+        model = m.SecurityCheckPlan
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['department'] = ShortDepartmentSerializer(instance.department).data
+        ret['security_officers'] = ShortSecurityOfficerProfileSerializer(
+            instance.security_officers, many=True
+        ).data
+
         return ret

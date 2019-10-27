@@ -351,6 +351,7 @@ class SecurityOfficerProfileViewSet(TMSViewSet):
 
     queryset = m.SecurityOfficerProfile.objects.all()
     serializer_class = s.SecurityOfficerProfileSerializer
+    short_serializer_class = s.ShortSecurityOfficerProfileSerializer
 
     def create(self, request):
         context = {
@@ -374,7 +375,7 @@ class SecurityOfficerProfileViewSet(TMSViewSet):
         serializer_instance = self.get_object()
         context = {
             'user': request.data.pop('user', None),
-            'department': request.data.pop('department', None),
+            'company_section': request.data.pop('company_section', None),
         }
 
         serializer = self.serializer_class(

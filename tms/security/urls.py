@@ -35,6 +35,11 @@ router.register(
     v.SecurityLibraryViewSet,
     base_name='libraries'
 )
+router.register(
+    r'security/check-plans',
+    v.SecurityCheckPlanViewSet,
+    base_name='security-check-plans'
+)
 
 # router.register(
 #     r'security-knowledge',

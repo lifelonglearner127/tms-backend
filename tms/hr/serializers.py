@@ -518,6 +518,17 @@ class CompanySectionTreeSerializer(serializers.ModelSerializer):
         return ret
 
 
+class ShortSecurityOfficerProfileSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='user.name')
+
+    class Meta:
+        model = m.SecurityOfficerProfile
+        fields = (
+            'id', 'name'
+        )
+
+
 class SecurityOfficerProfileSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
