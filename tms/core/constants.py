@@ -136,6 +136,8 @@ USER_TYPE_ESCORT = 'E'
 USER_TYPE_GUEST_DRIVER = 'P'
 USER_TYPE_GUEST_ESCORT = 'G'
 USER_TYPE_CUSTOMER = 'C'
+USER_TYPE_SECURITY_OFFICER = 'T'
+
 USER_TYPE = (
     (USER_TYPE_ADMIN, '管理人员'),
     (USER_TYPE_STAFF, '工作人员'),
@@ -143,7 +145,8 @@ USER_TYPE = (
     (USER_TYPE_ESCORT, '押运人员'),
     (USER_TYPE_GUEST_DRIVER, '外驾驶人员'),
     (USER_TYPE_GUEST_ESCORT, '外押运人员'),
-    (USER_TYPE_CUSTOMER, '客户')
+    (USER_TYPE_CUSTOMER, '客户'),
+    (USER_TYPE_SECURITY_OFFICER, '检查')
 )
 
 # user document type choices

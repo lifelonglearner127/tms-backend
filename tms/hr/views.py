@@ -330,10 +330,11 @@ class CustomerProfileViewSet(TMSViewSet):
         )
 
 
-class CompanySectionViewSet(viewsets.ModelViewSet):
+class CompanySectionViewSet(TMSViewSet):
 
     queryset = m.CompanySection.objects.all()
     serializer_class = s.CompanySectionSerializer
+    short_serializer_class = s.ShortCompanySectionSerializer
 
     @action(detail=False, url_path='tree')
     def get_company_tree(self, request):
@@ -342,5 +343,51 @@ class CompanySectionViewSet(viewsets.ModelViewSet):
                 m.CompanySection.objects.filter(parent=None),
                 many=True
             ).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class SecurityOfficerProfileViewSet(TMSViewSet):
+
+    queryset = m.SecurityOfficerProfile.objects.all()
+    serializer_class = s.SecurityOfficerProfileSerializer
+
+    def create(self, request):
+        context = {
+            'user': request.data.pop('user', None),
+            'company_section': request.data.pop('company_section', None),
+        }
+
+        serializer = self.serializer_class(
+            data=request.data, context=context
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        serializer_instance = self.get_object()
+        context = {
+            'user': request.data.pop('user', None),
+            'department': request.data.pop('department', None),
+        }
+
+        serializer = self.serializer_class(
+            serializer_instance,
+            data=request.data,
+            context=context,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK
         )

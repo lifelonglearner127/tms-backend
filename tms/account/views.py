@@ -130,7 +130,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = ChoiceSerializer(
             [
                 {'value': x, 'text': y} for (x, y) in c.USER_TYPE
-                if x != c.USER_TYPE_CUSTOMER
+                if x != c.USER_TYPE_CUSTOMER or x != c.USER_TYPE_SECURITY_OFFICER
             ],
             many=True
         )

@@ -252,6 +252,26 @@ class StaffProfile(TimeStampedModel):
     #     return customer_name
 
 
+class SecurityOfficerProfile(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        related_name='security_officer_profile',
+        on_delete=models.CASCADE
+    )
+
+    company_section = models.ForeignKey(
+        CompanySection,
+        on_delete=models.CASCADE
+    )
+
+    position = models.ForeignKey(
+        Position,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+
 class CustomerContact(models.Model):
 
     contact = models.CharField(
@@ -292,6 +312,18 @@ class CustomerProfile(TimeStampedModel):
         related_name='incharges_customers',
         on_delete=models.SET_NULL,
         null=True
+    )
+
+    bank = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    card_number = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     customer_request = models.TextField(

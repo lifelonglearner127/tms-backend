@@ -475,6 +475,16 @@ class CompanySectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ShortCompanySectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.CompanySection
+        fields = (
+            'id',
+            'text',
+        )
+
+
 class RecursiveSerializer(serializers.Serializer):
     def to_representation(self, value):
         serializer = self.parent.parent.__class__(value, context=self.context)
@@ -505,4 +515,123 @@ class CompanySectionTreeSerializer(serializers.ModelSerializer):
     def get_state(self, instance):
         ret = {}
         ret['expanded'] = True
+        return ret
+
+
+class SecurityOfficerProfileSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer(read_only=True)
+    company_section = ShortCompanySectionSerializer(read_only=True)
+    position = ShortPositionSerializer(read_only=True)
+
+    class Meta:
+        model = m.SecurityOfficerProfile
+        fields = '__all__'
+        read_only_fields = ('user', 'driver_license')
+
+    def create(self, validated_data):
+        # get user data and create
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError({
+                'user': 'User data is not provided'
+            })
+
+        # check if username and mobile exists already
+        if m.User.objects.filter(username=user_data['username']).exists():
+            raise serializers.ValidationError({
+                'username': 'Such user already exists'
+            })
+
+        if m.User.objects.filter(mobile=user_data['mobile']).exists():
+            raise serializers.ValidationError({
+                'mobile': 'Such mobile already exisits'
+            })
+
+        # check user user_type
+        user_data['user_type'] = user_data['user_type']['value']
+
+        permission = None
+        permission_data = user_data.pop('permission')
+        if permission_data is not None:
+            permission = get_object_or_404(
+                UserPermission, id=permission_data.get('id', None)
+            )
+
+        user = m.User.objects.create_user(permission=permission, **user_data)
+
+        company_section_data = self.context.get('company_section', None)
+        company_section = get_object_or_404(
+            m.CompanySection,
+            id=company_section_data.get('id', None)
+        )
+
+        profile = m.SecurityOfficerProfile.objects.create(
+            user=user,
+            company_section=company_section,
+            **validated_data
+        )
+        return profile
+
+    def update(self, instance, validated_data):
+        user_data = self.context.get('user', None)
+        if user_data is None:
+            raise serializers.ValidationError({
+                'user': 'User data is not provided'
+            })
+
+        # check if username and mobile exists already
+        if m.User.objects.exclude(pk=instance.user.id).filter(
+            username=user_data['username']
+        ).exists():
+            raise serializers.ValidationError({
+                'username': 'Such user already exists'
+            })
+
+        if m.User.objects.exclude(pk=instance.user.id).filter(
+            mobile=user_data['mobile']
+        ).exists():
+            raise serializers.ValidationError({
+                'mobile': 'Such mobile already exisits'
+            })
+
+        password = user_data.pop('password', None)
+        if password is not None:
+            instance.user.set_password(password)
+
+        permission = None
+        permission_data = user_data.pop('permission')
+        if permission_data is not None:
+            permission = get_object_or_404(
+                UserPermission, id=permission_data.get('id', None)
+            )
+            instance.user.permission = permission
+
+        for (key, value) in user_data.items():
+            setattr(instance.user, key, value)
+        instance.user.save()
+
+        company_section_data = self.context.get('company_section', None)
+        company_section = get_object_or_404(
+            m.CompanySection,
+            id=company_section_data.get('id', None)
+        )
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.company_section = company_section
+        instance.save()
+
+        return instance
+
+    def to_internal_value(self, data):
+        """
+        Exclude date, datetimefield if its string is empty
+        """
+        for key, value in self.fields.items():
+            if isinstance(value, serializers.DateField) and data[key] == '':
+                data.pop(key)
+
+        ret = super().to_internal_value(data)
         return ret

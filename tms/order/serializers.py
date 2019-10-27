@@ -906,6 +906,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
     """
     plate_num = serializers.CharField(source='vehicle.plate_num')
     routes = serializers.SerializerMethodField()
+    total_distance = serializers.SerializerMethodField()
     driver = serializers.SerializerMethodField()
     escort = serializers.SerializerMethodField()
     products = serializers.SerializerMethodField()
@@ -921,6 +922,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'plate_num',
+            'total_distance',
             'routes',
             'driver',
             'escort',
@@ -930,6 +932,13 @@ class JobFutureSerializer(serializers.ModelSerializer):
             'progress',
             'order_description',
         )
+
+    def get_total_distance(self, instance):
+        total_distance = 0
+        routes = m.Route.objects.filter(id__in=instance.routes)
+        for route in routes:
+            total_distance += route.distance
+        return total_distance
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)

@@ -35,6 +35,11 @@ router.register(
     v.CompanySectionViewSet,
     base_name='company-section'
 )
+router.register(
+    r'security-officers',
+    v.SecurityOfficerProfileViewSet,
+    base_name='security-officers'
+)
 
 
 urlpatterns = [
