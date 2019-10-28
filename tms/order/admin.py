@@ -23,13 +23,8 @@ class JobAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.JobDriver)
-class JobDriverAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.JobEscort)
-class JobEscortAdmin(admin.ModelAdmin):
+@admin.register(m.JobWorker)
+class JobWorkerAdmin(admin.ModelAdmin):
     pass
 
 

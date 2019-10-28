@@ -81,3 +81,19 @@ class CompleteJobManager(models.Manager):
         return super().get_queryset().filter(
             progress=c.JOB_PROGRESS_COMPLETE
         )
+
+
+class JobWorkerDriverManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            worker_type=c.WORKER_TYPE_DRIVER
+        )
+
+
+class JobWorkerEscortManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            worker_type=c.WORKER_TYPE_ESCORT
+        )

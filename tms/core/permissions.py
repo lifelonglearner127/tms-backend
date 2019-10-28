@@ -26,7 +26,7 @@ class IsDriverOrEscortUser(permissions.BasePermission):
         ]
 
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.associated_drivers.all() or request.user in obj.associated_escorts.all()
+        return request.user in obj.associated_workers.all()
 
 
 class IsCustomerUser(permissions.BasePermission):

@@ -309,68 +309,48 @@ class Job(models.Model):
         through_fields=('job', 'station')
     )
 
-    associated_drivers = models.ManyToManyField(
+    associated_workers = models.ManyToManyField(
         User,
-        related_name='associated_drivers',
-        through='JobDriver',
-        through_fields=('job', 'driver')
+        related_name='associated_jobs',
+        through='JobWorker',
+        through_fields=('job', 'worker')
     )
-
-    associated_escorts = models.ManyToManyField(
-        User,
-        related_name='associated_escorts',
-        through='JobEscort',
-        through_fields=('job', 'escort')
-    )
-
-    @property
-    def stations_info(self):
-        stations = self.stations.all()
-        station_info = []
-        previous_station_time = self.started_on
-        for station in stations:
-            jobstation = station.jobstation_set.get(job=self)
-            if station.station_type == 'L':
-                arrival_format_string = '赶往装货地时长'
-                loadwait_format_string = '等待装货时长'
-                load_format_string = '装货时长'
-            elif station.station_type == 'Q':
-                arrival_format_string = '赶往质检地时长'
-                loadwait_format_string = '等待质检时长'
-                load_format_string = '质检时长'
-            else:
-                arrival_format_string = '赶往卸货地时长'
-                loadwait_format_string = '等待卸货时长'
-                load_format_string = '卸货时长'
-
-            if jobstation.arrived_station_on:
-                time_diff = jobstation.arrived_station_on - previous_station_time
-                arrive_duration = format_hms_string(time_diff, arrival_format_string)
-            else:
-                arrive_duration = '{}: 未知'.format(arrival_format_string)
-
-            if jobstation.started_working_on and jobstation.arrived_station_on:
-                time_diff = jobstation.started_working_on - jobstation.arrived_station_on
-                load_wait_duration = format_hms_string(time_diff, loadwait_format_string)
-            else:
-                load_wait_duration = '{}: 未知'.format(loadwait_format_string)
-            if jobstation.started_working_on and jobstation.finished_working_on:
-                time_diff = jobstation.finished_working_on - jobstation.started_working_on
-                load_duration = format_hms_string(time_diff, load_format_string)
-            else:
-                load_duration = '{}: 未知'.format(load_format_string)
-
-            previous_station_time = jobstation.departure_station_on
-            station_info.append({
-                'arrive_duration': arrive_duration,
-                'load_wait_duration': load_wait_duration,
-                'load_duration': load_duration
-            })
-        return station_info
 
     @property
     def freight_payment_to_driver(self):
         return self.total_weight * self.heavy_mileage * 0.4
+
+    @property
+    def loading_time_duration(self):
+        station = self.jobstation_set.first()
+        duration = 0
+        if station.arrived_station_on is not None and station.departure_station_on is not None:
+            duration = (station.departure_station_on - station.arrived_station_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def quality_time_duration(self):
+        station = self.jobstation_set.all()[1]
+        duration = 0
+        if station.arrived_station_on is not None and station.departure_station_on is not None:
+            duration = (station.departure_station_on - station.arrived_station_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def unloading_time_duration(self):
+        duration = 0
+        for station in self.jobstation_set.all()[2:]:
+            if station.arrived_station_on is None or station.departure_station_on is None:
+                continue
+            duration += (station.departure_station_on - station.arrived_station_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def total_time_duration(self):
+        return self.loading_time_duration + self.quality_time_duration + self.unloading_time_duration
 
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()
@@ -383,17 +363,23 @@ class Job(models.Model):
         )
 
 
-class JobDriver(models.Model):
+class JobWorker(models.Model):
 
     job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE
     )
 
-    driver = models.ForeignKey(
+    worker = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='jobs_as_driver'
+        related_name='job'
+    )
+
+    worker_type = models.CharField(
+        max_length=1,
+        choices=c.WORKER_TYPE,
+        default=c.WORKER_TYPE_DRIVER
     )
 
     started_on = models.DateTimeField(
@@ -410,38 +396,9 @@ class JobDriver(models.Model):
         auto_now_add=True
     )
 
-    class Meta:
-        ordering = (
-            'job', '-assigned_on',
-        )
-
-
-class JobEscort(models.Model):
-
-    job = models.ForeignKey(
-        Job,
-        on_delete=models.CASCADE
-    )
-
-    escort = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='jobs_as_escorts'
-    )
-
-    started_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    finished_on = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    assigned_on = models.DateTimeField(
-        auto_now_add=True
-    )
+    objects = models.Manager()
+    drivers = managers.JobWorkerDriverManager()
+    escorts = managers.JobWorkerEscortManager()
 
     class Meta:
         ordering = (

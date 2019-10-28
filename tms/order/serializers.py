@@ -171,8 +171,8 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
         for job in instance.jobs.all():
             job_item = {}
             job_item['vehicle'] = job.vehicle.plate_num
-            job_item['drivers'] = [job.associated_drivers.first().name]
-            job_item['escorts'] = [job.associated_escorts.first().name]
+            job_item['drivers'] = [job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.name]
+            job_item['escorts'] = [job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.name]
             job_item['details'] = []
             for job_station in job.jobstation_set.all():
                 for ret_station in job_item['details']:
@@ -613,23 +613,12 @@ class JobStationSerializer(serializers.ModelSerializer):
         )
 
 
-class JobDriverSerializer(serializers.ModelSerializer):
+class JobWorkerSerializer(serializers.ModelSerializer):
 
-    driver = MainUserSerializer(read_only=True)
-
-    class Meta:
-        model = m.JobDriver
-        exclude = (
-            'job',
-        )
-
-
-class JobEscortSerializer(serializers.ModelSerializer):
-
-    escort = MainUserSerializer(read_only=True)
+    worker = MainUserSerializer(read_only=True)
 
     class Meta:
-        model = m.JobEscort
+        model = m.JobWorker
         exclude = (
             'job',
         )
@@ -652,12 +641,12 @@ class JobAdminSerializer(serializers.ModelSerializer):
         )
 
     def get_driver(self, instance):
-        job_driver = m.JobDriver.objects.filter(job=instance).first()
-        return MainUserSerializer(job_driver.driver).data
+        job_driver = m.JobWorker.drivers.filter(job=instance).first()
+        return MainUserSerializer(job_driver.worker).data
 
     def get_escort(self, instance):
-        job_escort = m.JobEscort.objects.filter(job=instance).first()
-        return MainUserSerializer(job_escort.escort).data
+        job_escort = m.JobWorker.escorts.filter(job=instance).first()
+        return MainUserSerializer(job_escort.worker).data
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
@@ -753,12 +742,8 @@ class JobDoneSerializer(serializers.ModelSerializer):
     """
     order = ShortOrderSerializer()
     vehicle = ShortVehiclePlateNumSerializer()
-    associated_drivers = JobDriverSerializer(
-        source='jobdriver_set', many=True, read_only=True
-    )
-    associated_escorts = JobEscortSerializer(
-        source='jobescort_set', many=True, read_only=True
-    )
+    associated_drivers = serializers.SerializerMethodField()
+    associated_escorts = serializers.SerializerMethodField()
     branches = serializers.SerializerMethodField()
     routes = serializers.SerializerMethodField()
     stations = serializers.SerializerMethodField()
@@ -775,6 +760,18 @@ class JobDoneSerializer(serializers.ModelSerializer):
             'routes', 'stations', 'costs', 'mileage', 'durations', 'started_on', 'finished_on',
             'is_paid', 'freight_payment_to_driver',
         )
+
+    def get_associated_drivers(self, instance):
+        return JobWorkerSerializer(
+            instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER),
+            many=True
+        ).data
+
+    def get_associated_escorts(self, instance):
+        return JobWorkerSerializer(
+            instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT),
+            many=True
+        ).data
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
@@ -949,10 +946,10 @@ class JobFutureSerializer(serializers.ModelSerializer):
         ).data
 
     def get_driver(self, instance):
-        return instance.associated_drivers.first().name
+        return instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.name
 
     def get_escort(self, instance):
-        return instance.associated_escorts.first().name
+        return instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker.name
 
     def get_products(self, instance):
         ret = []
@@ -1271,3 +1268,43 @@ class OrderPaymentStatusSerializer(serializers.ModelSerializer):
                 'text': '开票后, 待结算'
             })
         return ret
+
+
+class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
+
+    created = serializers.DateTimeField(format='%Y-%m-%d', required=False)
+    workers = serializers.SerializerMethodField()
+    loading_station = serializers.CharField(source='order.loading_station.name')
+    products = serializers.SerializerMethodField()
+    is_multiple_products = serializers.SerializerMethodField()
+    unloading_station_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'id',
+            'started_on',
+            'workers',
+            'loading_station',
+            'products',
+            'is_multiple_products',
+            'unloading_station_count',
+            'loading_time_duration',
+            'quality_time_duration',
+            'unloading_time_duration',
+            'total_time_duration',
+        )
+
+    def get_workers(self, instance):
+        return instance.associated_workers.values_list('name', flat=True)
+
+    def get_products(self, instance):
+        loading_station = instance.jobstation_set.first()
+        return loading_station.products.values_list('name', flat=True)
+
+    def get_is_multiple_products(self, instance):
+        loading_station = instance.jobstation_set.first()
+        return '是' if len(loading_station.products.values_list('name', flat=True)) > 1 else '不'
+
+    def get_unloading_station_count(self, instance):
+        return instance.stations.count() - 2
