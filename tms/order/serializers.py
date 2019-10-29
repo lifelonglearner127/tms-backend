@@ -1415,3 +1415,69 @@ class JobWorkDiaryReportSerializer(serializers.ModelSerializer):
 
     def get_unloading_station_count(self, instance):
         return instance.stations.count() - 2
+
+
+class JobWorkTimeDurationSerializer(serializers.ModelSerializer):
+
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    loop = serializers.SerializerMethodField()
+    line = serializers.SerializerMethodField()
+    unloading_stations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'started_on',
+            'vehicle',
+            'loop',
+            'line',
+            'waiting_at_loading_station_time_duration',
+            'loading_time_duration',
+            'waiting_at_quality_station_time_duration',
+            'quality_time_duration',
+            'unloading_stations'
+        )
+
+    def get_loop(self, instance):
+        return 1
+
+    def get_line(self, instance):
+        line = [station.station.name for station in instance.jobstation_set.all()]
+        return ' -> '.join(line)
+
+    def get_unloading_stations(self, instance):
+        ret = []
+        for station in instance.jobstation_set.all()[2:]:
+            tmp_ret = {
+                'waiting_time_duration': 0,
+                'working_time_duration': 0,
+                'weight': 0
+            }
+            if station.started_working_on is not None and station.arrived_station_on is not None:
+                duration = (station.started_working_on - station.arrived_station_on).total_seconds()
+                tmp_ret['waiting_time_duration'] = round(duration / 3600, 1)
+
+            if station.started_working_on is not None and station.finished_working_on is not None:
+                duration = (station.finished_working_on - station.started_working_on).total_seconds()
+                tmp_ret['working_time_duration'] = round(duration / 3600, 1)
+
+            for product in station.jobstationproduct_set.all():
+                tmp_ret['weight'] += product.mission_weight
+            ret.append(tmp_ret)
+        return ret
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        unloading_stations = ret.pop('unloading_stations')
+        for index, unloading_station in enumerate(unloading_stations):
+            ret['unloading_station' + str(index) + 'waiting_time_duration'] =\
+                unloading_station['waiting_time_duration']
+
+            ret['unloading_station' + str(index) + 'working_time_duration'] =\
+                unloading_station['working_time_duration']
+
+            ret['unloading_station' + str(index) + 'weight'] =\
+                unloading_station['weight']
+
+        return ret

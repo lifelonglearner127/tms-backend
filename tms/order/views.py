@@ -4,7 +4,7 @@ import requests
 
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
@@ -1509,6 +1509,26 @@ class JobViewSet(TMSViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=False, url_path='report/workdiary-time-schema')
+    def report_workdiary_time_class_table_schema(self, request):
+        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        max_step = m.JobStation.objects.filter(job__in=page).aggregate(Max('step'))
+        return Response(
+            {
+                'max_step': max_step['step__max'] - 1
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='report/workdiary-time-class')
+    def report_workdiary_time_class(self, request):
+        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        serializer = s.JobWorkTimeDurationSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
 
 class JobStationViewSet(viewsets.ModelViewSet):
 
@@ -1746,7 +1766,9 @@ class JobWorkerViewSet(viewsets.ModelViewSet):
 
 
 class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
-
+    """
+    工时统计
+    """
     queryset = m.JobWorker.objects.filter(job__progress=c.JOB_PROGRESS_COMPLETE)
     serializer_class = s.ReportJobWorkingTimeSerializer
     pagination_class = None
@@ -1784,7 +1806,9 @@ class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
 
 
 class JobWorkDiaryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
-
+    """
+    业务台账统计
+    """
     queryset = m.Job.completed_jobs.all()
     serializer_class = s.JobWorkDiaryReportSerializer
     pagination_class = None
@@ -1800,7 +1824,7 @@ class JobWorkDiaryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
             '路桥费', '鲁通卡', '总费用', '装货地', '货品', '混装', '站数量',
         ]
         ret['column_width'] = [
-            30, 20, 10, 40, 20, 20, 20,
+            30, 20, 10, 60, 20, 20, 20,
             20, 20, 20, 20, 20, 20, 20,
             20, 20, 20, 20, 20, 20, 20,
         ]
@@ -1819,4 +1843,51 @@ class JobWorkDiaryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
 
         queryset = self.queryset.filter(query_filter)
 
+        return queryset
+
+
+class JobWorkTimeDurationViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    装油时间统计
+    """
+    queryset = m.Job.completed_jobs.all()
+    serializer_class = s.JobWorkTimeDurationSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+    max_step = 3
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '日期', '车牌', '航次', '路线',
+            '装货等待时间', '装油时间', '质检等待时间', '质检操作时间',
+        ]
+
+        max_step = self.max_step
+        while max_step:
+            ret['titles'].extend(['卸油等待时间', '卸油时间', '卸仓数量'])
+            max_step = max_step - 1
+
+        ret['column_width'] = [
+            30, 20, 10, 60,
+        ]
+        return ret
+
+    def get_queryset(self):
+        queryset = self.queryset
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        queryset = self.queryset.filter(query_filter)
+
+        max_step = m.JobStation.objects.filter(job__in=queryset).aggregate(Max('step'))
+        self.max_step = max_step['step__max'] - 1   # unlaoding station count
         return queryset

@@ -338,20 +338,75 @@ class Job(models.Model):
         return self.total_mission_weight * self.heavy_mileage * 0.4
 
     @property
+    def to_loading_station_time_duration(self):
+        station = self.jobstation_set.first()
+        duration = 0
+        if self.started_on is not None and station.started_working_on is not None:
+            duration = (station.arrived_station_on - self.started_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def waiting_at_loading_station_time_duration(self):
+        station = self.jobstation_set.first()
+        duration = 0
+        if station.arrived_station_on is not None and station.started_working_on is not None:
+            duration = (station.started_working_on - station.arrived_station_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
     def loading_time_duration(self):
         station = self.jobstation_set.first()
         duration = 0
-        if station.arrived_station_on is not None and station.departure_station_on is not None:
-            duration = (station.departure_station_on - station.arrived_station_on).total_seconds()
+        if station.started_working_on is not None and station.finished_working_on is not None:
+            duration = (station.finished_working_on - station.started_working_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def waiting_at_loading_station_after_loading_time_duration(self):
+        station = self.jobstation_set.first()
+        duration = 0
+        if station.departure_station_on is not None and station.finished_on is not None:
+            duration = (station.departure_station_on - station.finished_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def to_quality_station_time_duration(self):
+        loading_station = self.jobstation_set.first()
+        quality_station = self.jobstation_set.get(step=1)
+        duration = 0
+        if loading_station.departure_station_on is not None and quality_station.arrived_station_on is not None:
+            duration = (quality_station.arrived_station_on - loading_station.departure_station_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def waiting_at_quality_station_time_duration(self):
+        station = self.jobstation_set.get(step=1)
+        duration = 0
+        if station.arrived_station_on is not None and station.started_working_on is not None:
+            duration = (station.started_working_on - station.arrived_station_on).total_seconds()
 
         return round(duration / 3600, 1)
 
     @property
     def quality_time_duration(self):
-        station = self.jobstation_set.all()[1]
+        station = self.jobstation_set.get(step=1)
         duration = 0
-        if station.arrived_station_on is not None and station.departure_station_on is not None:
-            duration = (station.departure_station_on - station.arrived_station_on).total_seconds()
+        if station.started_working_on is not None and station.finished_working_on is not None:
+            duration = (station.finished_working_on - station.started_working_on).total_seconds()
+
+        return round(duration / 3600, 1)
+
+    @property
+    def waiting_at_quality_station_after_quality_time_duration(self):
+        station = self.jobstation_set.get(step=1)
+        duration = 0
+        if station.finished_working_on is not None and station.departure_station_on is not None:
+            duration = (station.departure_station_on - station.finished_working_on).total_seconds()
 
         return round(duration / 3600, 1)
 
@@ -359,9 +414,9 @@ class Job(models.Model):
     def unloading_time_duration(self):
         duration = 0
         for station in self.jobstation_set.all()[2:]:
-            if station.arrived_station_on is None or station.departure_station_on is None:
+            if station.started_working_on is None or station.finished_working_on is None:
                 continue
-            duration += (station.departure_station_on - station.arrived_station_on).total_seconds()
+            duration += (station.finished_working_on - station.started_working_on).total_seconds()
 
         return round(duration / 3600, 1)
 
