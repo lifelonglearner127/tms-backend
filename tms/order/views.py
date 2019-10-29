@@ -1502,7 +1502,18 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='report/workdiary')
     def report_workdiary(self, request):
-        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        queryset = m.Job.completed_jobs.filter(query_filter)
+
+        page = self.paginate_queryset(queryset)
         serializer = s.JobWorkDiaryReportSerializer(
             page,
             many=True
@@ -1511,7 +1522,18 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='report/workdiary-time-schema')
     def report_workdiary_time_class_table_schema(self, request):
-        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        queryset = m.Job.completed_jobs.filter(query_filter)
+
+        page = self.paginate_queryset(queryset)
         max_step = m.JobStation.objects.filter(job__in=page).aggregate(Max('step'))
         return Response(
             {
@@ -1522,8 +1544,41 @@ class JobViewSet(TMSViewSet):
 
     @action(detail=False, url_path='report/workdiary-time-class')
     def report_workdiary_time_class(self, request):
-        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        queryset = m.Job.completed_jobs.filter(query_filter)
+        page = self.paginate_queryset(queryset)
         serializer = s.JobWorkTimeDurationSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='report/workdiary-weight-class')
+    def report_workdiary_weight_class(self, request):
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        plate_num = self.request.query_params.get('vehicle', None)
+        if plate_num is not None:
+            query_filter &= Q(vehicle__plate_num=plate_num)
+
+        queryset = m.Job.completed_jobs.filter(query_filter)
+        page = self.paginate_queryset(queryset)
+        serializer = s.JobWorkDiaryWeightClassSerializer(
             page,
             many=True
         )
@@ -1890,4 +1945,46 @@ class JobWorkTimeDurationViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
 
         max_step = m.JobStation.objects.filter(job__in=queryset).aggregate(Max('step'))
         self.max_step = max_step['step__max'] - 1   # unlaoding station count
+        return queryset
+
+
+class JobWorkDiaryWeightClassViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    装油时间统计
+    """
+    queryset = m.Job.completed_jobs.all()
+    serializer_class = s.JobWorkDiaryWeightClassSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '车牌', '日期', '实发流量', '实收流量', '差异', '是否需要解释', '原因（±100L)', '损益率（千分之）'
+        ]
+
+        ret['column_width'] = [
+            20, 30, 10, 10, 10, 10, 10, 10
+        ]
+        return ret
+
+    def get_queryset(self):
+        queryset = self.queryset
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        plate_num = self.request.query_params.get('vehicle', None)
+        if plate_num is not None:
+            query_filter &= Q(vehicle__plate_num=plate_num)
+
+        queryset = self.queryset.filter(query_filter)
+
         return queryset

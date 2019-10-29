@@ -36,7 +36,10 @@ router.register(
     r'export-work-diary', v.JobWorkDiaryExportViewSet, base_name='export-job-diary'
 )
 router.register(
-    r'export-work-diary-by-class', v.JobWorkTimeDurationViewSet, base_name='export-job-diary-by-class'
+    r'export-work-diary-time-class', v.JobWorkTimeDurationViewSet, base_name='export-job-diary-time-class'
+)
+router.register(
+    r'export-work-diary-weight-class', v.JobWorkDiaryWeightClassViewSet, base_name='export-job-diary-weight-class'
 )
 
 # # /jobs/{job_pk}/stations

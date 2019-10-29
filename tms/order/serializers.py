@@ -1481,3 +1481,39 @@ class JobWorkTimeDurationSerializer(serializers.ModelSerializer):
                 unloading_station['weight']
 
         return ret
+
+
+class JobWorkDiaryWeightClassSerializer(serializers.ModelSerializer):
+
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    loss = serializers.SerializerMethodField()
+    is_different = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    loss_rate = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.Job
+        fields = (
+            'vehicle',
+            'started_on',
+            'total_mission_weight',
+            'total_delivered_weight',
+            'loss',
+            'is_different',
+            'reason',
+            'loss_rate'
+        )
+
+    def get_loss(self, instance):
+        return instance.total_delivered_weight - instance.total_mission_weight
+
+    def get_is_different(self, instance):
+        return '是' if instance.total_mission_weight != instance.total_delivered_weight else '不'
+
+    def get_reason(self, instance):
+        pass
+
+    def get_loss_rate(self, instance):
+        loss = instance.total_delivered_weight - instance.total_mission_weight
+        return (loss / instance.total_mission_weight) * 1000
