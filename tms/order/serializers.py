@@ -1271,7 +1271,9 @@ class OrderPaymentStatusSerializer(serializers.ModelSerializer):
 
 
 class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
-
+    """
+    工时统计
+    """
     started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
     worker = serializers.CharField(source='worker.name')
     worker_type = serializers.CharField(source='get_worker_type_display')
@@ -1287,7 +1289,6 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobWorker
         fields = (
-            'id',
             'started_on',
             'worker',
             'worker_type',
@@ -1314,19 +1315,103 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
         return instance.job.stations.count() - 2
 
 
-class ExportReportJobWorkingTimeSerializer(ReportJobWorkingTimeSerializer):
+class JobWorkDiaryReportSerializer(serializers.ModelSerializer):
+    """
+    业务台账统计
+    """
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    loop = serializers.SerializerMethodField()
+    line = serializers.SerializerMethodField()
+    drivers = serializers.SerializerMethodField()
+    escorts = serializers.SerializerMethodField()
+    total_weight = serializers.SerializerMethodField()
+    truck_weight = serializers.FloatField(source='vehicle.total_load')
+    oil_weight = serializers.SerializerMethodField()
+    oil_price = serializers.SerializerMethodField()
+    oil_card_balance = serializers.SerializerMethodField()
+    oil_payment_type = serializers.SerializerMethodField()
+    toll = serializers.SerializerMethodField()
+    etc_card_balance = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+    loading_station = serializers.CharField(source='order.loading_station.name')
+    products = serializers.SerializerMethodField()
+    is_multiple_products = serializers.SerializerMethodField()
+    unloading_station_count = serializers.SerializerMethodField()
 
-    class Meta(ReportJobWorkingTimeSerializer.Meta):
+    class Meta:
+        model = m.Job
         fields = (
             'started_on',
-            'worker',
-            'worker_type',
+            'vehicle',
+            'loop',
+            'line',
+            'drivers',
+            'escorts',
+            'total_mileage',
+            'total_weight',
+            'truck_weight',
+            'total_delivered_weight',
+            'oil_weight',
+            'oil_price',
+            'oil_card_balance',
+            'oil_payment_type',
+            'toll',
+            'etc_card_balance',
+            'total_price',
             'loading_station',
             'products',
             'is_multiple_products',
             'unloading_station_count',
-            'loading_time_duration',
-            'quality_time_duration',
-            'unloading_time_duration',
-            'total_time_duration',
         )
+
+    def get_loop(self, instance):
+        return 1
+
+    def get_line(self, instance):
+        line = [station.station.name for station in instance.jobstation_set.all()]
+        return ' -> '.join(line)
+
+    def get_drivers(self, instance):
+        names = [worker.worker.name for worker in instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER)]
+        return ', '.join(names)
+
+    def get_escorts(self, instance):
+        names = [worker.worker.name for worker in instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT)]
+        return ', '.join(names)
+
+    def get_total_weight(self, instance):
+        return instance.vehicle.total_load + instance.total_delivered_weight
+
+    def get_oil_weight(self, instance):
+        pass
+
+    def get_oil_price(self, instance):
+        pass
+
+    def get_oil_card_balance(self, instance):
+        pass
+
+    def get_oil_payment_type(self, instance):
+        return '壳牌'
+
+    def get_toll(self, instance):
+        pass
+
+    def get_etc_card_balance(self, instance):
+        pass
+
+    def get_total_price(self, instance):
+        pass
+
+    def get_products(self, instance):
+        loading_station = instance.jobstation_set.first()
+        products = loading_station.products.values_list('name', flat=True)
+        return ', '.join(products)
+
+    def get_is_multiple_products(self, instance):
+        loading_station = instance.jobstation_set.first()
+        return '是' if len(loading_station.products.values_list('name', flat=True)) > 1 else '不'
+
+    def get_unloading_station_count(self, instance):
+        return instance.stations.count() - 2

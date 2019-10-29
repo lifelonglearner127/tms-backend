@@ -32,6 +32,9 @@ router.register(
 router.register(
     r'export-job-workers', v.JobWorkerExportViewSet, base_name='export-job-workers'
 )
+router.register(
+    r'export-work-diary', v.JobWorkDiaryExportViewSet, base_name='export-job-diary'
+)
 
 # # /jobs/{job_pk}/stations
 # # /jobs/{job_pk}/stations/{pk}

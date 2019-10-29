@@ -1500,6 +1500,15 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='report/workdiary')
+    def report_workdiary(self, request):
+        page = self.paginate_queryset(m.Job.completed_jobs.all())
+        serializer = s.JobWorkDiaryReportSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
 
 class JobStationViewSet(viewsets.ModelViewSet):
 
@@ -1588,11 +1597,6 @@ class JobReportViewSet(viewsets.ModelViewSet):
             many=True
         )
         return self.get_paginated_response(serializer.data)
-
-        return Response(
-            request.user.report.all()
-        )
-        return request.user
 
 
 class OrderReportViewSet(viewsets.ModelViewSet):
@@ -1744,71 +1748,20 @@ class JobWorkerViewSet(viewsets.ModelViewSet):
 class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
 
     queryset = m.JobWorker.objects.filter(job__progress=c.JOB_PROGRESS_COMPLETE)
-    serializer_class = s.ExportReportJobWorkingTimeSerializer
+    serializer_class = s.ReportJobWorkingTimeSerializer
     pagination_class = None
     renderer_classes = (XLSXRenderer, )
     filename = 'export.xlsx'
-    column_header = {
-        'titles': [
-            '日期',
-            '名称',
-            '分类',
-            '装货地',
-            '货品',
-            '是否混装',
-            '配送油站数量',
-            '装油工时',
-            '质检工时',
-            '卸油工时',
-            '航次所用工时',
-        ],
-        'column_width': [30, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
-        'height': 40,
-        'style': {
-            'fill': {
-                'fill_type': 'solid',
-                'start_color': 'FFCCFFCC',
-            },
-            'alignment': {
-                'horizontal': 'center',
-                'vertical': 'center',
-                'wrapText': True,
-                'shrink_to_fit': True,
-            },
-            'border_side': {
-                'border_style': 'thin',
-                'color': 'FF000000',
-            },
-            'font': {
-                'name': 'Arial',
-                'size': 14,
-                'bold': True,
-                'color': 'FF000000',
-            },
-        }
-    }
+    body = c.EXCEL_BODY_STYLE
 
-    body = {
-        'style': {
-            'alignment': {
-                'horizontal': 'center',
-                'vertical': 'center',
-                'wrapText': True,
-                'shrink_to_fit': True,
-            },
-            'border_side': {
-                'border_style': 'thin',
-                'color': 'FF000000',
-            },
-            'font': {
-                'name': 'Arial',
-                'size': 14,
-                'bold': False,
-                'color': 'FF000000',
-            }
-        },
-        'height': 25,
-    }
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '日期', '名称', '分类', '装货地', '货品', '是否混装', '配送油站数量',
+            '装油工时', '质检工时', '卸油工时', '航次所用工时',
+        ]
+        ret['column_width'] = [30, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
+        return ret
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1824,6 +1777,45 @@ class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
         worker_type = self.request.query_params.get('worker_type', None)
         if worker_type is not None:
             query_filter &= Q(worker_type=worker_type)
+
+        queryset = self.queryset.filter(query_filter)
+
+        return queryset
+
+
+class JobWorkDiaryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.Job.completed_jobs.all()
+    serializer_class = s.JobWorkDiaryReportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '日期', '车牌', '航次', '路线', '驾驶员', '押运员', '里程数',
+            '磅单毛重', '磅单皮重', '磅单净重', '加油数量', '加油费', '油卡余额', '加油类型',
+            '路桥费', '鲁通卡', '总费用', '装货地', '货品', '混装', '站数量',
+        ]
+        ret['column_width'] = [
+            30, 20, 10, 40, 20, 20, 20,
+            20, 20, 20, 20, 20, 20, 20,
+            20, 20, 20, 20, 20, 20, 20,
+        ]
+        return ret
+
+    def get_queryset(self):
+        queryset = self.queryset
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
 
         queryset = self.queryset.filter(query_filter)
 

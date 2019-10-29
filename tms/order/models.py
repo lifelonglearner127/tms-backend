@@ -273,10 +273,6 @@ class Job(models.Model):
         blank=True
     )
 
-    total_weight = models.FloatField(
-        default=0
-    )
-
     total_mileage = models.FloatField(
         default=0
     )
@@ -317,8 +313,29 @@ class Job(models.Model):
     )
 
     @property
+    def total_mission_weight(self):
+        loading_station = self.jobstation_set.first()
+        total_mission_weight = 0
+
+        if loading_station is not None:
+            for product in loading_station.jobstationproduct_set.all():
+                total_mission_weight += product.mission_weight
+
+        return total_mission_weight
+
+    @property
+    def total_delivered_weight(self):
+        total_delivered_weight = 0
+
+        for station in self.jobstation_set.all()[2:]:
+            for product in station.jobstationproduct_set.all():
+                total_delivered_weight += product.weight
+
+        return total_delivered_weight
+
+    @property
     def freight_payment_to_driver(self):
-        return self.total_weight * self.heavy_mileage * 0.4
+        return self.total_mission_weight * self.heavy_mileage * 0.4
 
     @property
     def loading_time_duration(self):
