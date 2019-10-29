@@ -26,7 +26,12 @@ router.register(
 router.register(
     r'order-report', v.OrderReportViewSet, base_name='order-report'
 )
-
+router.register(
+    r'job-workers', v.JobWorkerViewSet, base_name='job-workers'
+)
+router.register(
+    r'export-job-workers', v.JobWorkerExportViewSet, base_name='export-job-workers'
+)
 
 # # /jobs/{job_pk}/stations
 # # /jobs/{job_pk}/stations/{pk}

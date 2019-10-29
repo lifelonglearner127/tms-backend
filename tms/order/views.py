@@ -11,6 +11,8 @@ from rest_framework import viewsets, status
 from rest_framework.generics import DestroyAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_renderer_xlsx.mixins import XLSXFileMixin
+from drf_renderer_xlsx.renderers import XLSXRenderer
 
 # constants
 from ..core import constants as c
@@ -412,8 +414,8 @@ class OrderViewSet(TMSViewSet):
 
         # create job & associated driver and escort instance
         job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids, rest_place=rest_place)
-        m.JobDriver.objects.create(job=job, driver=driver)
-        m.JobEscort.objects.create(job=job, escort=escort)
+        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER)
+        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT)
 
         job_loading_station = m.JobStation.objects.create(
             job=job, station=order.loading_station, step=0
@@ -721,8 +723,8 @@ class JobViewSet(TMSViewSet):
 
         # validate driver
         # driver change and escort change should be in seperate context after the job is started
-        current_driver = job.associated_drivers.first()
-        current_escort = job.associated_escorts.first()
+        current_driver = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker
+        current_escort = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker
 
         try:
             new_driver = User.objects.get(
@@ -981,12 +983,12 @@ class JobViewSet(TMSViewSet):
             )
         else:
             if current_driver != new_driver:
-                m.JobDriver.objects.get(job=job).delete()
-                m.JobDriver.objects.create(job=job, driver=new_driver)
+                m.JobWorker.drivers.get(job=job).delete()
+                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER)
 
             if current_escort != new_escort:
-                m.JobEscort.objects.get(job=job).delete()
-                m.JobEscort.objects.create(job=job, escort=new_escort)
+                m.JobWorker.escorts.get(job=job).delete()
+                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT)
 
             notify_of_driver_or_escort_changes_before_job_start.apply_async(
                 args=[{
@@ -1037,8 +1039,8 @@ class JobViewSet(TMSViewSet):
             args=[{
                 'job': job.id,
                 'vehicle': job.vehicle.plate_num,
-                'driver': job.associated_drivers.first().id,
-                'escort': job.associated_escorts.first().id,
+                'driver': job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.id,
+                'escort': job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker.id,
                 'customer_name': job.order.customer.contacts.first().contact,
                 'customer_mobile': job.order.customer.contacts.first().mobile,
                 'loading_station': job.order.loading_station.address,
@@ -1285,7 +1287,7 @@ class JobViewSet(TMSViewSet):
         this api is used for retrieving the done job in driver app
         """
         page = self.paginate_queryset(
-            m.Job.completed_jobs.filter(associated_drivers=request.user)
+            m.Job.completed_jobs.filter(associated_workers=request.user)
         )
 
         serializer = s.JobDoneSerializer(
@@ -1298,7 +1300,7 @@ class JobViewSet(TMSViewSet):
         """
         this api is used for retrieving the current job in driver app
         """
-        job = m.Job.progress_jobs.filter(associated_drivers=request.user).first()
+        job = m.Job.progress_jobs.filter(associated_workers=request.user).first()
         if job is not None:
             ret = s.JobCurrentSerializer(job).data
         else:
@@ -1315,7 +1317,7 @@ class JobViewSet(TMSViewSet):
         this api is used for retrieving future jobs in driver app
         """
         page = self.paginate_queryset(
-            m.Job.pending_jobs.filter(associated_drivers=request.user)
+            m.Job.pending_jobs.filter(associated_workers=request.user)
         )
 
         serializer = s.JobFutureSerializer(page, many=True)
@@ -1338,7 +1340,7 @@ class JobViewSet(TMSViewSet):
             )
 
         # driver cannot perform more than 2 jobs
-        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_drivers=request.user).exists():
+        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=request.user).exists():
             return Response(
                 {'error': 'Cannot proceed more than 2 jobs simultaneously'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -1358,7 +1360,7 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
 
-            job_driver = m.JobDriver.objects.get(job=job, driver=request.user)
+            job_driver = m.JobWorker.objects.get(job=job, worker=request.user)
             job_driver.started_on = timezone.now()
             job_driver.save()
 
@@ -1397,7 +1399,7 @@ class JobViewSet(TMSViewSet):
                     job.progress = c.JOB_PROGRESS_COMPLETE
                     job.finished_on = timezone.now()
 
-                    job_driver = m.JobDriver.objects.get(job=job, driver=request.user)
+                    job_driver = m.JobWorker.drivers.get(job=job, worker=request.user)
                     job_driver.finished_on = timezone.now()
                     job_driver.save()
 
@@ -1704,3 +1706,125 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
             s.OrderPaymentSerializer(instance).data,
             status=status.HTTP_200_OK
         )
+
+
+class JobWorkerViewSet(viewsets.ModelViewSet):
+
+    queryset = m.JobWorker.objects.filter(job__progress=c.JOB_PROGRESS_COMPLETE)
+
+    def get_queryset(self):
+        queryset = self.queryset
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        worker_type = self.request.query_params.get('worker_type', None)
+        if worker_type is not None:
+            query_filter &= Q(worker_type=worker_type)
+
+        queryset = self.queryset.filter(query_filter)
+
+        return queryset
+
+    @action(detail=False, url_path='report-time')
+    def report_time(self, request):
+        page = self.paginate_queryset(self.get_queryset())
+        serializer = s.ReportJobWorkingTimeSerializer(
+            page,
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
+
+class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.JobWorker.objects.filter(job__progress=c.JOB_PROGRESS_COMPLETE)
+    serializer_class = s.ExportReportJobWorkingTimeSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    column_header = {
+        'titles': [
+            '日期',
+            '名称',
+            '分类',
+            '装货地',
+            '货品',
+            '是否混装',
+            '配送油站数量',
+            '装油工时',
+            '质检工时',
+            '卸油工时',
+            '航次所用工时',
+        ],
+        'column_width': [30, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+        'height': 40,
+        'style': {
+            'fill': {
+                'fill_type': 'solid',
+                'start_color': 'FFCCFFCC',
+            },
+            'alignment': {
+                'horizontal': 'center',
+                'vertical': 'center',
+                'wrapText': True,
+                'shrink_to_fit': True,
+            },
+            'border_side': {
+                'border_style': 'thin',
+                'color': 'FF000000',
+            },
+            'font': {
+                'name': 'Arial',
+                'size': 14,
+                'bold': True,
+                'color': 'FF000000',
+            },
+        }
+    }
+
+    body = {
+        'style': {
+            'alignment': {
+                'horizontal': 'center',
+                'vertical': 'center',
+                'wrapText': True,
+                'shrink_to_fit': True,
+            },
+            'border_side': {
+                'border_style': 'thin',
+                'color': 'FF000000',
+            },
+            'font': {
+                'name': 'Arial',
+                'size': 14,
+                'bold': False,
+                'color': 'FF000000',
+            }
+        },
+        'height': 25,
+    }
+
+    def get_queryset(self):
+        queryset = self.queryset
+        query_filter = Q()
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            query_filter &= Q(started_on__year=year)
+
+        month = self.request.query_params.get('month', None)
+        if month is not None:
+            query_filter &= Q(started_on__month=month)
+
+        worker_type = self.request.query_params.get('worker_type', None)
+        if worker_type is not None:
+            query_filter &= Q(worker_type=worker_type)
+
+        queryset = self.queryset.filter(query_filter)
+
+        return queryset

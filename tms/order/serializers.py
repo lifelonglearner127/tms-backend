@@ -1272,19 +1272,25 @@ class OrderPaymentStatusSerializer(serializers.ModelSerializer):
 
 class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
 
-    created = serializers.DateTimeField(format='%Y-%m-%d', required=False)
-    workers = serializers.SerializerMethodField()
-    loading_station = serializers.CharField(source='order.loading_station.name')
+    started_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    worker = serializers.CharField(source='worker.name')
+    worker_type = serializers.CharField(source='get_worker_type_display')
+    loading_station = serializers.CharField(source='job.order.loading_station.name')
     products = serializers.SerializerMethodField()
     is_multiple_products = serializers.SerializerMethodField()
     unloading_station_count = serializers.SerializerMethodField()
+    loading_time_duration = serializers.FloatField(source='job.loading_time_duration')
+    quality_time_duration = serializers.FloatField(source='job.quality_time_duration')
+    unloading_time_duration = serializers.FloatField(source='job.unloading_time_duration')
+    total_time_duration = serializers.FloatField(source='job.total_time_duration')
 
     class Meta:
-        model = m.Job
+        model = m.JobWorker
         fields = (
             'id',
             'started_on',
-            'workers',
+            'worker',
+            'worker_type',
             'loading_station',
             'products',
             'is_multiple_products',
@@ -1295,16 +1301,32 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
             'total_time_duration',
         )
 
-    def get_workers(self, instance):
-        return instance.associated_workers.values_list('name', flat=True)
-
     def get_products(self, instance):
-        loading_station = instance.jobstation_set.first()
-        return loading_station.products.values_list('name', flat=True)
+        loading_station = instance.job.jobstation_set.first()
+        products = loading_station.products.values_list('name', flat=True)
+        return ', '.join(products)
 
     def get_is_multiple_products(self, instance):
-        loading_station = instance.jobstation_set.first()
+        loading_station = instance.job.jobstation_set.first()
         return '是' if len(loading_station.products.values_list('name', flat=True)) > 1 else '不'
 
     def get_unloading_station_count(self, instance):
-        return instance.stations.count() - 2
+        return instance.job.stations.count() - 2
+
+
+class ExportReportJobWorkingTimeSerializer(ReportJobWorkingTimeSerializer):
+
+    class Meta(ReportJobWorkingTimeSerializer.Meta):
+        fields = (
+            'started_on',
+            'worker',
+            'worker_type',
+            'loading_station',
+            'products',
+            'is_multiple_products',
+            'unloading_station_count',
+            'loading_time_duration',
+            'quality_time_duration',
+            'unloading_time_duration',
+            'total_time_duration',
+        )
