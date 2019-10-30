@@ -193,7 +193,7 @@ class VehicleViewSet(TMSViewSet):
     def get_all_vehicles_status(self, request):
         ret = []
 
-        for vehicle in m.Vehicle.objects.all():
+        for vehicle in m.Vehicle.objects.order_by('plate_num'):
             bind = m.VehicleDriverDailyBind.objects.filter(
                 vehicle=vehicle
             ).first()

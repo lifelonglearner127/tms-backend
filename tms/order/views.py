@@ -1406,7 +1406,7 @@ class JobViewSet(TMSViewSet):
                     # update job empty mileage
                     loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
 
-                    queries = {
+                    empty_mileage_queries = {
                         'plate_num':
                             job.vehicle.plate_num,
                         'from':
@@ -1416,14 +1416,7 @@ class JobViewSet(TMSViewSet):
                                 '%Y-%m-%d %H:%M:%S'
                             )
                     }
-                    data = G7Interface.call_g7_http_interface(
-                        'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-                        queries=queries
-                    )
-                    job.empty_mileage = data['total_mileage'] / (100 * 1000)
-
-                    # update job heavy mileage
-                    queries = {
+                    heavy_mileage_queries = {
                         'plate_num':
                             job.vehicle.plate_num,
                         'from':
@@ -1435,7 +1428,24 @@ class JobViewSet(TMSViewSet):
                                 '%Y-%m-%d %H:%M:%S'
                             )
                     }
-                    job.heavy_mileage = data['total_mileage'] / (100 * 1000)
+                    try:
+                        data = G7Interface.call_g7_http_interface(
+                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                            queries=empty_mileage_queries
+                        )
+                        job.empty_mileage = data['total_mileage'] / (100 * 1000)
+                        data = G7Interface.call_g7_http_interface(
+                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                            queries=heavy_mileage_queries
+                        )
+                        empty_mileage = data['total_mileage'] / (100 * 1000)
+                        heavy_mileage = data['total_mileage'] / (100 * 1000)
+                    except Exception:
+                        empty_mileage = 0
+                        heavy_mileage = 0
+
+                    job.empty_mileage = empty_mileage
+                    job.heavy_mileage = heavy_mileage
                     job.total_mileage = job.empty_mileage + job.heavy_mileage
                     job.highway_mileage = 0
                     job.normalway_mileage = 0
