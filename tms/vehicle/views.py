@@ -56,7 +56,13 @@ class VehicleViewSet(TMSViewSet):
         This api endpoint will be used for getting vehicle and binded drivers and escorts
         When the user click the vehicle input box on arrange edit view on the front end
         """
-        page = self.paginate_queryset(self.queryset)
+        vehicle = request.query_params.get('vehicle', '')
+        queryset = self.queryset
+        if vehicle:
+            queryset = queryset.filter(plate_num__contains=vehicle)
+
+        page = self.paginate_queryset(queryset)
+
         serializer = s.VehicleBindDetailSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 

@@ -118,8 +118,9 @@ class StaffProfileViewSet(TMSViewSet):
         """
         ret = []
         user_type = request.query_params.get('user_type', 'D')
+        name = request.query_params.get('name', '')
         page = self.paginate_queryset(
-            m.StaffProfile.objects.filter(user__user_type=user_type)
+            m.StaffProfile.objects.filter(user__user_type=user_type, user__name__contains=name)
         )
 
         for instance in page:
