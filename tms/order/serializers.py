@@ -825,24 +825,47 @@ class JobDoneSerializer(serializers.ModelSerializer):
             'unloading_stations': []
         }
 
+        # this code is really redundant, I know about it, but this is the kind request from app dev
+        loading_checks = []
+        for product in instance.products:
+            try:
+                loading_check = m.LoadingStationProductCheck.objects.get(job=instance, product=product)
+                loading_checks.append(loading_check)
+            except m.LoadingStationProductCheck.DoesNotExist:
+                loading_checks.append({
+                    'job': instance,
+                    'product': product,
+                    'weight': 0
+                })
+
         ret['loading_station']['loading_checks'] = LoadingStationProductCheckSerializer(
-            instance.loading_checks.all(), context={'request': self.context.get('request')}, many=True
+            loading_checks, context={'request': self.context.get('request')}, many=True
         ).data
+
+        # this is the original code of above app dev request.
+        # ret['loading_station']['loading_checks'] = LoadingStationProductCheckSerializer(
+        #     instance.loading_checks.all(), context={'request': self.context.get('request')}, many=True
+        # ).data
 
         quality_station = job_stations[1]
         for product in quality_station.jobstationproduct_set.all():
             quality_check = instance.quality_checks.filter(branch=product.branch).first()
 
-            if quality_check is None:
-                continue
+            # actually there is no need to send empty quality check, but this is the kind request from app dev
+            if quality_check is not None:
+                density = quality_check.density
+                additive = quality_check.additive
+            else:
+                density = 0
+                additive = 0
 
             ret['quality_station']['branches'].append({
                 'branch': product.branch,
                 'product': ProductNameSerializer(product.product).data,
                 'weight': product.weight,
                 'due_time': product.due_time,
-                'density': quality_check.density,
-                'additive': quality_check.additive,
+                'density': density,
+                'additive': additive,
                 'volume': product.volume,
                 'man_hole': product.man_hole,
                 'branch_hole': product.branch_hole,
@@ -1168,8 +1191,14 @@ class LoadingStationProductCheckSerializer(serializers.ModelSerializer):
         )
 
     def get_images(self, instance):
+        # following 3 line checks are essentially not required, it is the kind request from app developer
+        if type(instance) is dict:
+            images = []
+        else:
+            images = instance.images.all()
+
         return ShortLoadingStationDocumentSerializer(
-            instance.images.all(),
+            images,
             context={'request': self.context.get('request')},
             many=True
         ).data

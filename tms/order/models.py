@@ -313,6 +313,11 @@ class Job(models.Model):
     )
 
     @property
+    def products(self):
+        loading_station = self.jobstation_set.first()
+        return loading_station.products.all()
+
+    @property
     def total_mission_weight(self):
         loading_station = self.jobstation_set.first()
         total_mission_weight = 0
