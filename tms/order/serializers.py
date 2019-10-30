@@ -666,7 +666,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         branch['mission_weight'] += job_station_product.mission_weight
                         branch['unloading_stations'].append({
                             'unloading_station': StationLocationSerializer(job_station.station).data,
-                            'due_time': job_station.due_time,
+                            'due_time': job_station_product.due_time,
                             'mission_weight': job_station_product.mission_weight
                         })
                         break
