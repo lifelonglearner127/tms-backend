@@ -1399,9 +1399,15 @@ class JobViewSet(TMSViewSet):
                     job.progress = c.JOB_PROGRESS_COMPLETE
                     job.finished_on = timezone.now()
 
-                    job_driver = m.JobWorker.drivers.get(job=job, worker=request.user)
-                    job_driver.finished_on = timezone.now()
-                    job_driver.save()
+                    try:
+                        job_driver = m.JobWorker.drivers.get(job=job, worker=request.user)
+                        job_driver.finished_on = timezone.now()
+                        job_driver.save()
+                        job_escort = m.JobWorker.escorts.get(job=job, worker=request.user)
+                        job_escort.finished_on = timezone.now()
+                        job_escort.save()
+                    except m.JobWorker.DoesNotExist:
+                        pass
 
                     # update job empty mileage
                     loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
