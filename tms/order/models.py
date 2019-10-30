@@ -315,7 +315,7 @@ class Job(models.Model):
     @property
     def products(self):
         loading_station = self.jobstation_set.first()
-        return loading_station.products.all()
+        return loading_station.products.distinct()
 
     @property
     def total_mission_weight(self):
