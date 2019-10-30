@@ -85,6 +85,10 @@ class Vehicle(TimeStampedModel):
         default=0
     )
 
+    tank_volume = models.FloatField(
+        default=0
+    )
+
     affiliation_unit = models.CharField(
         max_length=100,
         null=True,
@@ -228,7 +232,7 @@ class Vehicle(TimeStampedModel):
 
     # Position Information
     branches = ArrayField(
-        models.PositiveIntegerField()
+        models.FloatField()
     )
 
     # Hardware Information

@@ -958,7 +958,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
         routes = m.Route.objects.filter(id__in=instance.routes)
         for route in routes:
             total_distance += route.distance
-        return total_distance
+        return round(total_distance, 1)
 
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
@@ -1228,6 +1228,9 @@ class OrderReportSerializer(serializers.ModelSerializer):
 
 class OrderPaymentSerializer(serializers.ModelSerializer):
 
+    job_started_on = serializers.DateTimeField(
+        format='%Y-%m-%d', source='job_station.job.started_on'
+    )
     vehicle = ShortVehiclePlateNumSerializer(source='job_station.job.vehicle')
     invoice_ticket = serializers.BooleanField(source='job_station.job.order.invoice_ticket', read_only=True)
     customer = serializers.CharField(source='job_station.job.order.customer.name', read_only=True)
@@ -1242,6 +1245,7 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
         model = m.OrderPayment
         fields = (
             'id',
+            'job_started_on',
             'vehicle',
             'distance',
             'adjustment',
