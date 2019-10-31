@@ -67,23 +67,26 @@ class ObtainJWTSerializer(serializers.Serializer):
     password = serializers.CharField(
         style={'input_type': 'password'}
     )
-    user_type = serializers.CharField()
+    user_type = serializers.CharField(required=False)
     device_token = serializers.CharField(required=False)
 
     def validate(self, attrs):
+        user_type = attrs.pop('user_type', '')
         credentials = {
             'username': attrs.get('username'),
             'password': attrs.get('password'),
-            'user_type': attrs.get('user_type')
         }
+
+        if user_type:
+            credentials['user_type'] = user_type
 
         if all(credentials.values()):
             credentials['device_token'] = attrs.get('device_token', None)
             user = authenticate(**credentials)
 
             if user:
-                if not user.is_active:
-                    msg = 'User account is disabled.'
+                if not user_type and user.user_type not in [c.USER_TYPE_ADMIN, c.USER_TYPE_STAFF]:
+                    msg = 'Only admin and staff user types can access to website'
                     raise serializers.ValidationError(msg)
 
                 payload = utils.jwt_payload_handler(user)

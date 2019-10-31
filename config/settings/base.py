@@ -86,7 +86,6 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'account.User'
 AUTHENTICATION_BACKENDS = [
     'tms.account.backends.TMSAuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend'
 ]
 
 
