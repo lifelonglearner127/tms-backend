@@ -15,7 +15,7 @@ from ..core.redis import r
 
 # models
 from . import models as m
-from .utils import get_branches
+from ..core.utils import get_branches
 from ..account.models import User
 from ..notification.models import Notification
 # from ..vehicle.models import Vehicle

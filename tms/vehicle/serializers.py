@@ -13,7 +13,7 @@ from ..account.serializers import MainUserSerializer
 from ..info.serializers import StationLocationSerializer, StationNameSerializer
 
 # other
-from ..g7.interfaces import G7Interface
+from ..core import utils
 
 
 class FuelConsumptionSerializer(serializers.ModelSerializer):
@@ -482,35 +482,11 @@ class ShortTireManagementHistorySerializer(serializers.ModelSerializer):
         if instance.mileage is not None:
             return instance.mileage
         else:
-            plate_num = instance.vehicle_tire.vehicle.plate_num
-            from_datetime = instance.installed_on
-            middle_datetime = from_datetime
-            to_datetime = timezone.now()
-            total_mileage = 0
-            while True:
-                if to_datetime > from_datetime + timedelta(days=30):
-                    middle_datetime = from_datetime + timedelta(days=30)
-                else:
-                    middle_datetime = to_datetime
-
-                queries = {
-                    'plate_num': plate_num,
-                    'from': from_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-                    'to': middle_datetime.strftime('%Y-%m-%d %H:%M:%S')
-                }
-                data = G7Interface.call_g7_http_interface(
-                    'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-                    queries=queries
-                )
-                if data is not None:
-                    total_mileage += data.get('total_mileage', 0) / (100 * 1000)   # calculated in km
-
-                from_datetime = middle_datetime
-
-                if middle_datetime == to_datetime:
-                    break
-
-            return total_mileage
+            return utils.get_mileage(
+                instance.vehicle_tire.vehicle.plate_num,
+                instance.installed_on,
+                timezone.now()
+            )
 
 
 class ShortVehicleTireSerializer(serializers.ModelSerializer):

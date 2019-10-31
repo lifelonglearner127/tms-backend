@@ -44,7 +44,7 @@ from .tasks import (
     notify_of_driver_or_escort_changes_before_job_start
 )
 
-from .utils import get_branches
+from ..core.utils import get_branches
 
 
 class OrderCartViewSet(TMSViewSet):
