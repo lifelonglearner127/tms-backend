@@ -1,155 +1,42 @@
 # tms-backend
 Vehicle Management System
-- [Development](#development)
-- [Deployment](#deployment)
-  - [Deploy to Heroku](#deploy-to-heroku)
-  - [Deploy to Alibaba](#deploy-to-alibaba)
-- [About Project](#about-project)
-  - [asgimqtt.py](#asgimqtt.py)
+- [Introduction](#introduction)
+- [Important Notes](#important-notes)
+- [More docs](doc/README)
+    - [About Project](doc/project)
+    - [Development](doc/development)
+    - [Deployment](doc/deployment)
+    - [DB](doc/backup)
+- [G7 Sample Request & Response](tms/g7/ReadMe)
+> You need to take a look this document step by step before getting started.
 
-## Development
-### Prequisites
- - Postgresql
- - Python3.6
- - virtualenv
+### Introduction
+> This system is based on micro-service architecture and this code repository contains backend. You can find the front end code at [here](https://github.com/lifelonglearner127/tms-frontend)
 
-### Install & Configure Postgresql
-Please refer to this [link](https://www.postgresql.org/download/) to install Postgresql
+This system manages the trucks equipped with [G7](https://www.g7.com.cn/) device. G7 devices upload the various sensor data based on MQTT protocol to G7 Cloud server. We can get uploaded data from G7 Cloud Server using REST API and Push. You can see all functionalities G7 provided at [here](http://openapi.huoyunren.com/app/docopenapi/#/index)
 
-Configure postgresql:
-```
-sudo su postgres
-psql
-CREATE DATABASE database_name;
-CREATE USER my_username WITH PASSWORD 'my_password';
-GRANT ALL PRIVILEGES ON DATABASE "database_name" to my_username;
-```
+This system consist of following functionalities.
+ - Monitoring(实时监控)
+ - Order(订单管理)
+ - Routing(行程管理)
+ - Workdiary(工作单)
+ - Report(系统报表)
+ - Financial management(财务管理)
+ - Vehicle Management(车辆管理)
+ - Business workflow(业务处理)
+ - Security(安全管理)
+ - Company Policy(公司制度管理)
+ - Warehouse(仓库管理)
+ - Basic Setting(基础数据)
+ - Company Management(公司管理)
+> This is based on customer requirements so my backend project do not rely on this structure
 
-### Clone and installing project into local
-```
-git clone git@github.com:lifelonglearner127/tms-backend.git
-cd tms-backend
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-Configure Environment Variables
-```
-cd tms-backend
-cp .env.example .env
-```
-
-Running Locally
-```
-export DJANGO_SETTINGS_MODULE=config.settings.local
-python manage.py migrate
-python manage.py runserver
-```
-
-
-## Deployment
-### Deploy to Heroku
-```
-heroku create tms-backend
-heroku config:set DJANGO_SETTINGS_MODULE='config.settings.staging_heroku'
-git push heroku master
-```
-
-
-### Deploy to Alibaba Cloud
-1. In order to deploy django app to Alibaba Cloud, we need to intall Prerequisites.
- - Python & Pip & Virtualenv
-```
-sudo apt-get install python-pip
-sudo pip install virtualenv
-```
-> Important! Please double check python version before installing Prerequisites. This part can be skipped if these prerequisites are already installed.
- 
- - Nginx
-```
-sudo apt-get install nginx
-```
-> Important! This part can be skipped if these prerequisites are already installed.
- 
- - [Install Postgresql](https://www.postgresql.org/download/)
-```
-sudo su postgres
-psql
-CREATE DATABASE tms;
-CREATE USER dev WITH PASSWORD 'admin123';
-GRANT ALL PRIVILEGES ON DATABASE "tms" to dev;
-```
-
- - [Install RabbitMQ]
- ```
- sudo apt-get install rabbitmq-server
- ```
-> Important! This part can be skipped if these prerequisites are already installed.
-
-2. Clone and setup db
-```
-mkdir ~/.virtualenvs && cd ~/.virtualenvs
-virtualenv tms-backend
-source tms-backend/bin/activate
-cd ~ && mkdir Projects && cd Projects && git clone https://github.com/lifelonglearner127/tms-backend.git
-cd tms-backend && pip install -r requirements.txt
-export DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba
-cp .env.example .env
-python manage.py collectstatic
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-3. Configure wsgi & asgi & nginx
- - Configure Nginx
-```
-cp deploy/tms_backend.conf /etc/nginx/sites-available/
-ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
-systemctl restart nginx
-```
-
- - Configure Daphne service unit
-```
-cp deploy/daphne.service /lib/systemd/system/
-docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
-```
-
- - Configure Uwsgi service unit
- ```
-cp deploy/tms_backend.ini /etc/uwsgi/sites/
-cp deploy/uwsgi.service /lib/systemd/system/
- ```
-
- - Configure G7 service unit
-```
-cp deploy/g7.service /lib/systemd/system/
-```
-
- - Configure Celery Worker
-```
-cp deploy/tms_celery.service /lib/systemd/system/
-```
-
-5. Explanation
-Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.
-Check the `deploy` folder
- - Debugging Enter & Exit Area
-```
-python mqtt/asgimqtt.py --settings .env --debug config.asgi:channel_layer
-```
-
-
-## About Project
-### asgimqtt.py
-asgimqtt.py is a MQTT interface from ASGI. It connects to G7 MQTT Server and receives real-time vehicle positioning data published by G7.
-
-- `Functionalities`:
-  - Send vehicle positioning data to Django Channel Layres
-  - Monitor the entry enter & exit by calculating longitude and latitude between vehicle and stations
-  - At first, I tried to query station position data from db when mqtt client receive poition data. But G7 server publish the data every seconds(of course, it can be adjusted on our side). Querying db every second was redundant and useless. So in order to improve the performance, I load station position data into our variables at the first beginning of the process startup or when the station data are updated.
- 
-- `Why I don't use Redis?`
-  - This is because redis is `key-value` in-memory database, (de)serializing the station data might be time-consuming. When we have large data, (de)serializing might be longer than db query time.
-
-> `TODO`: Try to import arguments from .env file
+### Important Notes
+ - Monitoring
+    - G7 positioning data is based on WGS84(international coordinates) so please confirm your map coordination system with G7 coordinates.
+    - Take a look at following urls
+        - [G7 Positioning Data](http://openapi.huoyunren.com/app/docopenapi/#/productCenter/pushApi/detail?code=location&mqttPush=1&httpPush=1&desc=%E8%AE%BE%E5%A4%87%E4%B8%8A%E4%BC%A0%E7%9A%84%E8%BD%A6%E8%BE%86GPS%E5%AE%9A%E4%BD%8D%E6%95%B0%E6%8D%AE%28%E7%BB%8F%E7%BA%AC%E5%BA%A6%E6%95%B0%E6%8D%AE%29,%E6%95%B0%E6%8D%AE%E9%87%8F%E6%AF%94%E8%BE%83%E5%A4%A7)
+        - [Gaode Map Coordination Coverision](https://lbs.amap.com/api/javascript-api/guide/transform/convertfrom)
+ - Order
+ - Routing
+ - Workdiary
