@@ -608,6 +608,10 @@ class JobStation(models.Model):
             step=self.step-1
         ).first()
 
+    @property
+    def due_time(self):
+        return self.jobstationproduct_set.first().due_time
+
     class Meta:
         ordering = ['job', 'step']
 

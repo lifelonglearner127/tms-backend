@@ -575,12 +575,21 @@ class ShortJobStationSerializer(serializers.ModelSerializer):
     products = ShortJobStationProductSerializer(
         source='jobstationproduct_set', many=True, read_only=True
     )
+    due_time = serializers.SerializerMethodField()
 
     class Meta:
         model = m.JobStation
         fields = (
-            'id', 'station', 'products'
+            'id', 'station', 'products', 'due_time',
         )
+
+    def get_due_time(self, instance):
+        if instance.step > 1:
+            due_time = instance.due_time
+        else:
+            due_time = instance.job.order.loading_due_time
+
+        return due_time.strftime('%Y-%m-%d')
 
 
 class JobStationTimeSerializer(serializers.ModelSerializer):
