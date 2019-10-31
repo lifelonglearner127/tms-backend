@@ -408,6 +408,23 @@ class BasicRequestViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="me/associated")
+    def get_associated_requests(self, request):
+        associated = request.query_params.get('associated', '')
+        query_filter = Q(requester=request.user)
+        if associated == 'completed':
+            query_filter &= Q(approved=True)
+        elif associated == 'pending':
+            query_filter &= Q(approved=None)
+        elif associated == 'declined':
+            query_filter &= Q(approved=False)
+        elif associated == 'cc':
+            query_filter &= Q(ccs=request.user)
+
+        queryset = m.BasicRequest.objects.filter(query_filter)
+        page = self.paginate_queryset(queryset)
+        return self.get_paginated_response(s.BasicRequestSerializer(page, many=True).data)
+
     @action(detail=False, url_path="me")
     def get_my_requests(self, request):
         """
