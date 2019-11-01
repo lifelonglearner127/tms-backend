@@ -1345,8 +1345,7 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
         )
 
     def get_products(self, instance):
-        loading_station = instance.job.jobstation_set.first()
-        products = loading_station.products.values_list('name', flat=True)
+        products = instance.job.products.values_list('name', flat=True)
         return ', '.join(products)
 
     def get_is_multiple_products(self, instance):
@@ -1447,8 +1446,7 @@ class JobWorkDiaryReportSerializer(serializers.ModelSerializer):
         pass
 
     def get_products(self, instance):
-        loading_station = instance.jobstation_set.first()
-        products = loading_station.products.values_list('name', flat=True)
+        products = instance.products.values_list('name', flat=True)
         return ', '.join(products)
 
     def get_is_multiple_products(self, instance):
