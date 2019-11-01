@@ -1,5 +1,4 @@
 from django.utils import timezone
-from datetime import timedelta
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..core import constants as c

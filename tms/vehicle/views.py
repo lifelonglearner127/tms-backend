@@ -650,6 +650,28 @@ class VehicleViewSet(TMSViewSet):
                 status=status.HTTP_200_OK
             )
 
+    @action(detail=False, methods=['get'], url_path="unbinded-vehicles")
+    def get_unbinded_vehicles(self, request):
+        vehicle_ids = m.VehicleDriverEscortBind.objects.values_list('vehicle')
+        vehicles = m.Vehicle.objects.exclude(id__in=vehicle_ids)
+        return Response(
+            s.ShortVehiclePlateNumSerializer(vehicles, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['get'], url_path="unbinded-driversandescorts")
+    def get_unbinded_drivers_and_escorts(self, request):
+        user_ids = []
+        user_escort_ids = m.VehicleDriverEscortBind.objects.values_list('driver', 'escort')
+        for user_id, escort_id in user_escort_ids:
+            user_ids.extend([user_id, escort_id])
+
+        users = m.User.wheels.exclude(id__in=user_ids)
+        return Response(
+            s.MainUserSerializer(users, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
 
 class VehicleCheckItemViewSet(TMSViewSet):
 
