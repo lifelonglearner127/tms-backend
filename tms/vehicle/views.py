@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -436,9 +437,19 @@ class VehicleViewSet(TMSViewSet):
                 status=status.HTTP_200_OK
             )
 
-        vehicle_check, created = m.VehicleCheckHistory.objects.get_or_create(
-            vehicle=vehicle, driver=request.user, before_driving_checked_time__gt=bind.get_on
-        )
+        vehicle_check = m.VehicleCheckHistory.objects.filter(
+            Q(before_driving_checked_time__gt=bind.get_on) |
+            Q(driving_checked_time__gt=bind.get_on) |
+            Q(after_driving_checked_time__gt=bind.get_on),
+            vehicle=vehicle,
+            driver=request.user,
+        ).first()
+
+        if vehicle_check is None:
+            vehicle_check = m.VehicleCheckHistory.objects.create(
+                vehicle=vehicle,
+                driver=request.user
+            )
 
         items = request.data.pop('items')
         images = request.data.pop('images', [])

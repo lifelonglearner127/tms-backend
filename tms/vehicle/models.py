@@ -541,7 +541,7 @@ class VehicleCheckHistory(TimeStampedModel):
     )
 
     class Meta:
-        ordering = ['driver', '-before_driving_checked_time']
+        ordering = ['driver', '-updated']
 
 
 class VehicleCheckDocument(models.Model):
