@@ -41,31 +41,25 @@ class Config:
     TEST_MODE = False
     VEHICLE_OUT_AREA = 0
     VEHICLE_IN_AREA = 1
-    ENTER_STATION_EVENT = 4
-    EXIT_STATION_EVENT = 5
-    ENTER_BLACK_DOT_EVENT = 6
-    EXIT_BLACK_DOT_EVENT = 7
+    ENTER_STATION_EVENT = 3
+    EXIT_STATION_EVENT = 4
+    ENTER_BLACK_DOT_EVENT = 5
+    EXIT_BLACK_DOT_EVENT = 6
 
-    # this sql is used for retrieving vehicle-driving driver&escort channel and device token
     CHANNEL_NAME_QUERY = """
         SELECT au.id, au.channel_name, au.device_token
-        FROM (
-            SELECT *
-            FROM vehicle_vehicledriverdailybind vdb
-            WHERE get_off IS NULL
-        ) AS tmp
-        LEFT JOIN vehicle_vehicle vv ON tmp.vehicle_id = vv.id
-        LEFT JOIN account_user au ON tmp.driver_id = au.id
-        WHERE vv.plate_num='{}'
+        FROM account_user au
+        LEFT JOIN order_vehicleuserbind ovub ON ovub.driver_id=au.id
+        LEFT JOIN vehicle_vehicle vv ON vv.id=ovub.vehicle_id
+        where vv.plate_num='{}'
         """
 
-    # this sql is used for retriving job progress and next station location
-    VEHICLES_JOBS_QUERY = """
-        SELECT vv.plate_num, tmp.*
+    VEHICLES_JOBS_QUERY1 = """
+        SELECT vv.plate_num, tmp2.*, ovub.bind_method
         FROM vehicle_vehicle vv
         LEFT JOIN (
-            SELECT oo.is_same_station, oj.progress, oj.id, ojs.step, ist.id,
-            ist.longitude, ist.latitude, ist.radius,oj.vehicle_id
+            SELECT oj.vehicle_id, oo.is_same_station, oj.progress,
+                tmp.*
             FROM (
                 SELECT id, order_id, vehicle_id, progress
                 FROM order_job
@@ -73,15 +67,45 @@ class Config:
             ) oj
             LEFT JOIN order_order oo ON oj.order_id=oo.id
             LEFT JOIN (
-                SELECT DISTINCT ON (job_id) job_id, step,
-                    station_id
-                FROM order_jobstation
-                ORDER BY job_id, is_completed, step
-            ) ojs ON ojs.job_id=oj.id
-            LEFT JOIN info_station ist ON ojs.station_id=ist.id
-        ) as tmp
-        ON vv.id = tmp.vehicle_id
-        WHERE vv.status = 1
+                SELECT ojs.job_id, ojs.step, ist.id, ist.longitude,
+                    ist.latitude, ist.radius
+                FROM (
+                    SELECT DISTINCT ON (job_id) job_id, step,
+                        station_id
+                    FROM order_jobstation
+                    ORDER BY job_id, is_completed, step
+                ) ojs
+                LEFT JOIN info_station ist on ojs.station_id=ist.id
+            ) tmp ON oj.id=tmp.job_id
+        ) tmp2 ON vv.id=tmp2.vehicle_id
+        LEFT JOIN order_vehicleuserbind ovub on vv.id=ovub.vehicle_id;
+    """
+
+    VEHICLES_JOBS_QUERY2 = """
+        SELECT vv.plate_num, tmp2.*, ovub.bind_method
+        FROM vehicle_vehicle vv
+        LEFT JOIN (
+            SELECT oj.vehicle_id, oo.is_same_station, oj.progress,
+                tmp.*
+            FROM (
+                SELECT id, order_id, vehicle_id, progress
+                FROM order_job
+                WHERE progress > 1
+            ) oj
+            LEFT JOIN order_order oo ON oj.order_id=oo.id
+            LEFT JOIN (
+                SELECT ojs.job_id, ojs.step, ist.id, ist.longitude,
+                    ist.latitude, ist.radius
+                FROM (
+                    SELECT DISTINCT ON (job_id) job_id, step,
+                        station_id
+                    FROM order_jobstation
+                    ORDER BY job_id, is_completed, step
+                ) ojs
+                LEFT JOIN info_station ist on ojs.station_id=ist.id
+            ) tmp ON oj.id=tmp.job_id
+        ) tmp2 ON vv.id=tmp2.vehicle_id
+        LEFT JOIN order_vehicleuserbind ovub on vv.id=ovub.vehicle_id;
     """
 
     @classmethod
@@ -136,7 +160,8 @@ class Config:
         is_blackdots_updated = r.get('blackdot') == b'updated'
         is_vehicles_updated = r.get('vehicle') == b'updated'
         updated_jobs = r.smembers('jobs')
-        if not is_blackdots_updated and not is_vehicles_updated and not updated_jobs:
+        if not is_blackdots_updated and not is_vehicles_updated and\
+           not updated_jobs:
             return
 
         try:
@@ -148,7 +173,7 @@ class Config:
                 cursor.execute("""
                     SELECT id, latitude, longitude, radius
                     FROM info_station
-                    WHERE station_type=5
+                    WHERE station_type='B'
                 """)
                 results = cursor.fetchall()
                 for row in results:
@@ -178,32 +203,35 @@ class Config:
                     )
                 current_updated_job_ids = ', '.join(current_updated_jobs)
                 if current_updated_job_ids:
-                    query_str = Config.VEHICLES_JOBS_QUERY.format(
+                    query_str = Config.VEHICLES_JOBS_QUERY1.format(
                         current_updated_job_ids
                     )
-                    cursor.execute(query_str)
-                    results = cursor.fetchall()
-                    for row in results:
-                        cls.vehicles[row[0]] = {
-                            'blackdotposition': cls.VEHICLE_OUT_AREA,
-                            'stationposition': cls.VEHICLE_OUT_AREA,
-                            'is_same_station': row[1],
-                            'progress': row[2],
-                            'job_id': row[3],
-                            'step': row[4],
-                            'station_id': row[5],
-                            'longitude': row[6],
-                            'latitude': row[7],
-                            'radius': row[8]
-                        }
-                    if Config.DEBUG:
-                        print('[Load Data]: ', cls.vehicles)
+                else:
+                    query_str = Config.VEHICLES_JOBS_QUERY2
+                cursor.execute(query_str)
+                results = cursor.fetchall()
+                for row in results:
+                    cls.vehicles[row[0]] = {
+                        'blackdotposition': cls.VEHICLE_OUT_AREA,
+                        'stationposition': cls.VEHICLE_OUT_AREA,
+                        'is_same_station': row[2],
+                        'progress': row[3],
+                        'job_id': row[4],
+                        'step': row[5],
+                        'station_id': row[6],
+                        'longitude': row[7],
+                        'latitude': row[8],
+                        'radius': row[9],
+                        'bind_method': row[10]
+                    }
+                if Config.DEBUG:
+                    print('[Load Data]: ', cls.vehicles)
 
-                    if is_vehicles_updated:
-                        r.set('vehicle', 'read')
+                if is_vehicles_updated:
+                    r.set('vehicle', 'read')
 
-                    for job in current_updated_jobs:
-                        r.srem('jobs', job)
+                for job in current_updated_jobs:
+                    r.srem('jobs', job)
 
             cursor.close()
         except psycopg2.DatabaseError:
@@ -279,7 +307,8 @@ def _on_message(client, userdata, message):
         if plate_num not in Config.vehicles:
             continue
 
-        current_vehicle = Config.vehicles[plate_num]
+        if Config.vehicles[plate_num]['bind_method'] is None:
+            continue
 
         vehicle_pos = (vehicle['lat'], vehicle['lng'])
         if Config.DEBUG:
@@ -309,16 +338,24 @@ def _on_message(client, userdata, message):
                     blackdot['latitude'], blackdot['longitude'],
                     delta_distance
                 ))
-            if delta_distance < blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_OUT_AREA:
-                current_vehicle['blackdotposition'] = Config.VEHICLE_IN_AREA
+            if delta_distance < blackdot['radius'] and\
+               Config.vehicles[plate_num]['blackdotposition'] ==\
+               Config.VEHICLE_OUT_AREA:
+
+                Config.vehicles[plate_num]['blackdotposition'] =\
+                    Config.VEHICLE_IN_AREA
                 enter_exit_event = Config.ENTER_BLACK_DOT_EVENT
                 if Config.DEBUG:
                     print('[GeoPy]: {} enter into ({}, {})'.format(
                         plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
-            if delta_distance > blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_IN_AREA:
-                current_vehicle['blackdotposition'] = Config.VEHICLE_OUT_AREA
+            if delta_distance > blackdot['radius'] and\
+               Config.vehicles[plate_num]['blackdotposition'] ==\
+               Config.VEHICLE_IN_AREA:
+
+                Config.vehicles[plate_num]['blackdotposition'] =\
+                    Config.VEHICLE_OUT_AREA
                 enter_exit_event = Config.EXIT_BLACK_DOT_EVENT
                 if Config.DEBUG:
                     print('[G7]: {} exit from ({}, {})'.format(
@@ -395,14 +432,14 @@ def _on_message(client, userdata, message):
                             )
 
         # check if the vehicle enter or exit next station
-        if current_vehicle['progress'] is None:
+        if Config.vehicles[plate_num]['progress'] is None:
             return
 
         next_station_pos = (
-            current_vehicle['latitude'],
-            current_vehicle['longitude']
+            Config.vehicles[plate_num]['latitude'],
+            Config.vehicles[plate_num]['longitude']
         )
-        next_station_radius = current_vehicle['radius']
+        next_station_radius = Config.vehicles[plate_num]['radius']
         enter_exit_event = 0
 
         if Config.TEST_MODE:
@@ -418,29 +455,33 @@ def _on_message(client, userdata, message):
 
         if Config.DEBUG:
             print('[GeoPy]: Distance with ({}, {}) is {}'.format(
-                current_vehicle['latitude'],
-                current_vehicle['longitude'],
+                Config.vehicles[plate_num]['latitude'],
+                Config.vehicles[plate_num]['longitude'],
                 delta_distance
             ))
 
-        if delta_distance < next_station_radius and \
-           current_vehicle['stationposition'] == Config.VEHICLE_OUT_AREA:
-            current_vehicle['stationposition'] = Config.VEHICLE_IN_AREA
+        if delta_distance < next_station_radius and\
+           Config.vehicles[plate_num]['stationposition'] ==\
+           Config.VEHICLE_OUT_AREA:
+            Config.vehicles[plate_num]['stationposition'] =\
+                Config.VEHICLE_IN_AREA
             enter_exit_event = Config.ENTER_STATION_EVENT
             if Config.DEBUG:
                 print('[GeoPy]: {} enter into ({}, {})'.format(
-                    plate_num, current_vehicle['latitude'],
-                    current_vehicle['longitude']
+                    plate_num, Config.vehicles[plate_num]['latitude'],
+                    Config.vehicles[plate_num]['longitude']
                 ))
 
-        if delta_distance > next_station_radius and \
-           current_vehicle['stationposition'] == Config.VEHICLE_IN_AREA:
-            current_vehicle['stationposition'] = Config.VEHICLE_OUT_AREA
+        if delta_distance > next_station_radius and\
+           Config.vehicles[plate_num]['stationposition'] ==\
+           Config.VEHICLE_IN_AREA:
+            Config.vehicles[plate_num]['stationposition'] =\
+                Config.VEHICLE_OUT_AREA
             enter_exit_event = Config.EXIT_STATION_EVENT
             if Config.DEBUG:
                 print('[G7]: {} exit from ({}, {})'.format(
-                    plate_num, current_vehicle['latitude'],
-                    current_vehicle['longitude']
+                    plate_num, Config.vehicles[plate_num]['latitude'],
+                    Config.vehicles[plate_num]['longitude']
                 ))
 
         if enter_exit_event:
@@ -463,13 +504,14 @@ def _on_message(client, userdata, message):
                 # Get the current job progress
                 cursor.execute("""
                 SELECT progress FROM order_job WHERE id={}
-                """.format(current_vehicle['job_id']))
+                """.format(Config.vehicles[plate_num]['job_id']))
                 current_progress = cursor.fetchone()[0]
-                step = current_vehicle['step']
-                job_id = current_vehicle['job_id']
-                station_id = current_vehicle['station_id']
+                step = Config.vehicles[plate_num]['step']
+                job_id = Config.vehicles[plate_num]['job_id']
+                station_id = Config.vehicles[plate_num]['station_id']
 
-                quality_station_exit = step == 0 and current_vehicle['is_same_station']
+                quality_station_exit = step == 0 and\
+                    Config.vehicles[plate_num]['is_same_station']
                 if enter_exit_event == Config.ENTER_STATION_EVENT:
                     expected_progress = step * 4 + 3
                 elif enter_exit_event == Config.EXIT_STATION_EVENT:
@@ -495,7 +537,8 @@ def _on_message(client, userdata, message):
                         SET progress={}
                         WHERE id={}
                         """.format(expected_progress, job_id))
-                        current_vehicle['progress'] = expected_progress
+                        Config.vehicles[plate_num]['progress'] =\
+                            expected_progress
                         connection.commit()
                     elif enter_exit_event == Config.EXIT_STATION_EVENT:
                         next_step = step + 1
@@ -538,13 +581,14 @@ def _on_message(client, userdata, message):
                                 finished_on=now()
                             WHERE id={}
                             """.format(job_id))
-                            current_vehicle['is_same_station'] = None
-                            current_vehicle['progress'] = None
-                            current_vehicle['job_id'] = None
-                            current_vehicle['step'] = None
-                            current_vehicle['longitude'] = None
-                            current_vehicle['latitude'] = None
-                            current_vehicle['radius'] = None
+                            Config.vehicles[plate_num]['is_same_station'] =\
+                                None
+                            Config.vehicles[plate_num]['progress'] = None
+                            Config.vehicles[plate_num]['job_id'] = None
+                            Config.vehicles[plate_num]['step'] = None
+                            Config.vehicles[plate_num]['longitude'] = None
+                            Config.vehicles[plate_num]['latitude'] = None
+                            Config.vehicles[plate_num]['radius'] = None
                         else:
                             next_step = result[0]
                             next_station_id = result[1]
@@ -562,12 +606,17 @@ def _on_message(client, userdata, message):
                             """.format(next_station_id))
 
                             station_info = cursor.fetchone()
-                            current_vehicle['progress'] = expected_progress
-                            current_vehicle['step'] = next_step
-                            current_vehicle['station_id'] = station_info[0]
-                            current_vehicle['longitude'] = station_info[1]
-                            current_vehicle['latitude'] = station_info[2]
-                            current_vehicle['radius'] = station_info[3]
+                            Config.vehicles[plate_num]['progress'] =\
+                                expected_progress
+                            Config.vehicles[plate_num]['step'] = next_step
+                            Config.vehicles[plate_num]['station_id'] =\
+                                station_info[0]
+                            Config.vehicles[plate_num]['longitude'] =\
+                                station_info[1]
+                            Config.vehicles[plate_num]['latitude'] =\
+                                station_info[2]
+                            Config.vehicles[plate_num]['radius'] =\
+                                station_info[3]
 
                         connection.commit()
 
