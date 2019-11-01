@@ -56,3 +56,8 @@ class TireManagementHistoryAdmin(admin.ModelAdmin):
 @admin.register(m.VehicleDriverEscortBind)
 class VehicleDriverEscortBindBindAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.VehicleViolation)
+class VehicleViolationAdmin(admin.ModelAdmin):
+    pass
