@@ -46,9 +46,15 @@ class StaffProfileViewSet(TMSViewSet):
     def get_queryset(self):
         queryset = self.queryset
 
-        department = self.request.query_params.get('department', None)
-        if department is not None:
-            queryset = queryset.filter(department__id=department)
+        departments = self.request.query_params.get('departments', None)
+        if departments:
+            departments = departments.split(',')
+            departments = [int(department) for department in departments]
+            queryset = queryset.filter(department__id__in=departments)
+
+        name = self.request.query_params.get('name', None)
+        if name is not None:
+            queryset = queryset.filter(user__name__contains=name)
 
         return queryset
 
