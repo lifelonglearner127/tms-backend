@@ -7,7 +7,7 @@ Vehicle Management System
     - [Development](doc/development.md)
     - [Deployment](doc/deployment.md)
     - [DB](doc/backup.md)
-- [G7 Sample Request & Response](tms/g7/ReadMe)
+- [G7 Sample Request & Response](tms/g7/ReadMe.md)
 > You need to take a look this document step by step before getting started.
 
 ### Introduction

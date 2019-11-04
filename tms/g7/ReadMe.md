@@ -5,8 +5,12 @@
  - [Vehicle status inquiry](#vehicle-status-inquiry)
  - [Query vehicle status based on equipment](#query-vehicle-status-based-on-equipment)
  - [Bulk vehicle status inquiry](#bulk-vehicle-status-inquiry)
+G7 provides python SDK it is based on python2 so I needed to make it python3 compatible
 
-## Vehicle history track query
+## [Vehicle history track query](http://openapi.huoyunren.com/app/docopenapi/#/productCenter/restApi/detail?uri=%2Fv1%2Fdevice%2Ftruck%2Fhistory_location&method=GET)
+ - As the name implies, this api endpoint is used to retrieve the specified vehicle track.
+ - In this project, this api is used for playback functionality.
+ > This api needs `from` and `to` as start time and finish time, this interval should be less than 31 days. For example if you want to see the vehicle history track from `2019-01-01` to `2010-02-28`, time delta is over 31 days, so this api return error code. So you need to call this api twice to get the full vehicle history track. G7 support pagination and for more information please take a look at [here](http://openapi.huoyunren.com/app/docopenapi/#/productCenter/restApi/detail?uri=%2Fv1%2Fdevice%2Ftruck%2Fhistory_location&method=GET)
 ### Code
 ```
 from tms.g7.interfaces import G7Interface
@@ -46,7 +50,10 @@ data = G7Interface.call_g7_http_interface(
 }
 ```
 
-## Vehicle GPS total mileage inquiry
+## [Vehicle GPS total mileage inquiry](http://openapi.huoyunren.com/app/docopenapi/#/productCenter/restApi/detail?uri=%2Fv1%2Fdevice%2Ftruck%2Fmileage&method=GET)
+- As the name implies, this api endpoint is used to get mileage
+ - In this project, this api is used for calculating job mileage and vehicle tire running mileage.
+ > This api needs `from` and `to` as start time and finish time, this interval should be less than 31 days. For example if you want to see the vehicle history track from `2019-01-01` to `2010-02-28`, time interval is over 31 days, so this api return error code. So you need to call this api twice to get the total mileage. G7 support pagination and for more information please take a look at [here](http://openapi.huoyunren.com/app/docopenapi/#/productCenter/restApi/detail?uri=%2Fv1%2Fdevice%2Ftruck%2Fmileage&method=GET)
 ### Code
 ```
 from tms.g7.interfaces import G7Interface
@@ -83,6 +90,7 @@ data = G7Interface.call_g7_http_interface(
 ```
 
 ## Vehicle GPS daily mileage inquiry
+ - This api is not used in this project
 ### Code
 ```
 from tms.g7.interfaces import G7Interface
@@ -120,6 +128,9 @@ data = G7Interface.call_g7_http_interface(
 ```
 
 ## Vehicle status inquiry
+ - As the name implies, this api endpoint is used for getting current vehicle status.
+ - In this project, this api is used when the user click the vehicle button on the monitoring view
+ 
 ### Code
 ```
 from tms.g7.interfaces import G7Interface
@@ -177,6 +188,7 @@ data = G7Interface.call_g7_http_interface(
 ```
 
 ## Query vehicle status based on equipment
+ - this api is not used in this project
 ### Code
 ```
 from tms.g7.interfaces import G7Interface
