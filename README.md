@@ -2,11 +2,11 @@
 Vehicle Management System
 - [Introduction](#introduction)
 - [Important Notes](#important-notes)
-- [More docs](doc/README)
-    - [About Project](doc/project)
-    - [Development](doc/development)
-    - [Deployment](doc/deployment)
-    - [DB](doc/backup)
+- [More docs](doc/README.md)
+    - [About Project](doc/project.md)
+    - [Development](doc/development.md)
+    - [Deployment](doc/deployment.md)
+    - [DB](doc/backup.md)
 - [G7 Sample Request & Response](tms/g7/ReadMe)
 > You need to take a look this document step by step before getting started.
 

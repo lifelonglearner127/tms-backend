@@ -10,4 +10,13 @@ asgimqtt.py is a MQTT interface from ASGI. It connects to G7 MQTT Server and rec
 - `Why I don't use Redis?`
   - This is because redis is `key-value` in-memory database, (de)serializing the station data might be time-consuming. When we have large data, (de)serializing might be longer than db query time.
 
-> `TODO`: Try to import arguments from .env file
+- Arguments
+    - `settings`: The location of the django project env file, we need to import some of the environment variables from these file in order to send a notification and db access
+    - `channel_layer`: this is the channel layer referenced in django project
+    - `debug`: Flag to set log level; if it is set, print log
+    - `test`: Flag to set this service test mode
+        if this flag is set to True, this app do not rely on real distance delta(distance between station and vehicle postion), it rely on `blackdot_delta_distance` and `station_delta_distance` in redis
+        ```
+        python mqtt/asgimqtt.py --settings .env config.asgi:channel_layer --debug --test
+        ```
+        - You can use these endpoint to test the black dot and station entry and exit event `test/station-efence` and `test/blackdot-efence`. See the code at `order/views.py`.
