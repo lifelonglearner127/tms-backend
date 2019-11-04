@@ -1,6 +1,6 @@
 ## More documents
 - [About Project](project.md)
-    - This document describes the project structure and 
+    - This document describes the project structure
 - [Development](development.md)
     - This document describes the local development
 - [Deployment](deployment.md)
