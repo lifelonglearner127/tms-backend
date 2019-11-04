@@ -207,13 +207,18 @@ class VehicleViewSet(TMSViewSet):
         ret = []
 
         for vehicle in m.Vehicle.objects.order_by('plate_num'):
-            bind = m.VehicleWorkerBind.objects.filter(
-                vehicle=vehicle
-            ).first()
-            if bind is not None and bind.get_off is None:
-                driver = bind.driver.name
+            driver_bind = m.VehicleWorkerBind.driverbinds.filter(vehicle=vehicle).first()
+            if driver_bind is not None and driver_bind.get_off is None:
+                driver = driver_bind.worker.name
             else:
                 driver = '无司机'
+
+            escort_bind = m.VehicleWorkerBind.escortbinds.filter(vehicle=vehicle).first()
+            if escort_bind is not None and escort_bind.get_off is None:
+                escort = escort_bind.worker.name
+            else:
+                escort = '无押运员'
+
             if vehicle.status == c.VEHICLE_STATUS_UNDER_WHEEL:
                 job = Job.objects.filter(vehicle=vehicle, progress__gt=1).first()
                 if job is not None:
@@ -241,6 +246,7 @@ class VehicleViewSet(TMSViewSet):
             ret.append({
                 'plate_num': vehicle.plate_num,
                 'driver': driver,
+                'escort': escort,
                 'status': status
             })
 

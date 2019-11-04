@@ -113,6 +113,7 @@ class VehiclePositionSerializer(serializers.Serializer):
 class VehicleStatusSerializer(serializers.Serializer):
 
     plate_num = serializers.CharField()
+    escort = serializers.CharField()
     driver = serializers.CharField()
     status = serializers.CharField()
 
