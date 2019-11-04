@@ -1122,6 +1122,7 @@ class JobViewSet(TMSViewSet):
         )
         quality_check.density = request.data.pop('density')
         quality_check.additive = request.data.pop('additive')
+        quality_check.volume = request.data.pop('volume')
         quality_check.save()
 
         job_qualitystation = job.jobstation_set.all()[1]
@@ -1131,7 +1132,6 @@ class JobViewSet(TMSViewSet):
         )
 
         job_qualitystation_product.weight = request.data.pop('weight')
-        job_qualitystation_product.volume = request.data.pop('volume')
         job_qualitystation_product.man_hole = request.data.pop('man_hole')
         job_qualitystation_product.branch_hole = request.data.pop('branch_hole')
         job_qualitystation_product.save()
@@ -1148,7 +1148,7 @@ class JobViewSet(TMSViewSet):
             'branch': branch,
             'density': quality_check.density,
             'additive': quality_check.additive,
-            'volume': job_qualitystation_product.volume,
+            'volume': quality_check.volume,
             'man_hole': job_qualitystation_product.man_hole,
             'branch_hole': job_qualitystation_product.branch_hole,
             'images': s.ShortJobStationProductDocumentSerializer(
@@ -1651,13 +1651,26 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         images = request.data.pop('images', [])
         instance.man_hole = request.data.pop('man_hole', '')
         instance.branch_hole = request.data.pop('branch_hole', '')
-        instance.volume = request.data.pop('volume', 0)
+
+        # check if the requester belongs to which department
+        # if request.user.profile.department.name == '壳牌项目部':
+        #     """
+        #     this department manage the unloading product by volume
+        #     """
+        #     instance.weight = request.data.pop('weight', 0)
+        # elif request.user.profile.department.name == '油品配送部':
+        #     """
+        #     this department manage the unloading product by weight
+        #     """
+        #     instance.weight = request.data.pop('weight', 0)
+
+        instance.weight = request.data.pop('weight', 0)
         instance.save()
 
         # update order product delivered weight
         order = instance.job_station.job.order
         order_product = order.orderproduct_set.filter(product=instance.product).first()
-        order_product.delivered_weight += instance.volume
+        order_product.delivered_weight += instance.weight
         order_product.save()
 
         for image in images:
@@ -1668,7 +1681,7 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
 
         ret = {
             'branch': instance.branch,
-            'volume': instance.volume,
+            'weight': instance.weight,
             'images': s.ShortJobStationProductDocumentSerializer(
                 instance.images.all(),
                 context={'request': request},

@@ -512,7 +512,7 @@ class ShortJobStationProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'id', 'product', 'branch', 'mission_weight', 'volume'
+            'id', 'product', 'branch', 'mission_weight', 'weight'
         )
 
 
@@ -534,7 +534,7 @@ class JobStationUnloadingProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.JobStationProduct
         fields = (
-            'id', 'product', 'volume'
+            'id', 'product', 'weight'
         )
 
 
@@ -751,6 +751,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
     """
     order = ShortOrderSerializer()
     vehicle = ShortVehiclePlateNumSerializer()
+    by_weight = serializers.SerializerMethodField()
     associated_drivers = serializers.SerializerMethodField()
     associated_escorts = serializers.SerializerMethodField()
     branches = serializers.SerializerMethodField()
@@ -765,10 +766,22 @@ class JobDoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Job
         fields = (
-            'id', 'order', 'vehicle', 'associated_drivers', 'associated_escorts', 'branches',
+            'id', 'order', 'vehicle', 'by_weight', 'associated_drivers', 'associated_escorts', 'branches',
             'routes', 'stations', 'costs', 'mileage', 'durations', 'started_on', 'finished_on',
             'is_paid', 'freight_payment_to_driver',
         )
+
+    def get_by_weight(self, instance):
+        ret = True
+        driver = instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first()
+        # check if the requester belongs to which department
+        if driver.worker.profile.department.name == '壳牌项目部':
+            """
+            this department manage the unloading product by volume
+            """
+            ret = False
+
+        return ret
 
     def get_associated_drivers(self, instance):
         return JobWorkerSerializer(
@@ -864,6 +877,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
             if quality_check is not None:
                 density = quality_check.density
                 additive = quality_check.additive
+                volume = quality_check.volume
             else:
                 density = 0
                 additive = 0
@@ -875,7 +889,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
                 'due_time': product.due_time,
                 'density': density,
                 'additive': additive,
-                'volume': product.volume,
+                'volume': volume,
                 'man_hole': product.man_hole,
                 'branch_hole': product.branch_hole,
                 'images': ShortJobStationProductDocumentSerializer(
@@ -897,7 +911,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
                     'branch': product.branch,
                     'product': ProductNameSerializer(product.product).data,
                     'due_time': product.due_time,
-                    'volume': product.volume,
+                    'weight': product.weight,
                     'man_hole': product.man_hole,
                     'branch_hole': product.branch_hole,
                     'images': ShortJobStationProductDocumentSerializer(

@@ -532,6 +532,10 @@ class QualityCheck(models.Model):
         default=0
     )
 
+    volume = models.FloatField(
+        default=0
+    )
+
 
 class JobStation(models.Model):
 
@@ -642,10 +646,6 @@ class JobStationProduct(models.Model):
     )
 
     weight = models.FloatField(
-        default=0
-    )
-
-    volume = models.FloatField(
         default=0
     )
 
