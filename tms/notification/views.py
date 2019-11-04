@@ -7,14 +7,12 @@ from . import serializers as s
 from .permissions import IsMyNotification
 
 
-class NotificationViewSet(mixins.RetrieveModelMixin,
-                          mixins.ListModelMixin,
-                          viewsets.GenericViewSet):
+class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsMyNotification]
     serializer_class = s.NotificationSerializer
 
     def get_queryset(self):
-        return self.request.user.notifications.all()
+        return self.request.user.notifications.filter(is_deleted=False)
 
     @action(detail=True, methods=['post'], url_path='read')
     def read_notification(self, request, pk=None):
@@ -49,6 +47,16 @@ class NotificationViewSet(mixins.RetrieveModelMixin,
                 request.user.notifications.filter(is_read=True).count()
             },
             status=status.HTTP_200_OK
+        )
+
+    def destroy(self, request, pk=None):
+        job = self.get_object()
+        job.is_deleted = True
+        job.save()
+
+        return Response(
+            self.serializer_class(job).data,
+            status=status.HTTP_204_NO_CONTENT
         )
 
 

@@ -21,6 +21,26 @@ class ReadNotificationManager(models.Manager):
         )
 
 
+class DeletedNotificationManager(models.Manager):
+    """
+    Pending Job Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_deleted=True
+        )
+
+
+class AvailableNotificationManager(models.Manager):
+    """
+    Pending Job Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_deleted=False
+        )
+
+
 class ProcessedEventManager(models.Manager):
     """
     Pending Job Manager

@@ -1329,6 +1329,7 @@ class JobViewSet(TMSViewSet):
         this api is used for update progress in driver app
         """
         job = self.get_object()
+        meta_numbers = []
 
         # check if this driver is on vehicle
         vehicle_bind = VehicleDriverDailyBind.objects.filter(vehicle=job.vehicle, driver=request.user).first()
@@ -1371,6 +1372,15 @@ class JobViewSet(TMSViewSet):
             ).first()
 
             sub_progress = (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
+
+            if current_station.previous_station is not None:
+                for product in current_station.previous_station.jobstationproduct_set.all():
+                    meta_numbers.append({
+                        'branch': product.branch,
+                        'man_hole': product.man_hole,
+                        'branch_hole': product.branch_hole
+                    })
+
             if sub_progress == 0:
                 current_station.arrived_station_on = timezone.now()
                 current_station.save()
@@ -1456,22 +1466,20 @@ class JobViewSet(TMSViewSet):
                     job.highway_mileage = 0
                     job.normalway_mileage = 0
                     job.save()
-                    return Response(
-                        {
-                            'progress': c.JOB_PROGRESS_COMPLETE,
-                            'last_progress_finished_on':
-                            last_progress_finished_on
-                        },
-                        status=status.HTTP_200_OK
-                    )
-        job.progress = current_progress + 1
-        job.save()
+
+        if job.progress != c.JOB_PROGRESS_COMPLETE:
+            job.progress = current_progress + 1
+            job.save()
+
+        ret = {
+            'progress': job.progress,
+            'last_progress_finished_on': last_progress_finished_on,
+        }
+        if len(meta_numbers):
+            ret['meta_numbers'] = meta_numbers
 
         return Response(
-            {
-                'progress': job.progress,
-                'last_progress_finished_on': last_progress_finished_on,
-            },
+            ret,
             status=status.HTTP_200_OK
         )
 

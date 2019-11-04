@@ -31,9 +31,15 @@ class Notification(models.Model):
         auto_now_add=True
     )
 
+    is_deleted = models.BooleanField(
+        default=False
+    )
+
     objects = models.Manager()
     unreads = managers.UnreadNotificationManager()
     reads = managers.ReadNotificationManager()
+    availables = managers.AvailableNotificationManager()
+    deletes = managers.DeletedNotificationManager()
 
     class Meta:
         ordering = (

@@ -987,15 +987,11 @@ class JobFutureSerializer(serializers.ModelSerializer):
         ret = []
         loading_station = instance.jobstation_set.all()[0]
         for product in loading_station.jobstationproduct_set.all():
-            for ret_product in ret:
-                if ret_product['product']['id'] == product.product.id:
-                    ret_product['mission_weight'] += product.mission_weight
-                    break
-            else:
-                ret.append({
-                    'product': ProductNameSerializer(product.product).data,
-                    'mission_weight': product.mission_weight
-                })
+            ret.append({
+                'branch': product.branch,
+                'product': ProductNameSerializer(product.product).data,
+                'mission_weight': product.mission_weight
+            })
 
         return ret
 
