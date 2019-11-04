@@ -70,7 +70,12 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
-        page = self.paginate_queryset(m.Vehicle.availables.all())
+        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
+        if is_worker_driver:
+            queryset = m.Vehicle.objects.filter(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON])
+        else:
+            queryset = m.Vehicle.objects.filter(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON])
+        page = self.paginate_queryset(queryset)
         serializer = s.ShortVehicleStatusSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
@@ -202,7 +207,7 @@ class VehicleViewSet(TMSViewSet):
         ret = []
 
         for vehicle in m.Vehicle.objects.order_by('plate_num'):
-            bind = m.VehicleDriverDailyBind.objects.filter(
+            bind = m.VehicleWorkerBind.objects.filter(
                 vehicle=vehicle
             ).first()
             if bind is not None and bind.get_off is None:
@@ -318,7 +323,7 @@ class VehicleViewSet(TMSViewSet):
 
         # Get the current driver and escorts of this vehicle
 
-        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle).first()
+        bind = m.VehicleWorkerBind.objects.filter(vehicle=vehicle).first()
         if bind is not None and bind.get_off is None:
             driver = bind.driver.name
             driver_mobile = bind.driver.mobile
@@ -428,7 +433,9 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['post'], url_path='vehicle-check')
     def vehicle_check(self, request, pk=None):
         vehicle = self.get_object()
-        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=request.user).first()
+        bind = m.VehicleWorkerBind.objects.filter(
+            vehicle=vehicle, worker=request.user, worker_type=c.WORKER_TYPE_DRIVER
+        ).first()
         if bind is None or bind.get_off is not None:
             return Response(
                 {
@@ -486,39 +493,49 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=True, methods=['get'], url_path='daily-bind')
     def vehicle_driver_daily_bind(self, request, pk=None):
         vehicle = self.get_object()
-        driver = request.user
+        worker = request.user
+        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
 
-        # check if vehicle is available
-        if vehicle.status != c.VEHICLE_STATUS_AVAILABLE:
+        # check if such worker is able to get on this vehicle
+        if vehicle.status in [c.VEHICLE_STATUS_UNDER_WHEEL, c.VEHICLE_STATUS_REPAIR]:
             return Response(
                 {
-                    'msg': 'Cannot get on this vehicle because this vehicle is unavailable'
+                    'msg': 'Cannot get on this vehicle because this vehicle status is' +
+                    vehicle.get_status_display()
                 }
             )
 
-        # check if somebody is get on this vehicle
-        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle).first()
-        if bind is not None and bind.get_off is None:
-            return Response({
-                'msg': 'Somebody already get on this vehicle'
-            })
+        if vehicle.status == c.VEHICLE_STATUS_DRIVER_ON and is_worker_driver:
+            return Response(
+                {
+                    'msg': 'Cannot get on this vehicle because another driver is already on'
+                }
+            )
+
+        if vehicle.status == c.VEHICLE_STATUS_ESCORT_ON and not is_worker_driver:
+            return Response(
+                {
+                    'msg': 'Cannot get on this vehicle because another escort is already on'
+                }
+            )
 
         # check if driver is available
-        if driver.profile.status != c.WORK_STATUS_AVAILABLE:
+        if worker.profile.status != c.WORK_STATUS_AVAILABLE:
             return Response({
                 'msg': 'Cannot get on this vehicle because you are not available'
             })
 
-        bind = m.VehicleDriverDailyBind.objects.create(
+        bind = m.VehicleWorkerBind.objects.create(
             vehicle=vehicle,
-            driver=request.user
+            worker=request.user,
+            worker_type=c.WORKER_TYPE_DRIVER if is_worker_driver else c.WORKER_TYPE_ESCORT
         )
 
-        vehicle.status = c.VEHICLE_STATUS_UNDER_WHEEL
+        vehicle.status += c.VEHICLE_STATUS_DRIVER_ON if is_worker_driver else c.VEHICLE_STATUS_ESCORT_ON
         vehicle.save()
 
-        driver.profile.status = c.WORK_STATUS_DRIVING
-        driver.profile.save()
+        worker.profile.status = c.WORK_STATUS_DRIVING
+        worker.profile.save()
 
         return Response(
             s.VehicleDriverDailyBindSerializer(bind).data,
@@ -531,7 +548,8 @@ class VehicleViewSet(TMSViewSet):
         this api is called in driver app when driver get off the vehicle
         """
         vehicle = self.get_object()
-        driver = request.user
+        worker = request.user
+        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
         station_data = request.data.pop('station', None)
         if station_data is None:
             return Response(
@@ -541,7 +559,7 @@ class VehicleViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        bind = m.VehicleDriverDailyBind.objects.filter(vehicle=vehicle, driver=driver).first()
+        bind = m.VehicleWorkerBind.objects.filter(vehicle=vehicle, worker=worker).first()
         if bind is None:
             return Response({
                 'msg': "You didn't get on this vehicle before"
@@ -552,54 +570,55 @@ class VehicleViewSet(TMSViewSet):
                 'msg': 'You already get off this vehicle'
             })
 
-        # check if the vehicle check is all done
-        vehicle_check = m.VehicleCheckHistory.objects.filter(
-            vehicle=vehicle, driver=driver, before_driving_checked_time__gt=bind.get_on
-        ).first()
+        if is_worker_driver:
+            # check if the vehicle check is all done
+            vehicle_check = m.VehicleCheckHistory.objects.filter(
+                vehicle=vehicle, driver=worker, before_driving_checked_time__gt=bind.get_on
+            ).first()
 
-        if vehicle_check is None:
-            return Response(
-                {
-                    'msg': '你没有完成车辆三检查'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if vehicle_check is None:
+                return Response(
+                    {
+                        'msg': '你没有完成车辆三检查'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # check if driver complete before driving check
-        before_driving_check_item_count = m.VehicleCheckItem.published_before_driving_check_items.count()
-        checked_item_count = vehicle_check.vehiclebeforedrivingitemcheck_set.filter(is_checked=True).count()
-        if vehicle_check.before_driving_checked_time is None or\
-           checked_item_count != before_driving_check_item_count:
-            return Response(
-                {
-                    'msg': "you didn't complete before driving check "
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            # check if driver complete before driving check
+            before_driving_check_item_count = m.VehicleCheckItem.published_before_driving_check_items.count()
+            checked_item_count = vehicle_check.vehiclebeforedrivingitemcheck_set.filter(is_checked=True).count()
+            if vehicle_check.before_driving_checked_time is None or\
+               checked_item_count != before_driving_check_item_count:
+                return Response(
+                    {
+                        'msg': "you didn't complete before driving check "
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # check if driver complete driving check
-        driving_check_item_count = m.VehicleCheckItem.published_driving_check_items.count()
-        checked_item_count = vehicle_check.vehicledrivingitemcheck_set.filter(is_checked=True).count()
-        if vehicle_check.driving_checked_time is None or\
-           checked_item_count != driving_check_item_count:
-            return Response(
-                {
-                    'msg': "you didn't complete driving check "
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            # check if driver complete driving check
+            driving_check_item_count = m.VehicleCheckItem.published_driving_check_items.count()
+            checked_item_count = vehicle_check.vehicledrivingitemcheck_set.filter(is_checked=True).count()
+            if vehicle_check.driving_checked_time is None or\
+               checked_item_count != driving_check_item_count:
+                return Response(
+                    {
+                        'msg': "you didn't complete driving check "
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # check if driver complete after driving check
-        after_driving_check_item_count = m.VehicleCheckItem.published_after_driving_check_items.count()
-        checked_item_count = vehicle_check.vehicleafterdrivingitemcheck_set.filter(is_checked=True).count()
-        if vehicle_check.after_driving_checked_time is None or\
-           checked_item_count != after_driving_check_item_count:
-            return Response(
-                {
-                    'msg': "you didn't complete after driving check "
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            # check if driver complete after driving check
+            after_driving_check_item_count = m.VehicleCheckItem.published_after_driving_check_items.count()
+            checked_item_count = vehicle_check.vehicleafterdrivingitemcheck_set.filter(is_checked=True).count()
+            if vehicle_check.after_driving_checked_time is None or\
+               checked_item_count != after_driving_check_item_count:
+                return Response(
+                    {
+                        'msg': "you didn't complete after driving check "
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         station_id = station_data.get('id', None)
         if station_id is not None:
@@ -613,10 +632,15 @@ class VehicleViewSet(TMSViewSet):
         bind.get_off_station = station
         bind.get_off = timezone.now()
         bind.save()
-        vehicle.status = c.VEHICLE_STATUS_AVAILABLE
+
+        if is_worker_driver:
+            vehicle.status = vehicle.status - c.VEHICLE_STATUS_DRIVER_ON
+        else:
+            vehicle.status = vehicle.status - c.VEHICLE_STATUS_ESCORT_ON
+
         vehicle.save()
-        driver.profile.status = c.WORK_STATUS_AVAILABLE
-        driver.profile.save()
+        worker.profile.status = c.WORK_STATUS_AVAILABLE
+        worker.profile.save()
 
         return Response(s.VehicleDriverDailyBindSerializer(bind).data, status=status.HTTP_200_OK)
 
@@ -738,7 +762,7 @@ class VehicleCheckHistoryViewSet(viewsets.ModelViewSet):
             request.user.my_vehicle_checks.all()
         )
         context = {}
-        bind = m.VehicleDriverDailyBind.objects.filter(driver=request.user).first()
+        bind = m.VehicleWorkerBind.objects.filter(worker=request.user, worker_type=c.WORKER_TYPE_DRIVER).first()
         if bind is not None and bind.get_off is None:
             context = {
                 'bind': True,

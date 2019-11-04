@@ -323,7 +323,7 @@ class Vehicle(TimeStampedModel):
 
     # @property
     # def bound_driver(self):
-    #     bind = VehicleDriverDailyBind.objects.filter(
+    #     bind = VehicleWorkerBind.objects.filter(
     #         vehicle=self
     #     ).first()
     #     if bind is not None and bind.get_off is None:
@@ -612,17 +612,23 @@ class VehicleAfterDrivingItemCheck(models.Model):
     )
 
 
-class VehicleDriverDailyBind(models.Model):
+class VehicleWorkerBind(models.Model):
 
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE
     )
 
-    driver = models.ForeignKey(
+    worker = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='my_vehicle_bind'
+    )
+
+    worker_type = models.CharField(
+        max_length=1,
+        choices=c.WORKER_TYPE,
+        default=c.WORKER_TYPE_DRIVER
     )
 
     get_on = models.DateTimeField(
@@ -640,6 +646,10 @@ class VehicleDriverDailyBind(models.Model):
         null=True,
         blank=True
     )
+
+    objects = models.Manager()
+    driverbinds = managers.VehicleDriverBindManager()
+    escortbinds = managers.VehicleEscortBindManager()
 
     class Meta:
         ordering = ['-get_on', 'vehicle']

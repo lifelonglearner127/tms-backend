@@ -407,7 +407,7 @@ class VehicleDriverDailyBindSerializer(serializers.ModelSerializer):
     get_off_station = StationNameSerializer(required=False)
 
     class Meta:
-        model = m.VehicleDriverDailyBind
+        model = m.VehicleWorkerBind
         fields = '__all__'
 
 

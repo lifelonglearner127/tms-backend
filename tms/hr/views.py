@@ -8,7 +8,7 @@ from . import serializers as s
 from ..core import constants as c
 from ..core.permissions import IsDriverOrEscortUser
 from ..core.views import TMSViewSet
-from ..vehicle.models import VehicleDriverDailyBind
+from ..vehicle.models import VehicleWorkerBind
 
 
 class DepartmentViewSet(TMSViewSet):
@@ -130,7 +130,7 @@ class StaffProfileViewSet(TMSViewSet):
         )
 
         for instance in page:
-            vehicle_bind = VehicleDriverDailyBind.objects.filter(driver=instance.user).first()
+            vehicle_bind = VehicleWorkerBind.objects.filter(worker=instance.user).first()
             # job_driver = instance.user.jobs_as_driver.filter(job__progress__gt=c.JOB_PROGRESS_NOT_STARTED).first()
             status_payload = {
                 'id': instance.user.id,

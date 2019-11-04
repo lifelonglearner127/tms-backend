@@ -94,3 +94,19 @@ class PublishedAfterDrivingCheckItemsManager(models.Manager):
             is_after_driving_item=True,
             is_published=True
         )
+
+
+class VehicleDriverBindManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            worker_type=c.WORKER_TYPE_DRIVER
+        )
+
+
+class VehicleEscortBindManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            worker_type=c.WORKER_TYPE_ESCORT
+        )

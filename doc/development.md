@@ -1,5 +1,5 @@
 ## Development
-### Prequisites
+### Prerequisites
  - Postgresql
  - Python3.6
  - virtualenv

@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from . import models as m
 from ..account.models import UserPermission
-from ..vehicle.models import VehicleDriverDailyBind
+from ..vehicle.models import VehicleWorkerBind
 from ..core import constants as c
 
 # serializers
@@ -79,7 +79,7 @@ class ShortStaffProfileSerializer(serializers.ModelSerializer):
     driverlicense_number = serializers.SerializerMethodField()
 
     def get_bind_vehicle(self, instance):
-        bind = VehicleDriverDailyBind.objects.filter(driver=instance.user, get_off=None).first()
+        bind = VehicleWorkerBind.objects.filter(worker=instance.user, get_off=None).first()
         if bind is not None:
             return {
                 'id': bind.vehicle.id,
@@ -133,7 +133,7 @@ class DriverAppStaffProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_bind_vehicle(self, instance):
-        bind = VehicleDriverDailyBind.objects.filter(driver=instance.user, get_off=None).first()
+        bind = VehicleWorkerBind.objects.filter(worker=instance.user, get_off=None).first()
         if bind is not None:
             return {
                 'id': bind.vehicle.id,
