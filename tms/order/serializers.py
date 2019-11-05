@@ -881,6 +881,7 @@ class JobDoneSerializer(serializers.ModelSerializer):
             else:
                 density = 0
                 additive = 0
+                volume = 0
 
             ret['quality_station']['branches'].append({
                 'branch': product.branch,
