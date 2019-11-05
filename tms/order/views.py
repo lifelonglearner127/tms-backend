@@ -1332,7 +1332,7 @@ class JobViewSet(TMSViewSet):
         meta_numbers = []
 
         # check if this driver is on vehicle
-        vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, driver=request.user).first()
+        vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=request.user).first()
         if vehicle_bind is None or vehicle_bind.get_off is not None or\
            (vehicle_bind.get_off is None and vehicle_bind.vehicle != job.vehicle):
             return Response(

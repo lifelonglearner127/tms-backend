@@ -60,11 +60,11 @@ class UserPermission(models.Model):
 class Permission(models.Model):
 
     page = models.CharField(
-        max_length=20
+        max_length=100
     )
 
     action = models.CharField(
-        max_length=20
+        max_length=100
     )
 
     def __str__(self):
