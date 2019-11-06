@@ -55,8 +55,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
         job.save()
 
         return Response(
-            self.serializer_class(job).data,
-            status=status.HTTP_204_NO_CONTENT
+            {
+                'msg': 'successfully deleted '
+            },
+            status=status.HTTP_200_OK
         )
 
 
