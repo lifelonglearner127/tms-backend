@@ -179,26 +179,24 @@ class UserPermissionNameSerializer(serializers.ModelSerializer):
 
 class UserPermissionSerializer(serializers.ModelSerializer):
 
-    check_items = serializers.SerializerMethodField()
+    tree_data = serializers.SerializerMethodField()
 
     class Meta:
         model = m.UserPermission
         fields = '__all__'
 
-    def get_check_items(self, instance):
+    def get_tree_data(self, instance):
         ret = []
         for permission in instance.permissions.all():
             action = permission.action
             for value in ret:
                 if value['page'] == permission.page:
-                    value['view'] = value['view'] or action == 'list' or action == 'get'
-                    value['edit'] = value['edit'] or action == 'create' or action == 'update' or action == 'delete'
+                    value['value'].append(action)
                     break
             else:
                 ret.append({
                     'page': permission.page,
-                    'view': action == 'list' or action == 'get',
-                    'edit': action == 'create' or action == 'update' or action == 'delete'
+                    'value': [action],
                 })
 
         return ret
