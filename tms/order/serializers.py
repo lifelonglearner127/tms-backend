@@ -1077,7 +1077,39 @@ class JobCurrentSerializer(JobFutureSerializer):
     """
     Serializer for current job for driver app
     """
-    pass
+    last_meta = serializers.SerializerMethodField()
+
+    class Meta(JobFutureSerializer.Meta):
+        fields = (
+            'id',
+            'plate_num',
+            'total_distance',
+            'routes',
+            'driver',
+            'escort',
+            'products',
+            'stations',
+            'progress_bar',
+            'progress',
+            'order_description',
+            'last_meta',
+        )
+
+    def get_last_meta(self, instance):
+        ret = []
+        current_station = instance.jobstation_set.filter(
+            is_completed=False
+        ).first()
+
+        if current_station.previous_station is not None:
+            for product in current_station.previous_station.jobstationproduct_set.all():
+                ret.append({
+                    'branch': product.branch,
+                    'man_hole': product.man_hole,
+                    'branch_hole': product.branch_hole
+                })
+
+        return ret
 
 
 class BillSubCategoyChoiceField(serializers.Field):
