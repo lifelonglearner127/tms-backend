@@ -89,7 +89,6 @@ class ProductViewSet(TMSViewSet):
     queryset = m.Product.objects.all()
     serializer_class = s.ProductSerializer
     short_serializer_class = s.ProductNameSerializer
-    permission_classes = [p.ProductViewSetPermission]
 
     def get_queryset(self):
         queryset = self.queryset

@@ -71,8 +71,26 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, methods=['post'], url_path="update-me")
+    def update_my_account(self, request):
+        """
+        this api is used in web
+        """
+        request.user.name = request.data.get('name', '')
+        request.user.set_password(request.data.get('password', ''))
+        request.user.save()
+        return Response(
+            {
+                'msg': 'Success'
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, methods=['post'], url_path="me")
     def update_me(self, request):
+        """
+        this api is used in app
+        """
         username = request.data.get('username', None)
         if username is not None:
             if m.User.objects.exclude(id=request.user.id).filter(username=username).exists():

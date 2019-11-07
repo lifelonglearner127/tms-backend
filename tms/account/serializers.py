@@ -43,14 +43,12 @@ class AuthSerializer(serializers.ModelSerializer):
                     action = permission.action
                     for value in ret['permissions']:
                         if value['page'] == permission.page:
-                            value['view'] = value['view'] or action in ['list', 'get']
-                            value['edit'] = value['edit'] or action in ['create', 'update', 'delete']
+                            value['value'].append(action)
                             break
                     else:
                         ret['permissions'].append({
                             'page': permission.page,
-                            'view': action == 'list' or action == 'get',
-                            'edit': action == 'create' or action == 'update' or action == 'delete'
+                            'value': [action],
                         })
         return ret
 
