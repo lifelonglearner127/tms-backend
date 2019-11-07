@@ -19,3 +19,7 @@ Automated backup should be run as a cron job so you need to configure cronjob as
     > this cronjob will run the script every day at 0.0 a.m
 
  - Remember creating `.pgpass` in your home directory, take a look at [here](https://www.postgresql.org/docs/9.3/libpq-pgpass.html)
+ - Restore the database from backup
+   ```
+   psql -U dev -d tms -f db.sql
+   ```
