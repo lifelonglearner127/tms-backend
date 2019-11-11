@@ -93,6 +93,14 @@ class GetoffStationManager(models.Manager):
         )
 
 
+class RepairStationManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            station_type=c.STATION_TYPE_REPAIR_STATION
+        )
+
+
 class LoadingStationPointManager(models.Manager):
 
     def get_queryset(self):

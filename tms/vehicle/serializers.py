@@ -500,6 +500,7 @@ class ShortVehicleTireSerializer(serializers.ModelSerializer):
 
 class TireManagementHistoryDataViewSerializer(serializers.ModelSerializer):
 
+    installed_on = serializers.DateTimeField(format='%Y-%m-%d')
     vehicle_tire = ShortVehicleTireSerializer()
 
     class Meta:
@@ -512,8 +513,8 @@ class TireTreadDepthCheckHistorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     vehicle = serializers.CharField(source='tire.vehicle_tire.vehicle.plate_num')
     position = serializers.CharField(source='tire.vehicle_tire.position')
-    installed_on = serializers.DateTimeField(source='tire.installed_on')
-    checked_on = serializers.DateTimeField()
+    installed_on = serializers.DateTimeField(source='tire.installed_on', format='%Y-%m-%d')
+    checked_on = serializers.DateTimeField(format='%Y-%m-%d')
     tread_depth = serializers.FloatField()
     before_tread_depth = serializers.FloatField()
 

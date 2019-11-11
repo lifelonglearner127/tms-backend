@@ -14,6 +14,10 @@ class Vehicle(TimeStampedModel):
     """
     Vehicle model
     """
+    is_company_vehicle = models.BooleanField(
+        default=True
+    )
+
     # Basic Information
     model = models.CharField(
         max_length=1,

@@ -258,6 +258,15 @@ class GetoffStationSerializer(MainStationSerializer):
     pass
 
 
+class RepairStationSerialzier(serializers.ModelSerializer):
+
+    class Meta:
+        model = m.Station
+        fields = (
+            'id', 'name', 'contact', 'mobile', 'address'
+        )
+
+
 class TransportationDistanceSerializer(serializers.ModelSerializer):
 
     start_point = StationNameSerializer(read_only=True)

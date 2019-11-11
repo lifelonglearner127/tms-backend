@@ -238,6 +238,34 @@ class StationViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='short/names')
+    def get_short_station_names(self, request):
+        station_type_filter = Q()
+
+        station_types = self.request.query_params.get('station_type', '')
+        station_types = station_types.split(',')
+        station_types = [int(station_type) for station_type in station_types]
+
+        for station_type in station_types:
+            if station_type in [
+                c.STATION_TYPE_LOADING_STATION,
+                c.STATION_TYPE_UNLOADING_STATION,
+                c.STATION_TYPE_QUALITY_STATION,
+                c.STATION_TYPE_OIL_STATION,
+                c.STATION_TYPE_GET_OFF_STATION,
+                c.STATION_TYPE_BLACK_DOT,
+                c.STATION_TYPE_PARKING_STATION,
+                c.STATION_TYPE_REPAIR_STATION,
+            ]:
+                station_type_filter |= Q(station_type=station_type)
+
+        queryset = m.Station.objects.filter(station_type_filter)
+
+        return Response(
+            s.StationNameSerializer(queryset, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path='stations')
     def get_stations(self, request):
         stations = m.Station.objects.filter(~Q(station_type=c.STATION_TYPE_CUSTOM_POINT))
@@ -387,6 +415,24 @@ class StationViewSet(TMSViewSet):
     @action(detail=False, url_path='getoff-stations/short')
     def get_short_getoff_stations(self, request):
         page = self.paginate_queryset(m.Station.getoffstations.all())
+
+        serializer = s.StationNameSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='repair-stations')
+    def repair_stations(self, request):
+        page = self.paginate_queryset(
+            m.Station.repairstations.all(),
+        )
+
+        serializer = s.RepairStationSerialzier(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, url_path='getoff-stations/short')
+    def get_short_repair_stations(self, request):
+        page = self.paginate_queryset(m.Station.repairstations.all())
 
         serializer = s.StationNameSerializer(page, many=True)
 
