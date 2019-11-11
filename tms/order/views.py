@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from pytz import timezone as tz
 import requests
@@ -13,6 +14,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_renderer_xlsx.mixins import XLSXFileMixin
 from drf_renderer_xlsx.renderers import XLSXRenderer
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # constants
 from ..core import constants as c
@@ -45,6 +49,9 @@ from .tasks import (
 )
 
 from ..core.utils import get_branches
+
+
+channel_layer = get_channel_layer()
 
 
 class OrderCartViewSet(TMSViewSet):
@@ -414,8 +421,8 @@ class OrderViewSet(TMSViewSet):
 
         # create job & associated driver and escort instance
         job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids, rest_place=rest_place)
-        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER)
-        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT)
+        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER, last_active=True)
+        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT, last_active=True)
 
         job_loading_station = m.JobStation.objects.create(
             job=job, station=order.loading_station, step=0
@@ -478,7 +485,7 @@ class OrderViewSet(TMSViewSet):
     def get_jobs(self, request, pk=None):
         order = self.get_object()
         serializer = s.JobAdminSerializer(
-            order.jobs.all(),
+            order.jobs.order_by('-created'),
             many=True
         )
         return Response(
@@ -984,11 +991,11 @@ class JobViewSet(TMSViewSet):
         else:
             if current_driver != new_driver:
                 m.JobWorker.drivers.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER)
+                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, last_active=True)
 
             if current_escort != new_escort:
                 m.JobWorker.escorts.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT)
+                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, last_active=True)
 
             notify_of_driver_or_escort_changes_before_job_start.apply_async(
                 args=[{
@@ -1330,9 +1337,19 @@ class JobViewSet(TMSViewSet):
         """
         job = self.get_object()
         meta_numbers = []
+        worker = request.user
 
-        # check if this driver is on vehicle
-        vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=request.user).first()
+        # 1. Check if this user is authorized to perform this job
+        if worker != job.last_active_job_driver.worker and worker != job.last_active_job_escort.worker:
+            return Response(
+                {
+                    'error': 'Cannot proceed this job because you are not active yet'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. check if this worker is on vehicle
+        vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=worker).first()
         if vehicle_bind is None or vehicle_bind.get_off is not None or\
            (vehicle_bind.get_off is None and vehicle_bind.vehicle != job.vehicle):
             return Response(
@@ -1340,10 +1357,36 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # driver cannot perform more than 2 jobs
-        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=request.user).exists():
+        # 3. check if partner is on vehicle together
+        if worker.user_type == c.WORKER_TYPE_DRIVER:
+            partner = job.last_active_job_escort.worker
+        else:
+            partner = job.last_active_job_driver.worker
+
+        vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=partner).first()
+        if vehicle_bind is None or vehicle_bind.get_off is not None or\
+           (vehicle_bind.get_off is None and vehicle_bind.vehicle != job.vehicle):
             return Response(
-                {'error': 'Cannot proceed more than 2 jobs simultaneously'},
+                {
+                    'error': 'Your partner {} - {} need to get on vehicle first'.format(
+                        partner.user_type, partner.name
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 4. check if worker and its partner are free from other job
+        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=worker).exists():
+            return Response(
+                {'error': 'This job cannot be proceed because you are in other work'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=partner).exists():
+            return Response(
+                {
+                    'error': 'This job cannot be proceed because your partner is in other work',
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1361,10 +1404,10 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
 
-            job_driver = m.JobWorker.objects.get(job=job, worker=request.user)
-            job_driver.started_on = timezone.now()
-            job_driver.save()
-
+            job.last_active_job_driver.started_on = timezone.now()
+            job.last_active_job_driver.save()
+            job.last_active_job_escort.started_on = timezone.now()
+            job.last_active_job_escort.save()
             last_progress_finished_on = None
         else:
             current_station = job.jobstation_set.filter(
@@ -1410,12 +1453,10 @@ class JobViewSet(TMSViewSet):
                     job.finished_on = timezone.now()
 
                     try:
-                        job_driver = m.JobWorker.drivers.get(job=job, worker=request.user)
-                        job_driver.finished_on = timezone.now()
-                        job_driver.save()
-                        job_escort = m.JobWorker.escorts.get(job=job, worker=request.user)
-                        job_escort.finished_on = timezone.now()
-                        job_escort.save()
+                        job.last_active_job_driver.finished_on = timezone.now()
+                        job.last_active_job_driver.save()
+                        job.last_active_job_escort.finished_on = timezone.now()
+                        job.last_active_job_escort.save()
                     except m.JobWorker.DoesNotExist:
                         pass
 
@@ -1477,6 +1518,18 @@ class JobViewSet(TMSViewSet):
         }
         if len(meta_numbers):
             ret['meta_numbers'] = meta_numbers
+
+        if partner.channel_name:
+            async_to_sync(channel_layer.send)(
+                partner.channel_name,
+                {
+                    'type': 'notify',
+                    'data': json.dumps({
+                        'msg_type': c.DRIVER_NOTIFICATION_PROGRESS_SYNC,
+                        'message': 'job updated'
+                    })
+                }
+            )
 
         return Response(
             ret,

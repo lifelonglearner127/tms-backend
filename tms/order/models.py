@@ -232,7 +232,7 @@ def format_hms_string(time_diff, format_string):
     return format_string
 
 
-class Job(models.Model):
+class Job(TimeStampedModel):
     """
     Job model
     """
@@ -429,6 +429,14 @@ class Job(models.Model):
     def total_time_duration(self):
         return self.loading_time_duration + self.quality_time_duration + self.unloading_time_duration
 
+    @property
+    def last_active_job_driver(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER, last_active=True).first()
+
+    @property
+    def last_active_job_escort(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT, last_active=True).first()
+
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()
     progress_jobs = managers.InProgressJobManager()
@@ -473,13 +481,17 @@ class JobWorker(models.Model):
         auto_now_add=True
     )
 
+    last_active = models.BooleanField(
+        default=False
+    )
+
     objects = models.Manager()
     drivers = managers.JobWorkerDriverManager()
     escorts = managers.JobWorkerEscortManager()
 
     class Meta:
         ordering = (
-            'job', '-assigned_on',
+            'job', '-last_active', '-assigned_on',
         )
 
 
@@ -709,7 +721,7 @@ class JobReport(models.Model):
         ordering = ('-month', )
 
 
-class OrderPayment(models.Model):
+class OrderPayment(TimeStampedModel):
 
     job_station = models.ForeignKey(
         JobStation,
