@@ -464,6 +464,13 @@ class OrderViewSet(TMSViewSet):
                     mission_weight=job_product['mission_weight']
                 )
 
+        for orderproduct in order.orderproduct_set.all():
+            if order_product.arranged_weight < order_product.weight:
+                break
+        else:
+            order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_COMPLETE
+            order.save()
+
         if order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_PENDING:
             order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
             order.save()
@@ -1041,6 +1048,12 @@ class JobViewSet(TMSViewSet):
             order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
             order_product.arranged_weight -= arranged_product['mission_weight']
             order_product.save()
+
+        for orderproduct in job.order.orderproduct_set.all():
+            if order_product.arranged_weight < order_product.weight\
+               and job.order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_COMPLETE:
+                job.order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
+                job.order.save()
 
         notify_of_job_deleted.apply_async(
             args=[{
