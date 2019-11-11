@@ -641,12 +641,12 @@ class JobAdminSerializer(serializers.ModelSerializer):
     routes = serializers.SerializerMethodField()
     rest_place = StationNameSerializer()
     branches = serializers.SerializerMethodField()
-    progress = serializers.SerializerMethodField()
+    progress_display = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'rest_place', 'routes', 'branches', 'progress'
+            'id', 'vehicle', 'driver', 'escort', 'rest_place', 'routes', 'branches', 'progress', 'progress_display'
         )
 
     def get_driver(self, instance):
@@ -675,7 +675,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         branch['mission_weight'] += job_station_product.mission_weight
                         branch['unloading_stations'].append({
                             'unloading_station': StationLocationSerializer(job_station.station).data,
-                            'due_time': job_station_product.due_time,
+                            'due_time': job_station_product.due_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'mission_weight': job_station_product.mission_weight
                         })
                         break
@@ -688,7 +688,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         'mission_weight': job_station_product.mission_weight,
                         'unloading_stations': [{
                             'unloading_station': StationLocationSerializer(job_station.station).data,
-                            'due_time': job_station_product.due_time,
+                            'due_time': job_station_product.due_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'transport_unit_price': job_station.transport_unit_price,
                             'mission_weight': job_station_product.mission_weight
                         }]
@@ -710,7 +710,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
         branches.sort(key=lambda branch: branch['branch']['id'])
         return branches
 
-    def get_progress(self, instance):
+    def get_progress_display(self, instance):
         if instance.progress >= 10:
             if (instance.progress - 10) % 4 == 0:
                 progress = 10
