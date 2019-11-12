@@ -34,7 +34,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 'count':
-                request.user.notifications.filter(is_read=False).count()
+                request.user.notifications.filter(is_deleted=False, is_read=False).count()
             },
             status=status.HTTP_200_OK
         )
@@ -44,7 +44,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 'count':
-                request.user.notifications.filter(is_read=True).count()
+                request.user.notifications.filter(is_deleted=False, is_read=True).count()
             },
             status=status.HTTP_200_OK
         )
