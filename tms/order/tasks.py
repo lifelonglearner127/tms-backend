@@ -121,6 +121,60 @@ def notify_of_job_creation(context):
 
 
 @app.task
+def notify_of_worker_change_after_job_start(context):
+    """
+    when the job worker changes after job starts
+     - new workers will be notified, current active driver and escort will be notified
+    """
+    job = get_object_or_404(m.Job, id=context['job'])
+    current_driver = get_object_or_404(User, id=context['current_driver'])
+    current_escort = get_object_or_404(User, id=context['current_escort'])
+    change_place = context['change_place']
+    change_time = context['change_time']
+
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "customer": {
+            "name": job.order.customer.contacts.first().contact,
+            "mobile": job.order.customer.contacts.first().mobile
+        },
+        "change_place": change_place,
+        "change_time": change_time,
+        "current_driver": {
+            "name": current_driver.name,
+            "mobile": current_driver.mobile
+        },
+        "current_escort": {
+            "name": current_escort.name,
+            "mobile": current_escort.mobile
+        }
+    }
+
+    receivers = [current_driver, current_escort]
+    try:
+        new_driver = User.objects.get(id=context['new_driver'])
+        message['new_driver'] = {
+            "name": new_driver.name,
+            "mobile": new_driver.mobile
+        }
+        receivers.append(new_driver)
+    except User.DoesNotExist:
+        pass
+
+    try:
+        new_escort = User.objects.get(id=context['new_escort'])
+        message['new_escort'] = {
+            "name": new_escort.name,
+            "mobile": new_escort.mobile
+        }
+        receivers.append(new_escort)
+    except User.DoesNotExist:
+        pass
+
+    send_notifications(receivers, message, c.DRIVER_NOTIFICATION_TYPE_CHANGE_WORKER)
+
+
+@app.task
 def notify_of_driver_or_escort_changes_before_job_start(context):
     """
     when the job driver changes before the job start,

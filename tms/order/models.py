@@ -430,12 +430,20 @@ class Job(TimeStampedModel):
         return self.loading_time_duration + self.quality_time_duration + self.unloading_time_duration
 
     @property
-    def last_active_job_driver(self):
-        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER, last_active=True).first()
+    def active_job_driver(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER, is_active=True).first()
 
     @property
-    def last_active_job_escort(self):
-        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT, last_active=True).first()
+    def next_candidate_job_driver(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).order_by('-assigned_on').first()
+
+    @property
+    def active_job_escort(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT, is_active=True).first()
+
+    @property
+    def next_candidate_job_escort(self):
+        return self.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).order_by('-assigned_on').first()
 
     objects = models.Manager()
     completed_jobs = managers.CompleteJobManager()
@@ -477,11 +485,22 @@ class JobWorker(models.Model):
         blank=True
     )
 
+    start_due_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    start_place = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True
+    )
+
     assigned_on = models.DateTimeField(
         auto_now_add=True
     )
 
-    last_active = models.BooleanField(
+    is_active = models.BooleanField(
         default=False
     )
 
@@ -491,7 +510,7 @@ class JobWorker(models.Model):
 
     class Meta:
         ordering = (
-            'job', '-last_active', '-assigned_on',
+            'job', '-is_active', '-assigned_on',
         )
 
 

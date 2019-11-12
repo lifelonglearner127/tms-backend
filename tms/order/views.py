@@ -44,7 +44,7 @@ from ..core.views import TMSViewSet
 from ..g7.interfaces import G7Interface
 from .tasks import (
     notify_of_job_creation, notify_of_job_products_changes,
-    notify_of_job_deleted,
+    notify_of_job_deleted, notify_of_worker_change_after_job_start,
     notify_of_driver_or_escort_changes_before_job_start
 )
 
@@ -421,8 +421,8 @@ class OrderViewSet(TMSViewSet):
 
         # create job & associated driver and escort instance
         job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids, rest_place=rest_place)
-        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER, last_active=True)
-        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT, last_active=True)
+        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
+        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
 
         job_loading_station = m.JobStation.objects.create(
             job=job, station=order.loading_station, step=0
@@ -998,11 +998,11 @@ class JobViewSet(TMSViewSet):
         else:
             if current_driver != new_driver:
                 m.JobWorker.drivers.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, last_active=True)
+                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
 
             if current_escort != new_escort:
                 m.JobWorker.escorts.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, last_active=True)
+                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
 
             notify_of_driver_or_escort_changes_before_job_start.apply_async(
                 args=[{
@@ -1353,7 +1353,7 @@ class JobViewSet(TMSViewSet):
         worker = request.user
 
         # 1. Check if this user is authorized to perform this job
-        if worker != job.last_active_job_driver.worker and worker != job.last_active_job_escort.worker:
+        if worker != job.active_job_driver.worker and worker != job.active_job_escort.worker:
             return Response(
                 {
                     'error': 'Cannot proceed this job because you are not active yet'
@@ -1372,9 +1372,9 @@ class JobViewSet(TMSViewSet):
 
         # 3. check if partner is on vehicle together
         if worker.user_type == c.WORKER_TYPE_DRIVER:
-            partner = job.last_active_job_escort.worker
+            partner = job.active_job_escort.worker
         else:
-            partner = job.last_active_job_driver.worker
+            partner = job.active_job_driver.worker
 
         vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=partner).first()
         if vehicle_bind is None or vehicle_bind.get_off is not None or\
@@ -1417,10 +1417,10 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
 
-            job.last_active_job_driver.started_on = timezone.now()
-            job.last_active_job_driver.save()
-            job.last_active_job_escort.started_on = timezone.now()
-            job.last_active_job_escort.save()
+            job.active_job_driver.started_on = timezone.now()
+            job.active_job_driver.save()
+            job.active_job_escort.started_on = timezone.now()
+            job.active_job_escort.save()
             last_progress_finished_on = None
         else:
             current_station = job.jobstation_set.filter(
@@ -1466,10 +1466,10 @@ class JobViewSet(TMSViewSet):
                     job.finished_on = timezone.now()
 
                     try:
-                        job.last_active_job_driver.finished_on = timezone.now()
-                        job.last_active_job_driver.save()
-                        job.last_active_job_escort.finished_on = timezone.now()
-                        job.last_active_job_escort.save()
+                        job.active_job_driver.finished_on = timezone.now()
+                        job.active_job_driver.save()
+                        job.active_job_escort.finished_on = timezone.now()
+                        job.active_job_escort.save()
                     except m.JobWorker.DoesNotExist:
                         pass
 
@@ -1548,6 +1548,83 @@ class JobViewSet(TMSViewSet):
             ret,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=True, methods=['post'], url_path='change-worker')
+    def change_worker(self, request, pk=None):
+        job = self.get_object()
+        workers_data = request.data.pop('workers', [])
+        start_due_time = request.data.pop('start_due_time', None)
+        start_place = request.data.pop('start_place', None)
+
+        new_driver = None
+        new_escort = None
+        for worker_data in workers_data:
+            worker_type = worker_data.get('worker_type', c.WORKER_TYPE_DRIVER)
+            worker = get_object_or_404(m.User, id=worker_data.get('worker'), user_type=worker_type)
+            if worker_type == c.WORKER_TYPE_DRIVER:
+                new_driver = worker
+            else:
+                new_escort = worker
+
+            m.JobWorker.objects.create(
+                job=job,
+                worker=worker,
+                start_due_time=start_due_time,
+                start_place=start_place,
+                worker_type=worker_type
+            )
+
+        notify_of_worker_change_after_job_start.apply_async(
+                args=[{
+                    'job': job.id,
+                    'current_driver': job.active_job_driver.worker.id,
+                    'current_escort': job.active_job_escort.worker.id,
+                    'new_driver': new_driver.id if new_driver else None,
+                    'new_escort': new_escort.id if new_escort else None,
+                    'change_place': start_place,
+                    'change_time': start_due_time
+                }]
+            )
+
+        return Response(
+            {
+                'msg': 'Successfully finished'
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='workers')
+    def get_workers(self, requests, pk=None):
+        job = self.get_object()
+        workers = job.jobworker_set.order_by('assigned_on')
+        return Response(
+            s.ShortJobWorkerSerializer(workers, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='confirm-job-replace')
+    def finish_job(self, request, pk=None):
+        job = self.get_object()
+
+        if request.user.user_type == c.WORKER_TYPE_DRIVER:
+            job_worker = job.active_job_driver
+            next_job_woker = job.next_candidate_job_driver
+        elif request.user.user_type == c.WORKER_TYPE_ESCORT:
+            job_worker = job.active_job_escort
+            next_job_woker = job.next_candidate_job_escort
+
+        if job_worker.worker != request.user:
+            return Response(
+                {
+                    'msg': 'Error occured while confirming job replace'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        job_worker.finished_on = 0
+        if next_job_woker is not None:
+            next_job_woker.active = True
+            next_job_woker.save()
 
     @action(detail=True, url_path="test/station-efence")
     def test_station_efence(self, request, pk=None):
@@ -1892,30 +1969,43 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
 
 class JobWorkerViewSet(viewsets.ModelViewSet):
 
-    queryset = m.JobWorker.objects.filter(job__progress=c.JOB_PROGRESS_COMPLETE)
+    queryset = m.JobWorker.objects.all()
 
-    def get_queryset(self):
-        queryset = self.queryset
-        query_filter = Q()
-        year = self.request.query_params.get('year', None)
+    def destroy(self, request, pk=None):
+        job_worker = self.get_object()
+        job = job_worker.job
+        if job_worker.is_active:
+            return Response(
+                {
+                    'msg': 'cannot delete the active job worker'
+                }
+            )
+
+        job_worker.delete()
+        workers = job.jobworker_set.order_by('assigned_on')
+        return Response(
+            s.ShortJobWorkerSerializer(workers, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, url_path='report-time')
+    def report_time(self, request):
+        query_filter = Q(job__progress=c.JOB_PROGRESS_COMPLETE)
+        year = request.query_params.get('year', None)
         if year is not None:
             query_filter &= Q(started_on__year=year)
 
-        month = self.request.query_params.get('month', None)
+        month = request.query_params.get('month', None)
         if month is not None:
             query_filter &= Q(started_on__month=month)
 
-        worker_type = self.request.query_params.get('worker_type', None)
+        worker_type = request.query_params.get('worker_type', None)
         if worker_type is not None:
             query_filter &= Q(worker_type=worker_type)
 
         queryset = self.queryset.filter(query_filter)
 
-        return queryset
-
-    @action(detail=False, url_path='report-time')
-    def report_time(self, request):
-        page = self.paginate_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
         serializer = s.ReportJobWorkingTimeSerializer(
             page,
             many=True

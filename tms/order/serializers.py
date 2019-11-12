@@ -633,6 +633,18 @@ class JobWorkerSerializer(serializers.ModelSerializer):
         )
 
 
+class ShortJobWorkerSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source='worker.name')
+    start_due_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = m.JobWorker
+        fields = (
+            'id', 'name', 'worker_type', 'is_active', 'start_place', 'start_due_time',
+        )
+
+
 class JobAdminSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehicleSerializer()
