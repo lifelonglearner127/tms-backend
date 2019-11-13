@@ -191,6 +191,8 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
     new_escort = get_object_or_404(User, id=context['new_escort'])
     is_driver_updated = context['is_driver_updated']
     is_escort_updated = context['is_escort_updated']
+    old_vehicle = context['old_vehicle']
+    old_branches = context['old_branches']
 
     new_job_message = {
         "vehicle": job.vehicle.plate_num,
@@ -212,7 +214,7 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
     }
 
     cancel_job_message = {
-        "vehicle": job.vehicle.plate_num,
+        "vehicle": old_vehicle,
         "customer": {
             "name": job.order.customer.contacts.first().contact,
             "mobile": job.order.customer.contacts.first().mobile
@@ -226,7 +228,7 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
             "mobile": current_escort.mobile
         },
         "loading_station": job.order.loading_station.address,
-        "branches": get_branches(job),
+        "branches": old_branches,
         "rest_place": job.rest_place.address if job.rest_place is not None else '-'
     }
 

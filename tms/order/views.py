@@ -20,6 +20,7 @@ from asgiref.sync import async_to_sync
 
 # constants
 from ..core import constants as c
+from ..core.utils import get_branches
 
 # permissions
 from ..core.permissions import (
@@ -48,8 +49,6 @@ from .tasks import (
     notify_of_job_deleted, notify_of_worker_change_after_job_start,
     notify_of_driver_or_escort_changes_before_job_start
 )
-
-from ..core.utils import get_branches
 
 
 channel_layer = get_channel_layer()
@@ -1136,6 +1135,8 @@ class JobViewSet(TMSViewSet):
             )
 
         # create job & associated driver and escort instance
+        old_vehicle = job.vehicle.plate_num
+        old_branches = get_branches(job)
         job.vehicle = vehicle
         job.routes = route_ids
         job.save()
@@ -1210,6 +1211,8 @@ class JobViewSet(TMSViewSet):
                     'new_driver': new_driver.id,
                     'current_escort': current_escort.id,
                     'new_escort': new_escort.id,
+                    'old_vehicle': old_vehicle,
+                    'old_branches': old_branches,
                     'is_driver_updated': current_driver != new_driver,
                     'is_escort_updated':  current_escort != new_escort
                 }]
@@ -1248,10 +1251,18 @@ class JobViewSet(TMSViewSet):
             order_product.arranged_weight -= arranged_product['mission_weight']
             order_product.save()
 
+        arranged_product_count = 0
         for orderproduct in job.order.orderproduct_set.all():
-            if order_product.arranged_weight < order_product.weight\
-               and job.order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_COMPLETE:
-                job.order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
+            if order_product.arranged_weight > 0 and order_product.arranged_weight < order_product.weight:
+                arranged_product_count += 1
+                if job.order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_COMPLETE:
+                    job.order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS
+                    job.order.save()
+                    break
+
+        if order_product.arranged_weight == 0:
+            if job.order.arrangement_status != c.TRUCK_ARRANGEMENT_STATUS_PENDING:
+                job.order.arrangement_status = c.TRUCK_ARRANGEMENT_STATUS_PENDING
                 job.order.save()
 
         notify_of_job_deleted.apply_async(
