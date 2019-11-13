@@ -173,7 +173,7 @@ class OrderViewSet(TMSViewSet):
         if request.user.user_type != c.USER_TYPE_CUSTOMER:
             context['customer'] = request.data.pop('customer')
         else:
-            if requests.user.customer_profile != order.customer:
+            if request.user.customer_profile != order.customer:
                 return Response(
                     {
                         'msg': 'Cannot update the order'
