@@ -1260,13 +1260,13 @@ class JobViewSet(TMSViewSet):
                 'vehicle': job.vehicle.plate_num,
                 'driver': job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.id,
                 'escort': job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker.id,
-                'customer_name': job.order.customer.contacts.first().contact,
-                'customer_mobile': job.order.customer.contacts.first().mobile,
+                'customer': job.order.customer.id,
                 'loading_station': job.order.loading_station.address,
                 'branches': get_branches(job),
                 'rest_place': job.rest_place.address if job.rest_place is not None else '-'
             }]
         )
+
         job.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 

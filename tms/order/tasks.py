@@ -16,6 +16,7 @@ from ..core.redis import r
 # models
 from . import models as m
 from ..core.utils import get_branches
+from ..hr.models import CustomerProfile
 from ..account.models import User
 from ..notification.models import Notification
 # from ..vehicle.models import Vehicle
@@ -298,6 +299,7 @@ def notify_of_job_deleted(context):
     vehicle = context['vehicle']
     driver = get_object_or_404(User, id=context['driver'])
     escort = get_object_or_404(User, id=context['escort'])
+    customer = get_object_or_404(CustomerProfile, id=context['customer'])
 
     r.srem('jobs', job_id)
 
@@ -309,8 +311,8 @@ def notify_of_job_deleted(context):
     message = {
         "vehicle": vehicle,
         "customer": {
-            "name": context['customer_name'],
-            "mobile": context['customer_mobile']
+            "name": customer.contacts.first().contact,
+            "mobile": customer.contacts.first().mobile
         },
         "driver": {
             "name": driver.name,
@@ -326,6 +328,20 @@ def notify_of_job_deleted(context):
     }
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_DELETE_JOB)
+
+    message = {
+        "vehicle": vehicle,
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        }
+    }
+
+    send_notifications([customer.user], message, c.CUSTOMER_NOTIFICATION_DELETE_ARRANGEMENT)
 
 
 @app.task
