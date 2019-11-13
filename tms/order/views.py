@@ -117,7 +117,7 @@ class OrderViewSet(TMSViewSet):
     """
     Order Viewset
     """
-    queryset = m.Order.objects.all()
+    queryset = m.Order.availables.all()
     serializer_class = s.OrderSerializer
     permission_classes = [OrderPermission]
 
@@ -125,18 +125,18 @@ class OrderViewSet(TMSViewSet):
 
         context = {
             'products': request.data.pop('products'),
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
+            'assignee': request.data.pop('assignee', None),
             'loading_station': request.data.pop('loading_station'),
             'quality_station': request.data.pop('quality_station')
         }
         data = request.data
         if request.user.user_type == c.USER_TYPE_CUSTOMER:
-            data['customer'] = {
+            context['customer'] = {
                 'id': request.user.customer_profile.id
             }
             data['order_source'] = c.ORDER_SOURCE_CUSTOMER
         else:
+            context['customer'] = request.data.pop('customer')
             data['order_source'] = c.ORDER_SOURCE_INTERNAL
 
         serializer = s.OrderSerializer(
@@ -152,8 +152,8 @@ class OrderViewSet(TMSViewSet):
         )
 
     def update(self, request, pk=None):
-        serializer_instance = self.get_object()
-        if serializer_instance.status == c.ORDER_STATUS_COMPLETE:
+        order = self.get_object()
+        if order.status == c.ORDER_STATUS_COMPLETE:
             return Response(
                 {
                     'msg': 'Already finished'
@@ -164,21 +164,25 @@ class OrderViewSet(TMSViewSet):
         data = request.data
         context = {
             'products': request.data.pop('products'),
-            'assignee': request.data.pop('assignee'),
-            'customer': request.data.pop('customer'),
+            'assignee': request.data.pop('assignee', None),
             'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station')
+            'quality_station': request.data.pop('quality_station'),
+            'update_from_staff': request.user.user_type != c.USER_TYPE_CUSTOMER
         }
-        if request.user.user_type == c.USER_TYPE_CUSTOMER:
-            data['customer'] = {
-                'id': request.user.customer_profile.id
-            }
-            data['order_source'] = c.ORDER_SOURCE_CUSTOMER
+
+        if request.user.user_type != c.USER_TYPE_CUSTOMER:
+            context['customer'] = request.data.pop('customer')
         else:
-            data['order_source'] = c.ORDER_SOURCE_INTERNAL
+            if requests.user.customer_profile != order.customer:
+                return Response(
+                    {
+                        'msg': 'Cannot update the order'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         serializer = s.OrderSerializer(
-            serializer_instance,
+            order,
             data=data,
             context=context,
             partial=True
@@ -203,6 +207,29 @@ class OrderViewSet(TMSViewSet):
         )
 
         return self.get_paginated_response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        order = self.get_object()
+        if order.arrangement_status != c.TRUCK_ARRANGEMENT_STATUS_PENDING:
+            return Response(
+                {
+                    'msg': 'You cannot delete the order because it is under working'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.user.user_type != c.USER_TYPE_CUSTOMER:
+            s.notify_order_changes.apply_async(
+                args=[{
+                    'order': order.id,
+                    'customer_user_id': order.customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_DELETE_ORDER
+                }]
+            )
+
+        order.is_deleted = True
+        order.save()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, url_path='job', methods=['post'])
     def create_job(self, request, pk=None):

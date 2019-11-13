@@ -3,13 +3,33 @@ from django.db import models
 from ..core import constants as c
 
 
+class AvailableOrderManager(models.Manager):
+    """
+    Pending Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_deleted=False
+        )
+
+
+class DeletedOrderManager(models.Manager):
+    """
+    Pending Order Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_deleted=True
+        )
+
+
 class PendingOrderManager(models.Manager):
     """
     Pending Order Manager
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.ORDER_STATUS_PENDING
+            is_deleted=False, status=c.ORDER_STATUS_PENDING
         )
 
 
@@ -19,7 +39,7 @@ class InProgressOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.ORDER_STATUS_INPROGRESS
+            is_deleted=False, status=c.ORDER_STATUS_INPROGRESS
         )
 
 
@@ -29,7 +49,7 @@ class CompleteOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.ORDER_STATUS_COMPLETE
+            is_deleted=False, status=c.ORDER_STATUS_COMPLETE
         )
 
 
@@ -39,7 +59,7 @@ class InternalOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.ORDER_SOURCE_INTERNAL
+            is_deleted=False, status=c.ORDER_SOURCE_INTERNAL
         )
 
 
@@ -49,7 +69,7 @@ class CustomerOrderManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(
-            status=c.ORDER_SOURCE_CUSTOMER
+            is_deleted=False, status=c.ORDER_SOURCE_CUSTOMER
         )
 
 

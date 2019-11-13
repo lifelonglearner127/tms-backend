@@ -128,7 +128,13 @@ class Order(TimeStampedModel):
         through_fields=('order', 'product')
     )
 
+    is_deleted = models.BooleanField(
+        default=False
+    )
+
     objects = models.Manager()
+    availables = managers.AvailableOrderManager()
+    deleteds = managers.DeletedOrderManager()
     pendings = managers.PendingOrderManager()
     inprogress = managers.InProgressOrderManager()
     completeds = managers.CompleteOrderManager()
