@@ -241,23 +241,24 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
     elif is_driver_updated and not is_escort_updated:
         send_notifications([current_driver], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
         send_notifications([new_driver], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
-        # change_message = {
-        #     "driver": {
-        #         "name": new_driver.name,
-        #         "mobile": new_driver.mobile
-        #     }
-        # }
         send_notifications([current_escort], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
     elif not is_driver_updated and is_escort_updated:
         send_notifications([current_escort], cancel_job_message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
         send_notifications([new_escort], new_job_message, c.DRIVER_NOTIFICATION_NEW_JOB)
-        # change_message = {
-        #     "escort": {
-        #         "name": new_escort.name,
-        #         "mobile": new_escort.mobile
-        #     }
-        # }
         send_notifications([current_driver], change_message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
+
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "driver": {
+            "name": new_driver.name,
+            "mobile": new_driver.mobile
+        },
+        "escort": {
+            "name": new_escort.name,
+            "mobile": new_escort.mobile
+        }
+    }
+    send_notifications([job.order.customer.user], message, c.CUSTOMER_NOTIFICATION_UPDATE_ARRANGEMENT)
 
 
 @app.task
