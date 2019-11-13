@@ -43,6 +43,7 @@ from ..core.views import TMSViewSet
 # other
 from ..g7.interfaces import G7Interface
 from .tasks import (
+    notify_order_changes,
     notify_of_job_creation, notify_of_job_products_changes,
     notify_of_job_deleted, notify_of_worker_change_after_job_start,
     notify_of_driver_or_escort_changes_before_job_start
@@ -153,46 +154,213 @@ class OrderViewSet(TMSViewSet):
 
     def update(self, request, pk=None):
         order = self.get_object()
-        if order.status == c.ORDER_STATUS_COMPLETE:
+        if order.status == c.ORDER_STATUS_COMPLETE or order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_COMPLETE:
             return Response(
                 {
-                    'msg': 'Already finished'
+                    'msg': 'Cannot update the order because of order status or its arranegement status'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        data = request.data
-        context = {
-            'products': request.data.pop('products'),
-            'assignee': request.data.pop('assignee', None),
-            'loading_station': request.data.pop('loading_station'),
-            'quality_station': request.data.pop('quality_station'),
-            'update_from_staff': request.user.user_type != c.USER_TYPE_CUSTOMER
-        }
+        if request.user.user_type == c.USER_TYPE_CUSTOMER and requests.user.customer_profile != order.customer:
+            return Response(
+                {
+                    'msg': 'Cannot update the order'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        if request.user.user_type != c.USER_TYPE_CUSTOMER:
-            context['customer'] = request.data.pop('customer')
-        else:
-            if request.user.customer_profile != order.customer:
-                return Response(
-                    {
-                        'msg': 'Cannot update the order'
-                    },
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        order_products_data = request.data.pop('products', None)
+        if order_products_data is None:
+            return Response(
+                {
+                    'products': 'Order Product data is missing'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        serializer = s.OrderSerializer(
-            order,
-            data=data,
-            context=context,
-            partial=True
+        # check if loading station exists
+        loading_station_data = request.data.pop('loading_station', None)
+        if loading_station_data is None:
+            return Response(
+                {
+                    'loading_station': 'Loading station data is missing'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        loading_station = get_object_or_404(
+            m.Station,
+            id=loading_station_data.get('id'),
+            station_type=c.STATION_TYPE_LOADING_STATION
         )
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # check if quality station exists
+        quality_station_data = request.data.pop('quality_station', None)
+        if quality_station_data is None:
+            return Response(
+                {
+                    'quality_station': 'Quality station data is missing'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        quality_station = get_object_or_404(
+            m.Station,
+            id=quality_station_data.get('id'),
+            station_type=c.STATION_TYPE_QUALITY_STATION
+        )
+
+        # check if assignee exists
+        assignee_data = request.data.pop('assignee', None)
+        if assignee_data is None:
+            assignee = None
+        else:
+            assignee = get_object_or_404(
+                s.StaffProfile,
+                id=assignee_data.get('id')
+            )
+
+        # check if customer exists
+        if request.user.user_type == c.USER_TYPE_CUSTOMER:
+            customer = request.user.customer_profile
+            update_from_staff = False
+        else:
+            update_from_staff = True
+            customer_data = request.data.pop('customer', None)
+            if customer_data is None:
+                raise s.serializers.ValidationError({
+                    'customer': 'Customer data is missing'
+                })
+
+            customer = get_object_or_404(
+                m.CustomerProfile,
+                id=customer_data.get('id')
+            )
+
+        is_same_station = request.data.get('is_same_station', False)
+
+        if order.arrangement_status == c.TRUCK_ARRANGEMENT_STATUS_INPROGRESS:
+            error = False
+
+            if not error and customer != order.customer:
+                msg = 'Cannot change customer because the job already created'
+                error = True
+
+            if not error and loading_station != order.loading_station:
+                msg = 'Cannot change loading station because the job already created'
+                error = True
+
+            if not error and quality_station != order.quality_station:
+                msg = 'Cannot change quality station because the job already created'
+                error = True
+
+            if not error and is_same_station != order.is_same_station:
+                msg = 'Cannot change station meta because the job already created'
+                error = True
+
+            if not error:
+                for order_product in order.orderproduct_set.all():
+                    if not order_product.arranged_weight:
+                        continue
+
+                    existing_order_product = list(
+                        filter(lambda x: 'id' in x and x['id'] == order_product.id, order_products_data)
+                    )
+                    if not existing_order_product:
+                        msg = 'Cannot delete the product that is already arranged'
+                        error = True
+                        break
+
+                    if order_product.arranged_weight > float(existing_order_product[0]['weight']):
+                        msg = f'{order_product.product.name} is already arranged {order_product.arranged_weight}'
+                        'so cannot update'
+                        error = True
+                        break
+
+            if error:
+                return Response(
+                    {
+                        'msg': msg
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        previous_customer = order.customer
+        is_same_customer = previous_customer == customer
+        order.assignee = assignee
+        order.customer = customer
+        order.loading_station = loading_station
+        order.quality_station = quality_station
+
+        for key, value in request.data.items():
+            setattr(order, key, value)
+
+        order.save()
+
+        old_products = set(
+            order.orderproduct_set.values_list('id', flat=True)
+        )
+
+        new_products = set()
+
+        # save models
+        for order_product_data in order_products_data:
+            product_data = order_product_data.pop('product', None)
+            product = get_object_or_404(
+                m.Product,
+                id=product_data.get('id', None)
+            )
+
+            order_product_id = order_product_data.get('id', None)
+            new_products.add(order_product_id)
+            if order_product_id not in old_products:
+                order_product = m.OrderProduct.objects.create(
+                    order=order, product=product, **order_product_data
+                )
+            else:
+                order_product = get_object_or_404(
+                    m.OrderProduct,
+                    id=order_product_id
+                )
+
+                for (key, value) in order_product_data.items():
+                    setattr(order_product, key, value)
+
+                order_product.save()
+
+        m.OrderProduct.objects.filter(
+            order=order,
+            id__in=old_products.difference(new_products)
+        ).delete()
+
+        if is_same_customer:
+            if update_from_staff:
+                notify_order_changes.apply_async(
+                    args=[{
+                        'order': order.id,
+                        'customer_user_id': customer.user.id,
+                        'message_type': c.CUSTOMER_NOTIFICATION_UPDATE_ORDER
+                    }]
+                )
+        else:
+            notify_order_changes.apply_async(
+                args=[{
+                    'order': order.id,
+                    'customer_user_id': customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_NEW_ORDER
+                }]
+            )
+            notify_order_changes.apply_async(
+                args=[{
+                    'order': order.id,
+                    'customer_user_id': previous_customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_DELETE_ORDER
+                }]
+            )
 
         return Response(
-            serializer.data,
+            s.OrderSerializer(order).data,
             status=status.HTTP_200_OK
         )
 

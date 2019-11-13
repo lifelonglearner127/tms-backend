@@ -108,9 +108,6 @@ class OrderProductSerializer(serializers.ModelSerializer):
     Serializer for ordred products
     """
     product = ProductNameSerializer(read_only=True)
-    weight_measure_unit = TMSChoiceField(
-        choices=c.PRODUCT_WEIGHT_MEASURE_UNIT
-    )
 
     class Meta:
         model = m.OrderProduct
@@ -333,10 +330,6 @@ class OrderSerializer(serializers.ModelSerializer):
                 m.Product, id=product_data.get('id', None)
             )
 
-            if 'weight_measure_unit' in order_product_data:
-                order_product_data['weight_measure_unit'] =\
-                    order_product_data['weight_measure_unit']['value']
-
             m.OrderProduct.objects.create(
                 order=order, product=product, **order_product_data
             )
@@ -352,151 +345,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
-        """
-        Request format
-        {
-            alias: alias,
-            assignee: { id: '', name: '' },
-            customer: { id: '', name: '' },
-            products: [
-                product: { id: '', ... },
-                weight: 0
-            ]
-        }
-        1. Validate the data
-        2. save models
-        """
-        # check if order products exists in request
-        order_products_data = self.context.get('products', None)
-        if order_products_data is None:
-            raise serializers.ValidationError({
-                'products': 'Order Product data is missing'
-            })
-
-        # check if assignee exists
-        assignee_data = self.context.pop('assignee', None)
-        if assignee_data is None:
-            assignee = None
-        else:
-            assignee = get_object_or_404(
-                StaffProfile,
-                id=assignee_data.get('id')
-            )
-
-        # check if customer exists
-        customer_data = self.context.pop('customer', None)
-        if customer_data is None:
-            raise serializers.ValidationError({
-                'customer': 'Customer data is missing'
-            })
-
-        customer = get_object_or_404(
-            m.CustomerProfile,
-            id=customer_data.get('id')
-        )
-
-        # check if loading station exists
-        loading_station_data = self.context.pop('loading_station', None)
-        if loading_station_data is None:
-            raise serializers.ValidationError({
-                'loading_station': 'Loading station data is missing'
-            })
-
-        loading_station = get_object_or_404(
-            m.Station,
-            id=loading_station_data.get('id'),
-            station_type=c.STATION_TYPE_LOADING_STATION
-        )
-
-        # check if loading station exists
-        quality_station_data = self.context.pop('quality_station', None)
-        if quality_station_data is None:
-            raise serializers.ValidationError({
-                'quality_station': 'Quality station data is missing'
-            })
-
-        quality_station = get_object_or_404(
-            m.Station,
-            id=quality_station_data.get('id'),
-            station_type=c.STATION_TYPE_QUALITY_STATION
-        )
-
-        previous_customer = instance.customer
-        is_same_customer = previous_customer == customer
-        instance.assignee = assignee
-        instance.customer = customer
-        instance.loading_station = loading_station
-        instance.quality_station = quality_station
-
-        for (key, value) in validated_data.items():
-            setattr(instance, key, value)
-
-        instance.save()
-
-        old_products = set(
-            instance.orderproduct_set.values_list('id', flat=True)
-        )
-
-        new_products = set()
-
-        # save models
-        for order_product_data in order_products_data:
-            product_data = order_product_data.pop('product', None)
-            product = get_object_or_404(
-                m.Product,
-                id=product_data.get('id', None)
-            )
-
-            if 'weight_measure_unit' in order_product_data:
-                order_product_data['weight_measure_unit'] =\
-                    order_product_data['weight_measure_unit']['value']
-
-            order_product_id = order_product_data.get('id', None)
-            new_products.add(order_product_id)
-            if order_product_id not in old_products:
-                order_product = m.OrderProduct.objects.create(
-                    order=instance, product=product, **order_product_data
-                )
-            else:
-                order_product = get_object_or_404(
-                    m.OrderProduct,
-                    id=order_product_id
-                )
-
-                for (key, value) in order_product_data.items():
-                    setattr(order_product, key, value)
-                order_product.save()
-
-        m.OrderProduct.objects.filter(
-            order=instance,
-            id__in=old_products.difference(new_products)
-        ).delete()
-
-        if is_same_customer:
-            if self.context.get('update_from_staff'):
-                notify_order_changes.apply_async(
-                    args=[{
-                        'order': instance.id,
-                        'customer_user_id': customer.user.id,
-                        'message_type': c.CUSTOMER_NOTIFICATION_UPDATE_ORDER
-                    }]
-                )
-        else:
-            notify_order_changes.apply_async(
-                args=[{
-                    'order': instance.id,
-                    'customer_user_id': customer.user.id,
-                    'message_type': c.CUSTOMER_NOTIFICATION_NEW_ORDER
-                }]
-            )
-            notify_order_changes.apply_async(
-                args=[{
-                    'order': instance.id,
-                    'customer_user_id': previous_customer.user.id,
-                    'message_type': c.CUSTOMER_NOTIFICATION_DELETE_ORDER
-                }]
-            )
-        return instance
+        pass
 
 
 class JobMileageField(serializers.Field):
@@ -895,13 +744,10 @@ class JobDoneSerializer(serializers.ModelSerializer):
                         })
                         break
                 else:
-                    order_product = instance.order.orderproduct_set.filter(product=job_station_product.product).first()
-
                     branches.append({
                         'branch': job_station_product.branch,
                         'product': ProductNameSerializer(job_station_product.product).data,
                         'mission_weight': job_station_product.mission_weight,
-                        'weight_measure_unit': order_product.get_weight_measure_unit_display(),
                         'unloading_stations': [{
                             'unloading_station': StationNameSerializer(job_station.station).data,
                             'mission_weight': job_station_product.mission_weight
