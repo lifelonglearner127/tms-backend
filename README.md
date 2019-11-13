@@ -4,6 +4,7 @@ Vehicle Management System
 - [Important Notes](#important-notes)
 - [More docs](doc/README.md)
     - [About Project](doc/project.md)
+    - [Workflow](doc/workflow.md)
     - [Development](doc/development.md)
     - [Deployment](doc/deployment.md)
     - [DB](doc/backup.md)
