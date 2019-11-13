@@ -59,6 +59,8 @@ def send_notifications(users, message, message_type):
 def notify_order_changes(context):
     order = get_object_or_404(m.Order, id=context['order'])
     customer = get_object_or_404(User, id=context['customer_user_id'])
+    message_type = context['message_type']
+
     message = {
         "created": order.created.strftime('%Y-%m-%d'),
         "products": []
@@ -70,7 +72,7 @@ def notify_order_changes(context):
             'weight': order_product.weight
         })
 
-    send_notifications([customer], message, c.CUSTOMER_NOTIFICATION_NEW_ORDER)
+    send_notifications([customer], message, message_type)
 
 
 @app.task

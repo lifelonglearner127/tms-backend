@@ -125,6 +125,8 @@ class OrderViewSet(TMSViewSet):
 
         context = {
             'products': request.data.pop('products'),
+            'assignee': request.data.pop('assignee'),
+            'customer': request.data.pop('customer'),
             'loading_station': request.data.pop('loading_station'),
             'quality_station': request.data.pop('quality_station')
         }
@@ -162,6 +164,8 @@ class OrderViewSet(TMSViewSet):
         data = request.data
         context = {
             'products': request.data.pop('products'),
+            'assignee': request.data.pop('assignee'),
+            'customer': request.data.pop('customer'),
             'loading_station': request.data.pop('loading_station'),
             'quality_station': request.data.pop('quality_station')
         }

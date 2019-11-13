@@ -229,8 +229,8 @@ class OrderSerializer(serializers.ModelSerializer):
     customer = ShortCustomerProfileSerializer(read_only=True)
     loading_station = StationLocationSerializer(read_only=True)
     quality_station = StationLocationSerializer(read_only=True)
-    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, required=False)
-    status = TMSChoiceField(choices=c.ORDER_STATUS, required=False)
+    order_source = TMSChoiceField(choices=c.ORDER_SOURCE, read_only=True)
+    status = TMSChoiceField(choices=c.ORDER_STATUS, read_only=True)
     arrangement_status = TMSChoiceField(
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
     )
@@ -270,6 +270,29 @@ class OrderSerializer(serializers.ModelSerializer):
                 'products': 'Order Product data is missing'
             })
 
+        # check if assignee exists
+        assignee_data = self.context.pop('assignee', None)
+        if assignee_data is None:
+            raise serializers.ValidationError({
+                'assignee': 'Assignee data is missing'
+            })
+        assignee = get_object_or_404(
+            StaffProfile,
+            id=assignee_data.get('id')
+        )
+
+        # check if customer exists
+        customer_data = self.context.pop('customer', None)
+        if customer_data is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data is missing'
+            })
+
+        customer = get_object_or_404(
+            m.CustomerProfile,
+            id=customer_data.get('id')
+        )
+
         # check if loading station exists
         loading_station_data = self.context.pop('loading_station', None)
         if loading_station_data is None:
@@ -298,6 +321,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
         # save models
         order = m.Order.objects.create(
+            assignee=assignee,
+            customer=customer,
             loading_station=loading_station,
             quality_station=quality_station,
             **validated_data
@@ -320,7 +345,8 @@ class OrderSerializer(serializers.ModelSerializer):
         notify_order_changes.apply_async(
             args=[{
                 'order': order.id,
-                'customer_user_id': order.customer.user.id
+                'customer_user_id': customer.user.id,
+                'message_type': c.CUSTOMER_NOTIFICATION_NEW_ORDER
             }]
         )
         return order
@@ -346,6 +372,29 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'products': 'Order Product data is missing'
             })
+
+        # check if assignee exists
+        assignee_data = self.context.pop('assignee', None)
+        if assignee_data is None:
+            raise serializers.ValidationError({
+                'assignee': 'Assignee data is missing'
+            })
+        assignee = get_object_or_404(
+            StaffProfile,
+            id=assignee_data.get('id')
+        )
+
+        # check if customer exists
+        customer_data = self.context.pop('customer', None)
+        if customer_data is None:
+            raise serializers.ValidationError({
+                'customer': 'Customer data is missing'
+            })
+
+        customer = get_object_or_404(
+            m.CustomerProfile,
+            id=customer_data.get('id')
+        )
 
         # check if loading station exists
         loading_station_data = self.context.pop('loading_station', None)
@@ -373,6 +422,10 @@ class OrderSerializer(serializers.ModelSerializer):
             station_type=c.STATION_TYPE_QUALITY_STATION
         )
 
+        previous_customer = instance.customer
+        is_same_customer = previous_customer == customer
+        instance.assignee = assignee
+        instance.customer = customer
         instance.loading_station = loading_station
         instance.quality_station = quality_station
 
@@ -420,16 +473,30 @@ class OrderSerializer(serializers.ModelSerializer):
             id__in=old_products.difference(new_products)
         ).delete()
 
+        if is_same_customer:
+            notify_order_changes.apply_async(
+                args=[{
+                    'order': instance.id,
+                    'customer_user_id': customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_UPDATE_ORDER
+                }]
+            )
+        else:
+            notify_order_changes.apply_async(
+                args=[{
+                    'order': instance.id,
+                    'customer_user_id': customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_NEW_ORDER
+                }]
+            )
+            notify_order_changes.apply_async(
+                args=[{
+                    'order': instance.id,
+                    'customer_user_id': previous_customer.user.id,
+                    'message_type': c.CUSTOMER_NOTIFICATION_DELETE_ORDER
+                }]
+            )
         return instance
-
-    def to_internal_value(self, data):
-        ret = data
-        if 'assignee' in data:
-            ret['assignee'] = get_object_or_404(StaffProfile, id=data['assignee']['id'])
-        ret['customer'] = get_object_or_404(
-            CustomerProfile, id=data['customer']['id']
-        )
-        return ret
 
 
 class JobMileageField(serializers.Field):
