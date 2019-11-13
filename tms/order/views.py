@@ -264,7 +264,10 @@ class OrderViewSet(TMSViewSet):
                         continue
 
                     existing_order_product = list(
-                        filter(lambda x: 'id' in x and x['id'] == order_product.id, order_products_data)
+                        filter(
+                            lambda x: 'product' in x and x['product']['id'] == order_product.product.id,
+                            order_products_data
+                        )
                     )
                     if not existing_order_product:
                         msg = 'Cannot delete the product that is already arranged'
@@ -297,10 +300,7 @@ class OrderViewSet(TMSViewSet):
 
         order.save()
 
-        old_products = set(
-            order.orderproduct_set.values_list('id', flat=True)
-        )
-
+        old_products = set(order.products.values_list('id', flat=True))
         new_products = set()
 
         # save models
@@ -311,26 +311,30 @@ class OrderViewSet(TMSViewSet):
                 id=product_data.get('id', None)
             )
 
-            order_product_id = order_product_data.get('id', None)
-            new_products.add(order_product_id)
-            if order_product_id not in old_products:
+            new_products.add(product.id)
+            if product.id not in old_products:
                 order_product = m.OrderProduct.objects.create(
-                    order=order, product=product, **order_product_data
+                    order=order,
+                    product=product,
+                    weight=float(order_product_data.get('weight')),
+                    is_split=order_product_data.get('is_split'),
+                    is_pump=order_product_data.get('is_pump'),
                 )
             else:
                 order_product = get_object_or_404(
                     m.OrderProduct,
-                    id=order_product_id
+                    order=order,
+                    product=product
                 )
 
-                for (key, value) in order_product_data.items():
-                    setattr(order_product, key, value)
-
+                order_product.weight = float(order_product_data.get('weight'))
+                order_product.is_split = order_product_data.get('is_split')
+                order_product.is_pump = order_product_data.get('is_pump')
                 order_product.save()
 
         m.OrderProduct.objects.filter(
             order=order,
-            id__in=old_products.difference(new_products)
+            product__id__in=old_products.difference(new_products)
         ).delete()
 
         if is_same_customer:
@@ -897,20 +901,10 @@ class JobViewSet(TMSViewSet):
         """
         job = self.get_object()
 
-        msg = ''
-        if job.order.status == c.ORDER_STATUS_COMPLETE:
-            msg = "Cannot update completed order's job"
-
         if job.progress == c.JOB_PROGRESS_COMPLETE:
-            msg = "Cannot update completed job"
-
-        if job.progress > c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
-            msg = "Cannot update this job because it load the product"
-
-        if msg:
             return Response(
                 {
-                    'msg': msg
+                    'msg': 'Cannot update completed job"'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -925,7 +919,7 @@ class JobViewSet(TMSViewSet):
                 'vehicle': 'Such vehicle does not exist'
             })
 
-        if job.progress == c.JOB_PROGRESS_TO_LOADING_STATION and job.vehicle != vehicle:
+        if job.progress >= c.JOB_PROGRESS_TO_LOADING_STATION and job.vehicle != vehicle:
             return Response(
                 {
                     'msg': 'you canot change the vehicle'
@@ -950,7 +944,7 @@ class JobViewSet(TMSViewSet):
         if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_driver != new_driver:
             return Response(
                 {
-                    'msg': 'you canot change the driver'
+                    'msg': 'You cannot change the driver in this context'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -968,7 +962,7 @@ class JobViewSet(TMSViewSet):
         if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_escort != new_escort:
             return Response(
                 {
-                    'msg': 'you canot change the escort'
+                    'msg': 'you canot change the escort in this context'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
