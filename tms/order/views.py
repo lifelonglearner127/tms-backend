@@ -44,7 +44,7 @@ from ..core.views import TMSViewSet
 from ..g7.interfaces import G7Interface
 from .tasks import (
     notify_order_changes,
-    notify_of_job_creation, notify_of_job_products_changes,
+    notify_of_job_creation, notify_of_job_changes,
     notify_of_job_deleted, notify_of_worker_change_after_job_start,
     notify_of_driver_or_escort_changes_before_job_start
 )
@@ -1187,7 +1187,7 @@ class JobViewSet(TMSViewSet):
                 )
 
         if current_driver == new_driver and current_escort == new_escort:
-            notify_of_job_products_changes.apply_async(
+            notify_of_job_changes.apply_async(
                 args=[{
                     'job': job.id,
                     'driver': current_driver.id,

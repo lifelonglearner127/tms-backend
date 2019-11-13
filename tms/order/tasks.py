@@ -259,7 +259,7 @@ def notify_of_driver_or_escort_changes_before_job_start(context):
 
 
 @app.task
-def notify_of_job_products_changes(context):
+def notify_of_job_changes(context):
     """
     """
     job = get_object_or_404(m.Job, id=context['job'])
@@ -282,7 +282,7 @@ def notify_of_job_products_changes(context):
         },
         "loading_station": job.order.loading_station.address,
         "branches": get_branches(job),
-        "rest_place": job.rest_place.address
+        "rest_place": job.rest_place.address if job.rest_place is not None else '-'
     }
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
