@@ -69,7 +69,7 @@ class CustomerJobPositionConsumer(AsyncJsonWebsocketConsumer):
 
         try:
             order_pk = self.scope['url_route']['kwargs']['order_pk']
-            order = Order.objects.get(pk=order_pk)
+            order = Order.availables.get(pk=order_pk)
 
             self.vehicles = order.jobs.filter(progress__gt=1).values_list(
                 'vehicle__plate_num', flat=True

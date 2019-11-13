@@ -620,7 +620,7 @@ class OrderViewSet(TMSViewSet):
         permission_classes=[IsCustomerUser]
     )
     def get_customer_orders(self, request):
-        queryset = m.Order.objects.filter(
+        queryset = m.Order.availables.filter(
             customer=request.user.customer_profile
         )
 
