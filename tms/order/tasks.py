@@ -287,6 +287,17 @@ def notify_of_job_changes(context):
 
     send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_UPDATE_JOB)
 
+    message = {
+        "vehicle": job.vehicle.plate_num,
+        "driver": {
+            "name": driver.name,
+            "mobile": driver.mobile
+        },
+        "escort": {
+            "name": escort.name,
+            "mobile": escort.mobile
+        }
+    }
     send_notifications([job.order.customer.user], message, c.CUSTOMER_NOTIFICATION_UPDATE_ARRANGEMENT)
 
 
@@ -327,7 +338,7 @@ def notify_of_job_deleted(context):
         "rest_place": context['rest_place']
     }
 
-    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_DELETE_JOB)
+    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_CANCEL_JOB)
 
     message = {
         "vehicle": vehicle,
