@@ -1,34 +1,36 @@
-- [Order Create Workflow](#order-create-workflow)
-- [Order Update Workflow](#order-update-workflow)
-- [Job Create Workflow](#job-create-workflow)
-- [Job Update Workflow](#job-ppdate-workflow)
+- [주문창조 Workflow](#주문창조-workflow)
+- [주문갱신 Workflow](#주문갱신-workflow)
+- [Job창조 Workflow](#Job창조-workflow)
+- [Job갱신 Workflow](#Job갱신-workflow)
 
-### Order create workflow
- - Where order can be created?
-    - Customer app
-    - Web manager
- - Notifications
-    - Customer will be notified when the order is created on web manager
+### 주문창조 Workflow
+- 주문은 웹매니저와 고객앱을 리용하여 창조할수 있다.
+- 통지기능
+   - 고객이 앱을 리용하여 주문을 창조하는 경우 통지를 받지않는다. [구현됨]
+   - 고객은 웹매니저에서 주문이 창조되였을 경우에 그에 대해 통지를 받는다. [구현됨]
 
-### Order Update Workflow
- - Where order can be updated?
-    - Customer app
-    - Web manager
+### 주문갱신 Workflow
+- 주문은 웹매니저와 고객앱을 리용하여 갱신할수 있다.
+- 갱신로직
+   - 이미 끝난 주문과 배차가 끝난 주문에 관해서는 갱신을 할수 없다. [구현됨]
+   - 주문에 대한 아무런 Job이 창조되지 않은 경우 수정가능 [구현됨]
+   - 주문한 대한 Job이 창조되는 경우 고객, 원천지, 목적지, 정류소메타(is_same_station)들은 변경할수 없다. 창조된 Job의 물품에 대해서는 삭제를 할수 없으며 수량만 변경할수 있으나 배차된 수량보다 작게 되면 갱신이 될수 없다. 새로운 물품은 더 창조할수 있다. [구현됨]
 
- - Notifications
-    - Customer will be notified when the order is updated on web manager.
+- 통지기능
+   - 고객이 앱을 리용하여 주문을 갱신하는 경우 통지를 받지않는다. [구현됨]
+   - 웹매니저에서 주문이 갱신되는경우
+      - 고객이 바뀌지 않는 경우 고객은 주문갱신통지를 받는다. [구현됨]
+      - 고객이 바뀌는 경우 새 고객은 주문창조통지를 이전고객은 주문삭제통지를 받는다. [구현됨]
 
- - Constraints
-    - If any job is created 
+### 주문삭제 Workflow
+- 주문은 웹매니저와 고객앱을 리용하여 갱신할수 있다.
+- 삭제로직
+   - 배차가 시작된 주문에 관해서는 삭제할수 없다. 즉 배차가 시작되지 않은 주문에 관해서만 삭제가능하다.[구현됨]
+- 통지기능
+   - 웹매니저에서 주문이 삭제되는 경우 고객은 주문삭제통지를 받는다. [구현됨]
 
-### Order Delete Workflow
- - Where order can be deleted
-    - Customer app
-    - Web manager
- - Customer will be notified when the order is deleted on web manager
+### Job창조 Workflow
 
-### Job Create Workflow
+### Job갱신 Workflow
 
-### Job Update Workflow
-
-### Job Delete Workflow
+### Job삭제 Workflow
