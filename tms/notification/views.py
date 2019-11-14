@@ -66,3 +66,19 @@ class EventViewSets(viewsets.ModelViewSet):
 
     queryset = m.Event.objects.all()
     serializer_class = s.EventSerializer
+
+
+class G7MQTTEventViewSets(viewsets.ModelViewSet):
+
+    queryset = m.G7MQTTEvent.objects.all()
+    serializer_class = s.G7MQTTEventSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        event_type = self.request.query_params.get('event_type', None)
+
+        if event_type:
+            queryset = queryset.filter(event_type=int(event_type))
+
+        return queryset

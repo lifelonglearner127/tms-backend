@@ -14,6 +14,11 @@ router.register(
     views.EventViewSets,
     base_name='events'
 )
+router.register(
+    r'g7-mqtt-events',
+    views.G7MQTTEventViewSets,
+    base_name='g7-mqtt-events'
+)
 
 
 urlpatterns = [

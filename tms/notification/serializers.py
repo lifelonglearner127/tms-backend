@@ -43,3 +43,40 @@ class EventSerializer(serializers.ModelSerializer):
             ret['plate_num'] = instance.vehicle.plate_num_2
 
         return ret
+
+
+class G7MQTTEventSerializer(serializers.ModelSerializer):
+
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    driver = serializers.SerializerMethodField()
+    escort = serializers.SerializerMethodField()
+    event_type = TMSChoiceField(choices=c.MQTT_EVENT_TYPE)
+    push_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = m.G7MQTTEvent
+        fields = '__all__'
+
+    def get_driver(self, instance):
+        if instance.driver:
+            return {
+                'name': instance.driver.name,
+                'mobile': instance.driver.mobile
+            }
+        else:
+            return {
+                'name': '-',
+                'mobile': '-',
+            }
+
+    def get_escort(self, instance):
+        if instance.escort:
+            return {
+                'name': instance.escort.name,
+                'mobile': instance.escort.mobile
+            }
+        else:
+            return {
+                'name': '-',
+                'mobile': '-',
+            }

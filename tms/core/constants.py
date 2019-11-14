@@ -589,3 +589,12 @@ EXCEL_HEAD_STYLE = {
         }
     }
 }
+
+MQTT_EVENT_STOP = 0
+MQTT_EVENT_IDLE = 1
+MQTT_EVENT_EMS = 2
+MQTT_EVENT_TYPE = (
+    (MQTT_EVENT_STOP, '停留事件'),
+    (MQTT_EVENT_IDLE, '怠速事件'),
+    (MQTT_EVENT_EMS, 'EMS事件'),
+)

@@ -3,6 +3,7 @@ from django.db import models
 
 from jsonfield import JSONField
 from ..core import constants as c
+from ..core.models import TimeStampedModel
 from ..account.models import User
 from ..vehicle.models import Vehicle
 from . import managers
@@ -96,3 +97,71 @@ class Event(models.Model):
             '-created_on',
             'is_processed'
         )
+
+
+class G7MQTTEvent(TimeStampedModel):
+
+    event_type = models.PositiveIntegerField(
+        default=c.MQTT_EVENT_STOP,
+        choices=c.MQTT_EVENT_TYPE
+    )
+
+    push_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE
+    )
+
+    driver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events_as_driver',
+    )
+
+    escort = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events_as_escort',
+    )
+
+    start_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    end_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    seconds = models.PositiveIntegerField(
+        default=0
+    )
+
+    start_lng = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    start_lat = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    end_lng = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    end_lat = models.FloatField(
+        null=True,
+        blank=True
+    )
