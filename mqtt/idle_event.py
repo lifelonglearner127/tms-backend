@@ -11,6 +11,7 @@ import json
 import paho.mqtt.client as paho
 import psycopg2
 from datetime import datetime
+from asgiref.sync import async_to_sync
 
 
 class Config:
@@ -141,6 +142,15 @@ def _on_message(client, userdata, message):
         else:
             if Config.DEBUG:
                 print(f"[Error]: {plate_num} is not registered")
+
+        async_to_sync(channel_layer.group_send)(
+            'monitor',
+            {
+                'type': 'notify_monitor',
+                'notification_type': 'idleEvent',
+                'data': data
+            }
+        )
 
     except Exception as e:
         if Config.DEBUG:

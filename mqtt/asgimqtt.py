@@ -259,9 +259,10 @@ def _on_message(client, userdata, message):
         # send current vehicle position to position consumer
         # in order to display on frontend
         async_to_sync(channel_layer.group_send)(
-            'position',
+            'monitor',
             {
-                'type': 'notify_position',
+                'type': 'notify_monitor',
+                'notification_type': 'position',
                 'data': positions
             }
         )

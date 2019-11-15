@@ -36,7 +36,7 @@ class PositionConsumer(AsyncJsonWebsocketConsumer):
             user_pk = self.scope['url_route']['kwargs']['user_pk']
             self.user = User.objects.get(pk=user_pk)
             await self.channel_layer.group_add(
-                'position',
+                'monitor',
                 self.channel_name
             )
 
@@ -46,15 +46,16 @@ class PositionConsumer(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            'position',
+            'monitor',
             self.channel_name
         )
 
     async def receive(self, text_data):
         pass
 
-    async def notify_position(self, event):
+    async def notify_monitor(self, event):
         await self.send_json({
+            'notification_type': event['notification_type'],
             'content': event['data']
         })
 
