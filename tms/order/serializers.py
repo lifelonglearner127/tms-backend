@@ -1026,7 +1026,7 @@ class JobCurrentSerializer(JobFutureSerializer):
             is_completed=False
         ).first()
 
-        if current_station.previous_station is not None:
+        if current_station is not None and current_station.previous_station is not None:
             for product in current_station.previous_station.jobstationproduct_set.all():
                 ret.append({
                     'branch': product.branch,
