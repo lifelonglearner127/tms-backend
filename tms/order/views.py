@@ -1633,7 +1633,7 @@ class JobViewSet(TMSViewSet):
 
             sub_progress = (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
 
-            if current_station.previous_station is not None:
+            if current_station is not None and current_station.previous_station is not None:
                 for product in current_station.previous_station.jobstationproduct_set.all():
                     meta_numbers.append({
                         'branch': product.branch,
