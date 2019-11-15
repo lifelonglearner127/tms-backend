@@ -79,6 +79,15 @@ systemctl restart tms_g7_position.service
 systemctl restart tms_g7_stop_event.service
 systemctl restart tms_g7_ems_event.service
 systemctl restart tms_g7_idle_event.service
+
+systemctl status tms_celery.service
+systemctl status tms_celery_beat.service
+systemctl status tms_daphne.service
+systemctl status tms_uwsgi.service
+systemctl status tms_g7_position.service
+systemctl status tms_g7_stop_event.service
+systemctl status tms_g7_ems_event.service
+systemctl status tms_g7_idle_event.service
 ```
 
 5. Explanation
