@@ -52,21 +52,34 @@ python manage.py createsuperuser
 ```
 
 3. Configure wsgi & asgi & nginx
- - Configure Nginx
+- Configure Nginx
 ```
 cp deploy/tms_backend.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/tms_backend /etc/nginx/sites-enabled/tms_backend
 systemctl restart nginx
 ```
-
- - Make shell script executable
+- configure redis as docker
 ```
-chmod +x deploy/stagingstartup.sh
+docker run -dit --restart unless-stopped -p 6379:6379 -d redis:2.8
 ```
 
-- Make cronjob
-@reboot /root/Projects/tms-backend/deploy/stagingstartup.sh
-
+- Configure Various serivices
+```
+cp deploy/tms_backend.ini /etc/uwsgi/sites/
+cp deploy/*.service /lib/systemd/system/
+```
+- Restart Services
+```
+systemctl daemon-reload
+systemctl restart tms_celery.service
+systemctl restart tms_celery_beat.service
+systemctl restart tms_daphne.service
+systemctl restart tms_uwsgi.service
+systemctl restart tms_g7_position.service
+systemctl restart tms_g7_stop_event.service
+systemctl restart tms_g7_ems_event.service
+systemctl restart tms_g7_idle_event.service
+```
 
 5. Explanation
 Django Channels is used for providing socket. Although ASGI server - daphne is able to handle websocket and http requests, I use WSGI server for http requests and ASGI server for handling only web sockets.

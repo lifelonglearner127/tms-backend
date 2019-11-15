@@ -1,0 +1,13 @@
+[Unit]
+Description=tms uWSGI Emperor Service
+After=network.target
+
+[Service]
+Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
+ExecStart=/root/.virtualenvs/tms-backend/bin/uwsgi --emperor /etc/uwsgi/sites
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

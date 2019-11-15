@@ -1,12 +1,12 @@
 [Unit]
-Description=TMS Celery
+Description=Tms G7 Position
 After=network.target
 
 [Service]
 User=root
 Group=root
 WorkingDirectory=/root/Projects/tms-backend
-ExecStart=/root/.virtualenvs/tms-backend/bin/celery worker -A config
+ExecStart=/root/.virtualenvs/tms-backend/bin/python mqtt/ems_event.py --settings .env config.asgi:channel_layer
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 Restart=always

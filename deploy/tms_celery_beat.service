@@ -1,12 +1,12 @@
 [Unit]
-Description=TMS Celery
+Description=TMS Celery beat
 After=network.target
 
 [Service]
 User=root
 Group=root
 WorkingDirectory=/root/Projects/tms-backend
-ExecStart=/root/.virtualenvs/tms-backend/bin/celery worker -A config
+ExecStart=/root/.virtualenvs/tms-backend/bin/celery -A config beat
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 Restart=always
