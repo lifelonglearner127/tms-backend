@@ -666,8 +666,8 @@ class VehicleTire(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    position = models.PositiveIntegerField(
-        default=0
+    position = models.CharField(
+        max_length=100
     )
 
     @property
