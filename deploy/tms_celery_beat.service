@@ -6,6 +6,7 @@ After=network.target
 User=root
 Group=root
 WorkingDirectory=/root/Projects/tms-backend
+Environment="DJANGO_SETTINGS_MODULE=config.settings.staging_alibaba"
 ExecStart=/root/.virtualenvs/tms-backend/bin/celery -A config beat
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
