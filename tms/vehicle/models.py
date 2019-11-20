@@ -495,6 +495,11 @@ class VehicleCheckHistory(TimeStampedModel):
         null=True, blank=True
     )
 
+    before_driving_solution = models.TextField(
+        null=True,
+        blank=True
+    )
+
     before_driving_checked_time = models.DateTimeField(
         null=True, blank=True
     )
@@ -507,6 +512,11 @@ class VehicleCheckHistory(TimeStampedModel):
         null=True, blank=True
     )
 
+    driving_solution = models.TextField(
+        null=True,
+        blank=True
+    )
+
     driving_checked_time = models.DateTimeField(
         null=True, blank=True
     )
@@ -517,6 +527,11 @@ class VehicleCheckHistory(TimeStampedModel):
 
     after_driving_description = models.TextField(
         null=True, blank=True
+    )
+
+    after_driving_solution = models.TextField(
+        null=True,
+        blank=True
     )
 
     after_driving_checked_time = models.DateTimeField(
@@ -545,7 +560,7 @@ class VehicleCheckHistory(TimeStampedModel):
     )
 
     class Meta:
-        ordering = ['driver', '-updated']
+        ordering = ['-updated']
 
 
 class VehicleCheckDocument(models.Model):
@@ -723,6 +738,14 @@ class TireManagementHistory(TimeStampedModel):
         max_length=100
     )
 
+    tire_mileage = models.FloatField(
+        default=0
+    )
+
+    vehicle_mileage = models.FloatField(
+        default=0
+    )
+
     @property
     def current_tread_depth(self):
         return self.history.first()
@@ -741,13 +764,24 @@ class TireTreadDepthCheckHistory(TimeStampedModel):
         related_name='history'
     )
 
+    mileage = models.FloatField(
+        default=0
+    )
+
+    pressure = models.FloatField(
+        default=0
+    )
+
     tread_depth = models.FloatField(
         default=0
     )
 
-    checked_on = models.DateTimeField(
-        auto_now_add=True
+    symptom = models.TextField(
+        null=True,
+        blank=True
     )
+
+    checked_on = models.DateTimeField()
 
     @property
     def before_tread_depth(self):

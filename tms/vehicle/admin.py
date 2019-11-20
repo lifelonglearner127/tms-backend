@@ -13,6 +13,11 @@ class VehicleDriverDailyBindAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(m.TireTreadDepthCheckHistory)
+class TireTreadDepthCheckHistoryAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(m.VehicleCheckDocument)
 class VehicleCheckDocumentAdmin(admin.ModelAdmin):
     pass

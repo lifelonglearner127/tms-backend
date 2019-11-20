@@ -24,7 +24,6 @@ class WarehouseProductNameSerializer(serializers.ModelSerializer):
 class InTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
-    amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
 
     class Meta:
         model = m.InTransaction
@@ -34,6 +33,7 @@ class InTransactionSerializer(serializers.ModelSerializer):
         product = self.context.get('product')
 
         amount = validated_data.get('amount')
+        validated_data['price'] = amount * validated_data.get('unit_price')
         product.amount += amount
         product.save()
 
@@ -61,8 +61,7 @@ class OutTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
     recipient = UserNameTypeSerializer(read_only=True)
-    amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
-
+    
     class Meta:
         model = m.OutTransaction
         fields = '__all__'
@@ -147,7 +146,6 @@ class WarehouseProductSerializer(serializers.ModelSerializer):
     out_transactions = OutTransactionHistorySerializer(
         many=True, read_only=True
     )
-    amount_unit = TMSChoiceField(choices=c.WEIGHT_UNIT)
 
     class Meta:
         model = m.WarehouseProduct

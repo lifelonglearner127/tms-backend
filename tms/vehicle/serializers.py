@@ -382,6 +382,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             'itemsCount': m.VehicleCheckItem.published_before_driving_check_items.count(),
             'problems': ret.pop('before_driving_problems'),
             'description': ret.pop('before_driving_description'),
+            'beforeDrivingSolution': ret.pop('before_driving_solution'),
             'images': ret.pop('before_driving_images')
         }
 
@@ -390,6 +391,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             'itemsCount': m.VehicleCheckItem.published_driving_check_items.count(),
             'problems': ret.pop('driving_problems'),
             'description': ret.pop('driving_description'),
+            'drivingSolution': ret.pop('driving_solution'),
             'images': ret.pop('driving_images')
         }
 
@@ -398,6 +400,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
             'itemsCount': m.VehicleCheckItem.published_after_driving_check_items.count(),
             'problems': ret.pop('after_driving_problems'),
             'description': ret.pop('after_driving_description'),
+            'afterDrivingSolution': ret.pop('after_driving_solution'),
             'images': ret.pop('after_driving_images')
         }
         return ret

@@ -24,8 +24,7 @@ class WarehouseProduct(TimeStampedModel):
     )
 
     amount_unit = models.CharField(
-        max_length=1,
-        choices=c.WEIGHT_UNIT
+        max_length=100
     )
 
 
@@ -50,8 +49,7 @@ class InTransaction(TimeStampedModel):
     )
 
     amount_unit = models.CharField(
-        max_length=1,
-        choices=c.WEIGHT_UNIT
+        max_length=100
     )
 
     supplier = models.CharField(
@@ -64,6 +62,12 @@ class InTransaction(TimeStampedModel):
 
     supplier_mobile = models.CharField(
         max_length=100
+    )
+
+    ticket_type = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     transaction_on = models.DateTimeField()
@@ -81,13 +85,33 @@ class OutTransaction(TimeStampedModel):
         User,
         on_delete=models.CASCADE
     )
+
+    vehicle = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    unit_price = models.FloatField(
+        default=0
+    )
+
+    price = models.FloatField(
+        default=0
+    )
+
     amount = models.FloatField(
         default=0
     )
 
     amount_unit = models.CharField(
-        max_length=1,
-        choices=c.WEIGHT_UNIT
+        max_length=100
+    )
+
+    ticket_type = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
     )
 
     transaction_on = models.DateTimeField()

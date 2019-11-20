@@ -762,6 +762,42 @@ class VehicleCheckHistoryViewSet(viewsets.ModelViewSet):
             ).data
         )
 
+    @action(detail=True, methods=['post'], url_path='solution/before-driving')
+    def before_driving_solution(self, request, pk=None):
+        vehicle_check = self.get_object()
+        vehicle_check.before_driving_solution = request.data.pop(
+            'before_driving_solution', ''
+        )
+        vehicle_check.save()
+        return Response(
+            s.VehicleCheckHistorySerializer(vehicle_check).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='solution/driving')
+    def driving_solution(self, request, pk=None):
+        vehicle_check = self.get_object()
+        vehicle_check.driving_solution = request.data.pop(
+            'driving_solution', ''
+        )
+        vehicle_check.save()
+        return Response(
+            s.VehicleCheckHistorySerializer(vehicle_check).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], url_path='solution/after-driving')
+    def after_driving_solution(self, request, pk=None):
+        vehicle_check = self.get_object()
+        vehicle_check.after_driving_solution = request.data.pop(
+            'after_driving_solution', ''
+        )
+        vehicle_check.save()
+        return Response(
+            s.VehicleCheckHistorySerializer(vehicle_check).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path="me")
     def get_my_check_history(self, request):
         page = self.paginate_queryset(
@@ -944,6 +980,8 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
 
         return Response(
             {
+                'plate_num': vehicle_tire.vehicle.plate_num,
+                'position': vehicle_tire.position,
                 'tread_depth': tread_depth
             },
             status=status.HTTP_200_OK
@@ -965,7 +1003,11 @@ class VehicleTireViewSet(viewsets.ModelViewSet):
 
         m.TireTreadDepthCheckHistory.objects.create(
             tire=vehice_tire.current_tire,
-            tread_depth=request.data.pop('tread_depth', 0)
+            tread_depth=request.data.pop('tread_depth', 0),
+            checked_on=request.data.pop('checked_on'),
+            mileage=request.data.pop('mileage', 0),
+            pressure=request.data.pop('pressure', 0),
+            symptom=request.data.pop('symptom', ''),
         )
 
         return Response(
