@@ -94,17 +94,22 @@ class DriverLicense(models.Model):
 
     expires_on = models.DateField()
 
-    # document_type = models.CharField(
-    #     max_length=1,
-    #     choices=c.USER_DOCUMENT_TYPE,
-    #     default=c.USER_DOCUMENT_TYPE_D1
-    # )
-
     document_type = models.CharField(
         max_length=100
     )
 
     description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    work_license = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    work_license_expires_on = models.DateField(
         null=True,
         blank=True
     )

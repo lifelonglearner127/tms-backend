@@ -73,6 +73,16 @@ class BasicSetting(TimeStampedModel):
         default=c.DOCUMENT_EXPIRES_NOTIFICATION_DURATION_DAY
     )
 
+    driver_work_license_expires_notification_duration = models.PositiveIntegerField(
+        default=0
+    )
+
+    driver_work_license_expires_notification_duration_unit = models.CharField(
+        max_length=1,
+        choices=c.DOCUMENT_EXPIRES_NOTIFICATION_DURATION,
+        default=c.DOCUMENT_EXPIRES_NOTIFICATION_DURATION_DAY
+    )
+
     vehicle_license_expires_notification_duration = models.PositiveIntegerField(
         default=0
     )
