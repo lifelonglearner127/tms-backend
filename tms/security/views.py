@@ -26,6 +26,16 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
     queryset = m.CompanyPolicy.objects.all()
     serializer_class = s.CompanyPolicySerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        departments = self.request.query_params.get('departments', None)
+        if departments:
+            departments = departments.split(',')
+            departments = [int(department) for department in departments]
+            queryset = self.queryset.filter(departments__id__in=departments)
+
+        return queryset
+
     def create(self, request):
         author = request.data.pop('author', None)
         departments = request.data.pop('departments', [])
