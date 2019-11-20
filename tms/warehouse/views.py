@@ -17,6 +17,14 @@ class WarehouseProductViewSet(TMSViewSet):
     queryset = m.WarehouseProduct.objects.all()
     serializer_class = s.WarehouseProductSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
     def create(self, request):
         assignee = request.data.pop('assignee', None)
 
@@ -58,6 +66,14 @@ class InTransactionHistoryViewSet(TMSViewSet):
 
     queryset = m.InTransaction.objects.all()
     serializer_class = s.InTransactionSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(product__name__icontains=name)
+
+        return queryset
 
 
 class InTransactionViewSet(TMSViewSet):
@@ -110,6 +126,14 @@ class OutTransactionHistoryViewSet(TMSViewSet):
 
     queryset = m.OutTransaction.objects.all()
     serializer_class = s.OutTransactionSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(product__name__icontains=name)
+
+        return queryset
 
 
 class OutTransactionViewSet(TMSViewSet):
