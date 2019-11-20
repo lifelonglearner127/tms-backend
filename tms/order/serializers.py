@@ -9,7 +9,7 @@ from ..core import constants as c
 # from ..core.utils import format_datetime
 
 # models
-from ..hr.models import CustomerProfile, StaffProfile
+from ..hr.models import StaffProfile
 from ..info.models import Product
 from ..finance.models import FuelBillHistory
 

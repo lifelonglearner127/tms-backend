@@ -121,8 +121,8 @@ class Test(TimeStampedModel):
         Question
     )
 
-    appliants = models.ManyToManyField(
-        User
+    departments = models.ManyToManyField(
+        Department
     )
 
     @property
@@ -247,8 +247,8 @@ class SecurityLearningProgram(TimeStampedModel):
         blank=True,
     )
 
-    audiences = models.ManyToManyField(
-        User
+    departments = models.ManyToManyField(
+        Department
     )
 
 

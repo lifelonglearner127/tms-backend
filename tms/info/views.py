@@ -10,7 +10,6 @@ from ..core import constants as c
 from . import models as m
 
 # permissions
-from . import permissions as p
 
 # serializers
 from . import serializers as s

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 # constants
-from ..core import constants as c
+
 # models
 from . import models as m
 
@@ -9,7 +9,6 @@ from . import models as m
 from ..account.serializers import (
     MainUserSerializer, UserNameTypeSerializer
 )
-from ..core.serializers import TMSChoiceField
 
 
 class WarehouseProductNameSerializer(serializers.ModelSerializer):
@@ -61,7 +60,7 @@ class OutTransactionSerializer(serializers.ModelSerializer):
 
     product = WarehouseProductNameSerializer(read_only=True)
     recipient = UserNameTypeSerializer(read_only=True)
-    
+
     class Meta:
         model = m.OutTransaction
         fields = '__all__'

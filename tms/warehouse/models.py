@@ -1,7 +1,5 @@
 from django.db import models
 
-from ..core import constants as c
-
 # models
 from ..account.models import User
 from ..core.models import TimeStampedModel
