@@ -14,8 +14,9 @@ class Vehicle(TimeStampedModel):
     """
     Vehicle model
     """
-    is_company_vehicle = models.BooleanField(
-        default=True
+    department = models.PositiveIntegerField(
+        choices=c.VEHICLE_DEPARTMENT_TYPE,
+        default=c.VEHICLE_DEPARTMENT_TYPE_OIL
     )
 
     # Basic Information

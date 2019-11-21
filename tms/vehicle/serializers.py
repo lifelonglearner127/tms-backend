@@ -65,6 +65,7 @@ class VehicleSerializer(serializers.ModelSerializer):
     """
     Vehicle serializer
     """
+    department = TMSChoiceField(choices=c.VEHICLE_DEPARTMENT_TYPE)
     model = TMSChoiceField(choices=c.VEHICLE_MODEL_TYPE)
     brand = TMSChoiceField(choices=c.VEHICLE_BRAND)
     model_2 = TMSChoiceField(choices=c.VEHICLE_MODEL_TYPE)
