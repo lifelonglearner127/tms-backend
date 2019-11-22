@@ -892,15 +892,18 @@ class JobViewSet(TMSViewSet):
     serializer_class = s.JobSerializer
 
     def update(self, request, pk=None):
-        """
-         - completed order jobs cannot be updated
+        """Update the job if according to update logic
+
          - completed job cannot be updated
+         - vehicle cannot be updated once the job started
+         - driver, escort cannot be updated in this context once the job started
          - job cannot updated after loading
-         - vehicle cannot be updated if the job started
          - branches and routes cannot be updated if the vehicle arrived at loading station
         """
         job = self.get_object()
+        is_updated_job = False
 
+        # completed order jobs cannot be updated
         if job.progress == c.JOB_PROGRESS_COMPLETE:
             return Response(
                 {
@@ -919,6 +922,7 @@ class JobViewSet(TMSViewSet):
                 'vehicle': 'Such vehicle does not exist'
             })
 
+        # vehicle cannot be updated once the job started
         if job.progress >= c.JOB_PROGRESS_TO_LOADING_STATION and job.vehicle != vehicle:
             return Response(
                 {
@@ -928,7 +932,7 @@ class JobViewSet(TMSViewSet):
             )
 
         # validate driver
-        # driver change and escort change should be in seperate context after the job is started
+        # driver, escort cannot be updated in this context once the job started
         current_driver = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker
         current_escort = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker
 
@@ -941,7 +945,7 @@ class JobViewSet(TMSViewSet):
                 'driver': 'Such driver does not exist'
             })
 
-        if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_driver != new_driver:
+        if job.progress >= c.JOB_PROGRESS_TO_LOADING_STATION and current_driver != new_driver:
             return Response(
                 {
                     'msg': 'You cannot change the driver in this context'
@@ -959,7 +963,7 @@ class JobViewSet(TMSViewSet):
                 'escort': 'Such escort does not exist'
             })
 
-        if job.progress > c.JOB_PROGRESS_NOT_STARTED and current_escort != new_escort:
+        if job.progress >= c.JOB_PROGRESS_TO_LOADING_STATION and current_escort != new_escort:
             return Response(
                 {
                     'msg': 'you canot change the escort in this context'
@@ -1012,7 +1016,7 @@ class JobViewSet(TMSViewSet):
             for unloading_station_data in branch_data.get('unloading_stations', []):
                 unloading_station_id = unloading_station_data.get('unloading_station')
                 due_time = unloading_station_data.get('due_time')
-                transport_unit_price = float(unloading_station_data.get('transport_unit_price'))
+                transport_unit_price = float(unloading_station_data.get('transport_unit_price', 0))
                 unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
                 branch_weight = branch_weight - unloading_station_weight
 
@@ -1140,6 +1144,23 @@ class JobViewSet(TMSViewSet):
             job_loading_station.jobstationproduct_set.values_list('branch', flat=True)
         )
 
+        difference_products = old_loading_station_branches.difference(new_loading_station_branches)
+        if difference_products:
+            if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+                return Response(
+                    {
+                        'msg': '当前到达装货地，所以不能修装货货品和数量'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                job_loading_station.jobstationproduct_set.filter(
+                    branch__in=difference_products
+                ).delete()
+                job_quality_station.jobstationproduct_set.filter(
+                    branch__in=difference_products
+                ).delete()
+
         for job_station_product in job_products['total']:
             job_loading_station_product =\
                 job_loading_station.jobstationproduct_set.filter(
@@ -1155,6 +1176,7 @@ class JobViewSet(TMSViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 else:
+                    is_updated_job = True
                     new_added_product = get_object_or_404(Product, id=job_station_product['product'])
                     m.JobStationProduct.objects.create(
                         job_station=job_loading_station,
@@ -1180,6 +1202,7 @@ class JobViewSet(TMSViewSet):
                             status=status.HTTP_400_BAD_REQUEST
                         )
                     else:
+                        is_updated_job = True
                         new_added_product = get_object_or_404(Product, id=job_station_product['product'])
                         job_loading_station_product.product = new_added_product
                         job_loading_station_product.mission_weight = job_station_product['mission_weight']
@@ -1192,30 +1215,34 @@ class JobViewSet(TMSViewSet):
                         job_quality_station_product.mission_weight = job_station_product['mission_weight']
                         job_quality_station_product.save()
 
-        job_loading_station.jobstationproduct_set.filter(
-            branch__in=old_loading_station_branches.difference(new_loading_station_branches)
-        ).delete()
-        job_quality_station.jobstationproduct_set.filter(
-            branch__in=old_loading_station_branches.difference(new_loading_station_branches)
-        ).delete()
+        new_unloading_stations = [route.end_point for route in routes]
+        old_unloading_stations = [
+            job_station for job_station in job.jobstation_set.filter(step__gte=2).order_by('step')
+        ]
+        run_job_stations = [station for station in old_unloading_stations if station.is_completed]
+        next_job_station = None
+        if job.progress >= c.JOB_PROGRESS_TO_UNLOADING_STATION:
+            next_job_station = old_unloading_stations[len(run_job_stations)]
 
-        new_unloading_stations = [route.end_point.id for route in routes]
-        old_unloading_stations = [job_station for job_station in job.jobstation_set.filter(step__gte=2)]
-        run_job_stations = [job_station for job_station in old_unloading_stations if job_station.is_completed]
-        run_job_station_length = len(run_job_stations)
-
-        if run_job_stations\
+        if next_job_station\
            and [station.station for station in run_job_stations] \
-           != new_unloading_stations[:run_job_station_length]:
+           != new_unloading_stations[:len(run_job_stations)]:
+            run_station_names = [station.station.name for station in run_job_stations]
+            run_station_names.insert(0, job.order.quality_station.name)
+            run_station_names.insert(0, job.order.loading_station.name)
             return Response(
                 {
                     'msg': 'You cannot update the routes like this because the driver is already run {}'
-                    .format(' -> '.join(run_job_stations))
+                    'and now heading to {}'
+                    .format(
+                        ' -> '.join(run_station_names),
+                        next_job_station.station.name
+                    )
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        for run_station_index, run_station in run_job_stations:
+        for run_station in run_job_stations:
             unloading_station_products = job_products.get(run_station.station.id, None)
             if unloading_station_products is None:
                 return Response(
@@ -1225,6 +1252,22 @@ class JobViewSet(TMSViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             else:
+                new_unloading_station_branches = {
+                    unloading_station_product['branch'] for unloading_station_product in unloading_station_products
+                }
+                old_unloading_station_branches = set(
+                    run_station.jobstationproduct_set.values_list('branch', flat=True)
+                )
+
+                difference_products = old_unloading_station_branches.difference(new_unloading_station_branches)
+                if difference_products:
+                    return Response(
+                        {
+                            'msg': 'You cannot update the already delievered products'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
                 for unloading_station_product in unloading_station_products:
                     run_station_product = run_station.jobstationproduct_set.filter(
                         branch=unloading_station_product['branch']
@@ -1242,11 +1285,12 @@ class JobViewSet(TMSViewSet):
         job.jobstation_set.filter(
             station__id__in=[station.station.id for station in old_unloading_stations]).delete()
         for new_station_index, new_station in enumerate(new_unloading_stations):
+            is_updated_job = True
             job_station = m.JobStation.objects.create(
                 job=job,
-                station=get_object_or_404(m.Station, id=new_station),
+                station=new_station,
                 step=new_station_index+2,
-                transport_unit_price=transport_unit_prices[route.end_point.id]
+                transport_unit_price=transport_unit_prices[new_station.id]
             )
             for job_product in job_products[new_station.id]:
                 m.JobStationProduct.objects.create(
@@ -1257,50 +1301,53 @@ class JobViewSet(TMSViewSet):
                     mission_weight=job_product['mission_weight']
                 )
 
-        job.vehicle = vehicle
-        job.routes = route_ids
-        job.save()
+        if job.vehicle != vehicle or job.routes != route_ids:
+            is_updated_job = True
 
-        for product_id, old_arranged_product in old_arranged_products.items():
-            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
-            order_product.arranged_weight -= old_arranged_product['mission_weight']
-            order_product.save()
+        if is_updated_job:
+            job.vehicle = vehicle
+            job.routes = route_ids
+            job.save()
 
-        for product_id, arranged_product in arranged_products.items():
-            order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
-            order_product.arranged_weight += arranged_product['mission_weight']
-            order_product.save()
+            for product_id, old_arranged_product in old_arranged_products.items():
+                order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+                order_product.arranged_weight -= old_arranged_product['mission_weight']
+                order_product.save()
 
-        if current_driver == new_driver and current_escort == new_escort:
-            notify_of_job_changes.apply_async(
-                args=[{
-                    'job': job.id,
-                    'driver': current_driver.id,
-                    'escort': current_escort.id
-                }]
-            )
-        else:
-            if current_driver != new_driver:
-                m.JobWorker.drivers.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
+            for product_id, arranged_product in arranged_products.items():
+                order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
+                order_product.arranged_weight += arranged_product['mission_weight']
+                order_product.save()
+            if current_driver == new_driver and current_escort == new_escort:
+                notify_of_job_changes.apply_async(
+                    args=[{
+                        'job': job.id,
+                        'driver': current_driver.id,
+                        'escort': current_escort.id
+                    }]
+                )
+            else:
+                if current_driver != new_driver:
+                    m.JobWorker.drivers.get(job=job).delete()
+                    m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
 
-            if current_escort != new_escort:
-                m.JobWorker.escorts.get(job=job).delete()
-                m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
+                if current_escort != new_escort:
+                    m.JobWorker.escorts.get(job=job).delete()
+                    m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
 
-            notify_of_driver_or_escort_changes_before_job_start.apply_async(
-                args=[{
-                    'job': job.id,
-                    'current_driver': current_driver.id,
-                    'new_driver': new_driver.id,
-                    'current_escort': current_escort.id,
-                    'new_escort': new_escort.id,
-                    'old_vehicle': old_vehicle,
-                    'old_branches': old_branches,
-                    'is_driver_updated': current_driver != new_driver,
-                    'is_escort_updated':  current_escort != new_escort
-                }]
-            )
+                notify_of_driver_or_escort_changes_before_job_start.apply_async(
+                    args=[{
+                        'job': job.id,
+                        'current_driver': current_driver.id,
+                        'new_driver': new_driver.id,
+                        'current_escort': current_escort.id,
+                        'new_escort': new_escort.id,
+                        'old_vehicle': old_vehicle,
+                        'old_branches': old_branches,
+                        'is_driver_updated': current_driver != new_driver,
+                        'is_escort_updated':  current_escort != new_escort
+                    }]
+                )
 
         return Response(
             s.JobAdminSerializer(job).data,

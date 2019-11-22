@@ -604,6 +604,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
                         branch['unloading_stations'].append({
                             'unloading_station': StationLocationSerializer(job_station.station).data,
                             'due_time': job_station_product.due_time.strftime('%Y-%m-%d %H:%M:%S'),
+                            'transport_unit_price': job_station.transport_unit_price,
                             'mission_weight': job_station_product.mission_weight
                         })
                         break
@@ -639,6 +640,7 @@ class JobAdminSerializer(serializers.ModelSerializer):
         return branches
 
     def get_progress_display(self, instance):
+        job_station = instance.jobstation_set.filter(is_completed=False).first()
         if instance.progress >= 10:
             if (instance.progress - 10) % 4 == 0:
                 progress = 10
@@ -651,7 +653,11 @@ class JobAdminSerializer(serializers.ModelSerializer):
         else:
             progress = instance.progress
 
-        return c.JOB_PROGRESS.get(progress, '无任务')
+        progress = c.JOB_PROGRESS.get(progress, '无任务')
+        if job_station is not None:
+            progress = progress + ': ' + job_station.station.name
+
+        return progress
 
 
 class JobUnloadingStationProductSerializer(serializers.Field):
