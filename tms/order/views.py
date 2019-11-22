@@ -1128,14 +1128,138 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # create job & associated driver and escort instance
         old_vehicle = job.vehicle.plate_num
         old_branches = get_branches(job)
+
+        job_loading_station = job.jobstation_set.first()
+        job_quality_station = job.jobstation_set.get(step=1)
+        new_loading_station_branches = {
+            job_loading_station_product['branch'] for job_loading_station_product in job_products['total']
+        }
+        old_loading_station_branches = set(
+            job_loading_station.jobstationproduct_set.values_list('branch', flat=True)
+        )
+
+        for job_station_product in job_products['total']:
+            job_loading_station_product =\
+                job_loading_station.jobstationproduct_set.filter(
+                    branch=job_station_product['branch']
+                ).first()
+
+            if job_loading_station_product is None:
+                if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+                    return Response(
+                        {
+                            'msg': '当前到达装货地，所以不能修装货货品和数量'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                else:
+                    new_added_product = get_object_or_404(Product, id=job_station_product['product'])
+                    m.JobStationProduct.objects.create(
+                        job_station=job_loading_station,
+                        product=new_added_product,
+                        branch=job_station_product['branch'],
+                        mission_weight=job_station_product['mission_weight']
+                    )
+                    m.JobStationProduct.objects.create(
+                        job_station=job_quality_station,
+                        product=new_added_product,
+                        branch=job_station_product['branch'],
+                        mission_weight=job_station_product['mission_weight']
+                    )
+            else:
+                if job_loading_station_product.product.id != job_station_product['product']\
+                   or job_loading_station_product.mission_weight != job_station_product['mission_weight']:
+
+                    if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+                        return Response(
+                            {
+                                'msg': '当前到达装货地，所以不能修装货货品和数量'
+                            },
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    else:
+                        new_added_product = get_object_or_404(Product, id=job_station_product['product'])
+                        job_loading_station_product.product = new_added_product
+                        job_loading_station_product.mission_weight = job_station_product['mission_weight']
+                        job_loading_station_product.save()
+
+                        job_quality_station_product = job_quality_station.jobstationproduct_set.filter(
+                            branch=job_station_product['branch']
+                        ).first()
+                        job_quality_station_product.product = new_added_product
+                        job_quality_station_product.mission_weight = job_station_product['mission_weight']
+                        job_quality_station_product.save()
+
+        job_loading_station.jobstationproduct_set.filter(
+            branch__in=old_loading_station_branches.difference(new_loading_station_branches)
+        ).delete()
+        job_quality_station.jobstationproduct_set.filter(
+            branch__in=old_loading_station_branches.difference(new_loading_station_branches)
+        ).delete()
+
+        new_unloading_stations = [route.end_point.id for route in routes]
+        old_unloading_stations = [job_station for job_station in job.jobstation_set.filter(step__gte=2)]
+        run_job_stations = [job_station for job_station in old_unloading_stations if job_station.is_completed]
+        run_job_station_length = len(run_job_stations)
+
+        if run_job_stations\
+           and [station.station for station in run_job_stations] \
+           != new_unloading_stations[:run_job_station_length]:
+            return Response(
+                {
+                    'msg': 'You cannot update the routes like this because the driver is already run {}'
+                    .format(' -> '.join(run_job_stations))
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        for run_station_index, run_station in run_job_stations:
+            unloading_station_products = job_products.get(run_station.station.id, None)
+            if unloading_station_products is None:
+                return Response(
+                    {
+                        'msg': 'You cannot delete the already delivered products'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                for unloading_station_product in unloading_station_products:
+                    run_station_product = run_station.jobstationproduct_set.filter(
+                        branch=unloading_station_product['branch']
+                    ).first()
+
+                    if run_station_product.mission_weight != unloading_station_product['mission_weight']\
+                       or run_station_product.product.id != unloading_station_product['product']:
+                        return Response(
+                            {
+                                'msg': 'You cannot change the delivered product details'
+                            },
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+
+        job.jobstation_set.filter(
+            station__id__in=[station.station.id for station in old_unloading_stations]).delete()
+        for new_station_index, new_station in enumerate(new_unloading_stations):
+            job_station = m.JobStation.objects.create(
+                job=job,
+                station=get_object_or_404(m.Station, id=new_station),
+                step=new_station_index+2,
+                transport_unit_price=transport_unit_prices[route.end_point.id]
+            )
+            for job_product in job_products[new_station.id]:
+                m.JobStationProduct.objects.create(
+                    job_station=job_station,
+                    product=get_object_or_404(Product, id=job_product['product']),
+                    branch=job_product['branch'],
+                    due_time=job_product['due_time'],
+                    mission_weight=job_product['mission_weight']
+                )
+
         job.vehicle = vehicle
         job.routes = route_ids
         job.save()
-
-        job.stations.clear()
 
         for product_id, old_arranged_product in old_arranged_products.items():
             order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
@@ -1146,40 +1270,6 @@ class JobViewSet(TMSViewSet):
             order_product = get_object_or_404(m.OrderProduct, order=job.order, product__id=product_id)
             order_product.arranged_weight += arranged_product['mission_weight']
             order_product.save()
-
-        job_loading_station = m.JobStation.objects.create(
-            job=job, station=job.order.loading_station, step=0
-        )
-        job_quality_station = m.JobStation.objects.create(
-            job=job, station=job.order.quality_station, step=1
-        )
-        for job_product in job_products['total']:
-            m.JobStationProduct.objects.create(
-                job_station=job_loading_station,
-                product=get_object_or_404(Product, id=job_product['product']),
-                branch=job_product['branch'],
-                mission_weight=job_product['mission_weight']
-            )
-            m.JobStationProduct.objects.create(
-                job_station=job_quality_station,
-                product=get_object_or_404(Product, id=job_product['product']),
-                branch=job_product['branch'],
-                mission_weight=job_product['mission_weight']
-            )
-
-        for route_index, route in enumerate(routes):
-            job_station = m.JobStation.objects.create(
-                job=job, station=route.end_point, step=route_index+2,
-                transport_unit_price=transport_unit_prices[route.end_point.id]
-            )
-            for job_product in job_products[route.end_point.id]:
-                m.JobStationProduct.objects.create(
-                    job_station=job_station,
-                    product=get_object_or_404(Product, id=job_product['product']),
-                    branch=job_product['branch'],
-                    due_time=job_product['due_time'],
-                    mission_weight=job_product['mission_weight']
-                )
 
         if current_driver == new_driver and current_escort == new_escort:
             notify_of_job_changes.apply_async(
