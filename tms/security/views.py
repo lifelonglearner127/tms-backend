@@ -224,9 +224,7 @@ class TestViewSet(viewsets.ModelViewSet):
         """
         this api is called in driver app for retrieving test
         """
-        page = self.paginate_queryset(
-            m.Test.objects.filter(departments=request.user.profile.department)
-        )
+        page = self.paginate_queryset(m.Test.objects.filter(appliants=request.user))
         serializer = s.ShortTestSerializer(
             page, context={'user': request.user}, many=True
         )
@@ -246,9 +244,7 @@ class SecurityLearningProgramViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="my-program")
     def me(self, request):
-        page = self.paginate_queryset(
-            m.SecurityLearningProgram.objects.filter(departments=request.user.profile.department)
-        )
+        page = self.paginate_queryset(m.SecurityLearningProgram.objects.filter(audiences=request.user))
         serializer = s.ShortSecurityLearningProgramSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 

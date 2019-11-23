@@ -219,8 +219,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="wheels/short")
     def get_wheels_users(self, request):
+        queryset = m.User.wheels.all()
+        departments = request.query_params.get('departments', None)
+        if departments:
+            departments = departments.split(',')
+            departments = [int(department) for department in departments]
+            queryset = queryset.filter(profile__department__id__in=departments)
+
         serializer = s.UserDepartmentSerializer(
-            self.paginate_queryset(m.User.wheels.all()),
+            self.paginate_queryset(queryset),
             many=True
         )
         return self.get_paginated_response(serializer.data)

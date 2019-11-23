@@ -9,7 +9,7 @@ from ..hr.models import StaffProfile
 
 # serializers
 from ..core.serializers import TMSChoiceField
-from ..account.serializers import UserNameSerializer, MainUserSerializer
+from ..account.serializers import UserNameSerializer, MainUserSerializer, UserDepartmentSerializer
 from ..hr.serializers import ShortDepartmentSerializer, ShortSecurityOfficerProfileSerializer
 
 
@@ -192,6 +192,7 @@ class ShortTestSerializer(serializers.ModelSerializer):
 class TestSerializer(serializers.ModelSerializer):
 
     test_count = serializers.SerializerMethodField()
+    appliant_count = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Test
@@ -200,10 +201,13 @@ class TestSerializer(serializers.ModelSerializer):
     def get_test_count(self, instance):
         return instance.questions.all().count()
 
+    def get_appliant_count(self, instance):
+        return instance.appliants.all().count()
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['questions'] = ShortQuestionSerializer(instance.questions.all(), many=True).data
-        ret['departments'] = ShortDepartmentSerializer(instance.departments.all(), many=True).data
+        ret['appliants'] = UserDepartmentSerializer(instance.appliants.all(), many=True).data
         return ret
 
 
@@ -329,7 +333,7 @@ class ShortSecurityLearningProgramSerializer(serializers.ModelSerializer):
         model = m.SecurityLearningProgram
         exclude = (
             'description',
-            'departments',
+            'audiences',
         )
 
 
@@ -341,7 +345,7 @@ class SecurityLearningProgramSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['departments'] = ShortDepartmentSerializer(instance.departments.all(), many=True).data
+        ret['audiences'] = UserDepartmentSerializer(instance.audiences.all(), many=True).data
         return ret
 
 
