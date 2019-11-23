@@ -1661,9 +1661,11 @@ class JobViewSet(TMSViewSet):
         """
         this api is used for retrieving the current job in driver app
         """
-        job = m.Job.progress_jobs.filter(associated_workers=request.user).first()
-        if job is not None:
-            ret = s.JobCurrentSerializer(job).data
+        job_worker = m.JobWorker.objects.filter(
+            worker=request.user, is_active=True, job__progress__gt=c.JOB_PROGRESS_NOT_STARTED
+        ).first()
+        if job_worker:
+            ret = s.JobCurrentSerializer(job_worker.job).data
         else:
             ret = {}
 
@@ -1758,10 +1760,17 @@ class JobViewSet(TMSViewSet):
         if current_progress == c.JOB_PROGRESS_NOT_STARTED:
             job.started_on = timezone.now()
 
-            job.active_job_driver.started_on = timezone.now()
-            job.active_job_driver.save()
-            job.active_job_escort.started_on = timezone.now()
-            job.active_job_escort.save()
+            active_job_driver = job.jobworker_set.filter(
+                worker_type=c.WORKER_TYPE_DRIVER, is_active=True
+            ).first()
+            active_job_driver.started_on = timezone.now()
+            active_job_driver.save()
+
+            active_job_escort = job.jobworker_set.filter(
+                worker_type=c.WORKER_TYPE_ESCORT, is_active=True
+            ).first()
+            active_job_escort.started_on = timezone.now()
+            active_job_escort.save()
             last_progress_finished_on = None
         else:
             current_station = job.jobstation_set.filter(
@@ -1806,13 +1815,17 @@ class JobViewSet(TMSViewSet):
                     job.progress = c.JOB_PROGRESS_COMPLETE
                     job.finished_on = timezone.now()
 
-                    try:
-                        job.active_job_driver.finished_on = timezone.now()
-                        job.active_job_driver.save()
-                        job.active_job_escort.finished_on = timezone.now()
-                        job.active_job_escort.save()
-                    except m.JobWorker.DoesNotExist:
-                        pass
+                    active_job_driver = job.jobworker_set.filter(
+                        worker_type=c.WORKER_TYPE_DRIVER, is_active=True
+                    ).first()
+                    active_job_driver.finished_on = timezone.now()
+                    active_job_driver.save()
+
+                    active_job_escort = job.jobworker_set.filter(
+                        worker_type=c.WORKER_TYPE_ESCORT, is_active=True
+                    ).first()
+                    active_job_escort.finished_on = timezone.now()
+                    active_job_escort.save()
 
                     # update job empty mileage
                     loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on

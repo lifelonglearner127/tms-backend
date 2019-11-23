@@ -543,8 +543,51 @@ class VehicleViewSet(TMSViewSet):
         worker.profile.status = c.WORK_STATUS_DRIVING
         worker.profile.save()
 
+        job = Job.progress_jobs.filter(vehicle=vehicle, associated_workers=request.user).first()
+        if job:
+            current_job_worker = job.jobworker_set.filter(worker=request.user, is_active=True).first()
+            if current_job_worker:
+                previous_job_worker = job.jobworker_set.filter(
+                    assigned_on__lt=current_job_worker.assigned_on,
+                    worker_type=c.WORKER_TYPE_DRIVER if request.user.user_type in [
+                        c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT] else c.WORKER_TYPE_ESCORT
+                ).order_by('-assigned_on').first()
+
+                if previous_job_worker:
+                    current_job_worker.started_on = timezone.now()
+                    current_job_worker.save()
+
         return Response(
             s.VehicleDriverDailyBindSerializer(bind).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['get'], url_path='has-next-worker')
+    def check_driver_request(self, request, pk=None):
+        """Check if current job of the driver has driver change request
+        """
+        vehicle = self.get_object()
+        has_next_worker = False
+        if request.user.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]:
+            worker_type = c.WORKER_TYPE_DRIVER
+        elif request.user.user_type in [c.USER_TYPE_ESCORT, c.USER_TYPE_GUEST_ESCORT]:
+            worker_type = c.WORKER_TYPE_ESCORT
+
+        job = Job.progress_jobs.filter(vehicle=vehicle, associated_workers=request.user).first()
+
+        if job:
+            request_user_job_worker = job.jobworker_set.filter(worker=request.user, is_active=True).first()
+            if request_user_job_worker:
+                if job.jobworker_set.filter(
+                    assigned_on__gt=request_user_job_worker.assigned_on,
+                    worker_type=worker_type
+                ).exists():
+                    has_next_worker = True
+
+        return Response(
+            {
+                'has_next_worker': has_next_worker
+            },
             status=status.HTTP_200_OK
         )
 
@@ -557,6 +600,7 @@ class VehicleViewSet(TMSViewSet):
         worker = request.user
         is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
         station_data = request.data.pop('station', None)
+        finish_job = request.data.pop('finish', False)
         if station_data is None:
             return Response(
                 {
@@ -638,6 +682,24 @@ class VehicleViewSet(TMSViewSet):
         bind.get_off_station = station
         bind.get_off = timezone.now()
         bind.save()
+
+        # if the current driver needs to get off the vehicle because of worker change event
+        job = Job.progress_jobs.filter(vehicle=vehicle, associated_workers=worker).first()
+        if job:
+            current_job_worker = job.jobworker_set.filter(worker=request.user, is_active=True).first()
+            if current_job_worker:
+                next_job_worker = job.jobworker_set.filter(
+                    assigned_on__gt=current_job_worker.assigned_on,
+                    worker_type=c.WORKER_TYPE_DRIVER if request.user.user_type in [
+                        c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT] else c.WORKER_TYPE_ESCORT
+                ).first()
+
+                if next_job_worker and finish_job:
+                    current_job_worker.finished_on = timezone.now()
+                    current_job_worker.is_active = False
+                    next_job_worker.is_active = True
+                    current_job_worker.save()
+                    next_job_worker.save()
 
         if is_worker_driver:
             vehicle.status = vehicle.status - c.VEHICLE_STATUS_DRIVER_ON
