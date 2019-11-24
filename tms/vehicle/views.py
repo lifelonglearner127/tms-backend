@@ -697,7 +697,6 @@ class VehicleViewSet(TMSViewSet):
                 if next_job_worker and finish_job:
                     current_job_worker.finished_on = timezone.now()
                     current_job_worker.is_active = False
-                    next_job_worker.is_active = True
                     current_job_worker.save()
                     next_job_worker.save()
 

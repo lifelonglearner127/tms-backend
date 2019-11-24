@@ -623,8 +623,8 @@ class OrderViewSet(TMSViewSet):
 
         # create job & associated driver and escort instance
         job = m.Job.objects.create(order=order, vehicle=vehicle, routes=route_ids, rest_place=rest_place)
-        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
-        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
+        m.JobWorker.objects.create(job=job, worker=driver, worker_type=c.WORKER_TYPE_DRIVER)
+        m.JobWorker.objects.create(job=job, worker=escort, worker_type=c.WORKER_TYPE_ESCORT)
 
         job_loading_station = m.JobStation.objects.create(
             job=job, station=order.loading_station, step=0
@@ -1329,11 +1329,11 @@ class JobViewSet(TMSViewSet):
             else:
                 if current_driver != new_driver:
                     m.JobWorker.drivers.get(job=job).delete()
-                    m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER, is_active=True)
+                    m.JobWorker.objects.create(job=job, worker=new_driver, worker_type=c.WORKER_TYPE_DRIVER)
 
                 if current_escort != new_escort:
                     m.JobWorker.escorts.get(job=job).delete()
-                    m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT, is_active=True)
+                    m.JobWorker.objects.create(job=job, worker=new_escort, worker_type=c.WORKER_TYPE_ESCORT)
 
                 notify_of_driver_or_escort_changes_before_job_start.apply_async(
                     args=[{
@@ -1680,10 +1680,15 @@ class JobViewSet(TMSViewSet):
         this api is used for retrieving future jobs in driver app
         """
         page = self.paginate_queryset(
-            m.Job.pending_jobs.filter(associated_workers=request.user)
+            m.JobWorker.objects.filter(
+                worker=request.user,
+                job__progress__gte=c.JOB_PROGRESS_NOT_STARTED,
+                is_active=False
+            )
         )
+        jobs = [jobworker.job for jobworker in page]
 
-        serializer = s.JobFutureSerializer(page, many=True)
+        serializer = s.JobFutureSerializer(jobs, many=True)
         return self.get_paginated_response(serializer.data)
 
     @action(detail=True, url_path='update-progress', permission_classes=[IsDriverOrEscortUser])
@@ -1734,7 +1739,8 @@ class JobViewSet(TMSViewSet):
         # 4. check if worker and its partner are free from other job
         if m.JobWorker.objects.exclude(job=job).filter(
             job__progress__gt=c.JOB_PROGRESS_NOT_STARTED,
-            worker=worker
+            worker=worker,
+            is_active=True
         ).exists():
             return Response(
                 {'error': 'This job cannot be proceed because you are in other work'},
@@ -1743,7 +1749,8 @@ class JobViewSet(TMSViewSet):
 
         if m.JobWorker.objects.exclude(job=job).filter(
             job__progress__gt=c.JOB_PROGRESS_NOT_STARTED,
-            worker=partner
+            worker=partner,
+            is_active=True
         ).exists():
             return Response(
                 {
@@ -1767,13 +1774,13 @@ class JobViewSet(TMSViewSet):
             job.started_on = timezone.now()
 
             active_job_driver = job.jobworker_set.filter(
-                worker_type=c.WORKER_TYPE_DRIVER, is_active=True
+                worker_type=c.WORKER_TYPE_DRIVER
             ).first()
             active_job_driver.started_on = timezone.now()
             active_job_driver.save()
 
             active_job_escort = job.jobworker_set.filter(
-                worker_type=c.WORKER_TYPE_ESCORT, is_active=True
+                worker_type=c.WORKER_TYPE_ESCORT
             ).first()
             active_job_escort.started_on = timezone.now()
             active_job_escort.save()
@@ -1825,12 +1832,14 @@ class JobViewSet(TMSViewSet):
                         worker_type=c.WORKER_TYPE_DRIVER, is_active=True
                     ).first()
                     active_job_driver.finished_on = timezone.now()
+                    active_job_driver.is_active = False
                     active_job_driver.save()
 
                     active_job_escort = job.jobworker_set.filter(
                         worker_type=c.WORKER_TYPE_ESCORT, is_active=True
                     ).first()
                     active_job_escort.finished_on = timezone.now()
+                    active_job_escort.is_active = False
                     active_job_escort.save()
 
                     # update job empty mileage
