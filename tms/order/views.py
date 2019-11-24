@@ -1701,12 +1701,14 @@ class JobViewSet(TMSViewSet):
         worker = request.user
 
         # 1. Check if this user is authorized to perform this job
-        if worker != job.active_job_driver.worker and worker != job.active_job_escort.worker:
+        candidate_job_driver = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first()
+        candidate_job_escort = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first()
+        if worker != candidate_job_driver.worker and worker != candidate_job_escort.worker:
             return Response(
                 {
                     'error': 'Cannot proceed this job because you are not active yet'
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_403_FORBIDDEN
             )
 
         # 2. check if this worker is on vehicle
@@ -1720,9 +1722,9 @@ class JobViewSet(TMSViewSet):
 
         # 3. check if partner is on vehicle together
         if worker.user_type == c.WORKER_TYPE_DRIVER:
-            partner = job.active_job_escort.worker
+            partner = candidate_job_escort.worker
         else:
-            partner = job.active_job_driver.worker
+            partner = candidate_job_driver.worker
 
         vehicle_bind = VehicleWorkerBind.objects.filter(vehicle=job.vehicle, worker=partner).first()
         if vehicle_bind is None or vehicle_bind.get_off is not None or\
@@ -1943,11 +1945,14 @@ class JobViewSet(TMSViewSet):
                 worker_type=worker_type
             )
 
+        current_driver = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first()
+        current_escort = job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first()
+
         notify_of_worker_change_after_job_start.apply_async(
                 args=[{
                     'job': job.id,
-                    'current_driver': job.active_job_driver.worker.id,
-                    'current_escort': job.active_job_escort.worker.id,
+                    'current_driver': current_driver.worker.id,
+                    'current_escort': current_escort.worker.id,
                     'new_driver': new_driver.id if new_driver else None,
                     'new_escort': new_escort.id if new_escort else None,
                     'change_place': start_place,
@@ -1970,30 +1975,6 @@ class JobViewSet(TMSViewSet):
             s.ShortJobWorkerSerializer(workers, many=True).data,
             status=status.HTTP_200_OK
         )
-
-    @action(detail=True, url_path='confirm-job-replace')
-    def finish_job(self, request, pk=None):
-        job = self.get_object()
-
-        if request.user.user_type == c.WORKER_TYPE_DRIVER:
-            job_worker = job.active_job_driver
-            next_job_woker = job.next_candidate_job_driver
-        elif request.user.user_type == c.WORKER_TYPE_ESCORT:
-            job_worker = job.active_job_escort
-            next_job_woker = job.next_candidate_job_escort
-
-        if job_worker.worker != request.user:
-            return Response(
-                {
-                    'msg': 'Error occured while confirming job replace'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        job_worker.finished_on = 0
-        if next_job_woker is not None:
-            next_job_woker.active = True
-            next_job_woker.save()
 
     @action(detail=True, url_path="test/station-efence")
     def test_station_efence(self, request, pk=None):
