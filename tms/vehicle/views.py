@@ -543,20 +543,6 @@ class VehicleViewSet(TMSViewSet):
         worker.profile.status = c.WORK_STATUS_DRIVING
         worker.profile.save()
 
-        job = Job.progress_jobs.filter(vehicle=vehicle, associated_workers=request.user).first()
-        if job:
-            current_job_worker = job.jobworker_set.filter(worker=request.user, is_active=True).first()
-            if current_job_worker:
-                previous_job_worker = job.jobworker_set.filter(
-                    assigned_on__lt=current_job_worker.assigned_on,
-                    worker_type=c.WORKER_TYPE_DRIVER if request.user.user_type in [
-                        c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT] else c.WORKER_TYPE_ESCORT
-                ).order_by('-assigned_on').first()
-
-                if previous_job_worker:
-                    current_job_worker.started_on = timezone.now()
-                    current_job_worker.save()
-
         return Response(
             s.VehicleDriverDailyBindSerializer(bind).data,
             status=status.HTTP_200_OK

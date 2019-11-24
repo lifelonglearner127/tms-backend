@@ -1691,6 +1691,29 @@ class JobViewSet(TMSViewSet):
         serializer = s.JobFutureSerializer(jobs, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=True, url_path='confirm-job-change')
+    def confirm_job_change(self, request, pk=None):
+        job = self.get_object()
+        next_worker = job.jobworker_set.filter(
+            worker=request.user,
+            finished_on=None
+        ).first()
+        if not next_worker:
+            return Response(
+                {
+                    'error': 'You are not permitted to proceed this job'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        next_worker.started_on = True
+        next_worker.is_active = True
+        next_worker.save()
+        return Response(
+            s.JobCurrentSerializer(next_worker.job).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, url_path='update-progress', permission_classes=[IsDriverOrEscortUser])
     def progress_update(self, request, pk=None):
         """
