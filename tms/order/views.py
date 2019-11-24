@@ -1706,7 +1706,7 @@ class JobViewSet(TMSViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        next_worker.started_on = True
+        next_worker.started_on = timezone.now()
         next_worker.is_active = True
         next_worker.save()
         return Response(
