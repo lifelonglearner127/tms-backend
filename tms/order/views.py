@@ -1732,13 +1732,19 @@ class JobViewSet(TMSViewSet):
             )
 
         # 4. check if worker and its partner are free from other job
-        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=worker).exists():
+        if m.JobWorker.objects.exclude(job=job).filter(
+            job__progress__gt=c.JOB_PROGRESS_NOT_STARTED,
+            worker=worker
+        ).exists():
             return Response(
                 {'error': 'This job cannot be proceed because you are in other work'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if m.Job.progress_jobs.exclude(id=job.id).filter(associated_workers=partner).exists():
+        if m.JobWorker.objects.exclude(job=job).filter(
+            job__progress__gt=c.JOB_PROGRESS_NOT_STARTED,
+            worker=partner
+        ).exists():
             return Response(
                 {
                     'error': 'This job cannot be proceed because your partner is in other work',
