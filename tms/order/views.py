@@ -1706,7 +1706,7 @@ class JobViewSet(TMSViewSet):
         if worker != candidate_job_driver.worker and worker != candidate_job_escort.worker:
             return Response(
                 {
-                    'error': 'Cannot proceed this job because you are not active yet'
+                    'error': 'You are not permitted to proceed this job yet.
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
