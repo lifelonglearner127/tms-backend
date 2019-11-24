@@ -1785,7 +1785,7 @@ class JobViewSet(TMSViewSet):
             active_job_escort = job.jobworker_set.filter(
                 worker_type=c.WORKER_TYPE_ESCORT
             ).first()
-            active_job_driver.is_active = True
+            active_job_escort.is_active = True
             active_job_escort.started_on = timezone.now()
             active_job_escort.save()
             last_progress_finished_on = None
