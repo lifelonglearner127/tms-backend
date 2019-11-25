@@ -1123,3 +1123,18 @@ class VehicleViolationUploadView(APIView):
         return Response({
             'msg': 'Successfully uploaded'
         }, status=status.HTTP_200_OK)
+
+
+class VehicleMaintenanceCategoryAPIView(APIView):
+
+    def get(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in c.VEHICLE_MAINTENANCE_CATEGORY
+            ],
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

@@ -390,7 +390,7 @@ class VehicleMaintenanceHistory(TimeStampedModel):
 
     category = models.PositiveIntegerField(
         choices=c.VEHICLE_MAINTENANCE_CATEGORY,
-        default=c.VEHICLE_MAINTENANCE_CATEGORY_WHEEL
+        default=c.VEHICLE_MAINTENANCE_CATEGORY_0
     )
 
     maintenance_date = models.DateField()

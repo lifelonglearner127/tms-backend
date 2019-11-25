@@ -59,4 +59,5 @@ router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     path('vehicle-violations/upload-csv/', v.VehicleViolationUploadView.as_view()),
+    path('vehicle-maintenance/categories', v.VehicleMaintenanceCategoryAPIView.as_view()),
 ]
