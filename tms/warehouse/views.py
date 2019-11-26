@@ -1,7 +1,10 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
+from drf_renderer_xlsx.mixins import XLSXFileMixin
+from drf_renderer_xlsx.renderers import XLSXRenderer
 
+from ..core import constants as c
 # models
 from . import models as m
 
@@ -62,7 +65,7 @@ class WarehouseProductViewSet(TMSViewSet):
         )
 
 
-class InTransactionHistoryViewSet(TMSViewSet):
+class InTransactionHistoryViewSet(XLSXFileMixin, TMSViewSet):
 
     queryset = m.InTransaction.objects.all()
     serializer_class = s.InTransactionSerializer
@@ -136,6 +139,23 @@ class OutTransactionHistoryViewSet(TMSViewSet):
         return queryset
 
 
+class InTransactionHistoryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.InTransaction.objects.all()
+    serializer_class = s.InTransactionHistoryExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '名称', '发票类型', '单价', '数量', '数量单位', '供货商', '供货商联系人', '联系人电话', '日期',
+        ]
+        return ret
+
+
 class OutTransactionViewSet(TMSViewSet):
 
     serializer_class = s.OutTransactionSerializer
@@ -182,3 +202,20 @@ class OutTransactionViewSet(TMSViewSet):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class OutTransactionHistoryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.OutTransaction.objects.all()
+    serializer_class = s.OutTransactionHistoryExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '名称', '领取人', '单价', '数量', '数量单位', '日期', '车牌号', '发票类型',
+        ]
+        return ret

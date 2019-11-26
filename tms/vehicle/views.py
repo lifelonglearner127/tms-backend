@@ -8,6 +8,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from drf_renderer_xlsx.mixins import XLSXFileMixin
+from drf_renderer_xlsx.renderers import XLSXRenderer
+
 from ..core import constants as c
 
 # models
@@ -1150,3 +1153,58 @@ class VehicleMaintenanceCategoryAPIView(APIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+class VehicleTireChangeHistoryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.TireManagementHistory.objects.all()
+    serializer_class = s.TireChangeHistoryExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '车牌号', '位置', '旧胎行驶里程', '换胎时间', '轮胎里程上限', '品牌', '型号', '胎号',
+            '轮胎胎纹深度', '维修厂商', '联系电话', '安装时车里程数', '安装时轮胎里程数',
+
+        ]
+        return ret
+
+
+class VehicleTireTreadCheckHistoryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.TireTreadDepthCheckHistory.objects.all()
+    serializer_class = s.TireTreadCheckHistoryExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '车牌号', '位置', '检查时间', '深度', '轮胎里程', '胎压', '其它故障',
+
+        ]
+        return ret
+
+
+class VehicleTireExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.VehicleTire.objects.all()
+    serializer_class = s.VehicleTireExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '车牌号', '位置', '安装时间', '轮胎里程上限', '品牌', '型号', '胎号',
+            '轮胎胎纹深度', '维修厂商', '联系电话', '安装时车里程数', '安装时轮胎里程数',
+        ]
+        return ret

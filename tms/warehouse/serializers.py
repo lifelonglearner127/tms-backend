@@ -127,12 +127,39 @@ class InTransactionHistorySerializer(serializers.ModelSerializer):
         )
 
 
+class InTransactionHistoryExportSerializer(serializers.ModelSerializer):
+
+    product = serializers.CharField(source='product.name')
+    transaction_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+
+    class Meta:
+        model = m.InTransaction
+        fields = (
+            'product', 'ticket_type', 'unit_price', 'amount', 'amount_unit', 'supplier',
+            'supplier_contact', 'supplier_mobile', 'transaction_on',
+        )
+
+
 class OutTransactionHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.OutTransaction
         exclude = (
             'product',
+        )
+
+
+class OutTransactionHistoryExportSerializer(serializers.ModelSerializer):
+
+    product = serializers.CharField(source='product.name')
+    recipient = serializers.CharField(source='recipient.name')
+    transaction_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+
+    class Meta:
+        model = m.OutTransaction
+        fields = (
+            'product', 'recipient', 'unit_price', 'amount', 'amount_unit',
+            'transaction_on', 'vehicle', 'ticket_type'
         )
 
 

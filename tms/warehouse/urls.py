@@ -19,6 +19,12 @@ router.register(
     v.OutTransactionHistoryViewSet,
     base_name='out-transaction-history'
 )
+router.register(
+    r'export/in-transactions-history', v.InTransactionHistoryExportViewSet, base_name='export-in-transaction'
+)
+router.register(
+    r'export/out-transactions-history', v.OutTransactionHistoryExportViewSet, base_name='export-out-transaction'
+)
 
 # # /products/{product_pk}/in_transactions
 # # /products/{product_pk}/in_transactions/{pk}

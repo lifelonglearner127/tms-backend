@@ -684,3 +684,93 @@ class VehicleViolationSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.VehicleViolation
         fields = '__all__'
+
+
+class TireChangeHistoryExportSerializer(serializers.ModelSerializer):
+
+    vehicle = serializers.CharField(source='vehicle_tire.vehicle.plate_num')
+    position = serializers.CharField(source='vehicle_tire.position')
+    installed_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = m.TireManagementHistory
+        fields = (
+            'vehicle', 'position', 'mileage', 'installed_on',
+            'mileage_limit', 'brand', 'model', 'tire_type', 'tread_depth', 'manufacturer',
+            'contact_number', 'tire_mileage', 'vehicle_mileage',
+        )
+
+
+class TireTreadCheckHistoryExportSerializer(serializers.ModelSerializer):
+
+    vehicle = serializers.CharField(source='tire.vehicle_tire.vehicle.plate_num')
+    position = serializers.CharField(source='tire.vehicle_tire.position')
+    checked_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = m.TireTreadDepthCheckHistory
+        fields = (
+            'vehicle', 'position', 'checked_on', 'mileage', 'pressure', 'symptom',
+        )
+
+
+class VehicleTireExportSerializer(serializers.ModelSerializer):
+
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    installed_on = serializers.SerializerMethodField()
+    mileage_limit = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
+    model = serializers.SerializerMethodField()
+    tire_type = serializers.SerializerMethodField()
+    tread_depth = serializers.SerializerMethodField()
+    manufacturer = serializers.SerializerMethodField()
+    contact_number = serializers.SerializerMethodField()
+    tire_mileage = serializers.SerializerMethodField()
+    vehicle_mileage = serializers.SerializerMethodField()
+
+    class Meta:
+        model = m.VehicleTire
+        fields = (
+            'vehicle', 'position', 'installed_on', 'mileage_limit', 'brand', 'model', 'tire_type',
+            'tread_depth', 'manufacturer', 'contact_number', 'tire_mileage', 'vehicle_mileage',
+        )
+
+    def get_installed_on(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.installed_on.strftime('%Y-%m-%d %H:%M:%S')
+
+    def get_mileage_limit(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.mileage_limit
+
+    def get_brand(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.brand
+
+    def get_model(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.model
+
+    def get_tire_type(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.tire_type
+
+    def get_tread_depth(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.tread_depth
+
+    def get_manufacturer(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.manufacturer
+
+    def get_contact_number(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.contact_number
+
+    def get_tire_mileage(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.tire_mileage
+
+    def get_vehicle_mileage(self, instance):
+        if instance.current_tire:
+            return instance.current_tire.vehicle_mileage

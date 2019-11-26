@@ -56,6 +56,22 @@ router.register(
     v.VehicleDriverEscortBindViewSet,
     base_name='vehicle-user-binds'
 )
+router.register(
+    r'export/tire-changes-history',
+    v.VehicleTireChangeHistoryExportViewSet,
+    base_name='export-tire-change-history'
+)
+router.register(
+    r'export/tread-check-history',
+    v.VehicleTireTreadCheckHistoryExportViewSet,
+    base_name='export-tire-tread-check-history'
+)
+router.register(
+    r'export-vehicle-tires',
+    v.VehicleTireExportViewSet,
+    base_name='export-vehicle-tires'
+)
+
 urlpatterns = [
     url(r'^', include(router.urls)),
     path('vehicle-violations/upload-csv/', v.VehicleViolationUploadView.as_view()),
