@@ -81,7 +81,7 @@ class VehicleViewSet(TMSViewSet):
 
         if request.user.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OUTSIDE)
-        if request.user.profile.department.name == '油品配送部':
+        elif request.user.profile.department.name == '油品配送部':
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OIL)
         elif request.user.profile.department.name == '壳牌项目部':
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_SHELL)
