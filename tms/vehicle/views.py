@@ -73,21 +73,32 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
-        is_worker_driver =\
-            True if request.user.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]\
-            else False
+        worker = request.user
+        if worker.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]:
+            worker_type = c.WORKER_TYPE_DRIVER
+        elif worker.user_type in [c.USER_TYPE_ESCORT, c.USER_TYPE_GUEST_ESCORT]:
+            worker_type = c.WORKER_TYPE_ESCORT
+        else:
+            return Response(
+                {
+                    'error': 'You are not have any access to this api'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        if is_worker_driver:
+        if worker_type == c.WORKER_TYPE_DRIVER:
             query_filter = Q(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON])
         else:
             query_filter = Q(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON])
 
-        if request.user.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
+        if worker.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OUTSIDE)
-        elif request.user.profile.department.name == '油品配送部':
+        elif worker.profile.department.name == '油品配送部':
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OIL)
-        elif request.user.profile.department.name == '壳牌项目部':
+        elif worker.profile.department.name == '壳牌项目部':
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_SHELL)
+        else:
+            query_filter = Q(pk__isnull=True)
 
         queryset = m.Vehicle.objects.filter(query_filter).order_by('plate_num')
         page = self.paginate_queryset(queryset)
@@ -515,7 +526,37 @@ class VehicleViewSet(TMSViewSet):
     def vehicle_driver_daily_bind(self, request, pk=None):
         vehicle = self.get_object()
         worker = request.user
-        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
+        if worker.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]:
+            worker_type = c.WORKER_TYPE_DRIVER
+        elif worker.user_type in [c.USER_TYPE_ESCORT, c.USER_TYPE_GUEST_ESCORT]:
+            worker_type = c.WORKER_TYPE_ESCORT
+        else:
+            return Response(
+                {
+                    'error': 'You are not have any access to this api'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        error = False
+        if worker.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
+            if vehicle.department != c.VEHICLE_DEPARTMENT_TYPE_OUTSIDE:
+                error = True
+        elif worker.profile.department.name == '油品配送部':
+            if vehicle.department != c.VEHICLE_DEPARTMENT_TYPE_OIL:
+                error = True
+        elif worker.profile.department.name == '壳牌项目部':
+            if vehicle.department != c.VEHICLE_DEPARTMENT_TYPE_SHELL:
+                error = True
+        else:
+            error = True
+
+        if error:
+            return Response(
+                {
+                    'error': 'You are trying to get on other department vehicle'
+                }
+            )
 
         # check if such worker is able to get on this vehicle
         if vehicle.status in [c.VEHICLE_STATUS_UNDER_WHEEL, c.VEHICLE_STATUS_REPAIR]:
@@ -526,14 +567,14 @@ class VehicleViewSet(TMSViewSet):
                 }
             )
 
-        if vehicle.status == c.VEHICLE_STATUS_DRIVER_ON and is_worker_driver:
+        if vehicle.status == c.VEHICLE_STATUS_DRIVER_ON and worker_type == c.WORKER_TYPE_DRIVER:
             return Response(
                 {
                     'msg': 'Cannot get on this vehicle because another driver is already on'
                 }
             )
 
-        if vehicle.status == c.VEHICLE_STATUS_ESCORT_ON and not is_worker_driver:
+        if vehicle.status == c.VEHICLE_STATUS_ESCORT_ON and not worker_type == c.WORKER_TYPE_DRIVER:
             return Response(
                 {
                     'msg': 'Cannot get on this vehicle because another escort is already on'
@@ -549,10 +590,10 @@ class VehicleViewSet(TMSViewSet):
         bind = m.VehicleWorkerBind.objects.create(
             vehicle=vehicle,
             worker=request.user,
-            worker_type=c.WORKER_TYPE_DRIVER if is_worker_driver else c.WORKER_TYPE_ESCORT
+            worker_type=worker_type
         )
 
-        vehicle.status += c.VEHICLE_STATUS_DRIVER_ON if is_worker_driver else c.VEHICLE_STATUS_ESCORT_ON
+        vehicle.status += c.VEHICLE_STATUS_DRIVER_ON if worker_type == c.WORKER_TYPE_DRIVER else c.VEHICLE_STATUS_ESCORT_ON
         vehicle.save()
 
         worker.profile.status = c.WORK_STATUS_DRIVING
