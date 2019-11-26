@@ -553,6 +553,7 @@ class ShortJobWorkerSerializer(serializers.ModelSerializer):
 
     name = serializers.CharField(source='worker.name')
     start_due_time = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    finished_on = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
     class Meta:
         model = m.JobWorker
