@@ -72,9 +72,13 @@ class VehicleViewSet(TMSViewSet):
     def list_short_vehicles(self, request):
         is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
         if is_worker_driver:
-            queryset = m.Vehicle.objects.filter(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON])
+            queryset = m.Vehicle.objects.filter(
+                status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON]
+            ).order_by('plate_num')
         else:
-            queryset = m.Vehicle.objects.filter(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON])
+            queryset = m.Vehicle.objects.filter(
+                status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON]
+            ).order_by('plate_num')
         page = self.paginate_queryset(queryset)
         serializer = s.ShortVehicleStatusSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
