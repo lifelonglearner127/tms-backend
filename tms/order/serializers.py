@@ -558,6 +558,7 @@ class ShortJobWorkerSerializer(serializers.ModelSerializer):
         model = m.JobWorker
         fields = (
             'id', 'name', 'worker_type', 'is_active', 'start_place', 'start_due_time',
+            'finished_on',
         )
 
 
