@@ -70,15 +70,23 @@ class VehicleViewSet(TMSViewSet):
 
     @action(detail=False, url_path='vehicles')
     def list_short_vehicles(self, request):
-        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
+        is_worker_driver =\
+            True if request.user.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]\
+            else False
+
         if is_worker_driver:
-            queryset = m.Vehicle.objects.filter(
-                status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON]
-            ).order_by('plate_num')
+            query_filter = Q(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_ESCORT_ON])
         else:
-            queryset = m.Vehicle.objects.filter(
-                status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON]
-            ).order_by('plate_num')
+            query_filter = Q(status__in=[c.VEHICLE_STATUS_AVAILABLE, c.VEHICLE_STATUS_DRIVER_ON])
+
+        if request.user.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
+            query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OUTSIDE)
+        if request.user.profile.department.name == '油品配送部':
+            query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OIL)
+        elif request.user.profile.department.name == '壳牌项目部':
+            query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_SHELL)
+
+        queryset = m.Vehicle.objects.filter(query_filter).order_by('plate_num')
         page = self.paginate_queryset(queryset)
         serializer = s.ShortVehicleStatusSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
