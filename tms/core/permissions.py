@@ -22,7 +22,7 @@ class IsDriverOrEscortUser(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.user_type in [
-            c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT
+            c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT, c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT
         ]
 
     def has_object_permission(self, request, view, obj):
