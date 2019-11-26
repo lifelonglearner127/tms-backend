@@ -30,7 +30,7 @@ from ..core.permissions import (
 # models
 from . import models as m
 from ..account.models import User
-from ..info.models import Product
+from ..info.models import Product, TransportationDistance
 from ..route.models import Route
 from ..vehicle.models import Vehicle, VehicleWorkerBind
 
@@ -1849,7 +1849,19 @@ class JobViewSet(TMSViewSet):
                 current_station.save()
 
                 if current_station.step >= 2:
-                    m.OrderPayment.objects.create(job_station=current_station)
+                    try:
+                        transport_distance = TransportationDistance.objects.get(
+                            start_point=job.order.loading_station,
+                            end_point=current_station.station
+                        )
+                        order_payment_distance = transport_distance.distance
+                    except TransportationDistance.DoesNotExist:
+                        order_payment_distance = 0
+
+                    m.OrderPayment.objects.create(
+                        job_station=current_station,
+                        distance=order_payment_distance
+                    )
 
                 if not current_station.has_next_station:
                     job.progress = c.JOB_PROGRESS_COMPLETE

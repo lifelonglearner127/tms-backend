@@ -1221,8 +1221,6 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
     unloading_station = StationNameSerializer(source='job_station.station', read_only=True)
     transport_unit_price = serializers.FloatField(source='job_station.transport_unit_price', read_only=True)
     status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS)
-    loading_products = serializers.SerializerMethodField()
-    unloading_products = serializers.SerializerMethodField()
 
     class Meta:
         model = m.OrderPayment
@@ -1238,20 +1236,10 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
             'loading_station',
             'unloading_station',
             'transport_unit_price',
-            'loading_products',
-            'unloading_products',
+            'loading_weight',
+            'unloading_weight',
             'total_price',
         )
-
-    def get_loading_products(self, instance):
-        return JobStationLoadingProductSerializer(
-            instance.job_station.jobstationproduct_set.all(), many=True
-        ).data
-
-    def get_unloading_products(self, instance):
-        return JobStationUnloadingProductSerializer(
-            instance.job_station.jobstationproduct_set.all(), many=True
-        ).data
 
 
 class OrderPaymentStatusSerializer(serializers.ModelSerializer):

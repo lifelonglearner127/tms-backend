@@ -767,21 +767,26 @@ class OrderPayment(TimeStampedModel):
     )
 
     @property
-    def loading_station_volume(self):
-        total_volume = 0
-        for product in self.job_station.jobstationproduct_set.all():
-            total_volume += product.volume
+    def loading_weight(self):
+        ret = 0
+        for job_station_product in self.job_station.jobstationproduct_set.all():
+            ret += job_station_product.mission_weight
 
-        return total_volume
+        return ret
 
     @property
-    def unloading_station_volume(self):
-        total_volume = 0
-        for product in self.job_station.jobstationproduct_set.all():
-            total_volume += product.volume
+    def unloading_weight(self):
+        ret = 0
+        for job_station_product in self.job_station.jobstationproduct_set.all():
+            ret += job_station_product.mission_weight
 
-        return total_volume
+        return ret
 
     @property
     def total_price(self):
-        return self.distance * self.job_station.transport_unit_price * self.unloading_station_volume - self.adjustment
+        if self.distance and self.job_station.transport_unit_price and\
+           self.unloading_weight and self.adjustment:
+            return self.distance * self.job_station.transport_unit_price\
+                * self.unloading_weight - self.adjustment
+
+        return 0
