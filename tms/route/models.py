@@ -54,14 +54,19 @@ class Route(TimeStampedModel):
 
     g7_path = ArrayField(
         ArrayField(
-            models.FloatField(),
+            models.DecimalField(
+                max_digits=10,
+                decimal_places=2
+            ),
             size=2
         ),
         null=True
     )
 
-    distance = models.FloatField(
-        default=0
+    distance = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     def __str__(self):

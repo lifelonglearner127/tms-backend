@@ -52,8 +52,10 @@ class BaseCard(models.Model):
         blank=True
     )
 
-    balance = models.FloatField(
-        default=0
+    balance = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     department = models.ForeignKey(
@@ -86,16 +88,22 @@ class ETCCardChargeHistory(models.Model):
         on_delete=models.CASCADE
     )
 
-    previous_amount = models.FloatField(
-        default=0
+    previous_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    charged_amount = models.FloatField(
-        default=0
+    charged_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    after_amount = models.FloatField(
-        default=0
+    after_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     charged_on = models.DateTimeField(
@@ -131,8 +139,10 @@ class ETCBillHistory(models.Model):
         null=True
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     address = models.CharField(
@@ -185,16 +195,22 @@ class FuelCardChargeHistory(models.Model):
         on_delete=models.CASCADE
     )
 
-    previous_amount = models.FloatField(
-        default=0
+    previous_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    charged_amount = models.FloatField(
-        default=0
+    charged_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    after_amount = models.FloatField(
-        default=0
+    after_amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     charged_on = models.DateTimeField(
@@ -233,16 +249,22 @@ class FuelBillHistory(models.Model):
         on_delete=models.CASCADE
     )
 
-    unit_price = models.FloatField(
-        default=0
+    unit_price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    total_price = models.FloatField(
-        default=0
+    total_price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     address = models.CharField(
@@ -300,8 +322,10 @@ class Bill(CreatedTimeModel):
 
     to_time = models.DateTimeField()
 
-    cost = models.FloatField(
-        default=0
+    cost = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(

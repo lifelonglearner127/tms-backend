@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -309,10 +310,10 @@ class FuelCardChargeHistorySerializer(serializers.ModelSerializer):
 
         charge_history = m.FuelCardChargeHistory.objects.create(
             previous_amount=current_balance,
-            after_amount=current_balance + float(validated_data['charged_amount']),
+            after_amount=current_balance + Decimal(validated_data['charged_amount']),
             **validated_data
         )
-        card.balance += float(validated_data['charged_amount'])
+        card.balance += Decimal(validated_data['charged_amount'])
         card.save()
 
         return charge_history

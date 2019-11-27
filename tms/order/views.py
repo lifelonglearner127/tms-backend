@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from datetime import datetime, timedelta
 from pytz import timezone as tz
 import requests
@@ -274,7 +275,7 @@ class OrderViewSet(TMSViewSet):
                         error = True
                         break
 
-                    if order_product.arranged_weight > float(existing_order_product[0]['weight']):
+                    if order_product.arranged_weight > Decimal(existing_order_product[0]['weight']):
                         msg = f'{order_product.product.name} is already arranged {order_product.arranged_weight}'
                         'so cannot update'
                         error = True
@@ -316,7 +317,7 @@ class OrderViewSet(TMSViewSet):
                 order_product = m.OrderProduct.objects.create(
                     order=order,
                     product=product,
-                    weight=float(order_product_data.get('weight')),
+                    weight=Decimal(order_product_data.get('weight')),
                     is_split=order_product_data.get('is_split'),
                     is_pump=order_product_data.get('is_pump'),
                 )
@@ -327,7 +328,7 @@ class OrderViewSet(TMSViewSet):
                     product=product
                 )
 
-                order_product.weight = float(order_product_data.get('weight'))
+                order_product.weight = Decimal(order_product_data.get('weight'))
                 order_product.is_split = order_product_data.get('is_split')
                 order_product.is_pump = order_product_data.get('is_pump')
                 order_product.save()
@@ -488,7 +489,7 @@ class OrderViewSet(TMSViewSet):
         for branch_data in branches_data:
             branch = branch_data.get('branch', 0)
             product = branch_data.get('product')
-            branch_weight = float(branch_data.get('mission_weight', 0))
+            branch_weight = Decimal(branch_data.get('mission_weight', 0))
 
             # restructure by job station such data structure
             # {
@@ -515,7 +516,7 @@ class OrderViewSet(TMSViewSet):
                 'mission_weight': branch_weight
             })
 
-            if vehicle.branches[branch] < float(branch_data.get('mission_weight')):
+            if vehicle.branches[branch] < Decimal(branch_data.get('mission_weight')):
                 if branch not in errors:
                     errors[branch] = {}
                 errors[branch]['branch_over_weight'] = 'mission weight exceed vehicle branch actual load'
@@ -523,8 +524,8 @@ class OrderViewSet(TMSViewSet):
             for unloading_station_data in branch_data.get('unloading_stations', []):
                 unloading_station_id = unloading_station_data.get('unloading_station')
                 due_time = unloading_station_data.get('due_time')
-                transport_unit_price = float(unloading_station_data.get('transport_unit_price'))
-                unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
+                transport_unit_price = Decimal(unloading_station_data.get('transport_unit_price'))
+                unloading_station_weight = Decimal(unloading_station_data.get('mission_weight', 0))
                 branch_weight = branch_weight - unloading_station_weight
 
                 transport_unit_prices[unloading_station_id] = transport_unit_price
@@ -981,7 +982,7 @@ class JobViewSet(TMSViewSet):
         for branch_data in branches_data:
             branch = branch_data.get('branch', 0)
             product = branch_data.get('product')
-            branch_weight = float(branch_data.get('mission_weight', 0))
+            branch_weight = Decimal(branch_data.get('mission_weight', 0))
 
             # restructure by job station such data structure
             # {
@@ -1008,7 +1009,7 @@ class JobViewSet(TMSViewSet):
                 'mission_weight': branch_weight
             })
 
-            if vehicle.branches[branch] < float(branch_data.get('mission_weight')):
+            if vehicle.branches[branch] < Decimal(branch_data.get('mission_weight')):
                 if branch not in errors:
                     errors[branch] = {}
                 errors[branch]['branch_over_weight'] = 'mission weight exceed vehicle branch actual load'
@@ -1016,8 +1017,8 @@ class JobViewSet(TMSViewSet):
             for unloading_station_data in branch_data.get('unloading_stations', []):
                 unloading_station_id = unloading_station_data.get('unloading_station')
                 due_time = unloading_station_data.get('due_time')
-                transport_unit_price = float(unloading_station_data.get('transport_unit_price', 0))
-                unloading_station_weight = float(unloading_station_data.get('mission_weight', 0))
+                transport_unit_price = Decimal(unloading_station_data.get('transport_unit_price', 0))
+                unloading_station_weight = Decimal(unloading_station_data.get('mission_weight', 0))
                 branch_weight = branch_weight - unloading_station_weight
 
                 transport_unit_prices[unloading_station_id] = transport_unit_price
@@ -2280,8 +2281,8 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='update-distance')
     def update_order_payment_distance(self, request, pk=None):
         instance = self.get_object()
-        instance.distance = float(request.data.get('distance', 0))
-        instance.adjustment = float(request.data.get('adjustment', 0))
+        instance.distance = Decimal(request.data.get('distance', 0))
+        instance.adjustment = Decimal(request.data.get('adjustment', 0))
         if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
             instance.status = c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG
 

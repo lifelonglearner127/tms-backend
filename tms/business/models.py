@@ -337,12 +337,16 @@ class SelfDrivingPaymentRequest(models.Model):
         max_length=100
     )
 
-    mileage = models.FloatField(
-        default=0
+    mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
 
@@ -374,8 +378,10 @@ class InvoicePaymentRequest(models.Model):
 
     paid_on = models.DateField()
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     ticket_type = models.ForeignKey(

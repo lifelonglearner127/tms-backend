@@ -22,8 +22,10 @@ class OrderCart(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    weight = models.FloatField(
-        default=0
+    weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     is_split = models.BooleanField(
@@ -81,8 +83,10 @@ class Order(TimeStampedModel):
         default=False
     )
 
-    tax_rate = models.FloatField(
-        default=0
+    tax_rate = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(
@@ -167,8 +171,10 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE
     )
 
-    weight = models.FloatField(
-        default=0
+    weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     weight_measure_unit = models.CharField(
@@ -178,13 +184,17 @@ class OrderProduct(models.Model):
     )
 
     # sum of arranged weight
-    arranged_weight = models.FloatField(
-        default=0
+    arranged_weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     # summ of delivered weights
-    delivered_weight = models.FloatField(
-        default=0
+    delivered_weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     is_split = models.BooleanField(
@@ -210,8 +220,10 @@ class OrderReport(models.Model):
         default=0
     )
 
-    weights = models.FloatField(
-        default=0
+    weights = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     class Meta:
@@ -279,26 +291,36 @@ class Job(TimeStampedModel):
         blank=True
     )
 
-    total_mileage = models.FloatField(
-        default=0
+    total_mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    empty_mileage = models.FloatField(
-        default=0
+    empty_mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    heavy_mileage = models.FloatField(
-        default=0
+    heavy_mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    highway_mileage = models.FloatField(
+    highway_mileage = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=10,
+        decimal_places=2
     )
 
-    normalway_mileage = models.FloatField(
+    normalway_mileage = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=10,
+        decimal_places=2
     )
 
     is_paid = models.BooleanField(
@@ -533,8 +555,10 @@ class LoadingStationProductCheck(CreatedTimeModel):
         on_delete=models.CASCADE
     )
 
-    weight = models.FloatField(
-        default=0
+    weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
 
@@ -561,16 +585,22 @@ class QualityCheck(models.Model):
         default=0
     )
 
-    density = models.FloatField(
-        default=0
+    density = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    additive = models.FloatField(
-        default=0
+    additive = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    volume = models.FloatField(
-        default=0
+    volume = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
 
@@ -587,8 +617,10 @@ class JobStation(models.Model):
         null=True
     )
 
-    transport_unit_price = models.FloatField(
-        default=0
+    transport_unit_price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     step = models.PositiveIntegerField()
@@ -678,12 +710,16 @@ class JobStationProduct(models.Model):
         default=0
     )
 
-    mission_weight = models.FloatField(
-        default=0
+    mission_weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    weight = models.FloatField(
-        default=0
+    weight = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     man_hole = models.CharField(
@@ -753,12 +789,16 @@ class OrderPayment(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    distance = models.FloatField(
-        default=0
+    distance = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    adjustment = models.FloatField(
-        default=0
+    adjustment = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     status = models.PositiveIntegerField(

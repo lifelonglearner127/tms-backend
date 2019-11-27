@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
@@ -73,7 +74,7 @@ class ETCCardViewSet(TMSViewSet):
     def charge_card(self, request, pk=None):
         card = self.get_object()
         current_balance = card.balance
-        charged_amount = float(request.data.get('charged_amount', 0))
+        charged_amount = Decimal(request.data.get('charged_amount', 0))
         m.ETCCardChargeHistory.objects.create(
             card=card,
             previous_amount=current_balance,
@@ -180,7 +181,7 @@ class FuelCardViewSet(TMSViewSet):
     def charge_card(self, request, pk=None):
         card = self.get_object()
         current_balance = card.balance
-        charged_amount = float(request.data.get('charged_amount', 0))
+        charged_amount = Decimal(request.data.get('charged_amount', 0))
         m.FuelCardChargeHistory.objects.create(
             card=card,
             previous_amount=current_balance,

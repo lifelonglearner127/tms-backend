@@ -17,8 +17,10 @@ class WarehouseProduct(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     amount_unit = models.CharField(
@@ -34,16 +36,22 @@ class InTransaction(TimeStampedModel):
         related_name='in_transactions'
     )
 
-    unit_price = models.FloatField(
-        default=0
+    unit_price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    price = models.FloatField(
-        default=0
+    price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     amount_unit = models.CharField(
@@ -90,16 +98,22 @@ class OutTransaction(TimeStampedModel):
         blank=True
     )
 
-    unit_price = models.FloatField(
-        default=0
+    unit_price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    price = models.FloatField(
-        default=0
+    price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    amount = models.FloatField(
-        default=0
+    amount = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     amount_unit = models.CharField(

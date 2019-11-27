@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -104,7 +105,7 @@ class VehiclePositionSerializer(serializers.Serializer):
 
     def get_lnglat(self, obj):
         return [
-            float(obj['data']['loc']['lng']), float(obj['data']['loc']['lat'])
+            Decimal(obj['data']['loc']['lng']), Decimal(obj['data']['loc']['lat'])
         ]
 
     def get_speed(self, obj):
@@ -519,8 +520,8 @@ class TireTreadDepthCheckHistorySerializer(serializers.Serializer):
     position = serializers.CharField(source='tire.vehicle_tire.position')
     installed_on = serializers.DateTimeField(source='tire.installed_on', format='%Y-%m-%d')
     checked_on = serializers.DateTimeField(format='%Y-%m-%d')
-    tread_depth = serializers.FloatField()
-    before_tread_depth = serializers.FloatField()
+    tread_depth = serializers.DecimalField(max_digits=10, decimal_places=2)
+    before_tread_depth = serializers.DecimalField(max_digits=10, decimal_places=2)
 
 
 class VehicleTireSerializer(serializers.ModelSerializer):

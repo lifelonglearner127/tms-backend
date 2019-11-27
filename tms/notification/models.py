@@ -146,22 +146,30 @@ class G7MQTTEvent(TimeStampedModel):
         default=0
     )
 
-    start_lng = models.FloatField(
+    start_lng = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=20,
+        decimal_places=10
     )
 
-    start_lat = models.FloatField(
+    start_lat = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=20,
+        decimal_places=10
     )
 
-    end_lng = models.FloatField(
+    end_lng = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=20,
+        decimal_places=10
     )
 
-    end_lat = models.FloatField(
+    end_lat = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=20,
+        decimal_places=10
     )

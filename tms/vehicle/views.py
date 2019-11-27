@@ -1,3 +1,4 @@
+from decimal import Decimal
 from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
@@ -336,8 +337,8 @@ class VehicleViewSet(TMSViewSet):
 
         ret = {
             'plate_num': plate_num,
-            'lnglat': [float(data['loc']['lng']), float(data['loc']['lat'])],
-            'speed': float(data['loc']['speed'])
+            'lnglat': [Decimal(data['loc']['lng']), Decimal(data['loc']['lat'])],
+            'speed': Decimal(data['loc']['speed'])
         }
         return Response(
             ret,

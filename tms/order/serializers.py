@@ -1118,8 +1118,8 @@ class VehicleStatusOrderSerializer(serializers.Serializer):
     plate_num = serializers.CharField()
     # progress = serializers.CharField()
     # client_name = serializers.CharField()
-    distance = serializers.FloatField()
-    duration = serializers.FloatField()
+    distance = serializers.DecimalField(max_digits=10, decimal_places=2)
+    duration = serializers.DecimalField(max_digits=10, decimal_places=2)
     total_load = serializers.CharField()
     branch1 = serializers.CharField()
     branch2 = serializers.CharField()
@@ -1221,7 +1221,9 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
     customer = serializers.CharField(source='job_station.job.order.customer.name', read_only=True)
     loading_station = StationNameSerializer(source='job_station.job.order.loading_station', read_only=True)
     unloading_station = StationNameSerializer(source='job_station.station', read_only=True)
-    transport_unit_price = serializers.FloatField(source='job_station.transport_unit_price', read_only=True)
+    transport_unit_price = serializers.DecimalField(
+        source='job_station.transport_unit_price', read_only=True, max_digits=10, decimal_places=2
+    )
     status = TMSChoiceField(choices=c.ORDER_PAYMENT_STATUS)
 
     class Meta:
@@ -1287,10 +1289,18 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
     is_multiple_products = serializers.SerializerMethodField()
     unloading_station_count = serializers.SerializerMethodField()
-    loading_time_duration = serializers.FloatField(source='job.loading_time_duration')
-    quality_time_duration = serializers.FloatField(source='job.quality_time_duration')
-    unloading_time_duration = serializers.FloatField(source='job.unloading_time_duration')
-    total_time_duration = serializers.FloatField(source='job.total_time_duration')
+    loading_time_duration = serializers.DecimalField(
+        source='job.loading_time_duration', max_digits=10, decimal_places=2
+    )
+    quality_time_duration = serializers.DecimalField(
+        source='job.quality_time_duration', max_digits=10, decimal_places=2
+    )
+    unloading_time_duration = serializers.DecimalField(
+        source='job.unloading_time_duration', max_digits=10, decimal_places=2
+    )
+    total_time_duration = serializers.DecimalField(
+        source='job.total_time_duration', max_digits=10, decimal_places=2
+    )
 
     class Meta:
         model = m.JobWorker
@@ -1331,7 +1341,7 @@ class JobWorkDiaryReportSerializer(serializers.ModelSerializer):
     drivers = serializers.SerializerMethodField()
     escorts = serializers.SerializerMethodField()
     total_weight = serializers.SerializerMethodField()
-    truck_weight = serializers.FloatField(source='vehicle.total_load')
+    truck_weight = serializers.DecimalField(source='vehicle.total_load', max_digits=10, decimal_places=2)
     oil_weight = serializers.SerializerMethodField()
     oil_price = serializers.SerializerMethodField()
     oil_card_balance = serializers.SerializerMethodField()

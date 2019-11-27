@@ -47,12 +47,16 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    total_load = models.FloatField(
-        default=0
+    total_load = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    actual_load = models.FloatField(
-        default=0
+    actual_load = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     model_2 = models.CharField(
@@ -82,16 +86,22 @@ class Vehicle(TimeStampedModel):
         blank=True
     )
 
-    total_load_2 = models.FloatField(
-        default=0
+    total_load_2 = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    actual_load_2 = models.FloatField(
-        default=0
+    actual_load_2 = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    tank_volume = models.FloatField(
-        default=0
+    tank_volume = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     affiliation_unit = models.CharField(
@@ -237,7 +247,10 @@ class Vehicle(TimeStampedModel):
 
     # Position Information
     branches = ArrayField(
-        models.FloatField()
+        models.DecimalField(
+            max_digits=10,
+            decimal_places=2
+        )
     )
 
     # Hardware Information
@@ -367,12 +380,16 @@ class FuelConsumption(TimeStampedModel):
         max_length=100
     )
 
-    high_way = models.FloatField(
-        default=0
+    high_way = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    normal_way = models.FloatField(
-        default=0
+    normal_way = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(
@@ -407,20 +424,28 @@ class VehicleMaintenanceHistory(TimeStampedModel):
         null=True
     )
 
-    total_cost = models.FloatField(
-        default=0
+    total_cost = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    mileage = models.FloatField(
-        default=0
+    mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    accessories_fee = models.FloatField(
-        default=0
+    accessories_fee = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    work_fee = models.FloatField(
-        default=0
+    work_fee = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     ticket_type = models.CharField(
@@ -429,8 +454,10 @@ class VehicleMaintenanceHistory(TimeStampedModel):
         blank=True
     )
 
-    tax_rate = models.FloatField(
-        default=0
+    tax_rate = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(
@@ -706,13 +733,17 @@ class TireManagementHistory(TimeStampedModel):
 
     installed_on = models.DateTimeField()
 
-    mileage = models.FloatField(
+    mileage = models.DecimalField(
         null=True,
-        blank=True
+        blank=True,
+        max_digits=10,
+        decimal_places=2
     )
 
-    mileage_limit = models.FloatField(
-        default=0
+    mileage_limit = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     brand = models.CharField(
@@ -727,8 +758,10 @@ class TireManagementHistory(TimeStampedModel):
         max_length=100
     )
 
-    tread_depth = models.FloatField(
-        default=0
+    tread_depth = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     manufacturer = models.CharField(
@@ -739,12 +772,16 @@ class TireManagementHistory(TimeStampedModel):
         max_length=100
     )
 
-    tire_mileage = models.FloatField(
-        default=0
+    tire_mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    vehicle_mileage = models.FloatField(
-        default=0
+    vehicle_mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     @property
@@ -765,16 +802,22 @@ class TireTreadDepthCheckHistory(TimeStampedModel):
         related_name='history'
     )
 
-    mileage = models.FloatField(
-        default=0
+    mileage = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    pressure = models.FloatField(
-        default=0
+    pressure = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    tread_depth = models.FloatField(
-        default=0
+    tread_depth = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     symptom = models.TextField(
@@ -844,8 +887,10 @@ class VehicleViolation(models.Model):
         max_length=500
     )
 
-    fine = models.FloatField(
-        default=0
+    fine = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     deduction_score = models.PositiveIntegerField(

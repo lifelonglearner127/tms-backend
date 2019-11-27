@@ -35,8 +35,10 @@ class BasicSetting(TimeStampedModel):
     """
     Basic setting modal
     """
-    tax_rate = models.FloatField(
-        default=0
+    tax_rate = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     rapid_acceleration = models.PositiveIntegerField(
@@ -133,12 +135,16 @@ class Station(BasicContactModel):
         default=c.STATION_TYPE_LOADING_STATION
     )
 
-    longitude = models.FloatField(
-        default=0
+    longitude = models.DecimalField(
+        default=0,
+        max_digits=20,
+        decimal_places=10
     )
 
-    latitude = models.FloatField(
-        default=0
+    latitude = models.DecimalField(
+        default=0,
+        max_digits=20,
+        decimal_places=10
     )
 
     radius = models.PositiveIntegerField(
@@ -154,8 +160,10 @@ class Station(BasicContactModel):
         CustomerProfile
     )
 
-    price = models.FloatField(
-        default=0
+    price = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
     working_time = models.PositiveIntegerField(
@@ -262,12 +270,16 @@ class TransportationDistance(TimeStampedModel):
         related_name='end_points'
     )
 
-    distance = models.FloatField(
-        default=0
+    distance = models.DecimalField(
+        default=0,
+        max_digits=10,
+        decimal_places=2
     )
 
-    average_time = models.FloatField(
-        default=1
+    average_time = models.DecimalField(
+        default=1,
+        max_digits=10,
+        decimal_places=2
     )
 
     description = models.TextField(
