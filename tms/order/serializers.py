@@ -132,6 +132,7 @@ class ShortOrderSerializer(serializers.ModelSerializer):
         model = m.Order
         fields = (
             'id',
+            'alias',
             'assignee',
             'customer',
             'loading_station',
