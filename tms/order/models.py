@@ -542,6 +542,9 @@ class JobWorker(models.Model):
             'job', '-is_active', '-assigned_on',
         )
 
+    def __str__(self):
+        return str(self.job) + '-' + self.worker.name
+
 
 class LoadingStationProductCheck(CreatedTimeModel):
 
