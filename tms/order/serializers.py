@@ -882,6 +882,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
     """
     Serializer for future job for driver app
     """
+    alias = serializers.CharField(source='order.alias')
     plate_num = serializers.CharField(source='vehicle.plate_num')
     routes = serializers.SerializerMethodField()
     total_distance = serializers.SerializerMethodField()
@@ -899,6 +900,7 @@ class JobFutureSerializer(serializers.ModelSerializer):
         model = m.Job
         fields = (
             'id',
+            'alias',
             'plate_num',
             'total_distance',
             'routes',
