@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from month.models import MonthField
@@ -368,7 +369,7 @@ class Job(TimeStampedModel):
 
     @property
     def freight_payment_to_driver(self):
-        return self.total_mission_weight * self.heavy_mileage * 0.4
+        return round(self.total_mission_weight * self.heavy_mileage * Decimal(0.4), 2)
 
     @property
     def to_loading_station_time_duration(self):
