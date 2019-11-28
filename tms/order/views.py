@@ -2415,10 +2415,9 @@ class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
     def get_column_header(self):
         ret = c.EXCEL_HEAD_STYLE
         ret['titles'] = [
-            '日期', '名称', '分类', '装货地', '货品', '是否混装', '配送油站数量',
-            '装油工时', '质检工时', '卸油工时', '航次所用工时',
+            '日期', '名称', '分类', '装货地', '质检地', '货品', '是否混装', '配送油站数量',
+            # '装油工时', '质检工时', '卸油工时', '航次所用工时',
         ]
-        ret['column_width'] = [30, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]
         return ret
 
     def get_queryset(self):

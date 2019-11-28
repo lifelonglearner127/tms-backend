@@ -1287,21 +1287,22 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
     worker = serializers.CharField(source='worker.name')
     worker_type = serializers.CharField(source='get_worker_type_display')
     loading_station = serializers.CharField(source='job.order.loading_station.name')
+    quality_station = serializers.CharField(source='job.order.quality_station.name')
     products = serializers.SerializerMethodField()
     is_multiple_products = serializers.SerializerMethodField()
     unloading_station_count = serializers.SerializerMethodField()
-    loading_time_duration = serializers.DecimalField(
-        source='job.loading_time_duration', max_digits=10, decimal_places=2
-    )
-    quality_time_duration = serializers.DecimalField(
-        source='job.quality_time_duration', max_digits=10, decimal_places=2
-    )
-    unloading_time_duration = serializers.DecimalField(
-        source='job.unloading_time_duration', max_digits=10, decimal_places=2
-    )
-    total_time_duration = serializers.DecimalField(
-        source='job.total_time_duration', max_digits=10, decimal_places=2
-    )
+    # loading_time_duration = serializers.DecimalField(
+    #     source='job.loading_time_duration', max_digits=10, decimal_places=2
+    # )
+    # quality_time_duration = serializers.DecimalField(
+    #     source='job.quality_time_duration', max_digits=10, decimal_places=2
+    # )
+    # unloading_time_duration = serializers.DecimalField(
+    #     source='job.unloading_time_duration', max_digits=10, decimal_places=2
+    # )
+    # total_time_duration = serializers.DecimalField(
+    #     source='job.total_time_duration', max_digits=10, decimal_places=2
+    # )
 
     class Meta:
         model = m.JobWorker
@@ -1310,13 +1311,14 @@ class ReportJobWorkingTimeSerializer(serializers.ModelSerializer):
             'worker',
             'worker_type',
             'loading_station',
+            'quality_station',
             'products',
             'is_multiple_products',
             'unloading_station_count',
-            'loading_time_duration',
-            'quality_time_duration',
-            'unloading_time_duration',
-            'total_time_duration',
+            # 'loading_time_duration',
+            # 'quality_time_duration',
+            # 'unloading_time_duration',
+            # 'total_time_duration',
         )
 
     def get_products(self, instance):
