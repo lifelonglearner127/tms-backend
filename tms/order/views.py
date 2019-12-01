@@ -591,6 +591,8 @@ class OrderViewSet(TMSViewSet):
         routes = [routes[id] for id in route_ids]
 
         # route validations
+        # if the is_same_station is set to True, eliminated routes come from front-end
+        # route validations does against only for unloading stations
         if not order.is_same_station:
             routes = routes[1:]
 

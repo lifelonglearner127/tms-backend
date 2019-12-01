@@ -66,7 +66,7 @@ class Route(TimeStampedModel):
     distance = models.DecimalField(
         default=0,
         max_digits=10,
-        decimal_places=2
+        decimal_places=3
     )
 
     def __str__(self):
