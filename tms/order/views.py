@@ -1431,6 +1431,21 @@ class JobViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, url_path='finish-job')
+    def finish_job(self, request, pk=None):
+        job = self.get_object()
+        job.progress = c.JOB_PROGRESS_COMPLETE
+        job.save()
+        uncompleted_job_stations = job.jobstation_set.filter(is_completed=False)
+        for job_station in uncompleted_job_stations:
+            job_station.is_completed = True
+            job_station.save()
+
+        return Response(
+            s.JobAdminSerializer(job).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['post'], url_path='upload-loading-check')
     def upload_loading_station_check(self, request, pk=None):
         job = self.get_object()
