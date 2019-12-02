@@ -1223,13 +1223,11 @@ class JobViewSet(TMSViewSet):
             job_station for job_station in job.jobstation_set.filter(step__gte=2).order_by('step')
         ]
         run_job_stations = [station for station in old_unloading_stations if station.is_completed]
-        next_job_station = None
-        if job.progress >= c.JOB_PROGRESS_TO_UNLOADING_STATION:
-            next_job_station = old_unloading_stations[len(run_job_stations)]
+        # next_job_station = None
+        # if job.progress >= c.JOB_PROGRESS_TO_UNLOADING_STATION:
+        #     next_job_station = old_unloading_stations[len(run_job_stations)]
 
-        if next_job_station\
-           and [station.station for station in run_job_stations] \
-           != new_unloading_stations[:len(run_job_stations)]:
+        if [station.station for station in run_job_stations] != new_unloading_stations[:len(run_job_stations)]:
             run_station_names = [station.station.name for station in run_job_stations]
             run_station_names.insert(0, job.order.quality_station.name)
             run_station_names.insert(0, job.order.loading_station.name)
@@ -1238,8 +1236,7 @@ class JobViewSet(TMSViewSet):
                     'msg': 'You cannot update the routes like this because the driver is already run {}'
                     'and now heading to {}'
                     .format(
-                        ' -> '.join(run_station_names),
-                        next_job_station.station.name
+                        ' -> '.join(run_station_names)
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST
