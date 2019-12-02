@@ -539,6 +539,17 @@ class JobStationSerializer(serializers.ModelSerializer):
         )
 
 
+class JobStationCompleteSerializer(serializers.ModelSerializer):
+
+    station = StationLocationSerializer()
+
+    class Meta:
+        model = m.JobStation
+        fields = (
+            'id', 'station', 'step', 'is_completed'
+        )
+
+
 class JobWorkerSerializer(serializers.ModelSerializer):
 
     worker = MainUserSerializer(read_only=True)
@@ -573,12 +584,21 @@ class JobAdminSerializer(serializers.ModelSerializer):
     rest_place = StationNameSerializer()
     branches = serializers.SerializerMethodField()
     progress_display = serializers.SerializerMethodField()
+    unloading_stations = serializers.SerializerMethodField()
 
     class Meta:
         model = m.Job
         fields = (
-            'id', 'vehicle', 'driver', 'escort', 'rest_place', 'routes', 'branches', 'progress', 'progress_display'
+            'id', 'vehicle', 'driver', 'escort', 'rest_place', 'routes', 'branches', 'progress', 'progress_display',
+            'unloading_stations',
         )
+
+    def get_unloading_stations(self, instance):
+        unloading_stations = instance.jobstation_set.filter(step__gte=2).order_by('step')
+        return JobStationCompleteSerializer(
+            unloading_stations,
+            many=True
+        ).data
 
     def get_driver(self, instance):
         job_driver = m.JobWorker.drivers.filter(job=instance).first()
