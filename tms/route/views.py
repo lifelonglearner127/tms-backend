@@ -139,14 +139,16 @@ class RouteViewSet(TMSViewSet):
                     start_point=current_station,
                     end_point=next_station
                 )
-                routes.append(route)
             except m.Route.DoesNotExist:
-                missing_routes.append({
-                    'msg': '{} ({}) - {} ({})'.format(
-                        current_station.name, current_station.get_station_type_display(),
-                        next_station.name, next_station.get_station_type_display()
-                    )
-                })
+                route = m.Route.objects.create(
+                    start_point=current_station,
+                    end_point=next_station,
+                    map_path=[],
+                    name=f'{current_station.name}({current_station.get_station_type_display()})'
+                    f' - {next_station.name}({next_station.get_station_type_display()})'
+                )
+            finally:
+                routes.append(route)
 
         return Response(
             {
