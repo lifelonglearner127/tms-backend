@@ -894,6 +894,14 @@ class JobViewSet(TMSViewSet):
     queryset = m.Job.objects.all()
     serializer_class = s.JobSerializer
 
+    def retrieve(self, request, pk=None):
+        job = self.get_object()
+
+        return Response(
+            s.JobAdminSerializer(job).data,
+            status=status.HTTP_200_OK
+        )
+
     def update(self, request, pk=None):
         """Update the job if according to update logic
 
@@ -1234,7 +1242,6 @@ class JobViewSet(TMSViewSet):
             return Response(
                 {
                     'msg': 'You cannot update the routes like this because the driver is already run {}'
-                    'and now heading to {}'
                     .format(
                         ' -> '.join(run_station_names)
                     )
