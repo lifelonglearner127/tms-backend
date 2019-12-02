@@ -1,0 +1,1396 @@
+{
+	"info": {
+		"_postman_id": "6dd8e008-b783-4b06-9e3a-d4d37e0f46a9",
+		"name": "CustomerTracker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication&Profile",
+			"item": [
+				{
+					"name": "Get a customer's profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/hr/customer-profile/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"hr",
+								"customer-profile",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a customer's monthly order statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/order-report/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"order-report",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Authentication",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5f0f676c-970b-47ba-83aa-1881b270550d",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.environment.set('authToken', pm.response.json().token)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"username\": \"dcustomer1\",\n\t\"password\": \"123\",\n\t\"userType\": \"C\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/auth/obtain_token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"obtain_token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"mobile\": \"15543325\",\n\t\"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/hr/customer-profile/update-me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"hr",
+								"customer-profile",
+								"update-me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"alias\": \"alias\",\r\n\t\"products\": [\r\n\t\t{\r\n\t\t\t\"product\": {\r\n\t\t\t\t\"id\": 1\r\n\t\t\t},\r\n\t\t\t\"weight\": 4,\r\n\t\t\t\"isSplit\": true,\r\n\t\t\t\"isPump\": false\r\n\t\t}\r\n\t],\r\n\t\"description\": \"aaaa\",\r\n\t\"invoiceTicket\": true,\r\n\t\"taxRate\": 0.8,\r\n\t\"loadingStation\": {\r\n\t\t\"id\": 1\r\n\t},\r\n\t\"loadingDueTime\": \"2019-10-03 00:00:00\",\r\n\t\"qualityStation\": {\r\n\t\t\"id\": 2\r\n\t},\r\n\t\"isSameStation\": true\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/orders",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"alias\": \"alias\",\n\t\"loadingStation\": {\n\t\t\"id\": 102\n\t},\n\t\"qualityStation\": {\n\t\t\"id\": 101\n\t},\n\t\"products\": [\n\t\t{\n\t\t\t\"product\": {\n\t\t\t\t\"id\": 1\n\t\t\t},\n\t\t\t\"totalWeight\": 3,\n\t\t\t\"unloadingStations\": [\n\t\t\t\t{\n\t\t\t\t\t\"unloadingStation\": {\n\t\t\t\t\t\t\"id\": 29\n\t\t\t\t\t},\n\t\t\t\t\t\"weight\": 3\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/orders/46",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"46"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/me?per_page=5000",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"me"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "5000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List In-Progress Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/me?status=I",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"me"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "I"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Pending Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/me?status=P",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"me"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "P"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Completed Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/me?status=C",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"me"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "C"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Duizhangdan list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/5/payments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"5",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Duizhangdan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/order-payments/1/confirm-duizhang",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"order-payments",
+								"1",
+								"confirm-duizhang"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Duizhangdan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/order-payments/1/confirm-payment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"order-payments",
+								"1",
+								"confirm-payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Monitor Order Job Vehicles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/orders/6/position",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"6",
+								"position"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Monitor Order Job Vehicles(WebSocket)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://47.98.111.251:8000/ws/jobposition/{customerId}/orders/{orderId}/",
+							"protocol": "ws",
+							"host": [
+								"47",
+								"98",
+								"111",
+								"251"
+							],
+							"port": "8000",
+							"path": [
+								"ws",
+								"jobposition",
+								"{customerId}",
+								"orders",
+								"{orderId}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Get Tax rate",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/tax-setting",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"tax-setting"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Cart Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"id\": 1\n\t},\n\t\"unit_price\": 1,\n\t\"weight\": 3,\n\t\"loadingStation\": {\n\t\t\"id\": 28\n\t},\n\t\"qualityStation\": {\n\t\t\"id\": 30\n\t},\n\t\"unloadingStations\": [\n\t\t{\n\t\t\t\"unloadingStation\": {\n\t\t\t\t\"id\": 29\n\t\t\t},\n\t\t\t\"weight\": 3\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/cart",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"id\": 1\n\t},\n\t\"unit_price\": 1,\n\t\"weight\": 65,\n\t\"loadingStation\": {\n\t\t\"id\": 28\n\t},\n\t\"qualityStation\": {\n\t\t\"id\": 30\n\t},\n\t\"unloadingStations\": [\n\t\t{\n\t\t\t\"unloadingStation\": {\n\t\t\t\t\"id\": 29\n\t\t\t},\n\t\t\t\"weight\": 3\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/cart/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Cart Items",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"id\": 1\n\t},\n\t\"unit_price\": 1,\n\t\"weight\": 1,\n\t\"loadingStation\": {\n\t\t\"id\": 1\n\t},\n\t\"qualityStation\": {\n\t\t\"id\": 1\n\t},\n\t\"unloadingStations\": [\n\t\t{\n\t\t\t\"station\": {\n\t\t\t\t\"id\": 1\n\t\t\t},\n\t\t\t\"weight\": 1\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/cart",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart Item",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"id\": 1\n\t},\n\t\"unit_price\": 1,\n\t\"weight\": 1,\n\t\"loadingStation\": {\n\t\t\"id\": 1\n\t},\n\t\"qualityStation\": {\n\t\t\"id\": 1\n\t},\n\t\"unloadingStations\": [\n\t\t{\n\t\t\t\"station\": {\n\t\t\t\t\"id\": 1\n\t\t\t},\n\t\t\t\"weight\": 1\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/cart/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Cart Item",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/cart/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Station",
+			"item": [
+				{
+					"name": "List Loading Stations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/loading-stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"loading-stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Loading Stations - Short",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/loading-stations/short?page=1&per_page=5000",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"loading-stations",
+								"short"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "5000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Loading Station",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station 2\",\n\t\"contact\": \"Station contact 2\",\n\t\"station_type\": 0,\n\t\"address\": \"bbbb\",\n\t\"products\": [\n\t\t{\n\t\t\t\"id\": 1\n\t\t},\n\t\t{\n\t\t\t\"id\": 2\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Loading Station",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station aName\",\n\t\"contact\": \"Station Contact\",\n\t\"station_type\": 0,\n\t\"longitude\": 0,\n\t\"latitude\": 0,\n\t\"products\": [\n\t\t{\n\t\t\t\"id\": 1\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations/27",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"27"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Quality Stations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/quality-stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"quality-stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Quality Stations - Short",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/quality-stations/short",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"quality-stations",
+								"short"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Quality Station",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station 3\",\n\t\"contact\": \"Station Contact 3\",\n\t\"station_type\": 1,\n\t\"address\": \"ccc\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Quality Station",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station Naaasfmdd\",\n\t\"contact\": \"Station Contact\",\n\t\"station_type\": 1,\n\t\"address\": \"aaa\",\n\t\"longitude\": 0,\n\t\"latitude\": 0\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations/27",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"27"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Unloading Stations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/unloading-stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"unloading-stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Unloading Stations - Short",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/unloading-stations/short",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"unloading-stations",
+								"short"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Unloading Station",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station 2\",\n\t\"contact\": \"Station Contact 2\",\n\t\"station_type\": {\n\t\t\"value\": 2\n\t},\n\t\"address\": \"abc\",\n\t\"province\": \"a\",\n\t\"city\": \"b\",\n\t\"district\": \"c\",\n\t\"detailAddress\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Unloading Station",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Station 2\",\n\t\"contact\": \"Station Contact 2\",\n\t\"station_type\": 2,\n\t\"address\": \"abc\",\n\t\"province\": \"a\",\n\t\"city\": \"b\",\n\t\"district\": \"c\",\n\t\"detailAddress\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/stations/27",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"27"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Station",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/stations/27",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"stations",
+								"27"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Mock for e-fence",
+					"item": [
+						{
+							"name": "Blackdot",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "JWT {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/api/jobs/test/blackdot-efence?type=in",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"jobs",
+										"test",
+										"blackdot-efence"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "in"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "E-fence",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "JWT {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/api/jobs/3/test/station-efence?type=out",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"api",
+										"jobs",
+										"3",
+										"test",
+										"station-efence"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "out"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Get all notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/notifications",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get unread notification count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/notifications/unread-count",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"unread-count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update notification stutus to `read`",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"is_read\": true\n}"
+						},
+						"url": {
+							"raw": "{{url}}/api/notifications/2/read",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"2",
+								"read"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a notification",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/notifications/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "JWT {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/products",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
