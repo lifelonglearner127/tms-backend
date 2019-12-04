@@ -2304,6 +2304,8 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         instance.distance = Decimal(request.data.get('distance', 0))
         instance.adjustment = Decimal(request.data.get('adjustment', 0))
+        instance.description = request.data.get('description', '')
+
         if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
             instance.status = c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG
 

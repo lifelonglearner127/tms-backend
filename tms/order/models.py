@@ -810,6 +810,11 @@ class OrderPayment(TimeStampedModel):
         default=c.ORDER_PAYMENT_STATUS_NO_DISTANCE
     )
 
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
     @property
     def loading_weight(self):
         ret = 0
