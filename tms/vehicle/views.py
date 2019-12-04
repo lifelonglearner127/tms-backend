@@ -94,12 +94,12 @@ class VehicleViewSet(TMSViewSet):
 
         if worker.user_type in [c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT]:
             query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OUTSIDE)
-        elif worker.profile.department.name == '油品配送部':
-            query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OIL)
-        elif worker.profile.department.name == '壳牌项目部':
-            query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_SHELL)
-        else:
-            query_filter = Q(pk__isnull=True)
+        # elif worker.profile.department.name == '油品配送部':
+        #     query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_OIL)
+        # elif worker.profile.department.name == '壳牌项目部':
+        #     query_filter &= Q(department=c.VEHICLE_DEPARTMENT_TYPE_SHELL)
+        # else:
+        #     query_filter = Q(pk__isnull=True)
 
         queryset = m.Vehicle.objects.filter(query_filter).order_by('plate_num')
         page = self.paginate_queryset(queryset)
