@@ -170,7 +170,7 @@ class OrderCustomerAppSerializer(serializers.ModelSerializer):
             job_item = {}
             job_item['vehicle'] = job.vehicle.plate_num
             job_item['drivers'] = [job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.name]
-            job_item['escorts'] = [job.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first().worker.name]
+            job_item['escorts'] = [job.jobworker_set.filter(worker_type=c.WORKER_TYPE_ESCORT).first().worker.name]
             job_item['details'] = []
             for job_station in job.jobstation_set.all():
                 for ret_station in job_item['details']:

@@ -1157,7 +1157,7 @@ class JobViewSet(TMSViewSet):
 
         difference_products = old_loading_station_branches.difference(new_loading_station_branches)
         if difference_products:
-            if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+            if job.progress > c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
                 return Response(
                     {
                         'msg': '当前到达装货地，所以不能修装货货品和数量'
@@ -1179,7 +1179,7 @@ class JobViewSet(TMSViewSet):
                 ).first()
 
             if job_loading_station_product is None:
-                if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+                if job.progress > c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
                     return Response(
                         {
                             'msg': '当前到达装货地，所以不能修装货货品和数量'
@@ -1205,7 +1205,7 @@ class JobViewSet(TMSViewSet):
                 if job_loading_station_product.product.id != job_station_product['product']\
                    or job_loading_station_product.mission_weight != job_station_product['mission_weight']:
 
-                    if job.progress >= c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
+                    if job.progress > c.JOB_PROGRESS_ARRIVED_AT_LOADING_STATION:
                         return Response(
                             {
                                 'msg': '当前到达装货地，所以不能修装货货品和数量'
