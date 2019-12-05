@@ -46,7 +46,7 @@ from ..core.views import TMSViewSet
 from ..g7.interfaces import G7Interface
 from .tasks import (
     notify_order_changes,
-    notify_of_job_creation, notify_of_job_changes,
+    notify_of_job_creation, notify_of_job_changes, notify_of_job_finish,
     notify_of_job_deleted, notify_of_worker_change_after_job_start,
     notify_of_driver_or_escort_changes_before_job_start
 )
@@ -1440,12 +1440,81 @@ class JobViewSet(TMSViewSet):
         job = self.get_object()
         job.progress = c.JOB_PROGRESS_COMPLETE
         job.finished_on = timezone.now()
-        job.save()
+
         uncompleted_job_stations = job.jobstation_set.filter(is_completed=False)
         for job_station in uncompleted_job_stations:
             job_station.is_completed = True
             job_station.save()
 
+        active_job_driver = job.jobworker_set.filter(
+            worker_type=c.WORKER_TYPE_DRIVER, is_active=True
+        ).first()
+        active_job_driver.finished_on = timezone.now()
+        active_job_driver.is_active = False
+        active_job_driver.save()
+
+        active_job_escort = job.jobworker_set.filter(
+            worker_type=c.WORKER_TYPE_ESCORT, is_active=True
+        ).first()
+        active_job_escort.finished_on = timezone.now()
+        active_job_escort.is_active = False
+        active_job_escort.save()
+
+        # # update job empty mileage
+        loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
+
+        empty_mileage_queries = {
+            'plate_num':
+                job.vehicle.plate_num,
+            'from':
+                job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+            'to':
+                loading_station_arrived_on.strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+        }
+        heavy_mileage_queries = {
+            'plate_num':
+                job.vehicle.plate_num,
+            'from':
+                loading_station_arrived_on.strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                ),
+            'to':
+                job.finished_on.strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                )
+        }
+        try:
+            data = G7Interface.call_g7_http_interface(
+                'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                queries=empty_mileage_queries
+            )
+            job.empty_mileage = data['total_mileage'] / (100 * 1000)
+            data = G7Interface.call_g7_http_interface(
+                'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                queries=heavy_mileage_queries
+            )
+            empty_mileage = data['total_mileage'] / (100 * 1000)
+            heavy_mileage = data['total_mileage'] / (100 * 1000)
+        except Exception:
+            empty_mileage = 0
+            heavy_mileage = 0
+
+        job.empty_mileage = empty_mileage
+        job.heavy_mileage = heavy_mileage
+        job.total_mileage = job.empty_mileage + job.heavy_mileage
+        job.highway_mileage = 0
+        job.normalway_mileage = 0
+        job.save()
+
+        notify_of_job_changes.apply_async(
+            args=[{
+                'job': job.id,
+                'driver': active_job_driver.worker.id,
+                'escort': active_job_escort.worker.id
+            }]
+        )
         return Response(
             s.JobAdminSerializer(job).data,
             status=status.HTTP_200_OK
@@ -1840,9 +1909,17 @@ class JobViewSet(TMSViewSet):
                 is_completed=False
             ).first()
 
+            if current_station is None:
+                return Response(
+                    {
+                        'msg': 'Waiting for further instructions...'
+                    }, 
+                    status=status.HTTP_200_OK
+                )
+
             sub_progress = (current_progress - c.JOB_PROGRESS_TO_LOADING_STATION) % 4
 
-            if current_station is not None and current_station.previous_station is not None:
+            if current_station.previous_station is not None:
                 for product in current_station.previous_station.jobstationproduct_set.all():
                     meta_numbers.append({
                         'branch': product.branch,
@@ -1886,75 +1963,78 @@ class JobViewSet(TMSViewSet):
                         distance=order_payment_distance
                     )
 
-                if not current_station.has_next_station:
-                    job.progress = c.JOB_PROGRESS_COMPLETE
-                    job.finished_on = timezone.now()
+                # if not current_station.has_next_station:
+                    # job.progress = c.JOB_PROGRESS_COMPLETE
+                    # job.finished_on = timezone.now()
 
-                    active_job_driver = job.jobworker_set.filter(
-                        worker_type=c.WORKER_TYPE_DRIVER, is_active=True
-                    ).first()
-                    active_job_driver.finished_on = timezone.now()
-                    active_job_driver.is_active = False
-                    active_job_driver.save()
+                    # active_job_driver = job.jobworker_set.filter(
+                    #     worker_type=c.WORKER_TYPE_DRIVER, is_active=True
+                    # ).first()
+                    # active_job_driver.finished_on = timezone.now()
+                    # active_job_driver.is_active = False
+                    # active_job_driver.save()
 
-                    active_job_escort = job.jobworker_set.filter(
-                        worker_type=c.WORKER_TYPE_ESCORT, is_active=True
-                    ).first()
-                    active_job_escort.finished_on = timezone.now()
-                    active_job_escort.is_active = False
-                    active_job_escort.save()
+                    # active_job_escort = job.jobworker_set.filter(
+                    #     worker_type=c.WORKER_TYPE_ESCORT, is_active=True
+                    # ).first()
+                    # active_job_escort.finished_on = timezone.now()
+                    # active_job_escort.is_active = False
+                    # active_job_escort.save()
 
-                    # update job empty mileage
-                    loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
+                    # # update job empty mileage
+                    # loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
 
-                    empty_mileage_queries = {
-                        'plate_num':
-                            job.vehicle.plate_num,
-                        'from':
-                            job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
-                        'to':
-                            loading_station_arrived_on.strftime(
-                                '%Y-%m-%d %H:%M:%S'
-                            )
-                    }
-                    heavy_mileage_queries = {
-                        'plate_num':
-                            job.vehicle.plate_num,
-                        'from':
-                            loading_station_arrived_on.strftime(
-                                '%Y-%m-%d %H:%M:%S'
-                            ),
-                        'to':
-                            job.finished_on.strftime(
-                                '%Y-%m-%d %H:%M:%S'
-                            )
-                    }
-                    try:
-                        data = G7Interface.call_g7_http_interface(
-                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-                            queries=empty_mileage_queries
-                        )
-                        job.empty_mileage = data['total_mileage'] / (100 * 1000)
-                        data = G7Interface.call_g7_http_interface(
-                            'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
-                            queries=heavy_mileage_queries
-                        )
-                        empty_mileage = data['total_mileage'] / (100 * 1000)
-                        heavy_mileage = data['total_mileage'] / (100 * 1000)
-                    except Exception:
-                        empty_mileage = 0
-                        heavy_mileage = 0
+                    # empty_mileage_queries = {
+                    #     'plate_num':
+                    #         job.vehicle.plate_num,
+                    #     'from':
+                    #         job.started_on.strftime('%Y-%m-%d %H:%M:%S'),
+                    #     'to':
+                    #         loading_station_arrived_on.strftime(
+                    #             '%Y-%m-%d %H:%M:%S'
+                    #         )
+                    # }
+                    # heavy_mileage_queries = {
+                    #     'plate_num':
+                    #         job.vehicle.plate_num,
+                    #     'from':
+                    #         loading_station_arrived_on.strftime(
+                    #             '%Y-%m-%d %H:%M:%S'
+                    #         ),
+                    #     'to':
+                    #         job.finished_on.strftime(
+                    #             '%Y-%m-%d %H:%M:%S'
+                    #         )
+                    # }
+                    # try:
+                    #     data = G7Interface.call_g7_http_interface(
+                    #         'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                    #         queries=empty_mileage_queries
+                    #     )
+                    #     job.empty_mileage = data['total_mileage'] / (100 * 1000)
+                    #     data = G7Interface.call_g7_http_interface(
+                    #         'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
+                    #         queries=heavy_mileage_queries
+                    #     )
+                    #     empty_mileage = data['total_mileage'] / (100 * 1000)
+                    #     heavy_mileage = data['total_mileage'] / (100 * 1000)
+                    # except Exception:
+                    #     empty_mileage = 0
+                    #     heavy_mileage = 0
 
-                    job.empty_mileage = empty_mileage
-                    job.heavy_mileage = heavy_mileage
-                    job.total_mileage = job.empty_mileage + job.heavy_mileage
-                    job.highway_mileage = 0
-                    job.normalway_mileage = 0
-                    job.save()
+                    # job.empty_mileage = empty_mileage
+                    # job.heavy_mileage = heavy_mileage
+                    # job.total_mileage = job.empty_mileage + job.heavy_mileage
+                    # job.highway_mileage = 0
+                    # job.normalway_mileage = 0
+                    # job.save()
 
-        if job.progress != c.JOB_PROGRESS_COMPLETE:
-            job.progress = current_progress + 1
-            job.save()
+        # if job.progress != c.JOB_PROGRESS_COMPLETE:
+        #     job.progress = current_progress + 1
+        #     job.save()
+
+        job.progress = current_progress + 1
+        job.save()
 
         ret = {
             'progress': job.progress,

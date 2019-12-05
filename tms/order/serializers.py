@@ -996,10 +996,15 @@ class JobFutureSerializer(serializers.ModelSerializer):
             item['active'] = progress == instance.progress
             progress = progress + 1
 
+        # ret.append({
+        #     'title': '完成',
+        #     'progress': c.JOB_PROGRESS_COMPLETE,
+        #     'active': instance.progress == c.JOB_PROGRESS_COMPLETE
+        # })
         ret.append({
-            'title': '完成',
-            'progress': c.JOB_PROGRESS_COMPLETE,
-            'active': instance.progress == c.JOB_PROGRESS_COMPLETE
+            'title': '等待',
+            'progress': progress,
+            'active': instance.progress == progress
         })
 
         return ret
