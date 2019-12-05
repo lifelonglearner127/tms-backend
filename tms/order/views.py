@@ -1508,7 +1508,7 @@ class JobViewSet(TMSViewSet):
         job.normalway_mileage = 0
         job.save()
 
-        notify_of_job_changes.apply_async(
+        notify_of_job_finish.apply_async(
             args=[{
                 'job': job.id,
                 'driver': active_job_driver.worker.id,
