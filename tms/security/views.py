@@ -474,3 +474,14 @@ class SecurityCheckPlanViewSet(viewsets.ModelViewSet):
 
     queryset = m.SecurityCheckPlan.objects.all()
     serializer_class = s.SecurityCheckPlanSerializer
+
+    @action(detail=True, url_path='publish')
+    def publish_check_plan(self, request, pk=None):
+        instance = self.get_object()
+        instance.is_published = True
+        instance.save()
+
+        return Response(
+            s.SecurityCheckPlanSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )

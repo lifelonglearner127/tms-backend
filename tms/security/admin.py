@@ -41,3 +41,8 @@ class SecurityLibraryAdmin(admin.ModelAdmin):
 @admin.register(m.SecurityLibraryAttachment)
 class SecurityLibraryAttachmentAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.SecurityCheckPlan)
+class SecurityCheckPlanAdmin(admin.ModelAdmin):
+    pass
