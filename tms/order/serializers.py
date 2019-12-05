@@ -888,9 +888,12 @@ class JobDoneSerializer(serializers.ModelSerializer):
                 created_on__range=(previous_job.finished_on, instance.finished_on)
             )
         else:
-            bill_history = FuelBillHistory.objects.filter(
-                created_on__lte=instance.finished_on
-            )
+            if instance.finished_on:
+                bill_history = FuelBillHistory.objects.filter(
+                    created_on__lte=instance.finished_on
+                )
+            else:
+                bill_history = None
 
         ret['fuel'] = FuelBillHistorySerializer(
             bill_history, context={'request': self.context.get('request')}, many=True

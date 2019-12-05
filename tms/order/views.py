@@ -1439,6 +1439,7 @@ class JobViewSet(TMSViewSet):
     def finish_job(self, request, pk=None):
         job = self.get_object()
         job.progress = c.JOB_PROGRESS_COMPLETE
+        job.finished_on = timezone.now()
         job.save()
         uncompleted_job_stations = job.jobstation_set.filter(is_completed=False)
         for job_station in uncompleted_job_stations:
