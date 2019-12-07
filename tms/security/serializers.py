@@ -413,19 +413,17 @@ class SecurityIssueCCSerializer(serializers.ModelSerializer):
 class SecurityIssueSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehiclePlateNumSerializer(read_only=True)
-
     issue_type = TMSChoiceField(
         choices=m.SecurityIssue.SECUIRTY_ISSUE_TYPE
     )
-
     checker = UserNameSerializer(
         read_only=True
     )
-
     issue_status = TMSChoiceField(
         choices=m.SecurityIssue.SECUIRTY_ISSUE_STATUS, required=False
     )
-
+    has_rectifer_permission = serializers.SerializerMethodField()
+    has_acceptor_permission = serializers.SerializerMethodField()
     rectifiers = SecurityIssueRectifierSerializer(
         source='securityissuerectifier_set', many=True, read_only=True,
     )
@@ -542,3 +540,11 @@ class SecurityIssueSerializer(serializers.ModelSerializer):
         ).delete()
 
         return instance
+
+    def get_has_rectifer_permission(self, instance):
+        requester = self.context.get('requester')
+        return requester in instance.rectifiers.all() or requester.user_type == c.USER_TYPE_ADMIN
+
+    def get_has_acceptor_permission(self, instance):
+        requester = self.context.get('requester')
+        return requester in instance.acceptors.all() or requester.user_type == c.USER_TYPE_ADMIN

@@ -55,6 +55,14 @@ class CustomerUserManager(models.Manager):
         return super().get_queryset().filter(user_type=c.USER_TYPE_CUSTOMER)
 
 
+class SecurityOfficerUserManager(models.Manager):
+    """
+    Customer Model Manager
+    """
+    def get_queryset(self):
+        return super().get_queryset().filter(user_type=c.USER_TYPE_SECURITY_OFFICER)
+
+
 class CompanyMemberUserManager(models.Manager):
 
     def get_queryset(self):

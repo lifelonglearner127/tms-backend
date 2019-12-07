@@ -493,6 +493,29 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
     queryset = m.SecurityIssue.objects.all()
     serializer_class = s.SecurityIssueSerializer
 
+    def retrieve(self, request, pk=None):
+        instance = self.get_object()
+        return Response(
+            s.SecurityIssueSerializer(
+                instance,
+                context={
+                    'requester': request.user
+                }
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+    def list(self, request):
+        page = self.paginate_queryset(self.queryset)
+        serializer = s.SecurityIssueSerializer(
+            page,
+            context={
+                'requester': request.user
+            },
+            many=True
+        )
+        return self.get_paginated_response(serializer.data)
+
     def create(self, request):
         checker = request.data.pop('checker', None)
         if checker:
@@ -505,7 +528,8 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
             'checker': checker,
             'rectifiers': request.data.pop('rectifiers', []),
             'acceptors': request.data.pop('acceptors', []),
-            'ccs': request.data.pop('ccs', [])
+            'ccs': request.data.pop('ccs', []),
+            'requester': request.user
         }
 
         serializer = self.serializer_class(data=request.data, context=context)
@@ -529,7 +553,8 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
             'checker': checker,
             'rectifiers': request.data.pop('rectifiers', []),
             'acceptors': request.data.pop('acceptors', []),
-            'ccs': request.data.pop('ccs', [])
+            'ccs': request.data.pop('ccs', []),
+            'requester': request.user
         }
 
         serializer = self.serializer_class(
@@ -546,7 +571,7 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, url_path='rectify')
+    @action(detail=True, url_path='rectify', methods=['post'])
     def rectify(self, request, pk=None):
         security_issue = self.get_object()
         if request.user not in security_issue.rectifiers.all():
@@ -563,14 +588,20 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
         )
 
         obj.description = request.data.get('description', '')
+        obj.rectified_on = timezone.now()
         obj.save()
 
         return Response(
-            serializer.data,
+            s.SecurityIssueSerializer(
+                security_issue,
+                context={
+                    'requester': request.user
+                },
+            ).data,
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, url_path='accept')
+    @action(detail=True, url_path='accept', methods=['post'])
     def accept(self, request, pk=None):
         security_issue = self.get_object()
         if request.user not in security_issue.acceptors.all():
@@ -587,10 +618,31 @@ class SecurityIssueViewSet(viewsets.ModelViewSet):
         )
 
         obj.description = request.data.get('description', '')
+        obj.accepted_on = timezone.now()
         obj.save()
 
         return Response(
-            serializer.data,
+            s.SecurityIssueSerializer(
+                security_issue,
+                context={
+                    'requester': request.user
+                },
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path="update-status", methods=['post'])
+    def update_issue_status(self, request, pk=None):
+        instance = self.get_object()
+        instance.issue_status = int(request.data.get('status', 0))
+        instance.save()
+        return Response(
+            s.SecurityIssueSerializer(
+                instance,
+                context={
+                    'requester': request.user
+                },
+            ).data,
             status=status.HTTP_200_OK
         )
 

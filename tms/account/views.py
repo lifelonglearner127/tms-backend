@@ -243,6 +243,17 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path='security-officers/short')
+    def get_short_security_officer_users(self, request):
+        serializer = s.MainUserSerializer(
+            m.User.securityofficers.all(),
+            many=True
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
 
 class UserPermissionViewSet(TMSViewSet):
 

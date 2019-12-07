@@ -158,6 +158,7 @@ class User(AbstractBaseUser):
     escorts = managers.EscortUserManager()
     wheels = managers.WheelUserManager()
     customers = managers.CustomerUserManager()
+    securityofficers = managers.SecurityOfficerUserManager()
     companymembers = managers.CompanyMemberUserManager()
 
     USERNAME_FIELD = 'username'

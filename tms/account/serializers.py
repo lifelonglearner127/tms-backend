@@ -36,7 +36,7 @@ class AuthSerializer(serializers.ModelSerializer):
 
         if instance.user_type == c.USER_TYPE_ADMIN:
             ret['permissions'] = []
-        elif instance.user_type == c.USER_TYPE_STAFF:
+        elif instance.user_type in [c.USER_TYPE_STAFF, c.USER_TYPE_SECURITY_OFFICER]:
             ret['permissions'] = []
             if instance.permission is not None:
                 for permission in instance.permission.permissions.all():

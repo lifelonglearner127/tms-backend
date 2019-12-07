@@ -420,6 +420,11 @@ class SecurityIssueRectifier(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
+    rectified_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     description = models.TextField(
         null=True,
         blank=True
@@ -438,6 +443,11 @@ class SecurityIssueAcceptor(TimeStampedModel):
         on_delete=models.CASCADE
     )
 
+    accepted_on = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     description = models.TextField(
         null=True,
         blank=True
@@ -454,6 +464,11 @@ class SecurityIssueCC(TimeStampedModel):
     cc = models.ForeignKey(
         User,
         on_delete=models.CASCADE
+    )
+
+    cc_on = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     description = models.TextField(
