@@ -40,6 +40,11 @@ router.register(
     v.SecurityCheckPlanViewSet,
     base_name='security-check-plans'
 )
+router.register(
+    r'security/issues',
+    v.SecurityIssueViewSet,
+    base_name='security-issues'
+)
 
 # router.register(
 #     r'security-knowledge',
@@ -54,4 +59,5 @@ urlpatterns = [
     path('apps/company-policy/<int:policy_id>', v.get_company_policy, name='app-company-policy'),
     path('apps/tests/<int:test_id>/', v.get_test_template, name='app-test'),
     path('apps/tests/<int:test_id>/<int:question_id>/vote/', v.answer_question, name='answer-question'),
+    path('security/issue-types/', v.SecurityIssueTypeOptionsAPIView.as_view()),
 ]

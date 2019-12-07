@@ -8,6 +8,7 @@ from . import managers
 from ..core.models import TimeStampedModel, CreatedTimeModel
 from ..account.models import User
 from ..hr.models import Department, SecurityOfficerProfile
+from ..vehicle.models import Vehicle
 
 
 class CompanyPolicy(TimeStampedModel):
@@ -290,4 +291,172 @@ class SecurityCheckPlan(CreatedTimeModel):
 
     security_officers = models.ManyToManyField(
         SecurityOfficerProfile
+    )
+
+
+class SecurityIssue(TimeStampedModel):
+
+    SECUIRTY_ISSUE_TYPE_0 = 0
+    SECUIRTY_ISSUE_TYPE_1 = 1
+    SECUIRTY_ISSUE_TYPE_2 = 2
+    SECUIRTY_ISSUE_TYPE_3 = 3
+    SECUIRTY_ISSUE_TYPE_4 = 4
+    SECUIRTY_ISSUE_TYPE_5 = 5
+    SECUIRTY_ISSUE_TYPE_6 = 6
+    SECUIRTY_ISSUE_TYPE_7 = 7
+    SECUIRTY_ISSUE_TYPE_8 = 8
+    SECUIRTY_ISSUE_TYPE_9 = 9
+    SECUIRTY_ISSUE_TYPE_10 = 10
+    SECUIRTY_ISSUE_TYPE_11 = 11
+    SECUIRTY_ISSUE_TYPE_12 = 12
+    SECUIRTY_ISSUE_TYPE_13 = 13
+    SECUIRTY_ISSUE_TYPE_14 = 14
+    SECUIRTY_ISSUE_TYPE_15 = 15
+    SECUIRTY_ISSUE_TYPE_16 = 16
+    SECUIRTY_ISSUE_TYPE_17 = 17
+    SECUIRTY_ISSUE_TYPE_18 = 18
+    SECUIRTY_ISSUE_TYPE_19 = 19
+    SECUIRTY_ISSUE_TYPE_20 = 20
+
+    SECUIRTY_ISSUE_TYPE = (
+        (SECUIRTY_ISSUE_TYPE_0, '车辆保养'),
+        (SECUIRTY_ISSUE_TYPE_1, '换季保养'),
+        (SECUIRTY_ISSUE_TYPE_2, '主车保轮'),
+        (SECUIRTY_ISSUE_TYPE_3, '挂车保轮'),
+        (SECUIRTY_ISSUE_TYPE_4, '车辆电器路维修'),
+        (SECUIRTY_ISSUE_TYPE_5, '轮胎维修'),
+        (SECUIRTY_ISSUE_TYPE_6, '轮胎更换'),
+        (SECUIRTY_ISSUE_TYPE_7, '附属设备维修'),
+        (SECUIRTY_ISSUE_TYPE_8, '中集设备维修'),
+        (SECUIRTY_ISSUE_TYPE_9, '车辆救援费用'),
+        (SECUIRTY_ISSUE_TYPE_10, '车辆物品配备车辆保养'),
+        (SECUIRTY_ISSUE_TYPE_11, '换季保养'),
+        (SECUIRTY_ISSUE_TYPE_12, '主车保轮'),
+        (SECUIRTY_ISSUE_TYPE_13, '挂车保轮'),
+        (SECUIRTY_ISSUE_TYPE_14, '车辆电器路维修'),
+        (SECUIRTY_ISSUE_TYPE_15, '轮胎维修'),
+        (SECUIRTY_ISSUE_TYPE_16, '轮胎更换'),
+        (SECUIRTY_ISSUE_TYPE_17, '附属设备维修'),
+        (SECUIRTY_ISSUE_TYPE_18, '中集设备维修'),
+        (SECUIRTY_ISSUE_TYPE_19, '车辆救援费用'),
+        (SECUIRTY_ISSUE_TYPE_20, '车辆物品配备'),
+    )
+
+    SECUIRTY_ISSUE_STATUS_WAITING_REPAIR = 1
+    SECUIRTY_ISSUE_STATUS_WAITING_ACCEPTANCE = 2
+    SECUIRTY_ISSUE_STATUS_COMPLETE = 3
+
+    SECUIRTY_ISSUE_STATUS = (
+        (SECUIRTY_ISSUE_STATUS_WAITING_REPAIR, '等待修理'),
+        (SECUIRTY_ISSUE_STATUS_WAITING_ACCEPTANCE, '等待验收'),
+        (SECUIRTY_ISSUE_STATUS_COMPLETE, '完毕'),
+    )
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    issue_type = models.PositiveIntegerField(
+        default=SECUIRTY_ISSUE_TYPE_0,
+        choices=SECUIRTY_ISSUE_TYPE
+    )
+
+    checker = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    check_content = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    checked_on = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    issue_status = models.PositiveIntegerField(
+        default=SECUIRTY_ISSUE_STATUS_WAITING_REPAIR,
+        choices=SECUIRTY_ISSUE_STATUS
+    )
+
+    rectifiers = models.ManyToManyField(
+        User,
+        through='SecurityIssueRectifier',
+        through_fields=('security_issue', 'rectifier'),
+        related_name='security_issues_as_rectifier'
+    )
+
+    acceptors = models.ManyToManyField(
+        User,
+        through='SecurityIssueAcceptor',
+        through_fields=('security_issue', 'acceptor'),
+        related_name='security_issues_as_acceptors'
+    )
+
+    ccs = models.ManyToManyField(
+        User,
+        through='SecurityIssueCC',
+        through_fields=('security_issue', 'cc'),
+        related_name='security_issues_as_ccs'
+    )
+
+
+class SecurityIssueRectifier(TimeStampedModel):
+
+    security_issue = models.ForeignKey(
+        SecurityIssue,
+        on_delete=models.CASCADE
+    )
+
+    rectifier = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
+class SecurityIssueAcceptor(TimeStampedModel):
+
+    security_issue = models.ForeignKey(
+        SecurityIssue,
+        on_delete=models.CASCADE
+    )
+
+    acceptor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
+class SecurityIssueCC(TimeStampedModel):
+
+    security_issue = models.ForeignKey(
+        SecurityIssue,
+        on_delete=models.CASCADE
+    )
+
+    cc = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    description = models.TextField(
+        null=True,
+        blank=True
     )

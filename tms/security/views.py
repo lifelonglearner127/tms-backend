@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ..core import constants as c
+from ..core.serializers import ChoiceSerializer
 
 # models
 from . import models as m
@@ -483,5 +484,127 @@ class SecurityCheckPlanViewSet(viewsets.ModelViewSet):
 
         return Response(
             s.SecurityCheckPlanSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class SecurityIssueViewSet(viewsets.ModelViewSet):
+
+    queryset = m.SecurityIssue.objects.all()
+    serializer_class = s.SecurityIssueSerializer
+
+    def create(self, request):
+        checker = request.data.pop('checker', None)
+        if checker:
+            checker = get_object_or_404(m.User, id=checker.get('id', None))
+        else:
+            checker = request.user
+
+        context = {
+            'vehicle': request.data.pop('vehicle', None),
+            'checker': checker,
+            'rectifiers': request.data.pop('rectifiers', []),
+            'acceptors': request.data.pop('acceptors', []),
+            'ccs': request.data.pop('ccs', [])
+        }
+
+        serializer = self.serializer_class(data=request.data, context=context)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    def update(self, request, pk=None):
+        instance = self.get_object()
+
+        checker = request.data.pop('checker', None)
+        checker = get_object_or_404(m.User, id=checker.get('id', None)) if checker else request.user
+
+        context = {
+            'vehicle': request.data.pop('vehicle', None),
+            'checker': checker,
+            'rectifiers': request.data.pop('rectifiers', []),
+            'acceptors': request.data.pop('acceptors', []),
+            'ccs': request.data.pop('ccs', [])
+        }
+
+        serializer = self.serializer_class(
+            instance,
+            data=request.data,
+            context=context,
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='rectify')
+    def rectify(self, request, pk=None):
+        security_issue = self.get_object()
+        if request.user not in security_issue.rectifiers.all():
+            return Response(
+                {
+                    "msg": "You are not permitted to rectify"
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        obj, _ = m.SecurityIssueRectifier.objects.get_or_create(
+            security_issue=security_issue,
+            rectifier=request.user
+        )
+
+        obj.description = request.data.get('description', '')
+        obj.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, url_path='accept')
+    def accept(self, request, pk=None):
+        security_issue = self.get_object()
+        if request.user not in security_issue.acceptors.all():
+            return Response(
+                {
+                    "msg": "You are not permitted to rectify"
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        obj, _ = m.SecurityIssueAcceptor.objects.get_or_create(
+            security_issue=security_issue,
+            acceptor=request.user
+        )
+
+        obj.description = request.data.get('description', '')
+        obj.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class SecurityIssueTypeOptionsAPIView(APIView):
+
+    def get(self, request):
+        serializer = ChoiceSerializer(
+            [
+                {'value': x, 'text': y} for (x, y) in m.SecurityIssue.SECUIRTY_ISSUE_TYPE
+            ],
+            many=True
+        )
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK
         )

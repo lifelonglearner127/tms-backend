@@ -11,6 +11,7 @@ from ..hr.models import StaffProfile
 from ..core.serializers import TMSChoiceField
 from ..account.serializers import UserNameSerializer, MainUserSerializer, UserDepartmentSerializer
 from ..hr.serializers import ShortDepartmentSerializer, ShortSecurityOfficerProfileSerializer
+from ..vehicle.serializers import ShortVehiclePlateNumSerializer
 
 
 class ShortCompanyPolicySerializer(serializers.ModelSerializer):
@@ -373,3 +374,171 @@ class SecurityCheckPlanSerializer(serializers.ModelSerializer):
         ).data
 
         return ret
+
+
+
+class SecurityIssueRectifierSerializer(serializers.ModelSerializer):
+
+    rectifier = UserNameSerializer()
+
+    class Meta:
+        model = m.SecurityIssueRectifier
+        exclude = (
+            'security_issue',
+        )
+
+
+class SecurityIssueAcceptorSerializer(serializers.ModelSerializer):
+
+    acceptor = UserNameSerializer()
+
+    class Meta:
+        model = m.SecurityIssueAcceptor
+        exclude = (
+            'security_issue',
+        )
+
+
+class SecurityIssueCCSerializer(serializers.ModelSerializer):
+
+    cc = UserNameSerializer()
+
+    class Meta:
+        model = m.SecurityIssueCC
+        exclude = (
+            'security_issue',
+        )
+
+
+class SecurityIssueSerializer(serializers.ModelSerializer):
+
+    vehicle = ShortVehiclePlateNumSerializer(read_only=True)
+
+    issue_type = TMSChoiceField(
+        choices=m.SecurityIssue.SECUIRTY_ISSUE_TYPE
+    )
+
+    checker = UserNameSerializer(
+        read_only=True
+    )
+
+    issue_status = TMSChoiceField(
+        choices=m.SecurityIssue.SECUIRTY_ISSUE_STATUS, required=False
+    )
+
+    rectifiers = SecurityIssueRectifierSerializer(
+        source='securityissuerectifier_set', many=True, read_only=True,
+    )
+    acceptors = SecurityIssueAcceptorSerializer(
+        source='securityissueacceptor_set', many=True, read_only=True,
+    )
+    ccs = SecurityIssueCCSerializer(
+        source='securityissuecc_set', many=True, read_only=True,
+    )
+
+    class Meta:
+        model = m.SecurityIssue
+        fields = '__all__'
+
+    def create(self, validated_data):
+        vehicle = self.context.pop('vehicle')
+        checker = self.context.pop('checker')
+        rectifiers_data = self.context.pop('rectifiers', [])
+        acceptors_data = self.context.pop('acceptors', [])
+        ccs_data = self.context.pop('ccs', [])
+
+        security_issue = m.SecurityIssue.objects.create(
+            vehicle=get_object_or_404(m.Vehicle, id=vehicle.get('id', None)),
+            checker=checker,
+            **validated_data
+        )
+        
+        for rectifier_data in rectifiers_data:
+            rectifier = m.User.objects.get(id=rectifier_data)
+
+            m.SecurityIssueRectifier.objects.create(
+                security_issue=security_issue,
+                rectifier=rectifier
+            )
+
+        for acceptor_data in acceptors_data:
+            acceptor = m.User.objects.get(id=acceptor_data)
+
+            m.SecurityIssueAcceptor.objects.create(
+                security_issue=security_issue,
+                acceptor=acceptor
+            )
+
+        for cc_data in ccs_data:
+            cc = m.User.objects.get(id=cc_data)
+
+            m.SecurityIssueCC.objects.create(
+                security_issue=security_issue,
+                cc=cc
+            )
+
+        return security_issue
+
+    def update(self, instance, validated_data):
+        vehicle = self.context.pop('vehicle')
+        checker = self.context.pop('checker')
+        rectifiers_data = self.context.pop('rectifiers', [])
+        acceptors_data = self.context.pop('acceptors', [])
+        ccs_data = self.context.pop('ccs', [])
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.vehicle = get_object_or_404(m.Vehicle, id=vehicle.get('id', None))
+        instance.checker = checker
+        instance.save()
+
+        existing_ids = []
+        for rectifier_data in rectifiers_data:
+            rectifier = m.User.objects.get(id=rectifier_data)
+
+            obj, created = m.SecurityIssueRectifier.objects.get_or_create(
+                security_issue=instance,
+                rectifier=rectifier
+            )
+
+            if not created:
+                existing_ids.append(obj.id)
+
+        m.SecurityIssueRectifier.objects.exclude(id__in=existing_ids).filter(
+            security_issue=instance
+        ).delete()
+
+        existing_ids = []
+        for acceptor_data in acceptors_data:
+            acceptor = m.User.objects.get(id=acceptor_data)
+
+            obj, created = m.SecurityIssueAcceptor.objects.get_or_create(
+                security_issue=instance,
+                acceptor=acceptor
+            )
+
+            if not created:
+                existing_ids.append(obj.id)
+
+        m.SecurityIssueAcceptor.objects.exclude(id__in=existing_ids).filter(
+            security_issue=instance
+        ).delete()
+
+        existing_ids = []
+        for cc_data in ccs_data:
+            cc = m.User.objects.get(id=cc_data)
+
+            obj, created = m.SecurityIssueCC.objects.get_or_create(
+                security_issue=instance,
+                cc=cc
+            )
+
+            if not created:
+                existing_ids.append(obj.id)
+
+        m.SecurityIssueCC.objects.exclude(id__in=existing_ids).filter(
+            security_issue=instance
+        ).delete()
+
+        return instance
