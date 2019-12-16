@@ -4,6 +4,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 # models
 from ..account.models import User
 from ..order.models import Order
+from ..core.constants import USER_TYPE_GUEST_DRIVER, USER_TYPE_GUEST_ESCORT
 
 
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
@@ -104,3 +105,33 @@ class CustomerJobPositionConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json({
                 'content': json.dumps(data)
             })
+
+
+class GuestVehicleConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        try:
+            user_pk = self.scope['url_route']['kwargs']['user_pk']
+            self.user = User.objects.get(pk=user_pk, user_type__in=[USER_TYPE_GUEST_DRIVER, USER_TYPE_GUEST_ESCORT])
+        except User.DoesNotExist:
+            await self.close()
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        pass
+
+    async def receive_json(self, content):
+        await self.channel_layer.group_send(
+            'monitor',
+            {
+                'type': 'notify_monitor',
+                'notification_type': 'position',
+                'data': [
+                    {
+                        'plateNum': content['plateNum'],
+                        'lnglat': [content['lng'], content['lat']],
+                        'speed': content['speed']
+                    }
+                ]
+            }
+        )
