@@ -30,3 +30,8 @@ class CustomerProfileAdmin(admin.ModelAdmin):
 @admin.register(m.CompanySection)
 class CompanySectionAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(m.DriverLicense)
+class DriverLicenseAdmin(admin.ModelAdmin):
+    pass
