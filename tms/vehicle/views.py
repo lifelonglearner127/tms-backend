@@ -641,7 +641,7 @@ class VehicleViewSet(TMSViewSet):
         """
         vehicle = self.get_object()
         worker = request.user
-        is_worker_driver = request.user.user_type == c.USER_TYPE_DRIVER
+        is_worker_driver = request.user.user_type in [c.USER_TYPE_DRIVER, c.USER_TYPE_GUEST_DRIVER]
         station_data = request.data.pop('station', None)
         finish_job = request.data.pop('finish', False)
         if station_data is None:
