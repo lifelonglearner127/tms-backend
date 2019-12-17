@@ -123,10 +123,10 @@ class StaffProfileViewSet(TMSViewSet):
         this api is called in arrange view when user select the driver
         """
         ret = []
-        user_type = request.query_params.get('user_type', 'D')
+        user_type = request.query_params.get('user_type', [])
         name = request.query_params.get('name', '')
         page = self.paginate_queryset(
-            m.StaffProfile.objects.filter(user__user_type=user_type, user__name__contains=name)
+            m.StaffProfile.objects.filter(user__user_type__in=user_type, user__name__contains=name)
         )
 
         for instance in page:
