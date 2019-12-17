@@ -43,7 +43,7 @@ class WheelUserManager(models.Manager):
     """
     def get_queryset(self):
         return super().get_queryset().filter(user_type__in=[
-            c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT
+            c.USER_TYPE_DRIVER, c.USER_TYPE_ESCORT, c.USER_TYPE_GUEST_DRIVER, c.USER_TYPE_GUEST_ESCORT
         ])
 
 
