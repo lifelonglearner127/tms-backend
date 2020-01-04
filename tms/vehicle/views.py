@@ -229,6 +229,51 @@ class VehicleViewSet(TMSViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, url_path="g7-status")
+    def get_all_vehicle_g7_status(self, request):
+        plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
+        chunks = [plate_nums[i * 100:(i + 1) * 100] for i in range((len(plate_nums) + 100 - 1) // 100 )] 
+        ret = []
+        for chunk in chunks:
+            body = {
+                'plate_nums': chunk,
+                'fields': ['loc','status']
+            }
+            try:
+                data = G7Interface.call_g7_http_interface(
+                    'BULK_VEHICLE_STATUS_INQUIRY',
+                    body=body
+                )
+
+                for key, value in data.items():
+                    if value['code'] == 0:
+                        item_data = value['data']
+                        speed = item_data['loc']['speed']
+                        acc = item_data['status']['acc']
+                        gps = item_data['status']['gps']
+                        if speed > 0:
+                            icon_status = 'moving'
+                        else:
+                            if acc > 0:
+                                icon_status = 'acc'
+                            else:
+                                if gps > 0:
+                                    icon_status = 'gps'
+                                else:
+                                    icon_status = 'stop'
+                        ret.append({
+                            'plate_num': value['plate_num'],
+                            'status': icon_status
+                        })
+
+            except Exception:
+                pass
+
+        return Response(
+            s.VehicleG7StatusSerializer(ret, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=False, url_path='status')
     def get_all_vehicles_status(self, request):
         ret = []

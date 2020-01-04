@@ -120,6 +120,12 @@ class VehicleStatusSerializer(serializers.Serializer):
     status = serializers.CharField()
 
 
+class VehicleG7StatusSerializer(serializers.Serializer):
+
+    plate_num = serializers.CharField()
+    status = serializers.CharField()
+
+
 class VehicleCheckItemSerializer(serializers.ModelSerializer):
 
     class Meta:
