@@ -1247,6 +1247,8 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
     job_started_on = serializers.DateTimeField(
         format='%Y-%m-%d', source='job_station.job.started_on'
     )
+    loading_products = serializers.SerializerMethodField()
+    unloading_products = serializers.SerializerMethodField()
     vehicle = ShortVehiclePlateNumSerializer(source='job_station.job.vehicle')
     invoice_ticket = serializers.BooleanField(source='job_station.job.order.invoice_ticket', read_only=True)
     customer = serializers.CharField(source='job_station.job.order.customer.name', read_only=True)
@@ -1271,10 +1273,40 @@ class OrderPaymentSerializer(serializers.ModelSerializer):
             'loading_station',
             'unloading_station',
             'transport_unit_price',
+            'loading_products',
+            'unloading_products',
             'loading_weight',
             'unloading_weight',
             'total_price',
         )
+
+    def get_loading_products(self, instance):
+        products = []
+        for jobstationproduct in instance.job_station.jobstationproduct_set.all():
+            for product in products:
+                if product['product']['id'] == jobstationproduct.product.id:
+                    product['weight'] += jobstationproduct.mission_weight
+                    break
+            else:
+                products.append({
+                    'product': ProductNameSerializer(jobstationproduct.product).data,
+                    'weight': jobstationproduct.mission_weight
+                })
+        return products
+
+    def get_unloading_products(self, instance):
+        products = []
+        for jobstationproduct in instance.job_station.jobstationproduct_set.all():
+            for product in products:
+                if product['product']['id'] == jobstationproduct.product.id:
+                    product['volume'] += jobstationproduct.weight
+                    break
+            else:
+                products.append({
+                    'product': ProductNameSerializer(jobstationproduct.product).data,
+                    'volume': jobstationproduct.weight
+                })
+        return products
 
 
 class OrderPaymentStatusSerializer(serializers.ModelSerializer):
