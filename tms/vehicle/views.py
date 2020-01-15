@@ -337,7 +337,7 @@ class VehicleViewSet(TMSViewSet):
         plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
         body = {
             'plate_nums': list(plate_nums),
-            'fields': ['loc']
+            'fields': ['loc', 'status']
         }
         data = G7Interface.call_g7_http_interface(
             'BULK_VEHICLE_STATUS_INQUIRY',
@@ -345,7 +345,7 @@ class VehicleViewSet(TMSViewSet):
         )
         ret = []
         for key, value in data.items():
-            if value['code'] == 0:
+            if value['code'] == 0 and value['data']['status']['gps']:
                 ret.append(value)
 
         serializer = s.VehiclePositionSerializer(
