@@ -38,6 +38,14 @@ class VehicleViewSet(TMSViewSet):
     serializer_class = s.VehicleSerializer
     short_serializer_class = s.ShortVehiclePlateNumSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        query_str = self.request.query_params.get('vehicle', None)        
+        if query_str:
+            queryset = queryset.filter(plate_num__icontains=query_str)
+
+        return queryset
+
     def create(self, request):
         branches = request.data.get('branches', None)
         if branches is None:
