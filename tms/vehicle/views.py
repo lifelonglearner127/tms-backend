@@ -353,8 +353,9 @@ class VehicleViewSet(TMSViewSet):
         )
         ret = []
         for key, value in data.items():
-            if value['code'] == 0 and value['data']['status']['gps']:
-                ret.append(value)
+            if value['code'] == 0:
+                if value.get('data', None) and value['data']['status']['gps']:
+                    ret.append(value)
 
         serializer = s.VehiclePositionSerializer(
             ret, many=True
