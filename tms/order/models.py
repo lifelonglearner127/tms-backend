@@ -591,20 +591,20 @@ class QualityCheck(models.Model):
 
     density = models.DecimalField(
         default=0,
-        max_digits=10,
-        decimal_places=2
+        max_digits=30,
+        decimal_places=20
     )
 
     additive = models.DecimalField(
         default=0,
-        max_digits=10,
-        decimal_places=2
+        max_digits=30,
+        decimal_places=20
     )
 
     volume = models.DecimalField(
         default=0,
-        max_digits=10,
-        decimal_places=2
+        max_digits=30,
+        decimal_places=20
     )
 
 
