@@ -40,7 +40,7 @@ class VehicleViewSet(TMSViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        query_str = self.request.query_params.get('vehicle', None)        
+        query_str = self.request.query_params.get('vehicle', None)
         if query_str:
             queryset = queryset.filter(plate_num__icontains=query_str)
 

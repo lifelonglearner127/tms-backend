@@ -134,20 +134,23 @@ class RouteViewSet(TMSViewSet):
                     'station': 'Station data does not exist in db'
                 })
 
+            route = None
             try:
                 route = m.Route.objects.get(
                     start_point=current_station,
                     end_point=next_station
                 )
             except m.Route.DoesNotExist:
-                route = m.Route.objects.create(
-                    start_point=current_station,
-                    end_point=next_station,
-                    map_path=[],
-                    name=f'{current_station.name}({current_station.get_station_type_display()})'
-                    f' - {next_station.name}({next_station.get_station_type_display()})'
-                )
-            finally:
+                if current_station != next_station:
+                    route = m.Route.objects.create(
+                        start_point=current_station,
+                        end_point=next_station,
+                        map_path=[],
+                        name=f'{current_station.name}({current_station.get_station_type_display()})'
+                        f' - {next_station.name}({next_station.get_station_type_display()})'
+                    )
+
+            if route:
                 routes.append(route)
 
         return Response(
