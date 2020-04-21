@@ -10,17 +10,18 @@ from ..core.constants import USER_TYPE_GUEST_DRIVER, USER_TYPE_GUEST_ESCORT
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         try:
-            user_pk = self.scope['url_route']['kwargs']['user_pk']
-            self.user = User.objects.get(pk=user_pk)
-            self.user.channel_name = self.channel_name
-            self.user.save()
+            self.user_pk = self.scope['url_route']['kwargs']['user_pk']
+            user = User.objects.get(pk=self.user_pk)
+            user.channel_name = self.channel_name
+            user.save()
             await self.accept()
         except User.DoesNotExist:
             await self.close()
 
     async def disconnect(self, close_code):
-        self.user.channel_name = ''
-        self.user.save()
+        user = User.objects.get(pk=self.user_pk)
+        user.channel_name = ''
+        user.save()
 
     def receive(self, text_data):
         pass

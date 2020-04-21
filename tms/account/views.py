@@ -76,9 +76,16 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         this api is used in web
         """
-        request.user.name = request.data.get('name', '')
-        request.user.set_password(request.data.get('password', ''))
-        request.user.save()
+        user = request.user
+        name = request.data.get('name', None)
+        if name:
+            user.name = name
+
+        password = request.data.get('password', None)
+        if password:
+            user.set_password(password)
+
+        user.save()
         return Response(
             {
                 'msg': 'Success'
