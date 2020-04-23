@@ -7,6 +7,7 @@
 import argparse
 import redis
 import sys
+import datetime
 import importlib
 import json
 import paho.mqtt.client as paho
@@ -38,6 +39,7 @@ class Config:
     PASSWORD = ''
     QOS = ''
     DEBUG = False
+    LOG_FILEPATH = ''
     TEST_MODE = False
     VEHICLE_OUT_AREA = 0
     VEHICLE_IN_AREA = 1
@@ -81,7 +83,7 @@ class Config:
             LEFT JOIN info_station ist ON ojs.station_id=ist.id
         ) as tmp
         ON vv.id = tmp.vehicle_id
-        WHERE vv.status = 1
+        WHERE vv.status IN (1, 2, 3)
     """
 
     @classmethod
@@ -131,6 +133,25 @@ class Config:
             print('G7_MQTT_POSITION_SECRET', Config.PASSWORD)
             print('G7_MQTT_QOS', Config.QOS)
 
+        if Config.LOG_FILEPATH:
+            with open(Config.LOG_FILEPATH, 'a') as f:
+                now_time = datetime.datetime.now()
+                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                outputs = []
+                outputs.append(f'{time_fmt} DATABASE_URL: {Config.DB_URL}')
+                outputs.append(f'{time_fmt} ALIYUN_MOBILE_PUSH_APP_KEY: {Config.ALIYUN_MOBILE_PUSH_APP_KEY}')
+                outputs.append(f'{time_fmt} ALIYUN_MOBILE_PUSH_APP_SECRET: {Config.ALIYUN_MOBILE_PUSH_APP_SECRET}')
+                outputs.append(f'{time_fmt} ALIYUN_ACCESS_KEY_ID: {Config.ALIYUN_ACCESS_KEY_ID}')
+                outputs.append(f'{time_fmt} ALIYUN_ACCESS_KEY_SECRET: {Config.ALIYUN_ACCESS_KEY_SECRET}')
+                outputs.append(f'{time_fmt} G7_MQTT_HOST: {Config.HOST}')
+                outputs.append(f'{time_fmt} G7_MQTT_PORT: {Config.PORT}')
+                outputs.append(f'{time_fmt} G7_MQTT_POSITION_TOPIC: {Config.TOPIC}')
+                outputs.append(f'{time_fmt} G7_MQTT_POSITION_CLIENT_ID: {Config.CLIENT_ID}')
+                outputs.append(f'{time_fmt} G7_MQTT_POSITION_ACCESS_ID: {Config.USERNAME}')
+                outputs.append(f'{time_fmt} G7_MQTT_POSITION_SECRET: {Config.PASSWORD}')
+                outputs.append(f'{time_fmt} G7_MQTT_QOS: {Config.QOS}')
+                f.writelines(outputs)
+
     @classmethod
     def load_data_from_db(cls):
         is_blackdots_updated = r.get('blackdot') == b'updated'
@@ -145,6 +166,13 @@ class Config:
             if is_blackdots_updated:
                 if Config.DEBUG:
                     print('[Load Data]: Loading blackdots...')
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f'{time_fmt} [Load Data]: Loading blackdots...\n')
+
                 cursor.execute("""
                     SELECT id, latitude, longitude, radius
                     FROM info_station
@@ -162,6 +190,20 @@ class Config:
                 if Config.DEBUG:
                     print('[Load Data]: ', cls.blackdots)
 
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        outputs = []
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        for blackdot in cls.blackdots:
+                            outputs.append(
+                                f"{time_fmt} "
+                                f"station_id: {blackdot['station_id']}"
+                                f"latitude: {blackdot['latitude']}"
+                                f"longitude: {blackdot['longitude']}"
+                                f"radius: {blackdot['radius']}")
+                        f.writelines(outputs)
+
                 r.set('blackdot', 'read')
 
             if is_vehicles_updated or updated_jobs:
@@ -170,6 +212,20 @@ class Config:
                         print('[Load Data]: Loading updated vehicles...')
                     else:
                         print('[Load Data]: Loading updated jobs...')
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+
+                        if is_vehicles_updated:
+                            f.write(
+                                f"{time_fmt} "
+                                f'[Load Data]: Loading updated vehicles...')
+                        else:
+                            f.write(
+                                f"{time_fmt} "
+                                f'[Load Data]: Loading updated jobs...')
 
                 current_updated_jobs = []
                 for updated_job in updated_jobs:
@@ -199,11 +255,30 @@ class Config:
                     if Config.DEBUG:
                         print('[Load Data]: ', cls.vehicles)
 
-                    if is_vehicles_updated:
-                        r.set('vehicle', 'read')
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            for vehicle in cls.vehicles:
+                                outputs.append(
+                                    f"{time_fmt} [Load Data]: "
+                                    f"blackdotposition: {vehicle['blackdotposition']}"
+                                    f"stationposition: {vehicle['stationposition']}"
+                                    f"is_same_station: {vehicle['is_same_station']}"
+                                    f"progress: {vehicle['progress']}"
+                                    f"job_id: {vehicle['job_id']}"
+                                    f"step: {vehicle['step']}"
+                                    f"station_id: {vehicle['station_id']}"
+                                    f"longitude: {vehicle['longitude']}"
+                                    f"latitude: {vehicle['latitude']}"
+                                    f"radius: {vehicle['radius']}")
+                            f.writelines(outputs)
 
-                    for job in current_updated_jobs:
-                        r.srem('jobs', job)
+                if is_vehicles_updated:
+                    r.set('vehicle', 'read')
+
+                for job in current_updated_jobs:
+                    r.srem('jobs', job)
 
             cursor.close()
         except psycopg2.DatabaseError:
@@ -213,6 +288,12 @@ class Config:
                 connection.close()
                 if Config.DEBUG:
                     print('[Load Data]: Database connection closed.')
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write('[Load Data]: Database connection closed.\n')
 
 
 def get_channel_layer(channel_name):
@@ -228,6 +309,13 @@ def get_channel_layer(channel_name):
 def _on_connect(client, userdata, flags, rc):
     if Config.DEBUG:
         print('[G7]: Connected to MQTT Server')
+
+    if Config.LOG_FILEPATH:
+        with open(Config.LOG_FILEPATH, 'a') as f:
+            now_time = datetime.datetime.now()
+            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f'{time_fmt} [G7]: Connected to MQTT Server\n')
+
     client.subscribe(userdata['topic'], userdata['qos'])
 
 
@@ -240,6 +328,12 @@ def _on_message(client, userdata, message):
 
     if Config.DEBUG:
         print('[G7]: ', vehicles)
+
+        if Config.LOG_FILEPATH:
+            with open(Config.LOG_FILEPATH, 'a') as f:
+                now_time = datetime.datetime.now()
+                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                f.write(f'{time_fmt} [G7]: Received message: {message}\n')
 
     if vehicles is None:
         return
@@ -288,6 +382,14 @@ def _on_message(client, userdata, message):
                 plate_num, vehicle['lat'], vehicle['lng']
             ))
 
+            if Config.LOG_FILEPATH:
+                with open(Config.LOG_FILEPATH, 'a') as f:
+                    now_time = datetime.datetime.now()
+                    time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                    f.write(
+                        f"{time_fmt} [GeoPy]: Current {plate_num} Position - ({vehicle['lat']}, {vehicle['lng']})\n"
+                    )
+
         # check if the vehicle enter or exit black dot
         for blackdot in Config.blackdots:
             blackdot_pos = (blackdot['latitude'], blackdot['longitude'])
@@ -310,6 +412,14 @@ def _on_message(client, userdata, message):
                     blackdot['latitude'], blackdot['longitude'],
                     delta_distance
                 ))
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f"{time_fmt} [GeoPy]: Current {plate_num} "
+                                f"Position - ({vehicle['lat']}, {vehicle['lng']})\n")
+
             if delta_distance < blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_OUT_AREA:
                 current_vehicle['blackdotposition'] = Config.VEHICLE_IN_AREA
                 enter_exit_event = Config.ENTER_BLACK_DOT_EVENT
@@ -318,6 +428,13 @@ def _on_message(client, userdata, message):
                         plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f"{time_fmt} [GeoPy]: {plate_num} "
+                                f"enter into ({blackdot['latitude']}, {blackdot['longitude']})\n")
+
             if delta_distance > blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_IN_AREA:
                 current_vehicle['blackdotposition'] = Config.VEHICLE_OUT_AREA
                 enter_exit_event = Config.EXIT_BLACK_DOT_EVENT
@@ -325,6 +442,13 @@ def _on_message(client, userdata, message):
                     print('[G7]: {} exit from ({}, {})'.format(
                         plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f"{time_fmt} [GeoPy]: {plate_num} "
+                                f"exit from ({blackdot['latitude']}, {blackdot['longitude']})\n")
 
             if enter_exit_event:
                 try:
@@ -416,6 +540,7 @@ def _on_message(client, userdata, message):
                 return
         else:
             delta_distance = distance.distance(vehicle_pos, next_station_pos).m
+            print(delta_distance)
 
         if Config.DEBUG:
             print('[GeoPy]: Distance with ({}, {}) is {}'.format(
@@ -670,6 +795,9 @@ if __name__ == '__main__':
         '-d', '--debug', help='Set debug mode', action='store_true'
     )
     ap.add_argument(
+        '-l', '--log', help='Specify log file path',
+    )
+    ap.add_argument(
         '-t', '--test', help='Set test mode',
         action='store_true'
     )
@@ -681,6 +809,7 @@ if __name__ == '__main__':
     channel_layer = get_channel_layer(args.channel_layer)
 
     Config.DEBUG = args.debug
+    Config.LOG_FILEPATH = args.log
     Config.TEST_MODE = args.test
     Config.read_env(args.settings)
     Config.load_data_from_db()
