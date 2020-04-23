@@ -309,8 +309,8 @@ class VehicleRepairRequest(models.Model):
 
     category = models.CharField(
         max_length=1,
-        choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY,
-        default=c.VEHICLE_REPAIR_REQUEST_CATEGORY_BRAKE
+        choices=c.VEHICLE_MAINTENANCE_CATEGORY,
+        default=c.VEHICLE_MAINTENANCE_CATEGORY_0
     )
 
 

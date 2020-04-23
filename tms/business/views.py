@@ -547,7 +547,7 @@ class VehicleRepairRequestCategoryAPIView(APIView):
     def get(self, request):
         serializer = ChoiceSerializer(
             [
-                {'value': x, 'text': y} for (x, y) in c.VEHICLE_REPAIR_REQUEST_CATEGORY
+                {'value': x, 'text': y} for (x, y) in c.VEHICLE_MAINTENANCE_CATEGORY
             ],
             many=True
         )
