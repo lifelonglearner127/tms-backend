@@ -734,12 +734,14 @@ class JobDoneSerializer(serializers.ModelSerializer):
     def get_by_weight(self, instance):
         ret = True
         driver = instance.jobworker_set.filter(worker_type=c.WORKER_TYPE_DRIVER).first()
-        # check if the requester belongs to which department
-        if driver.worker.profile.department.name == '壳牌项目部':
-            """
-            this department manage the unloading product by volume
-            """
-            ret = False
+
+        if driver is not None:
+            # check if the requester belongs to which department
+            if driver.worker.profile.department.name == '壳牌项目部':
+                """
+                this department manage the unloading product by volume
+                """
+                ret = False
 
         return ret
 
