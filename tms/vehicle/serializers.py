@@ -210,18 +210,18 @@ class ShortVehicleCheckHistorySerializer(serializers.ModelSerializer):
 
 class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
-    # before_driving_checked_items = serializers.SerializerMethodField()
-    # driving_checked_items = serializers.SerializerMethodField()
-    # after_driving_checked_items = serializers.SerializerMethodField()
-    before_driving_checked_items = VehicleBeforeDrivingItemCheckSerializer(
-        source='vehiclebeforedrivingitemcheck_set', many=True, read_only=True
-    )
-    driving_checked_items = VehicleDrivingItemCheckSerializer(
-        source='vehicledrivingitemcheck_set', many=True, read_only=True
-    )
-    after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
-        source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
-    )
+    before_driving_checked_items = serializers.SerializerMethodField()
+    driving_checked_items = serializers.SerializerMethodField()
+    after_driving_checked_items = serializers.SerializerMethodField()
+    # before_driving_checked_items = VehicleBeforeDrivingItemCheckSerializer(
+    #     source='vehiclebeforedrivingitemcheck_set', many=True, read_only=True
+    # )
+    # driving_checked_items = VehicleDrivingItemCheckSerializer(
+    #     source='vehicledrivingitemcheck_set', many=True, read_only=True
+    # )
+    # after_driving_checked_items = VehicleAfterDrivingItemCheckSerializer(
+    #     source='vehicleafterdrivingitemcheck_set', many=True, read_only=True
+    # )
     driver = MainUserSerializer(read_only=True)
     total_problems = serializers.SerializerMethodField()
     before_driving_images = serializers.SerializerMethodField()
@@ -324,47 +324,47 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    # def get_before_driving_checked_items(self, instance):
-    #     # TODO: use annotate for better optimization
-    #     items = []
-    #     for item in m.VehicleCheckItem.published_before_driving_check_items.all():
-    #         checked_item = instance.vehiclebeforedrivingitemcheck_set.filter(item=item).first()
-    #         if checked_item:
-    #             is_checked = checked_item.is_checked
-    #         else:
-    #             is_checked = False
-    #         items.append({
-    #             "item": VehicleCheckItemNameSerializer(item).data,
-    #             "is_checked": is_checked
-    #         })
+    def get_before_driving_checked_items(self, instance):
+        # TODO: use annotate for better optimization
+        items = []
+        for item in m.VehicleCheckItem.published_before_driving_check_items.all():
+            checked_item = instance.vehiclebeforedrivingitemcheck_set.filter(item=item).first()
+            if checked_item:
+                is_checked = checked_item.is_checked
+            else:
+                is_checked = False
+            items.append({
+                "item": VehicleCheckItemNameSerializer(item).data,
+                "is_checked": is_checked
+            })
 
-    #     return items
+        return items
 
-    # def get_driving_checked_items(self, instance):
-    #     items = []
-    #     for item in m.VehicleCheckItem.published_driving_check_items.all():
-    #         checked_item = instance.vehicledrivingitemcheck_set.filter(item=item).first()
-    #         if checked_item:
-    #             is_checked = checked_item.is_checked
-    #         else:
-    #             is_checked = False
-    #         items.append({
-    #             "item": VehicleCheckItemNameSerializer(item).data,
-    #             "is_checked": is_checked
-    #         })
+    def get_driving_checked_items(self, instance):
+        items = []
+        for item in m.VehicleCheckItem.published_driving_check_items.all():
+            checked_item = instance.vehicledrivingitemcheck_set.filter(item=item).first()
+            if checked_item:
+                is_checked = checked_item.is_checked
+            else:
+                is_checked = False
+            items.append({
+                "item": VehicleCheckItemNameSerializer(item).data,
+                "is_checked": is_checked
+            })
 
-    # def get_after_driving_checked_items(self, instance):
-    #     items = []
-    #     for item in m.VehicleCheckItem.published_after_driving_check_items.all():
-    #         checked_item = instance.vehicleafterdrivingitemcheck_set.filter(item=item).first()
-    #         if checked_item:
-    #             is_checked = checked_item.is_checked
-    #         else:
-    #             is_checked = False
-    #         items.append({
-    #             "item": VehicleCheckItemNameSerializer(item).data,
-    #             "is_checked": is_checked
-    #         })
+    def get_after_driving_checked_items(self, instance):
+        items = []
+        for item in m.VehicleCheckItem.published_after_driving_check_items.all():
+            checked_item = instance.vehicleafterdrivingitemcheck_set.filter(item=item).first()
+            if checked_item:
+                is_checked = checked_item.is_checked
+            else:
+                is_checked = False
+            items.append({
+                "item": VehicleCheckItemNameSerializer(item).data,
+                "is_checked": is_checked
+            })
 
     def get_before_driving_images(self, instance):
         ret = []
