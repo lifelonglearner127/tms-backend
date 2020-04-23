@@ -2296,12 +2296,14 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         #     """
         #     instance.weight = request.data.pop('weight', 0)
 
+        previous_weight = instance.weight
         instance.weight = request.data.pop('weight', 0)
         instance.save()
 
         # update order product delivered weight
         order = instance.job_station.job.order
         order_product = order.orderproduct_set.filter(product=instance.product).first()
+        order_product.delivered_weight -= previous_weight
         order_product.delivered_weight += instance.weight
         order_product.save()
 
