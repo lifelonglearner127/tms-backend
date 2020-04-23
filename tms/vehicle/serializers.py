@@ -210,6 +210,9 @@ class ShortVehicleCheckHistorySerializer(serializers.ModelSerializer):
 
 class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
+    # before_driving_checked_items = serializers.SerializerMethodField()
+    # driving_checked_items = serializers.SerializerMethodField()
+    # after_driving_checked_items = serializers.SerializerMethodField()
     before_driving_checked_items = VehicleBeforeDrivingItemCheckSerializer(
         source='vehiclebeforedrivingitemcheck_set', many=True, read_only=True
     )
@@ -321,6 +324,48 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    # def get_before_driving_checked_items(self, instance):
+    #     # TODO: use annotate for better optimization
+    #     items = []
+    #     for item in m.VehicleCheckItem.published_before_driving_check_items.all():
+    #         checked_item = instance.vehiclebeforedrivingitemcheck_set.filter(item=item).first()
+    #         if checked_item:
+    #             is_checked = checked_item.is_checked
+    #         else:
+    #             is_checked = False
+    #         items.append({
+    #             "item": VehicleCheckItemNameSerializer(item).data,
+    #             "is_checked": is_checked
+    #         })
+
+    #     return items
+
+    # def get_driving_checked_items(self, instance):
+    #     items = []
+    #     for item in m.VehicleCheckItem.published_driving_check_items.all():
+    #         checked_item = instance.vehicledrivingitemcheck_set.filter(item=item).first()
+    #         if checked_item:
+    #             is_checked = checked_item.is_checked
+    #         else:
+    #             is_checked = False
+    #         items.append({
+    #             "item": VehicleCheckItemNameSerializer(item).data,
+    #             "is_checked": is_checked
+    #         })
+
+    # def get_after_driving_checked_items(self, instance):
+    #     items = []
+    #     for item in m.VehicleCheckItem.published_after_driving_check_items.all():
+    #         checked_item = instance.vehicleafterdrivingitemcheck_set.filter(item=item).first()
+    #         if checked_item:
+    #             is_checked = checked_item.is_checked
+    #         else:
+    #             is_checked = False
+    #         items.append({
+    #             "item": VehicleCheckItemNameSerializer(item).data,
+    #             "is_checked": is_checked
+    #         })
+
     def get_before_driving_images(self, instance):
         ret = []
         for image in instance.images.filter(document_type=c.VEHICLE_CHECK_TYPE_BEFORE_DRIVING):
@@ -387,7 +432,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['before'] = {
             'items': ret.pop('before_driving_checked_items'),
-            'itemsCount': m.VehicleCheckItem.published_before_driving_check_items.count(),
+            'itemsCount': instance.before_driving_checked_items.count(),
             'problems': ret.pop('before_driving_problems'),
             'description': ret.pop('before_driving_description'),
             'beforeDrivingSolution': ret.pop('before_driving_solution'),
@@ -396,7 +441,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['driving'] = {
             'items': ret.pop('driving_checked_items'),
-            'itemsCount': m.VehicleCheckItem.published_driving_check_items.count(),
+            'itemsCount': instance.driving_checked_items.count(),
             'problems': ret.pop('driving_problems'),
             'description': ret.pop('driving_description'),
             'drivingSolution': ret.pop('driving_solution'),
@@ -405,7 +450,7 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
 
         ret['after'] = {
             'items': ret.pop('after_driving_checked_items'),
-            'itemsCount': m.VehicleCheckItem.published_after_driving_check_items.count(),
+            'itemsCount': instance.after_driving_checked_items.count(),
             'problems': ret.pop('after_driving_problems'),
             'description': ret.pop('after_driving_description'),
             'afterDrivingSolution': ret.pop('after_driving_solution'),
