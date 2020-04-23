@@ -353,6 +353,8 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
                 "is_checked": is_checked
             })
 
+        return items
+
     def get_after_driving_checked_items(self, instance):
         items = []
         for item in m.VehicleCheckItem.published_after_driving_check_items.all():
@@ -365,6 +367,8 @@ class VehicleCheckHistorySerializer(serializers.ModelSerializer):
                 "item": VehicleCheckItemNameSerializer(item).data,
                 "is_checked": is_checked
             })
+
+        return items
 
     def get_before_driving_images(self, instance):
         ret = []
