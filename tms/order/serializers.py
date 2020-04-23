@@ -679,6 +679,8 @@ class JobAdminSerializer(serializers.ModelSerializer):
         progress = c.JOB_PROGRESS.get(progress, '无任务')
         if job_station is not None:
             progress = progress + ': ' + job_station.station.name
+        else:
+            progress = c.JOB_PROGRESS.get(c.JOB_PROGRESS_WAITING)
 
         return progress
 

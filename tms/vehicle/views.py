@@ -410,17 +410,21 @@ class VehicleViewSet(TMSViewSet):
 
         # Get the current driver and escorts of this vehicle
 
-        bind = m.VehicleWorkerBind.objects.filter(vehicle=vehicle).first()
-        if bind is not None and bind.get_off is None:
-            driver = bind.driver.name
-            driver_mobile = bind.driver.mobile
-            escort = '未知'
-            escort_mobile = '未知'
+        driver_bind = m.VehicleWorkerBind.driverbinds.filter(vehicle=vehicle).first()
+        if driver_bind is not None and driver_bind.get_off is None:
+            driver = driver_bind.worker.name
+            driver_mobile = driver_bind.worker.mobile
         else:
-            driver = '未知'
-            escort = '未知'
-            driver_mobile = '未知'
-            escort_mobile = '未知'
+            driver = '无司机'
+            driver_mobile = ""
+
+        escort_bind = m.VehicleWorkerBind.escortbinds.filter(vehicle=vehicle).first()
+        if escort_bind is not None and escort_bind.get_off is None:
+            escort = escort_bind.worker.name
+            escort_mobile = escort_bind.worker.mobile
+        else:
+            escort = '无押运员'
+            escort_mobile = ''
 
         queries = {
             'plate_num': plate_num,
