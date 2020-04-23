@@ -240,12 +240,12 @@ class VehicleViewSet(TMSViewSet):
     @action(detail=False, url_path="g7-status")
     def get_all_vehicle_g7_status(self, request):
         plate_nums = m.Vehicle.objects.values_list('plate_num', flat=True)
-        chunks = [plate_nums[i * 100:(i + 1) * 100] for i in range((len(plate_nums) + 100 - 1) // 100 )] 
+        chunks = [plate_nums[i * 100:(i + 1) * 100] for i in range((len(plate_nums) + 100 - 1) // 100)]
         ret = []
         for chunk in chunks:
             body = {
                 'plate_nums': chunk,
-                'fields': ['loc','status']
+                'fields': ['loc', 'status']
             }
             try:
                 data = G7Interface.call_g7_http_interface(

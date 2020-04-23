@@ -376,7 +376,6 @@ class SecurityCheckPlanSerializer(serializers.ModelSerializer):
         return ret
 
 
-
 class SecurityIssueRectifierSerializer(serializers.ModelSerializer):
 
     rectifier = UserNameSerializer()
@@ -450,7 +449,7 @@ class SecurityIssueSerializer(serializers.ModelSerializer):
             checker=checker,
             **validated_data
         )
-        
+
         for rectifier_data in rectifiers_data:
             rectifier = m.User.objects.get(id=rectifier_data)
 

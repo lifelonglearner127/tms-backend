@@ -1490,12 +1490,11 @@ class JobViewSet(TMSViewSet):
                 'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
                 queries=empty_mileage_queries
             )
-            job.empty_mileage = data['total_mileage'] / (100 * 1000)
+            empty_mileage = data['total_mileage'] / (100 * 1000)
             data = G7Interface.call_g7_http_interface(
                 'VEHICLE_GPS_TOTAL_MILEAGE_INQUIRY',
                 queries=heavy_mileage_queries
             )
-            empty_mileage = data['total_mileage'] / (100 * 1000)
             heavy_mileage = data['total_mileage'] / (100 * 1000)
         except Exception:
             empty_mileage = 0
@@ -1913,7 +1912,7 @@ class JobViewSet(TMSViewSet):
                 return Response(
                     {
                         'msg': 'Waiting for further instructions...'
-                    }, 
+                    },
                     status=status.HTTP_200_OK
                 )
 
