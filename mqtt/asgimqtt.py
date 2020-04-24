@@ -190,17 +190,15 @@ class Config:
 
                 if Config.LOG_FILEPATH:
                     with open(Config.LOG_FILEPATH, 'a') as f:
-                        outputs = []
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                         for blackdot in cls.blackdots:
-                            outputs.append(
+                            f.write(
                                 f"{time_fmt} [Blackdot]: "
                                 f"station_id: {blackdot['station_id']} "
                                 f"latitude: {blackdot['latitude']} "
                                 f"longitude: {blackdot['longitude']} "
-                                f"radius: {blackdot['radius']}")
-                        f.writelines(outputs)
+                                f"radius: {blackdot['radius']}\n")
 
                 r.set('blackdot', 'read')
 
@@ -215,7 +213,7 @@ class Config:
 
                         f.write(
                             f"{time_fmt} "
-                            f'[Load Data]: Loading updated vehicles...')
+                            f'[Load Data]: Loading updated vehicles...\n')
 
                 current_updated_jobs = []
                 for updated_job in updated_jobs:
@@ -223,6 +221,15 @@ class Config:
                         updated_job.decode('utf-8')
                     )
                 current_updated_job_ids = ', '.join(current_updated_jobs)
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(
+                            f"{time_fmt} "
+                            f'[Load Data]: Loading updated jobs: {current_updated_job_ids}...\n')
+
                 if current_updated_job_ids:
                     query_str = Config.VEHICLES_JOBS_QUERY.format(
                         current_updated_job_ids
@@ -250,7 +257,7 @@ class Config:
                             now_time = datetime.datetime.now()
                             time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                             for vehicle in cls.vehicles:
-                                outputs.append(
+                                f.write(
                                     f"{time_fmt} [Load Data]: "
                                     f"blackdotposition: {vehicle['blackdotposition']}"
                                     f"stationposition: {vehicle['stationposition']}"
@@ -261,8 +268,7 @@ class Config:
                                     f"station_id: {vehicle['station_id']}"
                                     f"longitude: {vehicle['longitude']}"
                                     f"latitude: {vehicle['latitude']}"
-                                    f"radius: {vehicle['radius']}")
-                            f.writelines(outputs)
+                                    f"radius: {vehicle['radius']}\n")
 
                 if is_vehicles_updated:
                     r.set('vehicle', 'read')
