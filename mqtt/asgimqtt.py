@@ -256,19 +256,20 @@ class Config:
                         with open(Config.LOG_FILEPATH, 'a') as f:
                             now_time = datetime.datetime.now()
                             time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                            for vehicle in cls.vehicles:
+                            for plate_num, data in cls.vehicles.items():
                                 f.write(
                                     f"{time_fmt} [Load Data]: "
-                                    f"blackdotposition: {vehicle['blackdotposition']}"
-                                    f"stationposition: {vehicle['stationposition']}"
-                                    f"is_same_station: {vehicle['is_same_station']}"
-                                    f"progress: {vehicle['progress']}"
-                                    f"job_id: {vehicle['job_id']}"
-                                    f"step: {vehicle['step']}"
-                                    f"station_id: {vehicle['station_id']}"
-                                    f"longitude: {vehicle['longitude']}"
-                                    f"latitude: {vehicle['latitude']}"
-                                    f"radius: {vehicle['radius']}\n")
+                                    f"{plate_num}: "
+                                    f"blackdotposition: {data['blackdotposition']}"
+                                    f"stationposition: {data['stationposition']}"
+                                    f"is_same_station: {data['is_same_station']}"
+                                    f"progress: {data['progress']}"
+                                    f"job_id: {data['job_id']}"
+                                    f"step: {data['step']}"
+                                    f"station_id: {data['station_id']}"
+                                    f"longitude: {data['longitude']}"
+                                    f"latitude: {data['latitude']}"
+                                    f"radius: {data['radius']}\n")
 
                 if is_vehicles_updated:
                     r.set('vehicle', 'read')
