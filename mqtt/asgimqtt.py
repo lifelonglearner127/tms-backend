@@ -137,20 +137,18 @@ class Config:
             with open(Config.LOG_FILEPATH, 'a') as f:
                 now_time = datetime.datetime.now()
                 time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                outputs = []
-                outputs.append(f'{time_fmt} DATABASE_URL: {Config.DB_URL}')
-                outputs.append(f'{time_fmt} ALIYUN_MOBILE_PUSH_APP_KEY: {Config.ALIYUN_MOBILE_PUSH_APP_KEY}')
-                outputs.append(f'{time_fmt} ALIYUN_MOBILE_PUSH_APP_SECRET: {Config.ALIYUN_MOBILE_PUSH_APP_SECRET}')
-                outputs.append(f'{time_fmt} ALIYUN_ACCESS_KEY_ID: {Config.ALIYUN_ACCESS_KEY_ID}')
-                outputs.append(f'{time_fmt} ALIYUN_ACCESS_KEY_SECRET: {Config.ALIYUN_ACCESS_KEY_SECRET}')
-                outputs.append(f'{time_fmt} G7_MQTT_HOST: {Config.HOST}')
-                outputs.append(f'{time_fmt} G7_MQTT_PORT: {Config.PORT}')
-                outputs.append(f'{time_fmt} G7_MQTT_POSITION_TOPIC: {Config.TOPIC}')
-                outputs.append(f'{time_fmt} G7_MQTT_POSITION_CLIENT_ID: {Config.CLIENT_ID}')
-                outputs.append(f'{time_fmt} G7_MQTT_POSITION_ACCESS_ID: {Config.USERNAME}')
-                outputs.append(f'{time_fmt} G7_MQTT_POSITION_SECRET: {Config.PASSWORD}')
-                outputs.append(f'{time_fmt} G7_MQTT_QOS: {Config.QOS}')
-                f.writelines(outputs)
+                f.write(f'{time_fmt} [Settings] DATABASE_URL: {Config.DB_URL}\n')
+                f.write(f'{time_fmt} [Settings] ALIYUN_MOBILE_PUSH_APP_KEY: {Config.ALIYUN_MOBILE_PUSH_APP_KEY}\n')
+                f.write(f'{time_fmt} [Settings] ALIYUN_MOBILE_PUSH_APP_SECRET: {Config.ALIYUN_MOBILE_PUSH_APP_SECRET}\n')
+                f.write(f'{time_fmt} [Settings] ALIYUN_ACCESS_KEY_ID: {Config.ALIYUN_ACCESS_KEY_ID}\n')
+                f.write(f'{time_fmt} [Settings] ALIYUN_ACCESS_KEY_SECRET: {Config.ALIYUN_ACCESS_KEY_SECRET}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_HOST: {Config.HOST}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_PORT: {Config.PORT}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_POSITION_TOPIC: {Config.TOPIC}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_POSITION_CLIENT_ID: {Config.CLIENT_ID}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_POSITION_ACCESS_ID: {Config.USERNAME}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_POSITION_SECRET: {Config.PASSWORD}\n')
+                f.write(f'{time_fmt} [Settings] G7_MQTT_QOS: {Config.QOS}\n')
 
     @classmethod
     def load_data_from_db(cls):
@@ -197,10 +195,10 @@ class Config:
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                         for blackdot in cls.blackdots:
                             outputs.append(
-                                f"{time_fmt} "
-                                f"station_id: {blackdot['station_id']}"
-                                f"latitude: {blackdot['latitude']}"
-                                f"longitude: {blackdot['longitude']}"
+                                f"{time_fmt} [Blackdot]: "
+                                f"station_id: {blackdot['station_id']} "
+                                f"latitude: {blackdot['latitude']} "
+                                f"longitude: {blackdot['longitude']} "
                                 f"radius: {blackdot['radius']}")
                         f.writelines(outputs)
 
@@ -208,24 +206,16 @@ class Config:
 
             if is_vehicles_updated or updated_jobs:
                 if Config.DEBUG:
-                    if is_vehicles_updated:
-                        print('[Load Data]: Loading updated vehicles...')
-                    else:
-                        print('[Load Data]: Loading updated jobs...')
+                    print('[Load Data]: Loading updated vehicles...')
 
                 if Config.LOG_FILEPATH:
                     with open(Config.LOG_FILEPATH, 'a') as f:
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
 
-                        if is_vehicles_updated:
-                            f.write(
-                                f"{time_fmt} "
-                                f'[Load Data]: Loading updated vehicles...')
-                        else:
-                            f.write(
-                                f"{time_fmt} "
-                                f'[Load Data]: Loading updated jobs...')
+                        f.write(
+                            f"{time_fmt} "
+                            f'[Load Data]: Loading updated vehicles...')
 
                 current_updated_jobs = []
                 for updated_job in updated_jobs:
@@ -293,7 +283,7 @@ class Config:
                     with open(Config.LOG_FILEPATH, 'a') as f:
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write('[Load Data]: Database connection closed.\n')
+                        f.write(f'{time_fmt} [Load Data]: Database connection closed.\n')
 
 
 def get_channel_layer(channel_name):
@@ -329,11 +319,11 @@ def _on_message(client, userdata, message):
     if Config.DEBUG:
         print('[G7]: ', vehicles)
 
-        if Config.LOG_FILEPATH:
-            with open(Config.LOG_FILEPATH, 'a') as f:
-                now_time = datetime.datetime.now()
-                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                f.write(f'{time_fmt} [G7]: Received message: {message}\n')
+    if Config.LOG_FILEPATH:
+        with open(Config.LOG_FILEPATH, 'a') as f:
+            now_time = datetime.datetime.now()
+            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"{time_fmt} [G7]: Received message: {message.payload.decode('utf-8')}\n")
 
     if vehicles is None:
         return
@@ -382,13 +372,13 @@ def _on_message(client, userdata, message):
                 plate_num, vehicle['lat'], vehicle['lng']
             ))
 
-            if Config.LOG_FILEPATH:
-                with open(Config.LOG_FILEPATH, 'a') as f:
-                    now_time = datetime.datetime.now()
-                    time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                    f.write(
-                        f"{time_fmt} [GeoPy]: Current {plate_num} Position - ({vehicle['lat']}, {vehicle['lng']})\n"
-                    )
+        if Config.LOG_FILEPATH:
+            with open(Config.LOG_FILEPATH, 'a') as f:
+                now_time = datetime.datetime.now()
+                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                f.write(
+                    f"{time_fmt} [GeoPy]: Current {plate_num} Position - ({vehicle['lat']}, {vehicle['lng']})\n"
+                )
 
         # check if the vehicle enter or exit black dot
         for blackdot in Config.blackdots:
@@ -458,8 +448,15 @@ def _on_message(client, userdata, message):
                         Config.CHANNEL_NAME_QUERY.format(plate_num)
                     )
                     result = cursor.fetchone()
-                    if result is None and Config.DEBUG:
-                        print('[Error]: Vehicle and user not bind')
+                    if result is None:
+                        if Config.DEBUG:
+                            print('[Error]: Vehicle and user not bind')
+
+                        if Config.LOG_FILEPATH:
+                            with open(Config.LOG_FILEPATH, 'a') as f:
+                                now_time = datetime.datetime.now()
+                                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                                f.write(f"{time_fmt} [Error]: vehicle and user not bind\n")
                         break
 
                     driver_id = result[0]
@@ -519,6 +516,12 @@ def _on_message(client, userdata, message):
                                 '[Enter & Exit]: Database connection closed.'
                             )
 
+                        if Config.LOG_FILEPATH:
+                            with open(Config.LOG_FILEPATH, 'a') as f:
+                                now_time = datetime.datetime.now()
+                                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                                f.write("[Enter & Exit]: Database connection closed.\n")
+
         # check if the vehicle enter or exit next station
         if current_vehicle['progress'] is None:
             return
@@ -540,7 +543,6 @@ def _on_message(client, userdata, message):
                 return
         else:
             delta_distance = distance.distance(vehicle_pos, next_station_pos).m
-            print(delta_distance)
 
         if Config.DEBUG:
             print('[GeoPy]: Distance with ({}, {}) is {}'.format(
@@ -548,6 +550,13 @@ def _on_message(client, userdata, message):
                 current_vehicle['longitude'],
                 delta_distance
             ))
+
+        if Config.LOG_FILEPATH:
+            with open(Config.LOG_FILEPATH, 'a') as f:
+                now_time = datetime.datetime.now()
+                time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                f.write(f"[GeoPy]: Distance with ({current_vehicle['latitude']}, {current_vehicle['longitude']})"
+                        f" is {delta_distance}\n")
 
         if delta_distance < next_station_radius and \
            current_vehicle['stationposition'] == Config.VEHICLE_OUT_AREA:
@@ -559,6 +568,13 @@ def _on_message(client, userdata, message):
                     current_vehicle['longitude']
                 ))
 
+            if Config.LOG_FILEPATH:
+                with open(Config.LOG_FILEPATH, 'a') as f:
+                    now_time = datetime.datetime.now()
+                    time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                    f.write(f"[GeoPy]: {plate_num} enter into "
+                            f"({current_vehicle['latitude']}, {current_vehicle['longitude']})\n")
+
         if delta_distance > next_station_radius and \
            current_vehicle['stationposition'] == Config.VEHICLE_IN_AREA:
             current_vehicle['stationposition'] = Config.VEHICLE_OUT_AREA
@@ -569,6 +585,13 @@ def _on_message(client, userdata, message):
                     current_vehicle['longitude']
                 ))
 
+            if Config.LOG_FILEPATH:
+                with open(Config.LOG_FILEPATH, 'a') as f:
+                    now_time = datetime.datetime.now()
+                    time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                    f.write(f"[GeoPy]: {plate_num} exit from "
+                            f"({current_vehicle['latitude']}, {current_vehicle['longitude']})\n")
+
         if enter_exit_event:
             try:
                 connection = psycopg2.connect(Config.DB_URL)
@@ -578,8 +601,15 @@ def _on_message(client, userdata, message):
                     Config.CHANNEL_NAME_QUERY.format(plate_num)
                 )
                 result = cursor.fetchone()
-                if result is None and Config.DEBUG:
-                    print('[Error]: Vehicle and user not bind')
+                if result is None:
+                    if Config.DEBUG:
+                        print('[Error]: Vehicle and user not bind')
+
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            f.write(f"{time_fmt} [Error]: vehicle and user not bind\n")
                     break
 
                 driver_id = result[0]
@@ -606,6 +636,12 @@ def _on_message(client, userdata, message):
                 if expected_progress != current_progress:
                     if Config.DEBUG:
                         print("Driver didn't update the progress")
+
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            f.write(f"{time_fmt} Driver didn't update the progress\n")
 
                     if enter_exit_event == Config.ENTER_STATION_EVENT:
                         # update jobstation model
@@ -751,10 +787,22 @@ def _on_message(client, userdata, message):
                             '[Enter & Exit]: Database connection closed.'
                         )
 
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            f.write(f"{time_fmt} [Enter & Exit]: Database connection closed.\n")
+
 
 def _on_disconnect(client, userdata, rc):
     if Config.DEBUG:
         print('[G7]: Disconnected')
+
+    if Config.LOG_FILEPATH:
+        with open(Config.LOG_FILEPATH, 'a') as f:
+            now_time = datetime.datetime.now()
+            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"{time_fmt} [G7]: Disconnected\n")
 
 
 class ASGIMQTTClient(object):
