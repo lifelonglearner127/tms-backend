@@ -611,8 +611,14 @@ class JobAdminSerializer(serializers.ModelSerializer):
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
         routes = dict([(route.id, route) for route in routes])
+        ret = []
+        for route_id in instance.routes:
+            route = routes.get(route_id, None)
+            if route is not None:
+                ret.append(route)
+
         return RouteSerializer(
-            [routes[id] for id in instance.routes],
+            ret,
             many=True
         ).data
 
@@ -760,8 +766,14 @@ class JobDoneSerializer(serializers.ModelSerializer):
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
         routes = dict([(route.id, route) for route in routes])
+        ret = []
+        for route_id in instance.routes:
+            route = routes.get(route_id, None)
+            if route is not None:
+                ret.append(route)
+
         return RouteSerializer(
-            [routes[id] for id in instance.routes],
+            ret,
             many=True
         ).data
 
@@ -951,8 +963,14 @@ class JobFutureSerializer(serializers.ModelSerializer):
     def get_routes(self, instance):
         routes = m.Route.objects.filter(id__in=instance.routes)
         routes = dict([(route.id, route) for route in routes])
+        ret = []
+        for route_id in instance.routes:
+            route = routes.get(route_id, None)
+            if route is not None:
+                ret.append(route)
+
         return RouteSerializer(
-            [routes[id] for id in instance.routes],
+            ret,
             many=True
         ).data
 

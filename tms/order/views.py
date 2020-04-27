@@ -2297,7 +2297,8 @@ class JobStationProductViewSet(viewsets.ModelViewSet):
         #     instance.weight = request.data.pop('weight', 0)
 
         previous_weight = instance.weight
-        instance.weight = request.data.pop('weight', 0)
+        updated_weight = request.data.pop('weight', 0)
+        instance.weight = Decimal(updated_weight).quantize(Decimal('1.00'))
         instance.save()
 
         # update order product delivered weight
