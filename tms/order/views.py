@@ -2382,6 +2382,15 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
     queryset = m.OrderPayment.objects.all()
     serializer_class = s.OrderPaymentSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        q = self.request.query_params.get('q', None)
+        if q is not None:
+            query_filter = Q(job_station__job__order__customer__name__icontains=q)
+            query_filter |= Q(job_station__job__vehicle__plate_num__icontains=q)
+            queryset = queryset.filter(query_filter)
+        return queryset
+
     @action(detail=True, methods=['post'], url_path='update-distance')
     def update_order_payment_distance(self, request, pk=None):
         instance = self.get_object()
