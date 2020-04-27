@@ -162,7 +162,7 @@ class OrderViewSet(TMSViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if request.user.user_type == c.USER_TYPE_CUSTOMER and requests.user.customer_profile != order.customer:
+        if request.user.user_type == c.USER_TYPE_CUSTOMER and request.user.customer_profile != order.customer:
             return Response(
                 {
                     'msg': 'Cannot update the order'
