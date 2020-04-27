@@ -15,7 +15,8 @@ def updated_job(sender, instance, created, **kwargs):
         pass
 
     if instance.progress > c.JOB_PROGRESS_NOT_STARTED:
-        r.sadd('jobs', instance.id)
+        # r.sadd('jobs', instance.id)
+        r.set('is_jobs', 'updated')
 
         # set order status to in-progress
         if instance.order.status == c.ORDER_STATUS_PENDING:

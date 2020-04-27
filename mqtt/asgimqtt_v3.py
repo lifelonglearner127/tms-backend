@@ -71,7 +71,7 @@ class Config:
             FROM (
                 SELECT id, order_id, vehicle_id, progress
                 FROM order_job
-                WHERE progress > 1
+                WHERE id IN ({})
             ) oj
             LEFT JOIN order_order oo ON oj.order_id=oo.id
             LEFT JOIN (
@@ -153,17 +153,25 @@ class Config:
     @classmethod
     def load_data_from_db(cls):
         is_blackdots_updated = r.get('blackdot') == b'updated'
-        is_jobs_updated = r.get('is_jobs') == b'updated'
-        if not is_blackdots_updated and not is_jobs_updated:
+        is_vehicles_updated = r.get('vehicle') == b'updated'
+        updated_jobs = r.smembers('jobs')
+        if not is_blackdots_updated and not is_vehicles_updated and not updated_jobs:
             return
 
         try:
             connection = psycopg2.connect(cls.DB_URL)
             cursor = connection.cursor()
-
-            # Load updated black dots
             if is_blackdots_updated:
                 cls.blackdots = []
+                if Config.DEBUG:
+                    print('[Load Data]: Loading blackdots...')
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f'{time_fmt} [Load Data]: Loading blackdots...\n')
+
                 cursor.execute("""
                     SELECT id, latitude, longitude, radius
                     FROM info_station
@@ -179,15 +187,12 @@ class Config:
                     })
 
                 if Config.DEBUG:
-                    print('[Load Data]: Loading blackdots...')
                     print('[Load Data]: ', cls.blackdots)
 
                 if Config.LOG_FILEPATH:
                     with open(Config.LOG_FILEPATH, 'a') as f:
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write(f'{time_fmt} [Load Data]: Loading blackdots...\n')
-
                         for blackdot in cls.blackdots:
                             f.write(
                                 f"{time_fmt} [Blackdot]: "
@@ -198,33 +203,25 @@ class Config:
 
                 r.set('blackdot', 'read')
 
-            # Load updated jobs
-            if is_jobs_updated:
-                cursor.execute(Config.VEHICLES_JOBS_QUERY)
-                results = cursor.fetchall()
-                updated_vehicles = []
-                for row in results:
-                    plate_num = row[0]
-                    updated_vehicles.append(plate_num)
-                    if plate_num not in cls.vehicles:
-                        cls.vehicles[plate_num] = {
-                            'blackdotposition': cls.VEHICLE_OUT_AREA,
-                            'stationposition': cls.VEHICLE_OUT_AREA,
-                            'is_same_station': row[1],
-                            'job_id': row[3],
-                        }
-                    cls.vehicles[plate_num]['progress'] = row[2]
-                    cls.vehicles[plate_num]['step'] = row[4]
-                    cls.vehicles[plate_num]['station_id'] = row[5]
-                    cls.vehicles[plate_num]['longitude'] = row[6]
-                    cls.vehicles[plate_num]['latitude'] = row[7]
-                    cls.vehicles[plate_num]['radius'] = row[8]
-
-                cls.vehicles = {k: v for (k, v) in cls.vehicles.items() if k in updated_vehicles}
-
+            if is_vehicles_updated or updated_jobs:
                 if Config.DEBUG:
-                    print('[Load Data]: Loading updated jobs...')
-                    print('[Load Data]: ', cls.vehicles)
+                    print('[Load Data]: Loading updated vehicles...')
+
+                if Config.LOG_FILEPATH:
+                    with open(Config.LOG_FILEPATH, 'a') as f:
+                        now_time = datetime.datetime.now()
+                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+
+                        f.write(
+                            f"{time_fmt} "
+                            f'[Load Data]: Loading updated vehicles...\n')
+
+                current_updated_jobs = []
+                for updated_job in updated_jobs:
+                    current_updated_jobs.append(
+                        updated_job.decode('utf-8')
+                    )
+                current_updated_job_ids = ', '.join(current_updated_jobs)
 
                 if Config.LOG_FILEPATH:
                     with open(Config.LOG_FILEPATH, 'a') as f:
@@ -232,23 +229,57 @@ class Config:
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                         f.write(
                             f"{time_fmt} "
-                            f'[Load Data]: Loading updated jobs...\n')
-                        for plate_num, data in cls.vehicles.items():
-                            f.write(
-                                f"{time_fmt} [Load Data]: "
-                                f"{plate_num}: "
-                                f"blackdotposition: {data['blackdotposition']} "
-                                f"stationposition: {data['stationposition']} "
-                                f"is_same_station: {data['is_same_station']} "
-                                f"progress: {data['progress']} "
-                                f"job_id: {data['job_id']} "
-                                f"step: {data['step']} "
-                                f"station_id: {data['station_id']} "
-                                f"longitude: {data['longitude']} "
-                                f"latitude: {data['latitude']} "
-                                f"radius: {data['radius']}\n")
+                            f'[Load Data]: Loading updated jobs: {current_updated_job_ids}...\n')
 
-                r.set('is_jobs', 'read')
+                if current_updated_job_ids:
+                    query_str = Config.VEHICLES_JOBS_QUERY.format(
+                        current_updated_job_ids
+                    )
+                    cursor.execute(query_str)
+                    results = cursor.fetchall()
+                    for row in results:
+                        plate_num = row[0]
+                        if plate_num not in cls.vehicles:
+                            cls.vehicles[plate_num] = {
+                                'blackdotposition': cls.VEHICLE_OUT_AREA,
+                                'stationposition': cls.VEHICLE_OUT_AREA,
+                                'is_same_station': row[1],
+                                'job_id': row[3],
+                            }
+                        cls.vehicles[plate_num]['progress'] = row[2]
+                        cls.vehicles[plate_num]['step'] = row[4]
+                        cls.vehicles[plate_num]['station_id'] = row[5]
+                        cls.vehicles[plate_num]['longitude'] = row[6]
+                        cls.vehicles[plate_num]['latitude'] = row[7]
+                        cls.vehicles[plate_num]['radius'] = row[8]
+
+                    if Config.DEBUG:
+                        print('[Load Data]: ', cls.vehicles)
+
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            for plate_num, data in cls.vehicles.items():
+                                f.write(
+                                    f"{time_fmt} [Load Data]: "
+                                    f"{plate_num}: "
+                                    f"blackdotposition: {data['blackdotposition']} "
+                                    f"stationposition: {data['stationposition']} "
+                                    f"is_same_station: {data['is_same_station']} "
+                                    f"progress: {data['progress']} "
+                                    f"job_id: {data['job_id']} "
+                                    f"step: {data['step']} "
+                                    f"station_id: {data['station_id']} "
+                                    f"longitude: {data['longitude']} "
+                                    f"latitude: {data['latitude']} "
+                                    f"radius: {data['radius']}\n")
+
+                if is_vehicles_updated:
+                    r.set('vehicle', 'read')
+
+                for job in current_updated_jobs:
+                    r.srem('jobs', job)
 
             cursor.close()
         except psycopg2.DatabaseError:
