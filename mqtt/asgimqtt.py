@@ -53,11 +53,11 @@ class Config:
         SELECT au.id, au.channel_name, au.device_token
         FROM (
             SELECT *
-            FROM vehicle_vehicledriverdailybind vdb
+            FROM vehicle_vehicleworkerbind vdb
             WHERE get_off IS NULL
         ) AS tmp
         LEFT JOIN vehicle_vehicle vv ON tmp.vehicle_id = vv.id
-        LEFT JOIN account_user au ON tmp.driver_id = au.id
+        LEFT JOIN account_user au ON tmp.worker_id = au.id
         WHERE vv.plate_num='{}'
         """
 
@@ -162,6 +162,7 @@ class Config:
             connection = psycopg2.connect(cls.DB_URL)
             cursor = connection.cursor()
             if is_blackdots_updated:
+                cls.blackdots = []
                 if Config.DEBUG:
                     print('[Load Data]: Loading blackdots...')
 
@@ -237,18 +238,21 @@ class Config:
                     cursor.execute(query_str)
                     results = cursor.fetchall()
                     for row in results:
-                        cls.vehicles[row[0]] = {
-                            'blackdotposition': cls.VEHICLE_OUT_AREA,
-                            'stationposition': cls.VEHICLE_OUT_AREA,
-                            'is_same_station': row[1],
-                            'progress': row[2],
-                            'job_id': row[3],
-                            'step': row[4],
-                            'station_id': row[5],
-                            'longitude': row[6],
-                            'latitude': row[7],
-                            'radius': row[8]
-                        }
+                        plate_num = row[0]
+                        if plate_num not in cls.vehicles:
+                            cls.vehicles[plate_num] = {
+                                'blackdotposition': cls.VEHICLE_OUT_AREA,
+                                'stationposition': cls.VEHICLE_OUT_AREA,
+                                'is_same_station': row[1],
+                                'job_id': row[3],
+                            }
+                        cls.vehicles[plate_num]['progress'] = row[2]
+                        cls.vehicles[plate_num]['step'] = row[4]
+                        cls.vehicles[plate_num]['station_id'] = row[5]
+                        cls.vehicles[plate_num]['longitude'] = row[6]
+                        cls.vehicles[plate_num]['latitude'] = row[7]
+                        cls.vehicles[plate_num]['radius'] = row[8]
+
                     if Config.DEBUG:
                         print('[Load Data]: ', cls.vehicles)
 
@@ -260,15 +264,15 @@ class Config:
                                 f.write(
                                     f"{time_fmt} [Load Data]: "
                                     f"{plate_num}: "
-                                    f"blackdotposition: {data['blackdotposition']}"
-                                    f"stationposition: {data['stationposition']}"
-                                    f"is_same_station: {data['is_same_station']}"
-                                    f"progress: {data['progress']}"
-                                    f"job_id: {data['job_id']}"
-                                    f"step: {data['step']}"
-                                    f"station_id: {data['station_id']}"
-                                    f"longitude: {data['longitude']}"
-                                    f"latitude: {data['latitude']}"
+                                    f"blackdotposition: {data['blackdotposition']} "
+                                    f"stationposition: {data['stationposition']} "
+                                    f"is_same_station: {data['is_same_station']} "
+                                    f"progress: {data['progress']} "
+                                    f"job_id: {data['job_id']} "
+                                    f"step: {data['step']} "
+                                    f"station_id: {data['station_id']} "
+                                    f"longitude: {data['longitude']} "
+                                    f"latitude: {data['latitude']} "
                                     f"radius: {data['radius']}\n")
 
                 if is_vehicles_updated:
@@ -410,12 +414,12 @@ def _on_message(client, userdata, message):
                     delta_distance
                 ))
 
-                if Config.LOG_FILEPATH:
-                    with open(Config.LOG_FILEPATH, 'a') as f:
-                        now_time = datetime.datetime.now()
-                        time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write(f"{time_fmt} [GeoPy]: Current {plate_num} "
-                                f"Position - ({vehicle['lat']}, {vehicle['lng']})\n")
+            if Config.LOG_FILEPATH:
+                with open(Config.LOG_FILEPATH, 'a') as f:
+                    now_time = datetime.datetime.now()
+                    time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                    f.write(f"{time_fmt} [GeoPy]: Current {plate_num} "
+                            f"Position - ({vehicle['lat']}, {vehicle['lng']})\n")
 
             if delta_distance < blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_OUT_AREA:
                 current_vehicle['blackdotposition'] = Config.VEHICLE_IN_AREA
@@ -454,8 +458,8 @@ def _on_message(client, userdata, message):
                     cursor.execute(
                         Config.CHANNEL_NAME_QUERY.format(plate_num)
                     )
-                    result = cursor.fetchone()
-                    if result is None:
+                    results = cursor.fetchall()
+                    if len(results) == 0:
                         if Config.DEBUG:
                             print('[Error]: Vehicle and user not bind')
 
@@ -464,12 +468,9 @@ def _on_message(client, userdata, message):
                                 now_time = datetime.datetime.now()
                                 time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                                 f.write(f"{time_fmt} [Error]: vehicle and user not bind\n")
-                        break
+                        continue
 
-                    driver_id = result[0]
-                    channel_name = result[1]
-                    device_token = result[2]
-
+                    # load black dot message
                     cursor.execute("""
                     SELECT notification_message
                     FROM info_station WHERE id={}
@@ -479,38 +480,43 @@ def _on_message(client, userdata, message):
                         'notification': notification_message
                     }
 
-                    cursor.execute("""
-                    INSERT INTO notification_notification
-                        (msg_type, message, user_id, is_read, sent_on)
-                    VALUES ('{}', '{}', '{}', False, now()) RETURNING sent_on;
-                    """.format(
-                        enter_exit_event, json.dumps(message), driver_id
-                    ))
-                    connection.commit()
-                    sent_on = cursor.fetchone()[0]
-                    data = {
-                        'msg_type': enter_exit_event,
-                        'message': message,
-                        'is_read': False,
-                        'sent_on': sent_on.strftime('%Y-%m-%d %H:%M')
-                    }
+                    for result in results:
+                        worker_id = result[0]
+                        channel_name = result[1]
+                        device_token = result[2]
 
-                    if channel_name:
-                        async_to_sync(channel_layer.send)(
-                            channel_name,
-                            {
-                                'type': 'notify',
-                                'data': data
-                            }
-                        )
+                        cursor.execute("""
+                        INSERT INTO notification_notification
+                            (msg_type, message, user_id, is_read, is_deleted, sent_on)
+                        VALUES ('{}', '{}', '{}', False, False, now()) RETURNING sent_on;
+                        """.format(
+                            enter_exit_event, json.dumps(message), worker_id
+                        ))
+                        connection.commit()
+                        sent_on = cursor.fetchone()[0]
+                        data = {
+                            'msg_type': enter_exit_event,
+                            'message': message,
+                            'is_read': False,
+                            'sent_on': sent_on.strftime('%Y-%m-%d %H:%M')
+                        }
 
-                    if device_token:
-                        title = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
-                        body = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
-                        Config.aliyun_request.set_Title(title)
-                        Config.aliyun_request.set_Body(body)
-                        Config.aliyun_request.set_TargetValue(device_token)
-                        Config.aliyun_client.do_action(Config.aliyun_request)
+                        if channel_name:
+                            async_to_sync(channel_layer.send)(
+                                channel_name,
+                                {
+                                    'type': 'notify',
+                                    'data': data
+                                }
+                            )
+
+                        if device_token:
+                            title = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
+                            body = 'In Blackdot' if Config.ENTER_STATION_EVENT else 'Out Black dot'
+                            Config.aliyun_request.set_Title(title)
+                            Config.aliyun_request.set_Body(body)
+                            Config.aliyun_request.set_TargetValue(device_token)
+                            Config.aliyun_client.do_action(Config.aliyun_request)
 
                     cursor.close()
                 except psycopg2.DatabaseError:
@@ -603,25 +609,6 @@ def _on_message(client, userdata, message):
             try:
                 connection = psycopg2.connect(Config.DB_URL)
                 cursor = connection.cursor()
-
-                cursor.execute(
-                    Config.CHANNEL_NAME_QUERY.format(plate_num)
-                )
-                result = cursor.fetchone()
-                if result is None:
-                    if Config.DEBUG:
-                        print('[Error]: Vehicle and user not bind')
-
-                    if Config.LOG_FILEPATH:
-                        with open(Config.LOG_FILEPATH, 'a') as f:
-                            now_time = datetime.datetime.now()
-                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                            f.write(f"{time_fmt} [Error]: vehicle and user not bind\n")
-                    break
-
-                driver_id = result[0]
-                channel_name = result[1]
-                device_token = result[2]
 
                 # Get the current job progress
                 cursor.execute("""
@@ -740,7 +727,22 @@ def _on_message(client, userdata, message):
 
                         connection.commit()
 
-                # Notification
+                cursor.execute(
+                    Config.CHANNEL_NAME_QUERY.format(plate_num)
+                )
+                results = cursor.fetchall()
+                if len(results) == 0:
+                    if Config.DEBUG:
+                        print('[Error]: Vehicle and user not bind')
+
+                    if Config.LOG_FILEPATH:
+                        with open(Config.LOG_FILEPATH, 'a') as f:
+                            now_time = datetime.datetime.now()
+                            time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
+                            f.write(f"{time_fmt} [Error]: vehicle and user not bind\n")
+                    continue
+
+                # Get Station address
                 cursor.execute("""
                 SELECT address
                 FROM info_station WHERE id={}
@@ -751,37 +753,43 @@ def _on_message(client, userdata, message):
                     'notification': notification_message
                 }
 
-                cursor.execute("""
-                INSERT INTO notification_notification
-                    (msg_type, message, user_id, is_read, sent_on)
-                VALUES ('{}', '{}', '{}', False, now()) RETURNING sent_on;
-                """.format(
-                    enter_exit_event, json.dumps(message), driver_id
-                ))
-                connection.commit()
-                sent_on = cursor.fetchone()[0]
-                data = {
-                    'msg_type': enter_exit_event,
-                    'message': message,
-                    'is_read': False,
-                    'sent_on': sent_on.strftime('%Y-%m-%d %H:%M')
-                }
-                if channel_name:
-                    async_to_sync(channel_layer.send)(
-                        channel_name,
-                        {
-                            'type': 'notify',
-                            'data': data
-                        }
-                    )
+                for result in results:
+                    worker_id = result[0]
+                    channel_name = result[1]
+                    device_token = result[2]
 
-                if device_token:
-                    title = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
-                    body = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
-                    Config.aliyun_request.set_Title(title)
-                    Config.aliyun_request.set_Body(body)
-                    Config.aliyun_request.set_TargetValue(device_token)
-                    Config.aliyun_client.do_action(Config.aliyun_request)
+                    cursor.execute("""
+                    INSERT INTO notification_notification
+                        (msg_type, message, user_id, is_read, is_deleted, sent_on)
+                    VALUES ('{}', '{}', '{}', False, False, now()) RETURNING sent_on;
+                    """.format(
+                        enter_exit_event, json.dumps(message), worker_id
+                    ))
+                    connection.commit()
+
+                    if channel_name:
+                        sent_on = cursor.fetchone()[0]
+                        data = {
+                            'msg_type': enter_exit_event,
+                            'message': message,
+                            'is_read': False,
+                            'sent_on': sent_on.strftime('%Y-%m-%d %H:%M')
+                        }
+                        async_to_sync(channel_layer.send)(
+                            channel_name,
+                            {
+                                'type': 'notify',
+                                'data': data
+                            }
+                        )
+
+                    if device_token:
+                        title = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
+                        body = 'In Station' if Config.ENTER_STATION_EVENT else 'Out Station'
+                        Config.aliyun_request.set_Title(title)
+                        Config.aliyun_request.set_Body(body)
+                        Config.aliyun_request.set_TargetValue(device_token)
+                        Config.aliyun_client.do_action(Config.aliyun_request)
 
                 cursor.close()
             except psycopg2.DatabaseError:
