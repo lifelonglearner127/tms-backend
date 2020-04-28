@@ -3,6 +3,7 @@ from django.db import models
 from . import managers
 from ..core import constants as c
 from ..core.models import TimeStampedModel, BasicContactModel
+from ..core.utils import gcj02_to_wgs84
 from ..hr.models import CustomerProfile
 
 
@@ -262,6 +263,12 @@ class Station(BasicContactModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        new_coords = gcj02_to_wgs84(float(self.longitude), float(self.latitude))
+        self.gps_longitude = new_coords[0]
+        self.gps_latitude = new_coords[1]
+        super().save(*args, **kwargs)
 
 
 class TransportationDistance(TimeStampedModel):
