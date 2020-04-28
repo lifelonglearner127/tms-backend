@@ -141,7 +141,19 @@ class Station(BasicContactModel):
         decimal_places=10
     )
 
+    gps_longitude = models.DecimalField(
+        default=0,
+        max_digits=20,
+        decimal_places=10
+    )
+
     latitude = models.DecimalField(
+        default=0,
+        max_digits=20,
+        decimal_places=10
+    )
+
+    gps_latitude = models.DecimalField(
         default=0,
         max_digits=20,
         decimal_places=10

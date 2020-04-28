@@ -67,7 +67,7 @@ class Config:
         FROM vehicle_vehicle vv
         LEFT JOIN (
             SELECT oo.is_same_station, oj.progress, oj.id, ojs.step, ist.id,
-            ist.longitude, ist.latitude, ist.radius,oj.vehicle_id
+            ist.gps_longitude, ist.gps_latitude, ist.radius,oj.vehicle_id
             FROM (
                 SELECT id, order_id, vehicle_id, progress
                 FROM order_job
