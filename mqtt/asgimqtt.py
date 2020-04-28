@@ -378,7 +378,7 @@ def _on_message(client, userdata, message):
                 delta_distance = distance.distance(vehicle_pos, blackdot_pos).m
 
             if Config.DEBUG:
-                print('[GeoPy]: Distance with ({}, {}) is {}'.format(
+                print('[GeoPy Blackdot]: Distance with ({}, {}) is {}'.format(
                     blackdot['latitude'], blackdot['longitude'],
                     delta_distance
                 ))
@@ -387,14 +387,14 @@ def _on_message(client, userdata, message):
                 with open(Config.LOG_FILEPATH, 'a') as f:
                     now_time = datetime.datetime.now()
                     time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                    f.write(f"{time_fmt} [GeoPy]: Current {plate_num} "
+                    f.write(f"{time_fmt} [GeoPy Blackdot]: Current {plate_num} "
                             f"Position - ({vehicle['lat']}, {vehicle['lng']})\n")
 
             if delta_distance < blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_OUT_AREA:
                 current_vehicle['blackdotposition'] = Config.VEHICLE_IN_AREA
                 enter_exit_event = Config.ENTER_BLACK_DOT_EVENT
                 if Config.DEBUG:
-                    print('[GeoPy]: {} enter into ({}, {})'.format(
+                    print('[GeoPy Blackdot]: {} enter into ({}, {})'.format(
                         plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
@@ -402,14 +402,14 @@ def _on_message(client, userdata, message):
                     with open(Config.LOG_FILEPATH, 'a') as f:
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write(f"{time_fmt} [GeoPy]: {plate_num} "
+                        f.write(f"{time_fmt} [GeoPy Blackdot]: {plate_num} "
                                 f"enter into ({blackdot['latitude']}, {blackdot['longitude']})\n")
 
             if delta_distance > blackdot['radius'] and current_vehicle['blackdotposition'] == Config.VEHICLE_IN_AREA:
                 current_vehicle['blackdotposition'] = Config.VEHICLE_OUT_AREA
                 enter_exit_event = Config.EXIT_BLACK_DOT_EVENT
                 if Config.DEBUG:
-                    print('[G7]: {} exit from ({}, {})'.format(
+                    print('[G7 Blackdot]: {} exit from ({}, {})'.format(
                         plate_num, blackdot['latitude'], blackdot['longitude']
                     ))
 
@@ -417,7 +417,7 @@ def _on_message(client, userdata, message):
                     with open(Config.LOG_FILEPATH, 'a') as f:
                         now_time = datetime.datetime.now()
                         time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
-                        f.write(f"{time_fmt} [GeoPy]: {plate_num} "
+                        f.write(f"{time_fmt} [GeoPy Blackdot]: {plate_num} "
                                 f"exit from ({blackdot['latitude']}, {blackdot['longitude']})\n")
 
             if enter_exit_event:
