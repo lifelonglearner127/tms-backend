@@ -62,5 +62,5 @@ class Command(BaseCommand):
             latitude = float(station.latitude)
             new_coords = gcj02_to_wgs84(longitude, latitude)
             station.gps_longitude = new_coords[0]
-            station.gps_latitude = new_coords[0]
+            station.gps_latitude = new_coords[1]
             station.save()
