@@ -656,29 +656,16 @@ def _on_message(client, userdata, message):
                             WHERE job_id={} AND step={}
                             """.format(job_id, step+1))
 
-                        if result is None:
-                            cursor.execute("""
-                            UPDATE order_job
-                            SET progress=0,
-                                finished_on=now()
-                            WHERE id={}
-                            """.format(job_id))
-                            current_vehicle['is_same_station'] = None
-                            current_vehicle['progress'] = None
-                            current_vehicle['job_id'] = None
-                            current_vehicle['step'] = None
-                            current_vehicle['longitude'] = None
-                            current_vehicle['latitude'] = None
-                            current_vehicle['radius'] = None
-                        else:
-                            next_step = result[0]
-                            next_station_id = result[1]
-
-                            cursor.execute("""
+                        cursor.execute("""
                             UPDATE order_job
                             SET progress={}
                             WHERE id={};
                             """.format(expected_progress, job_id))
+
+                        connection.commit()
+                        if result is not None:
+                            next_step = result[0]
+                            next_station_id = result[1]
 
                             cursor.execute("""
                             SELECT id, longitude, latitude, radius
@@ -693,8 +680,6 @@ def _on_message(client, userdata, message):
                             current_vehicle['longitude'] = station_info[1]
                             current_vehicle['latitude'] = station_info[2]
                             current_vehicle['radius'] = station_info[3]
-
-                        connection.commit()
 
                 cursor.execute(
                     Config.CHANNEL_NAME_QUERY.format(plate_num)
