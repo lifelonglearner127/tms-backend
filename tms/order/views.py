@@ -2191,9 +2191,13 @@ class JobViewSet(TMSViewSet):
 
         page = self.paginate_queryset(queryset)
         max_step = m.JobStation.objects.filter(job__in=page).aggregate(Max('step'))
+        max_step = max_step.get('step__max', None)
+        if max_step is None:
+            max_step = 2
+
         return Response(
             {
-                'max_step': max_step['step__max'] - 1
+                'max_step': max_step - 1
             },
             status=status.HTTP_200_OK
         )
