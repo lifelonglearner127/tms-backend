@@ -41,6 +41,7 @@ class Config:
     DEBUG = False
     LOG_FILEPATH = ''
     TEST_MODE = False
+    STATION_CHECK = False
     VEHICLE_OUT_AREA = 0
     VEHICLE_IN_AREA = 1
     ENTER_STATION_EVENT = 4
@@ -209,16 +210,20 @@ class Config:
                     if plate_num not in cls.vehicles:
                         cls.vehicles[plate_num] = {
                             'blackdotposition': cls.VEHICLE_OUT_AREA,
-                            'stationposition': cls.VEHICLE_OUT_AREA,
-                            'is_same_station': row[1],
-                            'job_id': row[3],
                         }
-                    cls.vehicles[plate_num]['progress'] = row[2]
-                    cls.vehicles[plate_num]['step'] = row[4]
-                    cls.vehicles[plate_num]['station_id'] = row[5]
-                    cls.vehicles[plate_num]['longitude'] = row[6]
-                    cls.vehicles[plate_num]['latitude'] = row[7]
-                    cls.vehicles[plate_num]['radius'] = row[8]
+
+                        if Config.STATION_CHECK:
+                            cls.vehicles[plate_num]['stationposition'] = cls.VEHICLE_OUT_AREA
+                            cls.vehicles[plate_num]['is_same_station'] = row[1]
+                            cls.vehicles[plate_num]['job_id'] = row[3]
+
+                    if Config.STATION_CHECK:
+                        cls.vehicles[plate_num]['progress'] = row[2]
+                        cls.vehicles[plate_num]['step'] = row[4]
+                        cls.vehicles[plate_num]['station_id'] = row[5]
+                        cls.vehicles[plate_num]['longitude'] = row[6]
+                        cls.vehicles[plate_num]['latitude'] = row[7]
+                        cls.vehicles[plate_num]['radius'] = row[8]
 
                 cls.vehicles = {k: v for (k, v) in cls.vehicles.items() if k in updated_vehicles}
 
@@ -234,19 +239,25 @@ class Config:
                             f"{time_fmt} "
                             f'[Load Data]: Loading updated jobs...\n')
                         for plate_num, data in cls.vehicles.items():
-                            f.write(
-                                f"{time_fmt} [Load Data]: "
-                                f"{plate_num}: "
-                                f"blackdotposition: {data['blackdotposition']} "
-                                f"stationposition: {data['stationposition']} "
-                                f"is_same_station: {data['is_same_station']} "
-                                f"progress: {data['progress']} "
-                                f"job_id: {data['job_id']} "
-                                f"step: {data['step']} "
-                                f"station_id: {data['station_id']} "
-                                f"longitude: {data['longitude']} "
-                                f"latitude: {data['latitude']} "
-                                f"radius: {data['radius']}\n")
+                            if Config.STATION_CHECK:
+                                f.write(
+                                    f"{time_fmt} [Load Data]: "
+                                    f"{plate_num}: "
+                                    f"blackdotposition: {data['blackdotposition']} "
+                                    f"stationposition: {data['stationposition']} "
+                                    f"is_same_station: {data['is_same_station']} "
+                                    f"progress: {data['progress']} "
+                                    f"job_id: {data['job_id']} "
+                                    f"step: {data['step']} "
+                                    f"station_id: {data['station_id']} "
+                                    f"longitude: {data['longitude']} "
+                                    f"latitude: {data['latitude']} "
+                                    f"radius: {data['radius']}\n")
+                            else:
+                                f.write(
+                                    f"{time_fmt} [Load Data]: "
+                                    f"{plate_num}: "
+                                    f"blackdotposition: {data['blackdotposition']}\n")
 
                 r.set('is_jobs', 'read')
 
@@ -503,6 +514,9 @@ def _on_message(client, userdata, message):
                                 now_time = datetime.datetime.now()
                                 time_fmt = now_time.strftime("%Y-%m-%d %H:%M:%S")
                                 f.write("[Enter & Exit]: Database connection closed.\n")
+
+        if not Config.STATION_CHECK:
+            continue
 
         # check if the vehicle enter or exit next station
         if current_vehicle['progress'] is None:
@@ -815,6 +829,9 @@ if __name__ == '__main__':
         '-l', '--log', help='Specify log file path',
     )
     ap.add_argument(
+        '-f', '--fence', help='Set fence mode', action='store_true'
+    )
+    ap.add_argument(
         '-t', '--test', help='Set test mode',
         action='store_true'
     )
@@ -828,6 +845,7 @@ if __name__ == '__main__':
     Config.DEBUG = args.debug
     Config.LOG_FILEPATH = args.log
     Config.TEST_MODE = args.test
+    Config.STATION_CHECK = args.fence
     Config.read_env(args.settings)
     Config.load_data_from_db()
 
