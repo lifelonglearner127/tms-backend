@@ -122,6 +122,20 @@ class OrderViewSet(TMSViewSet):
     serializer_class = s.OrderSerializer
     permission_classes = [OrderPermission]
 
+    def get_queryset(self):
+        queryset = self.queryset
+        query_str = self.request.query_params.get('q')
+
+        if query_str:
+            q = Q(alias__icontains=query_str)
+            q |= Q(customer__name__icontains=query_str)
+            q |= Q(loading_station__name__icontains=query_str)
+            q |= Q(quality_station__name__icontains=query_str)
+            q |= Q(products__name__icontains=query_str)
+            queryset = self.queryset.filter(q)
+
+        return queryset
+
     def create(self, request):
 
         context = {
@@ -2398,18 +2412,31 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='update-distance')
     def update_order_payment_distance(self, request, pk=None):
         instance = self.get_object()
-        instance.distance = Decimal(request.data.get('distance', 0))
-        instance.adjustment = Decimal(request.data.get('adjustment', 0))
-        instance.description = request.data.get('description', '')
+        distance = request.data.get('distance', 0)
+        adjustment = request.data.get('adjustment', 0)
+        description = request.data.get('description', '')
 
-        if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
-            instance.status = c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG
+        try:
+            instance.distance = Decimal(distance)
+            instance.adjustment = Decimal(adjustment)
+            instance.description = description
+        except Exception:
+            return Response(
+                {
+                    'msg': 'Error occured while converting data'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
 
-        instance.save()
-        return Response(
-            s.OrderPaymentSerializer(instance).data,
-            status=status.HTTP_200_OK
-        )
+            if instance.status == c.ORDER_PAYMENT_STATUS_NO_DISTANCE:
+                instance.status = c.ORDER_PAYMENT_STATUS_WAITING_DUIZHANG
+
+            instance.save()
+            return Response(
+                s.OrderPaymentSerializer(instance).data,
+                status=status.HTTP_200_OK
+            )
 
     @action(detail=True, methods=['get'], url_path='confirm-duizhang')
     def confirm_duizhang(self, request, pk=None):

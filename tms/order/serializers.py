@@ -232,6 +232,9 @@ class OrderSerializer(serializers.ModelSerializer):
     arrangement_status = TMSChoiceField(
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
     )
+    loading_due_time = serializers.DateTimeField(
+        format='%Y-%m-%d', required=False
+    )
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
     )
