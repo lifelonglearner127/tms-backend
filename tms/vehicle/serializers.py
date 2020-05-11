@@ -830,3 +830,98 @@ class VehicleTireExportSerializer(serializers.ModelSerializer):
     def get_vehicle_mileage(self, instance):
         if instance.current_tire:
             return instance.current_tire.vehicle_mileage
+
+
+class VehicleExportSerializer(serializers.Serializer):
+    """Export Serializer
+
+    Although using model serializer might seem helpful, but this code is intended for export order
+    """
+    department = serializers.CharField(source='get_department_display')
+    model = serializers.CharField(source='get_model_display')
+    plate_num = serializers.CharField()
+    identifier_code = serializers.CharField()
+    brand = serializers.CharField(source='get_brand_display')
+    use_for = serializers.CharField()
+    total_load = serializers.DecimalField(max_digits=10, decimal_places=2)
+    actual_load = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    model_2 = serializers.CharField(source='get_model_display')
+    plate_num_2 = serializers.CharField()
+    identifier_code_2 = serializers.CharField()
+    brand_2 = serializers.CharField(source='get_brand_display')
+    use_for_2 = serializers.CharField()
+    total_load_2 = serializers.DecimalField(max_digits=10, decimal_places=2)
+    actual_load_2 = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    tank_volume = serializers.DecimalField(max_digits=10, decimal_places=2)
+    affiliation_unit = serializers.CharField()
+    use_started_on = serializers.DateField(format='%Y-%m-%d')
+    use_expires_on = serializers.DateField(format='%Y-%m-%d')
+    service_area = serializers.CharField()
+    obtain_method = serializers.CharField()
+    attribute = serializers.CharField()
+
+    license_authority = serializers.CharField()
+    license_registered_on = serializers.DateField(format='%Y-%m-%d')
+    license_active_on = serializers.DateField(format='%Y-%m-%d')
+    license_expires_on = serializers.DateField(format='%Y-%m-%d')
+    operation_permit_active_on = serializers.DateField(format='%Y-%m-%d')
+    operation_permit_expires_on = serializers.DateField(format='%Y-%m-%d')
+    insurance_active_on = serializers.DateField(format='%Y-%m-%d')
+    insurance_expires_on = serializers.DateField(format='%Y-%m-%d')
+
+    license_authority_2 = serializers.CharField()
+    license_registered_on_2 = serializers.DateField(format='%Y-%m-%d')
+    license_active_on_2 = serializers.DateField(format='%Y-%m-%d')
+    license_expires_on_2 = serializers.DateField(format='%Y-%m-%d')
+    operation_permit_active_on_2 = serializers.DateField(format='%Y-%m-%d')
+    operation_permit_expires_on_2 = serializers.DateField(format='%Y-%m-%d')
+    insurance_active_on_2 = serializers.DateField(format='%Y-%m-%d')
+    insurance_expires_on_2 = serializers.DateField(format='%Y-%m-%d')
+
+    branch_count = serializers.IntegerField()
+    branch1 = serializers.SerializerMethodField()
+    branch2 = serializers.SerializerMethodField()
+    branch3 = serializers.SerializerMethodField()
+
+    engine_model = serializers.CharField()
+    engine_power = serializers.IntegerField()
+    engine_displacement = serializers.CharField()
+    tire_rules = serializers.CharField()
+    tank_material = serializers.CharField()
+    is_gps_installed = serializers.SerializerMethodField()
+    is_gps_working = serializers.SerializerMethodField()
+    with_pump = serializers.SerializerMethodField()
+    main_car_size = serializers.CharField()
+    main_car_color = serializers.CharField()
+    trailer_car_size = serializers.CharField()
+    trailer_car_color = serializers.CharField()
+
+    def get_branch_weight(self, branches, i):
+        try:
+            branch = branches[i]
+        except Exception:
+            branch = ''
+        return branch
+
+    def get_boolean_str(self, value):
+        return '是' if value else '不'
+
+    def get_branch1(self, instance):
+        return self.get_branch_weight(instance.branches, 0)
+
+    def get_branch2(self, instance):
+        return self.get_branch_weight(instance.branches, 1)
+
+    def get_branch3(self, instance):
+        return self.get_branch_weight(instance.branches, 2)
+
+    def get_is_gps_installed(self, instance):
+        return self.get_boolean_str(instance.is_gps_installed)
+
+    def get_is_gps_working(self, instance):
+        return self.get_boolean_str(instance.is_gps_working)
+
+    def get_with_pump(self, instance):
+        return self.get_boolean_str(instance.with_pump)

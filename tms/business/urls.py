@@ -25,6 +25,26 @@ router.register(
     v.BasicRequestViewSet,
     base_name='requests'
 )
+router.register(
+    r'requests-export/rest-requests',
+    v.RestRequestExportViewSet,
+    base_name='export-rest-requests'
+)
+router.register(
+    r'requests-export/vehicle-repair-requests',
+    v.VehicleRepairRequestExportViewSet,
+    base_name='export-rest-requests'
+)
+router.register(
+    r'requests-export/self-driving-requests',
+    v.SelfDrivingPaymentRequestExportViewSet,
+    base_name='export-rest-requests'
+)
+router.register(
+    r'requests-export/invoice-payment-requests',
+    v.InvoicePaymentRequestExportViewSet,
+    base_name='export-rest-requests'
+)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

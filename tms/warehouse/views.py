@@ -219,3 +219,20 @@ class OutTransactionHistoryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelVi
             '名称', '领取人', '单价', '数量', '数量单位', '日期', '车牌号', '发票类型',
         ]
         return ret
+
+
+class WarehouseProductExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.WarehouseProduct.objects.all()
+    serializer_class = s.WarehouseProductExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '名称', '负责人', '数量', '数量单位',
+        ]
+        return ret

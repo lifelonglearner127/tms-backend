@@ -1,10 +1,12 @@
 from django.db.models import Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_renderer_xlsx.mixins import XLSXFileMixin
+from drf_renderer_xlsx.renderers import XLSXRenderer
 
 # constants
 from ..core import constants as c
@@ -525,6 +527,74 @@ class BasicRequestViewSet(TMSViewSet):
         )
         serializer = ChoiceSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class RestRequestExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.RestRequest.objects.all()
+    serializer_class = s.RestRequestExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '发起人', '类型', '请假日期', '请假日期', '天数', '审批状态',
+        ]
+        return ret
+
+
+class VehicleRepairRequestExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.VehicleRepairRequest.objects.all()
+    serializer_class = s.VehicleRepairRequestExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '申请日期', '车牌', '请求者', '类型', '审批状态',
+        ]
+        return ret
+
+
+class SelfDrivingPaymentRequestExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.SelfDrivingPaymentRequest.objects.all()
+    serializer_class = s.SelfDrivingPaymentRequestExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '发起人', '部门', '请假日期', '路线', '里程', '补贴金额', '审批状态',
+        ]
+        return ret
+
+
+class InvoicePaymentRequestExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.InvoicePaymentRequest.objects.all()
+    serializer_class = s.InvoicePaymentRequestExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '发起人', '部门', '请假日期', '车辆', '费用类型', '补贴金额', '票据金额', '审批状态',
+        ]
+        return ret
 
 
 class RestRequestCateogryAPIView(APIView):

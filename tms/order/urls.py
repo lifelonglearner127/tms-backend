@@ -41,6 +41,9 @@ router.register(
 router.register(
     r'export-work-diary-weight-class', v.JobWorkDiaryWeightClassViewSet, base_name='export-job-diary-weight-class'
 )
+router.register(
+    r'export-order-payments', v.OrderPaymentExportViewSet, base_name='export-order-payment'
+)
 
 # # /jobs/{job_pk}/stations
 # # /jobs/{job_pk}/stations/{pk}

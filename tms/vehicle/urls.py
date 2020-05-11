@@ -71,6 +71,11 @@ router.register(
     v.VehicleTireExportViewSet,
     base_name='export-vehicle-tires'
 )
+router.register(
+    r'export-vehicles',
+    v.VehicleExportViewSet,
+    base_name='export-vehicles'
+)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

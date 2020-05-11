@@ -1308,3 +1308,35 @@ class VehicleTireExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
             '轮胎胎纹深度', '维修厂商', '联系电话', '安装时车里程数', '安装时轮胎里程数',
         ]
         return ret
+
+
+class VehicleExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+
+    queryset = m.Vehicle.objects.all()
+    serializer_class = s.VehicleExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '车辆部门',
+            '车型类型', '车牌号', '车辆识别代码', '车辆品牌', '用途分类', '整备质量', '准牵引质量',
+            '车型类型', '车牌号', '车辆识别代码', '车辆品牌', '用途分类', '整备质量', '准牵引质量',
+
+            '罐体容积', '所属单位', '使用期限', '使用期限', '服务区域', '获得方式', '车属性质',
+
+            '登记机关', '登记日期', '行驶证检验有效期', '行驶证检验有效期', '营运证开始时间', '营运证开始时间',
+            '商业保险有效期', '商业保险有效期',
+            '登记机关', '登记日期', '行驶证检验有效期', '行驶证检验有效期', '营运证开始时间', '营运证开始时间',
+            '商业保险有效期', '商业保险有效期',
+
+            '分仓数量', '一仓', '二仓', '三仓',
+
+            '发动机型号', '发动机功率', '排量', '轮胎规则', '罐体材质',
+            '安装GPS终端?', 'GPS正常工作?', '带泵?',
+            '主车尺寸', '主车颜色', '挂车尺寸', '挂车颜色',
+        ]
+        return ret

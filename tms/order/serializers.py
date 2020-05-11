@@ -233,7 +233,7 @@ class OrderSerializer(serializers.ModelSerializer):
         choices=c.TRUCK_ARRANGEMENT_STATUS, required=False
     )
     loading_due_time = serializers.DateTimeField(
-        format='%Y-%m-%d', required=False
+        format='%Y-%m-%d %H:%M:%S', required=False
     )
     products = OrderProductSerializer(
         source='orderproduct_set', many=True, read_only=True
@@ -1622,3 +1622,23 @@ class JobWorkDiaryWeightClassSerializer(serializers.ModelSerializer):
     def get_loss_rate(self, instance):
         loss = instance.total_delivered_weight - instance.total_mission_weight
         return (loss / instance.total_mission_weight) * 1000
+
+
+class OrderPaymentExportSerializer(serializers.Serializer):
+
+    job_started_on = serializers.DateTimeField(
+        format='%Y-%m-%d', source='job_station.job.started_on'
+    )
+    plate_num = serializers.CharField(source='job_station.job.vehicle.plate_num')
+    customer = serializers.CharField(source='job_station.job.order.customer.name')
+    loading_station = serializers.CharField(source='job_station.job.order.loading_station.name')
+    unloading_station = serializers.CharField(source='job_station.station.name')
+    loading_weight = serializers.DecimalField(max_digits=10, decimal_places=2)
+    unloading_weight = serializers.DecimalField(max_digits=10, decimal_places=2)
+    distance = serializers.DecimalField(max_digits=10, decimal_places=2)
+    transport_unit_price = serializers.DecimalField(
+        source='job_station.transport_unit_price', max_digits=10, decimal_places=2
+    )
+    adjustment = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    status = serializers.CharField(source='get_status_display')

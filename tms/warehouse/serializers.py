@@ -219,3 +219,11 @@ class WarehouseProductSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class WarehouseProductExportSerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+    assignee = serializers.CharField(source='assignee.name')
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    amount_unit = serializers.CharField()

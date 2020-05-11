@@ -71,7 +71,7 @@ class RestRequestSerializer(serializers.ModelSerializer):
 class VehicleRepairRequestSerializer(serializers.ModelSerializer):
 
     vehicle = ShortVehiclePlateNumSerializer(read_only=True)
-    category = TMSChoiceField(choices=c.VEHICLE_REPAIR_REQUEST_CATEGORY)
+    category = TMSChoiceField(choices=c.VEHICLE_MAINTENANCE_CATEGORY)
 
     class Meta:
         model = m.VehicleRepairRequest
@@ -367,3 +367,57 @@ class BasicRequestSerializer(serializers.ModelSerializer):
             return '审批完'
         elif instance.approved is False:
             return '审批拒绝'
+
+
+class RestRequestExportSerializer(serializers.Serializer):
+
+    requester = serializers.CharField(source='request.requester.name')
+    category = serializers.CharField(source='get_category_display')
+    from_date = serializers.DateField(format='%Y-%m-%d')
+    to_date = serializers.DateField(format='%Y-%m-%d')
+    days = serializers.SerializerMethodField()
+    status = serializers.CharField(source='request.status')
+
+    def get_days(self, instance):
+        return (instance.to_date - instance.from_date).days
+
+
+class VehicleRepairRequestExportSerializer(serializers.Serializer):
+
+    request_time = serializers.DateTimeField(source='request.request_time', format='%Y-%m-%d')
+    vehicle = serializers.CharField(source='vehicle.plate_num')
+    requester = serializers.CharField(source='request.requester.name')
+    category = serializers.CharField(source='get_category_display')
+    status = serializers.CharField(source='request.status')
+
+
+class SelfDrivingPaymentRequestExportSerializer(serializers.Serializer):
+
+    requester = serializers.CharField(source='request.requester.name')
+    department = serializers.SerializerMethodField()
+    request_time = serializers.DateTimeField(source='request.request_time', format='%Y-%m-%d')
+    line = serializers.CharField()
+    mileage = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    status = serializers.CharField(source='request.status')
+
+    def get_department(self, instance):
+        return instance.department.name if instance.department else ''
+
+
+class InvoicePaymentRequestExportSerializer(serializers.Serializer):
+
+    requester = serializers.CharField(source='request.requester.name')
+    department = serializers.SerializerMethodField()
+    request_time = serializers.DateTimeField(source='request.request_time', format='%Y-%m-%d')
+    vehicle = serializers.SerializerMethodField()
+    other_cost_type = OtherCostTypeSerializer()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    ticket_type = serializers.CharField(source='ticket_type.name')
+    status = serializers.CharField(source='request.status')
+
+    def get_department(self, instance):
+        return instance.department.name if instance.department else ''
+
+    def get_vehicle(self, instance):
+        return instance.vehicle.plate_num if instance.vehicle else ''

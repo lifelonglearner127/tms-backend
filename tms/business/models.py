@@ -307,8 +307,7 @@ class VehicleRepairRequest(models.Model):
         on_delete=models.CASCADE
     )
 
-    category = models.CharField(
-        max_length=1,
+    category = models.PositiveIntegerField(
         choices=c.VEHICLE_MAINTENANCE_CATEGORY,
         default=c.VEHICLE_MAINTENANCE_CATEGORY_0
     )

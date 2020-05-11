@@ -2714,3 +2714,22 @@ class JobWorkDiaryWeightClassViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSe
         queryset = self.queryset.filter(query_filter)
 
         return queryset
+
+
+class OrderPaymentExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    装油时间统计
+    """
+    queryset = m.OrderPayment.objects.all()
+    serializer_class = s.OrderPaymentExportSerializer
+    pagination_class = None
+    renderer_classes = (XLSXRenderer, )
+    filename = 'export.xlsx'
+    body = c.EXCEL_BODY_STYLE
+
+    def get_column_header(self):
+        ret = c.EXCEL_HEAD_STYLE
+        ret['titles'] = [
+            '日期', '车牌', '客户', '装货地', '卸货地', '装货数量', '卸货数量', '运距', '运价', '调整运费', '运费', '状态'
+        ]
+        return ret

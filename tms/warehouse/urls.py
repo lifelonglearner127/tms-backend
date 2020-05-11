@@ -10,6 +10,11 @@ router.register(
     base_name='product'
 )
 router.register(
+    r'export-products',
+    v.WarehouseProductExportViewSet,
+    base_name='product'
+)
+router.register(
     r'in-transactions-history',
     v.InTransactionHistoryViewSet,
     base_name='in-transaction-history'
