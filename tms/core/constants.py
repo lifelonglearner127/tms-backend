@@ -101,8 +101,8 @@ VEHICLE_STATUS = (
     (VEHICLE_STATUS_AVAILABLE, 'Available'),
     (VEHICLE_STATUS_DRIVER_ON, 'Driver on'),
     (VEHICLE_STATUS_ESCORT_ON, 'Escort on'),
-    (VEHICLE_STATUS_UNDER_WHEEL, 'Under wheel'),
-    (VEHICLE_STATUS_REPAIR, 'Repair')
+    (VEHICLE_STATUS_UNDER_WHEEL, '驾驶中'),
+    (VEHICLE_STATUS_REPAIR, '修理中')
 )
 
 # vehicle maintenace type

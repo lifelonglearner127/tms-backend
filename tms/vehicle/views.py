@@ -530,7 +530,7 @@ class VehicleViewSet(TMSViewSet):
         if bind is None or bind.get_off is not None:
             return Response(
                 {
-                    'msg': 'You need to get on this vehicle'
+                    'msg': '请先上车，在进行车辆检查'
                 },
                 status=status.HTTP_200_OK
             )
@@ -621,29 +621,28 @@ class VehicleViewSet(TMSViewSet):
         if vehicle.status in [c.VEHICLE_STATUS_UNDER_WHEEL, c.VEHICLE_STATUS_REPAIR]:
             return Response(
                 {
-                    'msg': 'Cannot get on this vehicle because this vehicle status is' +
-                    vehicle.get_status_display()
+                    'msg': '该车目前处于' + vehicle.get_status_display() + '状态，无法上车'
                 }
             )
 
         if vehicle.status == c.VEHICLE_STATUS_DRIVER_ON and worker_type == c.WORKER_TYPE_DRIVER:
             return Response(
                 {
-                    'msg': 'Cannot get on this vehicle because another driver is already on'
+                    'msg': '该车辆已有其他司机上车'
                 }
             )
 
         if vehicle.status == c.VEHICLE_STATUS_ESCORT_ON and not worker_type == c.WORKER_TYPE_DRIVER:
             return Response(
                 {
-                    'msg': 'Cannot get on this vehicle because another escort is already on'
+                    'msg': '该车辆已有其他押运员上车'
                 }
             )
 
         # check if driver is available
         if worker.profile.status != c.WORK_STATUS_AVAILABLE:
             return Response({
-                'msg': 'Cannot get on this vehicle because you are not available'
+                'msg': '目前处于不可执行任务状态，无法上车'
             })
 
         bind = m.VehicleWorkerBind.objects.create(
@@ -718,7 +717,7 @@ class VehicleViewSet(TMSViewSet):
 
         if bind.get_off is not None:
             return Response({
-                'msg': 'You already get off this vehicle'
+                'msg': '已下车'
             })
 
         if is_worker_driver:
