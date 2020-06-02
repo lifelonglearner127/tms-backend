@@ -126,6 +126,8 @@ class OrderViewSet(TMSViewSet):
         queryset = self.queryset
         query_str = self.request.query_params.get('q')
 
+        order_status = self.request.query_params.get('status')
+
         if query_str:
             q = Q(alias__icontains=query_str)
             q |= Q(customer__name__icontains=query_str)
@@ -134,6 +136,9 @@ class OrderViewSet(TMSViewSet):
             q |= Q(products__name__icontains=query_str)
             q |= Q(jobs__associated_workers__name=query_str)
             queryset = self.queryset.filter(q)
+
+        if order_status:
+            queryset = self.queryset.filter(status=order_status)
 
         return queryset
 
