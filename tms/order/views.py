@@ -132,6 +132,7 @@ class OrderViewSet(TMSViewSet):
             q |= Q(loading_station__name__icontains=query_str)
             q |= Q(quality_station__name__icontains=query_str)
             q |= Q(products__name__icontains=query_str)
+            q |= Q(jobs__associated_workers__name=query_str)
             queryset = self.queryset.filter(q)
 
         return queryset
