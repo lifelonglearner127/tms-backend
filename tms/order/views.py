@@ -126,7 +126,7 @@ class OrderViewSet(TMSViewSet):
         queryset = self.queryset
         query_str = self.request.query_params.get('q')
 
-        order_status = self.request.query_params.get('status')
+        job_status = self.request.query_params.get('status')
 
         if query_str:
             q = Q(alias__icontains=query_str)
@@ -137,8 +137,12 @@ class OrderViewSet(TMSViewSet):
             q |= Q(jobs__associated_workers__name=query_str)
             queryset = self.queryset.filter(q)
 
-        if order_status:
-            queryset = self.queryset.filter(status=order_status)
+        if job_status == 'P':
+            queryset = self.queryset.filter(jobs__progress=c.JOB_PROGRESS_NOT_STARTED)
+        elif job_status == 'I':
+            queryset = self.queryset.filter(jobs__progress__gt=c.JOB_PROGRESS_NOT_STARTED)
+        elif job_status == 'C':
+            queryset = self.queryset.filter(jobs__progress=c.JOB_PROGRESS_COMPLETE)
 
         return queryset
 
