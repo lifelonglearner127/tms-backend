@@ -138,11 +138,11 @@ class OrderViewSet(TMSViewSet):
             queryset = self.queryset.filter(q)
 
         if job_status == 'P':
-            queryset = self.queryset.filter(jobs__progress=c.JOB_PROGRESS_NOT_STARTED)
+            queryset = queryset.filter(jobs__progress=c.JOB_PROGRESS_NOT_STARTED)
         elif job_status == 'I':
-            queryset = self.queryset.filter(jobs__progress__gt=c.JOB_PROGRESS_NOT_STARTED)
+            queryset = queryset.filter(jobs__progress__gt=c.JOB_PROGRESS_NOT_STARTED)
         elif job_status == 'C':
-            queryset = self.queryset.filter(jobs__progress=c.JOB_PROGRESS_COMPLETE)
+            queryset = queryset.filter(jobs__progress=c.JOB_PROGRESS_COMPLETE)
 
         return queryset
 
