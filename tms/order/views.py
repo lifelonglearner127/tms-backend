@@ -1462,6 +1462,14 @@ class JobViewSet(TMSViewSet):
     @action(detail=True, url_path='finish-job')
     def finish_job(self, request, pk=None):
         job = self.get_object()
+        if job.progress == c.JOB_PROGRESS_COMPLETE:
+            return Response(
+                {
+                    'msg': 'You cannot upload because this job is not started yet'
+                },
+                status=status.HTTP_200_OK
+            )
+
         job.progress = c.JOB_PROGRESS_COMPLETE
         job.finished_on = timezone.now()
 
@@ -1473,16 +1481,18 @@ class JobViewSet(TMSViewSet):
         active_job_driver = job.jobworker_set.filter(
             worker_type=c.WORKER_TYPE_DRIVER, is_active=True
         ).first()
-        active_job_driver.finished_on = timezone.now()
-        active_job_driver.is_active = False
-        active_job_driver.save()
+        if active_job_driver:
+            active_job_driver.finished_on = timezone.now()
+            active_job_driver.is_active = False
+            active_job_driver.save()
 
         active_job_escort = job.jobworker_set.filter(
             worker_type=c.WORKER_TYPE_ESCORT, is_active=True
         ).first()
-        active_job_escort.finished_on = timezone.now()
-        active_job_escort.is_active = False
-        active_job_escort.save()
+        if active_job_escort:
+            active_job_escort.finished_on = timezone.now()
+            active_job_escort.is_active = False
+            active_job_escort.save()
 
         # # update job empty mileage
         loading_station_arrived_on = job.jobstation_set.get(step=0).arrived_station_on
