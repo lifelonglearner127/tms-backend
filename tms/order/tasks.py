@@ -84,31 +84,33 @@ def notify_of_job_finish(context):
     the mission was complete, then he or she click finish button on the web to make
     the job status to finish.
     """
-    job = get_object_or_404(m.Job, id=context['job'])
-    driver = get_object_or_404(User, id=context['driver'])
-    escort = get_object_or_404(User, id=context['escort'])
 
-    # send in-app notfication to driver
-    message = {
-        "vehicle": job.vehicle.plate_num,
-        "customer": {
-            "name": job.order.customer.contacts.first().contact,
-            "mobile": job.order.customer.contacts.first().mobile
-        },
-        "driver": {
-            "name": driver.name,
-            "mobile": driver.mobile
-        },
-        "escort": {
-            "name": escort.name,
-            "mobile": escort.mobile
-        },
-        "loading_station": job.order.loading_station.address,
-        "branches": get_branches(job),
-        "rest_place": job.rest_place.address if job.rest_place is not None else '-'
-    }
+    if context['driver'] and context['escort']:
+        job = get_object_or_404(m.Job, id=context['job'])
+        driver = get_object_or_404(User, id=context['driver'])
+        escort = get_object_or_404(User, id=context['escort'])
 
-    send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_FINISH_JOB)
+        # send in-app notfication to driver
+        message = {
+            "vehicle": job.vehicle.plate_num,
+            "customer": {
+                "name": job.order.customer.contacts.first().contact,
+                "mobile": job.order.customer.contacts.first().mobile
+            },
+            "driver": {
+                "name": driver.name,
+                "mobile": driver.mobile
+            },
+            "escort": {
+                "name": escort.name,
+                "mobile": escort.mobile
+            },
+            "loading_station": job.order.loading_station.address,
+            "branches": get_branches(job),
+            "rest_place": job.rest_place.address if job.rest_place is not None else '-'
+        }
+
+        send_notifications([driver, escort], message, c.DRIVER_NOTIFICATION_FINISH_JOB)
 
 
 @app.task

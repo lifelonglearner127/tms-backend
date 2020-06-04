@@ -1541,11 +1541,13 @@ class JobViewSet(TMSViewSet):
         job.normalway_mileage = 0
         job.save()
 
+        worker_id = active_job_driver.worker.id if active_job_driver else None
+        escort_id = active_job_escort.worker.id if active_job_escort else None
         notify_of_job_finish.apply_async(
             args=[{
                 'job': job.id,
-                'driver': active_job_driver.worker.id,
-                'escort': active_job_escort.worker.id
+                'driver': worker_id,
+                'escort': escort_id
             }]
         )
         return Response(
