@@ -605,7 +605,7 @@ class QualityCheck(models.Model):
     volume = models.DecimalField(
         default=0,
         max_digits=30,
-        decimal_places=20
+        decimal_places=2
     )
 
 

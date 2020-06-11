@@ -1612,7 +1612,7 @@ class JobViewSet(TMSViewSet):
         )
         quality_check.density = request.data.pop('density')
         quality_check.additive = request.data.pop('additive')
-        quality_check.volume = request.data.pop('volume')
+        quality_check.volume = round(float(request.data.pop('volume')) * 1000, 2)
         quality_check.save()
 
         job_qualitystation = job.jobstation_set.all()[1]
