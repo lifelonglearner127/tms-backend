@@ -44,7 +44,7 @@ class StaffProfileViewSet(TMSViewSet):
     short_serializer_class = s.ShortStaffProfileSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
 
         departments = self.request.query_params.get('departments', None)
         if departments:

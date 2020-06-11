@@ -21,7 +21,7 @@ class ETCCardViewSet(TMSViewSet):
     short_serializer_class = s.ETCCardNumberSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         card_type = self.request.query_params.get('type', None)
         if card_type == 'master':
             queryset = queryset.filter(is_child=False)
@@ -128,7 +128,7 @@ class FuelCardViewSet(TMSViewSet):
     serializer_class = s.FuelCardSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         card_type = self.request.query_params.get('type', None)
         if card_type == 'master':
             queryset = queryset.filter(is_child=False)

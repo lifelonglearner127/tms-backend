@@ -144,7 +144,7 @@ class BasicRequestViewSet(TMSViewSet):
     serializer_class = s.BasicRequestSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         request_type = self.request.query_params.get('type', None)
 
         if self.request.user.user_type != c.USER_TYPE_ADMIN:

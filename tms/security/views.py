@@ -28,7 +28,7 @@ class CompanyPolicyViewSet(viewsets.ModelViewSet):
     serializer_class = s.CompanyPolicySerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         departments = self.request.query_params.get('departments', None)
         if departments:
             departments = departments.split(',')

@@ -21,7 +21,7 @@ class WarehouseProductViewSet(TMSViewSet):
     serializer_class = s.WarehouseProductSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)
@@ -71,7 +71,7 @@ class InTransactionHistoryViewSet(XLSXFileMixin, TMSViewSet):
     serializer_class = s.InTransactionSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(product__name__icontains=name)
@@ -131,7 +131,7 @@ class OutTransactionHistoryViewSet(TMSViewSet):
     serializer_class = s.OutTransactionSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(product__name__icontains=name)

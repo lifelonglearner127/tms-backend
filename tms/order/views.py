@@ -123,7 +123,7 @@ class OrderViewSet(TMSViewSet):
     permission_classes = [OrderPermission]
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_str = self.request.query_params.get('q')
 
         job_status = self.request.query_params.get('status')
@@ -2425,7 +2425,7 @@ class OrderPaymentViewSet(viewsets.ModelViewSet):
     serializer_class = s.OrderPaymentSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         q = self.request.query_params.get('q', None)
         if q is not None:
             query_filter = Q(job_station__job__order__customer__name__icontains=q)
@@ -2591,7 +2591,7 @@ class JobWorkerExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
         return ret
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_filter = Q()
         year = self.request.query_params.get('year', None)
         if year is not None:
@@ -2636,7 +2636,7 @@ class JobWorkDiaryExportViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
         return ret
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_filter = Q()
         year = self.request.query_params.get('year', None)
         if year is not None:
@@ -2681,7 +2681,7 @@ class JobWorkTimeDurationViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSet):
         return ret
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_filter = Q()
         year = self.request.query_params.get('year', None)
         if year is not None:
@@ -2721,7 +2721,7 @@ class JobWorkDiaryWeightClassViewSet(XLSXFileMixin, viewsets.ReadOnlyModelViewSe
         return ret
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_filter = Q()
         year = self.request.query_params.get('year', None)
         if year is not None:

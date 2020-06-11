@@ -90,7 +90,7 @@ class ProductViewSet(TMSViewSet):
     short_serializer_class = s.ProductNameSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         product_name = self.request.query_params.get('name', None)
         if product_name is not None:
             queryset = queryset.filter(name__contains=product_name)
@@ -150,7 +150,7 @@ class StationViewSet(TMSViewSet):
     serializer_class = s.StationSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         station_type = self.request.query_params.get('station_type', None)
         if station_type is not None:
             queryset = queryset.filter(station_type=station_type)

@@ -39,7 +39,7 @@ class VehicleViewSet(TMSViewSet):
     short_serializer_class = s.ShortVehiclePlateNumSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         query_str = self.request.query_params.get('vehicle', None)
         if query_str:
             queryset = queryset.filter(plate_num__icontains=query_str)
@@ -71,7 +71,7 @@ class VehicleViewSet(TMSViewSet):
         When the user click the vehicle input box on arrange edit view on the front end
         """
         vehicle = request.query_params.get('vehicle', '')
-        queryset = self.queryset
+        queryset = self.queryset.all()
         if vehicle:
             queryset = queryset.filter(plate_num__contains=vehicle)
 

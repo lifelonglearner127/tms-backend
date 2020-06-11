@@ -62,7 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
         retrieve users by its user types.
         """
         user_types = request.query_params.get('user_types', [])
-        queryset = self.queryset
+        queryset = self.queryset.all()
         if len(user_types) > 0:
             queryset = queryset.filter(user_type__in=user_types)
 
